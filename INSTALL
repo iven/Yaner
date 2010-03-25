@@ -1,0 +1,15 @@
+This software depends on Python and PyGTK >= 2.12
+sexy-python (libsexy bindings) is also used but optionnal.
+Of course librsvg-common is needed for a proper svg support in gtk/gdk.
+
+Run the setup.py script to install, e.g.:
+    python setup.py install (as root, or with root rights using sudo)
+
+To install it to /usr/local (or any other prefix) use:
+    python setup.py install --prefix=/usr/local
+(specify --prefix _after_ install or it won't work)
+
+To uninstall, use:
+    python setup.py uninstall (also as root, or with root rights using sudo)
+
+Don't remove the file "installed_files", it's used for uninstallation.

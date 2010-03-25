@@ -1,0 +1,30 @@
+Lead Developers:
+--------------------------------------------
+	
+    Iven Day (Xu Lijian) <ivenvd@gmail.com>
+
+Contributors:
+--------------------------------------------
+
+Translators:
+--------------------------------------------
+
+
+Note: 
+-------------------------------------------------------------------------------
+If you have contributed something significant to iscoder
+and your name is missing here, please email the lead developers 
+with your Full name, email address, country and a brief 
+reminder of what you have done.
+
+Format :
+-------------------------------------------------------------------------------
+In order to parse AUTHORS files some rules must be followed :
+
+1 - Each first chapter line must end by ':'
+The recognized chapter names are :
+"Developer:", "Developers:", "Contributors:", Note:", "Website:", "Documenters:"
+and "Translators:".
+
+2 - Each item of the "Translators" chapter must begin by the locale keyword.
+This keyword must be followed by a space.
