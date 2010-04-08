@@ -1,0 +1,194 @@
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.20"/>
+  <!-- interface-naming-policy project-wide -->
+  <object class="GtkWindow" id="main_window">
+    <property name="title" translatable="yes">Yaner - Faster than a flash of lightning</property>
+    <property name="icon_name">emblem-downloads</property>
+    <signal name="destroy" handler="on_main_window_destroy"/>
+    <child>
+      <object class="GtkVBox" id="main_vbox">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkMenuBar" id="main_menu_bar">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkMenuItem" id="file_menu">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">&#x6587;&#x4EF6;(_F)</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="file_sub_menu">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="new_item">
+                        <property name="visible">True</property>
+                        <property name="related_action">new_action</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                        <accelerator key="n" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem" id="separator_item1">
+                        <property name="visible">True</property>
+                        <property name="use_action_appearance">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="quit_item">
+                        <property name="visible">True</property>
+                        <property name="related_action">quit_action</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="view_menu">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">&#x89C6;&#x56FE;(_V)</property>
+                <property name="use_underline">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="help_menu">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">&#x5E2E;&#x52A9;(_H)</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="help_sub_menu">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="about_item">
+                        <property name="visible">True</property>
+                        <property name="related_action">about_action</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToolbar" id="toolbar">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkToolButton" id="new_tool_item">
+                <property name="visible">True</property>
+                <property name="related_action">new_action</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHPaned" id="main_hpaned">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkVPaned" id="main_vpaned">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">True</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStatusbar" id="statusbar1">
+            <property name="visible">True</property>
+            <property name="spacing">2</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkAction" id="new_action">
+    <property name="stock_id">gtk-new</property>
+    <signal name="activate" handler="on_new_action_activate"/>
+  </object>
+  <object class="GtkAction" id="about_action">
+    <property name="stock_id">gtk-about</property>
+    <signal name="activate" handler="on_about_action_activate"/>
+  </object>
+  <object class="GtkAction" id="quit_action">
+    <property name="stock_id">gtk-quit</property>
+    <signal name="activate" handler="on_quit_action_activate"/>
+  </object>
+  <object class="GtkAboutDialog" id="about_dialog">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">About Yaner</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon_name">yaner</property>
+    <property name="type_hint">normal</property>
+    <property name="has_separator">False</property>
+    <property name="program_name">Yaner</property>
+    <property name="copyright" translatable="yes">Copyright &#xA9; 2010 Iven Day(Xu Lijian)</property>
+    <property name="website">http://www.kissuki.com/</property>
+    <property name="authors">Iven Day(Xu Lijian) &lt;ivenvd@gmail.com&gt;</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog_vbox">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="about_dialog_action_area">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
