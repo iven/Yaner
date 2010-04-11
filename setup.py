@@ -146,11 +146,13 @@ if os.path.isdir (podir):
                 os.system (buildcmd % (name, name))
             data_files.append ((destpath % name, [mopath % name]))
 
-#gladedir = os.path.join (os.path.realpath ("."), "glade")
-#if os.path.isdir (gladedir):
-#    destpath = "share/yaner/glade/"
-#    for name in os.listdir (gladedir):
-#        data_files.append ((destpath + name), "
+gladedir = os.path.join (os.path.realpath ("."), "glade")
+if os.path.isdir (gladedir):
+    glade_files = []
+    destpath = "share/yaner/glade/"
+    for file in os.listdir (gladedir):
+        glade_files.append("/".join((gladedir, file)))
+    data_files.append((destpath, glade_files))
 
 setup (
         name             = "yaner",

@@ -20,39 +20,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from os.path import join as path_join
-from xdg.BaseDirectory import xdg_config_home
+import pygtk
+pygtk.require('2.0')
+import gtk
 
-# Optional Imports
-#
-#try:
-#    import sexy
-#    has_sexy = True
-#except ImportError:
-#    has_sexy = False
+if gtk.pygtk_version < (2,12,0):
+    raise SystemExit(' * Error: PyGtk 2.12.0 or later required')
 
-# Paths
-#
-DataDir = "@prefix@/share"
-GladeDir = path_join(DataDir, "yaner", "glade")
-IconDir = path_join(DataDir, "yaner", "icons")
-PixmapDir = path_join(DataDir, "yaner", "images")
-ConfigDir = path_join(xdg_config_home, "yaner")
+try:
+    from yaner.Window import YanerApp
+except ImportError:
+    raise SystemExit(' * Error: the "IsCoder" module is missing. Check if it is installed properly.')
 
-# Files
-#
-GladeFile = path_join(GladeDir, "yaner.glade")
-
-# Version
-#
-Version = "@version@"
-
-# Translation
-#
-import locale
-import gettext
-locale.setlocale(locale.LC_ALL, "")
-gettext.bindtextdomain("iscoder", DataDir + "/locale")
-gettext.textdomain("iscoder")
-_ = gettext.gettext
-
+YanerApp().main_window.show_all()
+gtk.main()
