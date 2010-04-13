@@ -25,16 +25,23 @@ import gtk
 import os
 
 from yaner.Constants import *
+from yaner.SingleInstance import SingleInstanceApp
 
-class YanerApp:
+class YanerApp(SingleInstanceApp):
     "Main Application"
 
     def __init__(self):
+        SingleInstanceApp.__init__(self, "yaner")
         builder = gtk.Builder()
         builder.add_from_file(GladeFile)
         self.main_window = builder.get_object("main_window")
         self.about_dialog = builder.get_object("about_dialog")
         builder.connect_signals(self)
+
+        self.main_window.show()
+
+    def on_instance_exists(self):
+        SingleInstanceApp.on_instance_exists(self)
 
     def on_new_action_activate(self, widget, data = None):
         pass
@@ -52,6 +59,5 @@ class YanerApp:
         gtk.main_quit()
 
 if __name__ == '__main__':
-    app = YanerApp()
-    app.window.show()
+    YanerApp()
     gtk.main()

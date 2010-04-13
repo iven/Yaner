@@ -20,17 +20,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import pygtk
-pygtk.require('2.0')
-import gtk
+import socket
 
-if gtk.pygtk_version < (2,12,0):
-    raise SystemExit(' * Error: PyGtk 2.12.0 or later required')
+class SingleInstanceApp:
+    "Single Instance Application"
 
-try:
-    from yaner.Application import YanerApp
-except ImportError:
-    raise SystemExit(' * Error: the "IsCoder" module is missing. Check if it is installed properly.')
+    def __init__(self, temp_name):
+        self.s = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        try:
+            self.s.bind('\0yaner')
+        except IOError:
+            print "Another instance is already running."
+            self.on_instance_exists()
 
-YanerApp()
-gtk.main()
+    def on_instance_exists(self):
+        import sys
+        sys.exit(0)
+
+if __name__ == '__main__':
+    pass
