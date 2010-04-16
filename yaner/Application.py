@@ -47,7 +47,8 @@ class YanerApp(SingleInstanceApp):
         pass
 
     def on_about_action_activate(self, widget, data = None):
-        self.about_dialog.show()
+        self.about_dialog.run()
+        self.about_dialog.hide()
         
     def on_quit_action_activate(self, widget, data = None):
         self.on_quit()

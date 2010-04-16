@@ -21,24 +21,21 @@
 #
 
 import pygtk
-pygtk.require('2.0')
 import gtk
+from twisted.web import xmlrpc
 
-if gtk.pygtk_version < (2,12,0):
-    raise SystemExit(' * Error: PyGtk 2.12.0 or later required')
+class Aria2Server:
+    "Aria2 Server"
 
-try:
-    from twisted.internet import gtk2reactor
-    from twisted.internet import reactor
-except ImportError:
-    raise SystemExit(' * Error: the "twisted" module is missing. Check if it is installed properly.')
+    def __init__(self, host, port = 6800, user = '', passwd = ''):
+        self.server_info = {
+                'host': host,
+                'port': port,
+                'user': user,
+                'passwd': passwd,
+                }
+        self.conn_str = 'http://%(user):%(passwd)@%(host):%(port)/rpc' \
+                % self.server_info
+        self.proxy = xmlrpc.Proxy(self.conn_str)
 
-gtk2reactor.install()
 
-try:
-    from yaner.Window import YanerApp
-except ImportError:
-    raise SystemExit(' * Error: the "IsCoder" module is missing. Check if it is installed properly.')
-
-YanerApp()
-reactor.run()

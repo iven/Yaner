@@ -28,7 +28,7 @@ class SingleInstanceApp:
     def __init__(self, temp_name):
         self.s = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         try:
-            self.s.bind('\0yaner')
+            self.s.bind('\0' + temp_name)
         except IOError:
             print "Another instance is already running."
             self.on_instance_exists()
