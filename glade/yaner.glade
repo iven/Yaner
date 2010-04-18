@@ -2,9 +2,16 @@
 <interface>
   <requires lib="gtk+" version="2.20"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkTreeStore" id="category_ts"/>
   <object class="GtkTreeStore" id="tasklist_ts"/>
   <object class="GtkTreeStore" id="taskinfo_ts"/>
+  <object class="GtkTreeStore" id="server_ts">
+    <columns>
+      <!-- column-name server_status -->
+      <column type="gchararray"/>
+      <!-- column-name server_name -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="main_window">
     <property name="title" translatable="yes">Yaner - Faster than a flash of lightning</property>
     <property name="icon_name">emblem-downloads</property>
@@ -111,9 +118,30 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkTreeView" id="category_tv">
+              <object class="GtkTreeView" id="server_tv">
+                <property name="width_request">150</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="model">server_ts</property>
+                <property name="headers_visible">False</property>
+                <property name="search_column">1</property>
+                <child>
+                  <object class="GtkTreeViewColumn" id="server_tc">
+                    <property name="title" translatable="yes">Servers</property>
+                    <child>
+                      <object class="GtkCellRendererPixbuf" id="server_status_renderer"/>
+                      <attributes>
+                        <attribute name="stock-id">0</attribute>
+                      </attributes>
+                    </child>
+                    <child>
+                      <object class="GtkCellRendererText" id="server_name_renderer"/>
+                      <attributes>
+                        <attribute name="markup">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="resize">False</property>

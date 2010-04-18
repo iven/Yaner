@@ -29,16 +29,16 @@ if gtk.pygtk_version < (2,12,0):
 
 try:
     from twisted.internet import gtk2reactor
-    from twisted.internet import reactor
 except ImportError:
     raise SystemExit(' * Error: the "twisted" module is missing. Check if it is installed properly.')
-
-gtk2reactor.install()
+else:
+    gtk2reactor.install()
+    from twisted.internet import reactor
 
 try:
-    from yaner.Window import YanerApp
+    from yaner.Application import YanerApp
 except ImportError:
-    raise SystemExit(' * Error: the "IsCoder" module is missing. Check if it is installed properly.')
+    raise SystemExit(' * Error: the "yaner" module is missing. Check if it is installed properly.')
 
 YanerApp()
 reactor.run()

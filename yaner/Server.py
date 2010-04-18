@@ -24,18 +24,27 @@ import pygtk
 import gtk
 from twisted.web import xmlrpc
 
+from yaner.Constants import _
+
 class Aria2Server:
     "Aria2 Server"
 
-    def __init__(self, host, port = 6800, user = '', passwd = ''):
-        self.server_info = {
-                'host': host,
-                'port': port,
-                'user': user,
-                'passwd': passwd,
-                }
-        self.conn_str = 'http://%(user):%(passwd)@%(host):%(port)/rpc' \
+    def __init__(self, server_info):
+        self.server_info = server_info
+        self.conn_str = 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
                 % self.server_info
         self.proxy = xmlrpc.Proxy(self.conn_str)
 
+class Aria2ServerView:
+    """
+    Aria2 server treeview of the left pane in the main window.
+    This contains queuing, completed, recycled tasks as its children.
+    """
+
+    def __init__(self, model, server_name):
+        self.iter = model.append(None, ["gtk-add", server_name])
+        self.queuing_iter = model.append(self.iter, ["gtk-add", _("Queuing")])
+        self.completed_iter = model.append(self.iter, ["gtk-add", _("Completed")])
+        self.recycled_iter = model.append(self.iter, ["gtk-add", _("Recycled")])
+        self.model = model
 

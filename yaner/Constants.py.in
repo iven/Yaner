@@ -20,7 +20,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from os.path import join as path_join
+import gtk
+from os import path
 from xdg.BaseDirectory import xdg_config_home
 
 # Optional Imports
@@ -33,15 +34,17 @@ from xdg.BaseDirectory import xdg_config_home
 
 # Paths
 #
-DataDir = "@prefix@/share"
-GladeDir = path_join(DataDir, "yaner", "glade")
-IconDir = path_join(DataDir, "yaner", "icons")
-PixmapDir = path_join(DataDir, "yaner", "images")
-ConfigDir = path_join(xdg_config_home, "yaner")
-
-# Files
-#
-GladeFile = path_join(GladeDir, "yaner.glade")
+# Global
+DataDir = "@prefix@/share/yaner"
+IconDir = path.join(DataDir, "icons")
+PixmapDir = path.join(DataDir, "images")
+ConfigDir = path.join(DataDir, "config")
+GladeDir = path.join(DataDir, "glade")
+GladeFile = path.join(GladeDir, "yaner.glade")
+ServerConfigFile = path.join(ConfigDir, "servers.conf")
+# User
+UConfigDir = path.join(xdg_config_home, "yaner")
+UServerConfigFile = path.join(UConfigDir, "servers.conf")
 
 # Version
 #
@@ -55,4 +58,3 @@ locale.setlocale(locale.LC_ALL, "")
 gettext.bindtextdomain("iscoder", DataDir + "/locale")
 gettext.textdomain("iscoder")
 _ = gettext.gettext
-

@@ -23,9 +23,12 @@
 import pygtk
 import gtk
 import os
+import shutil
 
 from yaner.Constants import *
-from yaner.SingleInstance import SingleInstanceApp
+from yaner.Configuration import *
+from yaner.Server import *
+from yaner.SingleInstance import *
 
 class YanerApp(SingleInstanceApp):
     "Main Application"
@@ -36,9 +39,31 @@ class YanerApp(SingleInstanceApp):
         builder.add_from_file(GladeFile)
         self.main_window = builder.get_object("main_window")
         self.about_dialog = builder.get_object("about_dialog")
+        self.server_ts = builder.get_object("server_ts")
+        tmp_iter = Aria2ServerView(self.server_ts, "localhost")
         builder.connect_signals(self)
 
+        self.init_paths()
+        self.init_servers()
+
         self.main_window.show()
+
+    def init_paths(self):
+        """
+        Init UConfigDir and config files.
+        """
+        if not os.path.exists(UConfigDir):
+            os.makedirs(UConfigDir)
+            shutil.copyfile(ServerConfigFile, UServerConfigFile)
+
+    def init_servers(self):
+        """
+        Init servers, include GUI TreeView building.
+        """
+        server_conf = ConfigFile(UServerConfigFile)
+        servers = []
+        for (server_name, server_info) in server_conf.items():
+            servers.append(Aria2Server(server_info))
 
     def on_instance_exists(self):
         SingleInstanceApp.on_instance_exists(self)

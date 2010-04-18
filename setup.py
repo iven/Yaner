@@ -154,6 +154,14 @@ if os.path.isdir (gladedir):
         glade_files.append("/".join((gladedir, file)))
     data_files.append((destpath, glade_files))
 
+configdir = os.path.join (os.path.realpath ("."), "config")
+if os.path.isdir (configdir):
+    config_files = []
+    destpath = "share/yaner/config/"
+    for file in os.listdir (configdir):
+        config_files.append("/".join((configdir, file)))
+    data_files.append((destpath, config_files))
+
 setup (
         name             = "yaner",
         version          = version,
