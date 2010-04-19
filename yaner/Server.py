@@ -29,19 +29,21 @@ from yaner.Constants import _
 class Aria2Server:
     "Aria2 Server"
 
-    def __init__(self, server_info):
-        self.server_info = server_info
+    def __init__(self, server_info, server_model):
         self.conn_str = 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
-                % self.server_info
+                % server_info
         self.proxy = xmlrpc.Proxy(self.conn_str)
+        self.info = server_info
+        self.model = server_model
 
-class Aria2ServerView:
+class Aria2ServerModel:
     """
-    Aria2 server treeview of the left pane in the main window.
+    Aria2 server tree model of the left pane in the main window.
     This contains queuing, completed, recycled tasks as its children.
     """
 
-    def __init__(self, model, server_name):
+    def __init__(self, model, server_info):
+        self.server = Aria2Server(server_info, self)
         self.iter = model.append(None, ["gtk-add", server_name])
         self.queuing_iter = model.append(self.iter, ["gtk-add", _("Queuing")])
         self.completed_iter = model.append(self.iter, ["gtk-add", _("Completed")])

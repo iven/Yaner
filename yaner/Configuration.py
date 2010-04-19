@@ -35,6 +35,10 @@ class ConfigFile(dict):
         self.config_file = config_file
 
     def __setitem__(self, section, option_dict):
+        """
+        To add a section, use "config_file[key] = {}".
+        The dict contains all options in the section.
+        """
         if not self.has_key(section):
             self.cp.add_section(section)
             dict.__setitem__(self, section,
@@ -43,6 +47,9 @@ class ConfigFile(dict):
             self[section][key] = value
 
     def __delitem__(self, section):
+        """
+        To delete a section, simply use "del config_file[key]".
+        """
         self.cp.remove_section(section)
         dict.__delitem__(self, section)
 

@@ -61,9 +61,9 @@ class YanerApp(SingleInstanceApp):
         Init servers, include GUI TreeView building.
         """
         server_conf = ConfigFile(UServerConfigFile)
-        servers = []
+        server_models = []
         for (server_name, server_info) in server_conf.items():
-            servers.append(Aria2Server(server_info))
+            server_models.append(Aria2ServerModel(self.server_ts, server_info))
 
     def on_instance_exists(self):
         SingleInstanceApp.on_instance_exists(self)
