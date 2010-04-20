@@ -29,11 +29,12 @@ from yaner.Constants import _
 class Aria2Server:
     "Aria2 Server"
 
-    def __init__(self, server_info, server_model):
+    def __init__(self, server_conf, server_model):
+        self.info = server_conf.information
+        self.cate = server_conf.category
         self.conn_str = 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
-                % server_info
+                % self.info
         self.proxy = xmlrpc.Proxy(self.conn_str)
-        self.info = server_info
         self.model = server_model
 
 class Aria2ServerModel:
@@ -42,11 +43,11 @@ class Aria2ServerModel:
     This contains queuing, completed, recycled tasks as its children.
     """
 
-    def __init__(self, model, server_info):
-        self.server = Aria2Server(server_info, self)
-        self.iter = model.append(None, ["gtk-add", server_name])
-        self.queuing_iter = model.append(self.iter, ["gtk-add", _("Queuing")])
-        self.completed_iter = model.append(self.iter, ["gtk-add", _("Completed")])
-        self.recycled_iter = model.append(self.iter, ["gtk-add", _("Recycled")])
-        self.model = model
+    def __init__(self, treestore, server_conf):
+        self.server = Aria2Server(server_conf, self)
+        self.iter = treestore.append(None, ["gtk-disconnect", self.server.info.name])
+        self.queuing_iter = treestore.append(self.iter, ["gtk-media-forward", _("Queuing")])
+        self.completed_iter = treestore.append(self.iter, ["gtk-media-stop", _("Completed")])
+        self.recycled_iter = treestore.append(self.iter, ["gtk-media-rewind", _("Recycled")])
+        self.treestore = treestore
 

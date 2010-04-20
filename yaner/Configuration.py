@@ -34,6 +34,9 @@ class ConfigFile(dict):
         self.cp = cp
         self.config_file = config_file
 
+    def __getattr__(self, key):
+        return self[key]
+
     def __setitem__(self, section, option_dict):
         """
         To add a section, use "config_file[key] = {}".
@@ -64,6 +67,9 @@ class ConfigSection(dict):
         dict.__init__(self, config_parser.items(section))
         self.cp = config_parser
         self.section = section
+
+    def __getattr__(self, key):
+        return self[key]
 
     def __setitem__(self, key, value):
         self.cp.set(self.section, key, value)

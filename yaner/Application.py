@@ -40,7 +40,6 @@ class YanerApp(SingleInstanceApp):
         self.main_window = builder.get_object("main_window")
         self.about_dialog = builder.get_object("about_dialog")
         self.server_ts = builder.get_object("server_ts")
-        tmp_iter = Aria2ServerView(self.server_ts, "localhost")
         builder.connect_signals(self)
 
         self.init_paths()
@@ -52,18 +51,19 @@ class YanerApp(SingleInstanceApp):
         """
         Init UConfigDir and config files.
         """
-        if not os.path.exists(UConfigDir):
-            os.makedirs(UConfigDir)
-            shutil.copyfile(ServerConfigFile, UServerConfigFile)
+        if not os.path.exists(UServerConfigDir):
+            os.makedirs(UServerConfigDir)
+            shutil.copy(ServerConfigFile, UServerConfigDir)
 
     def init_servers(self):
         """
         Init servers, include GUI TreeView building.
         """
-        server_conf = ConfigFile(UServerConfigFile)
         server_models = []
-        for (server_name, server_info) in server_conf.items():
-            server_models.append(Aria2ServerModel(self.server_ts, server_info))
+        for f in os.listdir(UServerConfigDir):
+            if f.endswith('.conf'):
+                server_conf = ConfigFile(os.path.join(UServerConfigDir, f))
+                server_models.append(Aria2ServerModel(self.server_ts, server_conf))
 
     def on_instance_exists(self):
         SingleInstanceApp.on_instance_exists(self)
