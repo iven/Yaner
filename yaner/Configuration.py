@@ -34,6 +34,9 @@ class ConfigFile(dict):
         self.cp = cp
         self.config_file = config_file
 
+    def __str__(self):
+        return self.config_file
+
     def __getattr__(self, key):
         return self[key]
 
@@ -67,6 +70,9 @@ class ConfigSection(dict):
         dict.__init__(self, config_parser.items(section))
         self.cp = config_parser
         self.section = section
+
+    def __str__(self):
+        return self.section
 
     def __getattr__(self, key):
         return self[key]

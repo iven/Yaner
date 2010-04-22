@@ -42,10 +42,20 @@ class YanerApp(SingleInstanceApp):
         self.server_ts = builder.get_object("server_ts")
         builder.connect_signals(self)
 
+        self.init_rgba()
         self.init_paths()
         self.init_servers()
 
         self.main_window.show()
+
+    def init_rgba(self):
+        """
+        Init rgba.
+        """
+        screen = self.main_window.get_screen()
+        colormap = screen.get_rgba_colormap()
+        if colormap:
+            gtk.widget_set_default_colormap(colormap)
 
     def init_paths(self):
         """
@@ -63,7 +73,7 @@ class YanerApp(SingleInstanceApp):
         for f in os.listdir(UServerConfigDir):
             if f.endswith('.conf'):
                 server_conf = ConfigFile(os.path.join(UServerConfigDir, f))
-                server_models.append(Aria2ServerModel(self.server_ts, server_conf))
+                server_models.append(ServerModel(self.server_ts, server_conf))
 
     def on_instance_exists(self):
         SingleInstanceApp.on_instance_exists(self)
@@ -82,6 +92,7 @@ class YanerApp(SingleInstanceApp):
         self.on_quit()
 
     def on_quit(self):
+        gtk.widget_pop_colormap()
         gtk.main_quit()
 
 if __name__ == '__main__':

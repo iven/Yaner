@@ -26,7 +26,7 @@ from twisted.web import xmlrpc
 
 from yaner.Constants import _
 
-class Aria2Server:
+class Server:
     "Aria2 Server"
 
     def __init__(self, server_conf, server_model):
@@ -37,17 +37,18 @@ class Aria2Server:
         self.proxy = xmlrpc.Proxy(self.conn_str)
         self.model = server_model
 
-class Aria2ServerModel:
+class ServerModel:
     """
     Aria2 server tree model of the left pane in the main window.
     This contains queuing, completed, recycled tasks as its children.
     """
 
     def __init__(self, treestore, server_conf):
-        self.server = Aria2Server(server_conf, self)
+        self.server = Server(server_conf, self)
         self.iter = treestore.append(None, ["gtk-disconnect", self.server.info.name])
         self.queuing_iter = treestore.append(self.iter, ["gtk-media-forward", _("Queuing")])
         self.completed_iter = treestore.append(self.iter, ["gtk-media-stop", _("Completed")])
         self.recycled_iter = treestore.append(self.iter, ["gtk-media-rewind", _("Recycled")])
+        #for (name, path) in self.server.cate.items():
         self.treestore = treestore
 

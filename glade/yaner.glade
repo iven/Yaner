@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <interface>
-  <requires lib="gtk+" version="2.20"/>
+  <requires lib="gtk+" version="2.18"/>
   <!-- interface-naming-policy project-wide -->
   <object class="GtkTreeStore" id="tasklist_ts"/>
   <object class="GtkTreeStore" id="taskinfo_ts"/>
@@ -13,6 +13,8 @@
     </columns>
   </object>
   <object class="GtkWindow" id="main_window">
+    <property name="width_request">700</property>
+    <property name="height_request">500</property>
     <property name="title" translatable="yes">Yaner - Faster than a flash of lightning</property>
     <property name="icon_name">emblem-downloads</property>
     <signal name="destroy" handler="on_main_window_destroy"/>
@@ -26,7 +28,6 @@
             <child>
               <object class="GtkMenuItem" id="file_menu">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">&#x6587;&#x4EF6;(_F)</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -44,7 +45,6 @@
                     <child>
                       <object class="GtkSeparatorMenuItem" id="separator1_item">
                         <property name="visible">True</property>
-                        <property name="use_action_appearance">False</property>
                       </object>
                     </child>
                     <child>
@@ -62,7 +62,6 @@
             <child>
               <object class="GtkMenuItem" id="view_menu">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">&#x89C6;&#x56FE;(_V)</property>
                 <property name="use_underline">True</property>
               </object>
@@ -70,7 +69,6 @@
             <child>
               <object class="GtkMenuItem" id="help_menu">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">&#x5E2E;&#x52A9;(_H)</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
@@ -118,27 +116,36 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkTreeView" id="server_tv">
+              <object class="GtkScrolledWindow" id="server_sw">
                 <property name="width_request">150</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">server_ts</property>
-                <property name="headers_visible">False</property>
-                <property name="search_column">1</property>
+                <property name="hscrollbar_policy">automatic</property>
+                <property name="vscrollbar_policy">automatic</property>
                 <child>
-                  <object class="GtkTreeViewColumn" id="server_tc">
-                    <property name="title" translatable="yes">Servers</property>
+                  <object class="GtkTreeView" id="server_tv">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="model">server_ts</property>
+                    <property name="headers_visible">False</property>
+                    <property name="headers_clickable">False</property>
+                    <property name="search_column">1</property>
                     <child>
-                      <object class="GtkCellRendererPixbuf" id="server_status_renderer"/>
-                      <attributes>
-                        <attribute name="stock-id">0</attribute>
-                      </attributes>
-                    </child>
-                    <child>
-                      <object class="GtkCellRendererText" id="server_name_renderer"/>
-                      <attributes>
-                        <attribute name="markup">1</attribute>
-                      </attributes>
+                      <object class="GtkTreeViewColumn" id="server_tc">
+                        <property name="title">Servers</property>
+                        <child>
+                          <object class="GtkCellRendererPixbuf" id="server_status_renderer"/>
+                          <attributes>
+                            <attribute name="stock-id">0</attribute>
+                          </attributes>
+                        </child>
+                        <child>
+                          <object class="GtkCellRendererText" id="server_name_renderer"/>
+                          <attributes>
+                            <attribute name="markup">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
                     </child>
                   </object>
                 </child>
@@ -154,11 +161,19 @@
                 <property name="can_focus">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTreeView" id="tasklist_tv">
-                    <property name="height_request">100</property>
+                  <object class="GtkScrolledWindow" id="tasklist_sw">
+                    <property name="height_request">150</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">tasklist_ts</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <child>
+                      <object class="GtkTreeView" id="tasklist_tv">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">tasklist_ts</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="resize">False</property>
@@ -166,10 +181,18 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkTreeView" id="taskinfo_tv">
+                  <object class="GtkScrolledWindow" id="taskinfo_sw">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">taskinfo_ts</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <child>
+                      <object class="GtkTreeView" id="taskinfo_tv">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">taskinfo_ts</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="resize">True</property>
