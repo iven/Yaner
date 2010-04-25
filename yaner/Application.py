@@ -34,20 +34,21 @@ class YanerApp(SingleInstanceApp):
 
     def __init__(self):
         SingleInstanceApp.__init__(self, "yaner")
+        # Builder
         self.builder = gtk.Builder()
         self.builder.add_from_file(GladeFile)
+        self.builder.connect_signals(self)
         # Windows
         self.main_window = self.builder.get_object("main_window")
         self.about_dialog = self.builder.get_object("about_dialog")
+        #
+        self.init_rgba()
+        self.init_paths()
         # Server View
         server_tv = self.builder.get_object("server_tv")
         server_ts = self.builder.get_object("server_ts")
         self.server_view = ServerView(self, server_tv, server_ts);
-
-        self.init_rgba()
-        self.init_paths()
-
-        self.builder.connect_signals(self)
+        # Show the window
         self.main_window.show()
 
     def init_rgba(self):

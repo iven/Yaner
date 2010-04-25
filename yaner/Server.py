@@ -62,9 +62,11 @@ class ServerView:
     Aria2 server treeview in the left pane.
     """
     def __init__(self, main_window, treeview, treestore):
+        # TreeSelection
         selection = treeview.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
-
+        selection.connect("changed", self.on_selection_changed)
+        # TreeModel
         for f in os.listdir(UServerConfigDir):
             if f.endswith('.conf'):
                 server_conf = ConfigFile(os.path.join(UServerConfigDir, f))
@@ -73,3 +75,7 @@ class ServerView:
         self.main_win = main_window
         self.treeview = treeview
         self.treestore = treestore
+        self.selection = selection
+
+    def on_selection_changed(self, selection, data = None):
+        pass
