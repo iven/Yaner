@@ -26,7 +26,6 @@ import os
 import shutil
 
 from yaner.Constants import *
-from yaner.Configuration import *
 from yaner.Server import *
 from yaner.SingleInstance import *
 
@@ -35,17 +34,20 @@ class YanerApp(SingleInstanceApp):
 
     def __init__(self):
         SingleInstanceApp.__init__(self, "yaner")
-        builder = gtk.Builder()
-        builder.add_from_file(GladeFile)
-        self.main_window = builder.get_object("main_window")
-        self.about_dialog = builder.get_object("about_dialog")
-        self.server_ts = builder.get_object("server_ts")
-        builder.connect_signals(self)
+        self.builder = gtk.Builder()
+        self.builder.add_from_file(GladeFile)
+        # Windows
+        self.main_window = self.builder.get_object("main_window")
+        self.about_dialog = self.builder.get_object("about_dialog")
+        # Server View
+        server_tv = self.builder.get_object("server_tv")
+        server_ts = self.builder.get_object("server_ts")
+        self.server_view = ServerView(self, server_tv, server_ts);
 
         self.init_rgba()
         self.init_paths()
-        self.init_servers()
 
+        self.builder.connect_signals(self)
         self.main_window.show()
 
     def init_rgba(self):
@@ -64,16 +66,6 @@ class YanerApp(SingleInstanceApp):
         if not os.path.exists(UServerConfigDir):
             os.makedirs(UServerConfigDir)
             shutil.copy(ServerConfigFile, UServerConfigDir)
-
-    def init_servers(self):
-        """
-        Init servers, include GUI TreeView building.
-        """
-        server_models = []
-        for f in os.listdir(UServerConfigDir):
-            if f.endswith('.conf'):
-                server_conf = ConfigFile(os.path.join(UServerConfigDir, f))
-                server_models.append(ServerModel(self.server_ts, server_conf))
 
     def on_instance_exists(self):
         SingleInstanceApp.on_instance_exists(self)
