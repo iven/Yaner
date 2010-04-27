@@ -2,7 +2,6 @@
 <interface>
   <requires lib="gtk+" version="2.18"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkTreeStore" id="tasklist_ts"/>
   <object class="GtkTreeStore" id="taskinfo_ts"/>
   <object class="GtkTreeStore" id="server_ts">
     <columns>
@@ -10,6 +9,32 @@
       <column type="gchararray"/>
       <!-- column-name server_name -->
       <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkTreeStore" id="tasklist_ts">
+    <columns>
+      <!-- column-name task_gid -->
+      <column type="gchararray"/>
+      <!-- column-name task_status -->
+      <column type="gchararray"/>
+      <!-- column-name task_name -->
+      <column type="gchararray"/>
+      <!-- column-name task_dir -->
+      <column type="gchararray"/>
+      <!-- column-name task_total_length -->
+      <column type="glong"/>
+      <!-- column-name task_down_length -->
+      <column type="glong"/>
+      <!-- column-name task_up_length -->
+      <column type="glong"/>
+      <!-- column-name task_down_speed -->
+      <column type="gchararray"/>
+      <!-- column-name task_up_speed -->
+      <column type="gchararray"/>
+      <!-- column-name task_bitfield -->
+      <column type="gchararray"/>
+      <!-- column-name task_connections -->
+      <column type="gint"/>
     </columns>
   </object>
   <object class="GtkWindow" id="main_window">
@@ -172,6 +197,31 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">tasklist_ts</property>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="gid_tc">
+                            <property name="title">#GID</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="task_gid_renderer"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="name_tc">
+                            <property name="title" translatable="yes">Name</property>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="task_status_renderer"/>
+                            </child>
+                            <child>
+                              <object class="GtkCellRendererText" id="task_name_renderer"/>
+                              <attributes>
+                                <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
