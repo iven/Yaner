@@ -180,12 +180,12 @@ setup (
 
 os.remove ("yaner/Constants.py")
 
-if sys.argv[1] == "install":
-    gtk_update_icon_cache = "gtk-update-icon-cache -f -t %s/share/{,yaner/}icons/hicolor" % prefix
-    root_specified = len([s for s in sys.argv if s.startswith("--root")]) > 0
-    if not root_specified:
-        print "Updating Gtk+ icon cache."
-        os.system(gtk_update_icon_cache)
-    else:
-        print """*** Icon cache not updated. After install, run this:
-***     %s""" % gtk_update_icon_cache
+#if sys.argv[1] == "install":
+#    gtk_update_icon_cache = "gtk-update-icon-cache -f -t %s/share/{,yaner/}icons/hicolor" % prefix
+#    root_specified = len([s for s in sys.argv if s.startswith("--root")]) > 0
+#    if not root_specified:
+#        print "Updating Gtk+ icon cache."
+#        os.system(gtk_update_icon_cache)
+#    else:
+#        print """*** Icon cache not updated. After install, run this:
+#***     %s""" % gtk_update_icon_cache
