@@ -41,6 +41,7 @@ class YanerApp(SingleInstanceApp):
         # Windows
         self.main_window = self.builder.get_object("main_window")
         self.about_dialog = self.builder.get_object("about_dialog")
+        self.about_dialog.set_version(Version)
         #
         self.init_rgba()
         self.init_paths()

@@ -21,17 +21,11 @@
       <column type="gchararray"/>
       <!-- column-name task_dir -->
       <column type="gchararray"/>
-      <!-- column-name task_total_length -->
-      <column type="glong"/>
-      <!-- column-name task_down_length -->
-      <column type="glong"/>
-      <!-- column-name task_up_length -->
-      <column type="glong"/>
+      <!-- column-name task_size -->
+      <column type="gchararray"/>
       <!-- column-name task_down_speed -->
       <column type="gchararray"/>
       <!-- column-name task_up_speed -->
-      <column type="gchararray"/>
-      <!-- column-name task_bitfield -->
       <column type="gchararray"/>
       <!-- column-name task_connections -->
       <column type="gint"/>
@@ -199,7 +193,7 @@
                         <property name="model">tasklist_ts</property>
                         <child>
                           <object class="GtkTreeViewColumn" id="gid_tc">
-                            <property name="title">#GID</property>
+                            <property name="title">GID</property>
                             <child>
                               <object class="GtkCellRendererText" id="task_gid_renderer"/>
                               <attributes>
@@ -218,6 +212,59 @@
                               <object class="GtkCellRendererText" id="task_name_renderer"/>
                               <attributes>
                                 <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="progress_tc">
+                            <property name="title" translatable="yes">Progress</property>
+                            <property name="expand">True</property>
+                            <child>
+                              <object class="GtkCellRendererProgress" id="task_progress_renderer"/>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="size_tc">
+                            <property name="title" translatable="yes">Size</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="task_size_renderer"/>
+                              <attributes>
+                                <attribute name="text">4</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="down_speed_tc">
+                            <property name="title" translatable="yes">DownSpeed</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="task_down_speed_renderer"/>
+                              <attributes>
+                                <attribute name="text">5</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="up_speed_tc">
+                            <property name="title" translatable="yes">UpSpeed</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="task_up_speed_renderer"/>
+                              <attributes>
+                                <attribute name="text">6</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="connections_tc">
+                            <property name="title" translatable="yes">Connections</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="task_connections_renderer"/>
+                              <attributes>
+                                <attribute name="text">7</attribute>
                               </attributes>
                             </child>
                           </object>

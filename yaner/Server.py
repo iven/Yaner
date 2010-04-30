@@ -29,17 +29,6 @@ from yaner.Constants import *
 from yaner.Constants import _
 from yaner.Configuration import *
 
-class Server:
-    "Aria2 Server"
-
-    def __init__(self, server_model, server_conf):
-        self.info = server_conf.information
-        self.cate = server_conf.category
-        self.conn_str = 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
-                % self.info
-        self.proxy = xmlrpc.Proxy(self.conn_str)
-        self.model = server_model
-
 class ServerModel:
     """
     Aria2 server tree model of the left pane in the main window.
@@ -47,13 +36,21 @@ class ServerModel:
     """
 
     def __init__(self, treeview, treestore, server_conf):
-        self.server = Server(self, server_conf)
-        self.iter = treestore.append(None, ["gtk-disconnect", self.server.info.name])
-        self.queuing_iter = treestore.append(self.iter, ["gtk-media-forward", _("Queuing")])
-        self.completed_iter = treestore.append(self.iter, ["gtk-media-stop", _("Completed")])
-        self.recycled_iter = treestore.append(self.iter, ["gtk-media-rewind", _("Recycled")])
-        for (name, path) in self.server.cate.items():
-            iter = treestore.append(self.completed_iter, ["gtk-add", name])
+        # Preferences
+        self.info = server_conf.information
+        self.cate = server_conf.category
+        self.conn_str = 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
+                % self.info
+        self.proxy = xmlrpc.Proxy(self.conn_str)
+        # Iters
+        self.iter = treestore.append(None, ["gtk-disconnect", self.info.name])
+        self.queuing_iter = treestore.append(self.iter, ["gtk-media-play", _("Queuing")])
+        self.completed_iter = treestore.append(self.iter, ["gtk-apply", _("Completed")])
+        self.recycled_iter = treestore.append(self.iter, ["gtk-cancel", _("Recycled")])
+        self.cate_iters = {}
+        for (name, path) in self.cate.items():
+            iter = treestore.append(self.completed_iter, ["gtk-directory", name])
+            self.cate_iters[name] = iter
         self.treeview = treeview
         self.treestore = treestore
 
@@ -67,15 +64,18 @@ class ServerView:
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
         # TreeModel
+        servers = {}
         for f in os.listdir(UServerConfigDir):
-            if f.endswith('.conf'):
-                server_conf = ConfigFile(os.path.join(UServerConfigDir, f))
-                ServerModel(self, treestore, server_conf)
+            server_conf = ConfigFile(os.path.join(UServerConfigDir, f))
+            model = ServerModel(self, treestore, server_conf)
+            servers[f[:-5]] = model
 
         self.main_win = main_window
         self.treeview = treeview
         self.treestore = treestore
         self.selection = selection
+        self.servers = servers
 
     def on_selection_changed(self, selection, data = None):
         pass
+
