@@ -42,13 +42,15 @@ class YanerApp(SingleInstanceApp):
         self.main_window = self.builder.get_object("main_window")
         self.about_dialog = self.builder.get_object("about_dialog")
         self.about_dialog.set_version(Version)
-        #
-        self.init_rgba()
-        self.init_paths()
+        self.task_new_dialog = self.builder.get_object("task_new_dialog")
         # Server View
         server_tv = self.builder.get_object("server_tv")
         server_ts = self.builder.get_object("server_ts")
         self.server_view = ServerView(self, server_tv, server_ts);
+        #
+        self.init_rgba()
+        self.init_paths()
+        self.init_filefilters()
         # Show the window
         self.main_window.show()
 
@@ -69,11 +71,21 @@ class YanerApp(SingleInstanceApp):
             os.makedirs(UServerConfigDir)
             shutil.copy(ServerConfigFile, UServerConfigDir)
 
+    def init_filefilters(self):
+        """
+        Init Filefilters.
+        """
+        torrent_filefilter = self.builder.get_object("torrent_filefilter")
+        torrent_filefilter.add_mime_type("application/x-bittorrent")
+        metalink_filefilter = self.builder.get_object("metalink_filefilter")
+        metalink_filefilter.add_mime_type("application/xml")
+
     def on_instance_exists(self):
         SingleInstanceApp.on_instance_exists(self)
 
-    def on_new_action_activate(self, widget, data = None):
-        pass
+    def on_task_new_action_activate(self, widget, data = None):
+        self.task_new_dialog.run()
+        self.task_new_dialog.hide()
 
     def on_about_action_activate(self, widget, data = None):
         self.about_dialog.run()
