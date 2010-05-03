@@ -48,18 +48,42 @@
               <object class="GtkMenuItem" id="file_menu">
                 <property name="visible">True</property>
                 <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">File(_F)</property>
+                <property name="label" translatable="yes">_File</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="file_sub_menu">
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkImageMenuItem" id="task_new_item">
+                        <property name="label">gtk-new</property>
                         <property name="visible">True</property>
-                        <property name="related_action">task_new_action</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <accelerator key="n" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                        <child type="submenu">
+                          <object class="GtkMenu" id="task_new_menu">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkMenuItem" id="task_new_normal_item">
+                                <property name="visible">True</property>
+                                <property name="related_action">task_new_normal_action</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkMenuItem" id="task_new_bt_item">
+                                <property name="visible">True</property>
+                                <property name="related_action">task_new_bt_action</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkMenuItem" id="task_new_metalink_item">
+                                <property name="visible">True</property>
+                                <property name="related_action">task_new_metalink_action</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
@@ -84,7 +108,7 @@
               <object class="GtkMenuItem" id="view_menu">
                 <property name="visible">True</property>
                 <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">View(_V)</property>
+                <property name="label" translatable="yes">_View</property>
                 <property name="use_underline">True</property>
               </object>
             </child>
@@ -92,7 +116,7 @@
               <object class="GtkMenuItem" id="help_menu">
                 <property name="visible">True</property>
                 <property name="use_action_appearance">False</property>
-                <property name="label" translatable="yes">Help(_H)</property>
+                <property name="label" translatable="yes">_Help</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="help_sub_menu">
@@ -119,9 +143,13 @@
           <object class="GtkToolbar" id="toolbar">
             <property name="visible">True</property>
             <child>
-              <object class="GtkToolButton" id="task_new_tool_item">
+              <object class="GtkMenuToolButton" id="task_new_tool_item">
                 <property name="visible">True</property>
-                <property name="related_action">task_new_action</property>
+                <property name="use_action_appearance">False</property>
+                <property name="related_action">task_new_normal_action</property>
+                <property name="label" translatable="yes">Add new task</property>
+                <property name="stock_id">gtk-new</property>
+                <property name="menu">task_new_menu</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -324,10 +352,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkAction" id="task_new_action">
-    <property name="stock_id">gtk-new</property>
-    <signal name="activate" handler="on_task_new_action_activate"/>
-  </object>
   <object class="GtkAction" id="about_action">
     <property name="stock_id">gtk-about</property>
     <signal name="activate" handler="on_about_action_activate"/>
@@ -385,12 +409,12 @@
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkVBox" id="task_new_main_vbox">
+          <object class="GtkVBox" id="task_new_vbox">
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <property name="spacing">5</property>
             <child>
-              <object class="GtkNotebook" id="task_new_main_notebook">
+              <object class="GtkNotebook" id="task_new_nb">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <child>
@@ -1424,5 +1448,17 @@
     <property name="value">2</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAction" id="task_new_normal_action">
+    <property name="label" translatable="yes">HTTP/FTP/BT Magnet</property>
+    <signal name="activate" handler="on_task_new_action_activate" object="task_new_normal_action"/>
+  </object>
+  <object class="GtkAction" id="task_new_bt_action">
+    <property name="label" translatable="yes">BitTorrent</property>
+    <signal name="activate" handler="on_task_new_action_activate" object="task_new_bt_action"/>
+  </object>
+  <object class="GtkAction" id="task_new_metalink_action">
+    <property name="label" translatable="yes">Metalink</property>
+    <signal name="activate" handler="on_task_new_action_activate" object="task_new_metalink_action"/>
   </object>
 </interface>

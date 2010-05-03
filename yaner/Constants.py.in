@@ -46,6 +46,13 @@ ServerConfigFile = path.join(ConfigDir, "localhost.conf")
 UConfigDir = path.join(xdg_config_home, "yaner")
 UServerConfigDir = path.join(UConfigDir, "servers")
 
+# Task types
+#
+(
+    TASK_NORMAL,
+    TASK_BT,
+    TASK_METALINK,
+) = range(3)
 # Version
 #
 Version = "@version@"

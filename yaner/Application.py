@@ -47,6 +47,9 @@ class YanerApp(SingleInstanceApp):
         server_tv = self.builder.get_object("server_tv")
         server_ts = self.builder.get_object("server_ts")
         self.server_view = ServerView(self, server_tv, server_ts);
+
+        # Notebook
+        self.task_new_nb = self.builder.get_object("task_new_nb")
         #
         self.init_rgba()
         self.init_paths()
@@ -83,11 +86,21 @@ class YanerApp(SingleInstanceApp):
     def on_instance_exists(self):
         SingleInstanceApp.on_instance_exists(self)
 
-    def on_task_new_action_activate(self, widget, data = None):
-        self.task_new_dialog.run()
+    def on_task_new_action_activate(self, action, data = None):
+        action_dict = {
+                "task_new_normal_action": TASK_NORMAL,
+                "task_new_bt_action": TASK_BT,
+                "task_new_metalink_action": TASK_METALINK,
+                }
+        page = action_dict[action.get_property('name')]
+        self.task_new_nb.set_current_page(page)
+        response = self.task_new_dialog.run()
         self.task_new_dialog.hide()
+        if response == gtk.RESPONSE_OK:
+            pass
 
     def on_about_action_activate(self, widget, data = None):
+        print data
         self.about_dialog.run()
         self.about_dialog.hide()
         
