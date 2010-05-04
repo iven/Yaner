@@ -31,6 +31,14 @@
       <column type="gint"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="task_new_server_ls">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name section -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="main_window">
     <property name="width_request">700</property>
     <property name="height_request">500</property>
@@ -1274,6 +1282,13 @@
                         <child>
                           <object class="GtkComboBox" id="task_new_server_combobox">
                             <property name="visible">True</property>
+                            <property name="model">task_new_server_ls</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="task_new_server_renderer"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>

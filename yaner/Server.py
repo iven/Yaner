@@ -35,22 +35,25 @@ class ServerModel:
     This contains queuing, completed, recycled tasks as its children.
     """
 
-    def __init__(self, treeview, treestore, server_conf):
+    def __init__(self, treeview, treestore, server_conf, server_cates):
         # Preferences
-        self.info = server_conf.information
-        self.cate = server_conf.category
+        self.conf = server_conf
+        self.cates = server_cates
+        self.connected = False
         self.conn_str = 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
-                % self.info
+                % self.conf
         self.proxy = xmlrpc.Proxy(self.conn_str)
         # Iters
-        self.iter = treestore.append(None, ["gtk-disconnect", self.info.name])
+        self.iter = treestore.append(None, ["gtk-disconnect", self.conf.name])
         self.queuing_iter = treestore.append(self.iter, ["gtk-media-play", _("Queuing")])
         self.completed_iter = treestore.append(self.iter, ["gtk-apply", _("Completed")])
         self.recycled_iter = treestore.append(self.iter, ["gtk-cancel", _("Recycled")])
+        # Category Iters
         self.cate_iters = {}
-        for (name, path) in self.cate.items():
-            iter = treestore.append(self.completed_iter, ["gtk-directory", name])
-            self.cate_iters[name] = iter
+        for cate_name in self.cates:
+            key_name = 'cate_' + cate_name
+            iter = treestore.append(self.completed_iter, ["gtk-directory", cate_name])
+            self.cate_iters[cate_name] = iter
         self.treeview = treeview
         self.treestore = treestore
 
@@ -65,10 +68,12 @@ class ServerView:
         selection.connect("changed", self.on_selection_changed)
         # TreeModel
         servers = {}
-        for f in os.listdir(UServerConfigDir):
-            server_conf = ConfigFile(os.path.join(UServerConfigDir, f))
-            model = ServerModel(self, treestore, server_conf)
-            servers[f[:-5]] = model
+        server_conf_file = ConfigFile(UServerConfigFile)
+        for server in main_window.conf_file.main.servers.split(','):
+            server_conf = getattr(server_conf_file, server)
+            server_cates = getattr(main_window.conf_file.cate, server).split(',')
+            server_model = ServerModel(self, treestore, server_conf, server_cates)
+            servers[server] = server_model
 
         self.main_win = main_window
         self.treeview = treeview

@@ -41,10 +41,12 @@ PixmapDir = path.join(DataDir, "images")
 ConfigDir = path.join(DataDir, "config")
 GladeDir = path.join(DataDir, "glade")
 GladeFile = path.join(GladeDir, "yaner.glade")
-ServerConfigFile = path.join(ConfigDir, "localhost.conf")
+MainConfigFile = path.join(ConfigDir, "yaner.conf")
+ServerConfigFile = path.join(ConfigDir, "servers.conf")
 # User
 UConfigDir = path.join(xdg_config_home, "yaner")
-UServerConfigDir = path.join(UConfigDir, "servers")
+UMainConfigFile = path.join(UConfigDir, "yaner.conf")
+UServerConfigFile = path.join(UConfigDir, "servers.conf")
 
 # Task types
 #
@@ -52,7 +54,8 @@ UServerConfigDir = path.join(UConfigDir, "servers")
     TASK_NORMAL,
     TASK_BT,
     TASK_METALINK,
-) = range(3)
+    TASK_TYPES
+) = range(4)
 # Version
 #
 Version = "@version@"

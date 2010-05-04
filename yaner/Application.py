@@ -38,22 +38,25 @@ class YanerApp(SingleInstanceApp):
         self.builder = gtk.Builder()
         self.builder.add_from_file(GladeFile)
         self.builder.connect_signals(self)
-        # Windows
+        #
         self.main_window = self.builder.get_object("main_window")
-        self.about_dialog = self.builder.get_object("about_dialog")
-        self.about_dialog.set_version(Version)
-        self.task_new_dialog = self.builder.get_object("task_new_dialog")
-        # Server View
-        server_tv = self.builder.get_object("server_tv")
-        server_ts = self.builder.get_object("server_ts")
-        self.server_view = ServerView(self, server_tv, server_ts);
-
-        # Notebook
-        self.task_new_nb = self.builder.get_object("task_new_nb")
         #
         self.init_rgba()
         self.init_paths()
         self.init_filefilters()
+        # Main Config
+        self.conf_file = ConfigFile(UMainConfigFile)
+        # Server View
+        server_tv = self.builder.get_object("server_tv")
+        server_ts = self.builder.get_object("server_ts")
+        self.server_view = ServerView(self, server_tv, server_ts);
+        # About Dialog
+        self.about_dialog = self.builder.get_object("about_dialog")
+        self.about_dialog.set_version(Version)
+        # Task New Dialog
+        self.task_new_dialog = self.builder.get_object("task_new_dialog")
+        self.task_new_nb = self.builder.get_object("task_new_nb")
+        self.task_new_server_ls = self.builder.get_object("task_new_server_ls")
         # Show the window
         self.main_window.show()
 
@@ -70,9 +73,12 @@ class YanerApp(SingleInstanceApp):
         """
         Init UConfigDir and config files.
         """
-        if not os.path.exists(UServerConfigDir):
-            os.makedirs(UServerConfigDir)
-            shutil.copy(ServerConfigFile, UServerConfigDir)
+        if not os.path.exists(UConfigDir):
+            os.makedirs(UConfigDir)
+        if not os.path.exists(UMainConfigFile):
+            shutil.copy(MainConfigFile, UConfigDir)
+        if not os.path.exists(UServerConfigFile):
+            shutil.copy(ServerConfigFile, UConfigDir)
 
     def init_filefilters(self):
         """
@@ -87,6 +93,7 @@ class YanerApp(SingleInstanceApp):
         SingleInstanceApp.on_instance_exists(self)
 
     def on_task_new_action_activate(self, action, data = None):
+        # set current page of the notebook
         action_dict = {
                 "task_new_normal_action": TASK_NORMAL,
                 "task_new_bt_action": TASK_BT,
@@ -94,6 +101,11 @@ class YanerApp(SingleInstanceApp):
                 }
         page = action_dict[action.get_property('name')]
         self.task_new_nb.set_current_page(page)
+        # init the server combobox
+        self.task_new_server_ls.clear()
+        for (server, model) in self.server_view.servers.iteritems():
+            iter = self.task_new_server_ls.append([model.info.name, server])
+        # run the dialog
         response = self.task_new_dialog.run()
         self.task_new_dialog.hide()
         if response == gtk.RESPONSE_OK:
