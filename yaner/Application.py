@@ -56,7 +56,11 @@ class YanerApp(SingleInstanceApp):
         # Task New Dialog
         self.task_new_dialog = self.builder.get_object("task_new_dialog")
         self.task_new_nb = self.builder.get_object("task_new_nb")
+        self.task_new_server_combobox = self.builder.get_object("task_new_server_combobox")
         self.task_new_server_ls = self.builder.get_object("task_new_server_ls")
+        self.task_new_cate_combobox = self.builder.get_object("task_new_cate_combobox")
+        self.task_new_cate_ls = self.builder.get_object("task_new_cate_ls")
+        self.task_new_dir_entry = self.builder.get_object("task_new_dir_entry")
         # Show the window
         self.main_window.show()
 
@@ -92,6 +96,29 @@ class YanerApp(SingleInstanceApp):
     def on_instance_exists(self):
         SingleInstanceApp.on_instance_exists(self)
 
+    def on_task_new_dir_chooser_selection_changed(self, widget, data = None):
+        dir = widget.get_filename()
+        self.task_new_dir_entry.set_text(dir)
+
+    def on_task_new_cate_combobox_changed(self, widget, data = None):
+        model = widget.get_model()
+        iter = widget.get_active_iter()
+        if iter != None:
+            dir = model.get(iter, 1)[0]
+            self.task_new_dir_entry.set_text(dir)
+
+    def on_task_new_server_combobox_changed(self, widget, data = None):
+        model = widget.get_model()
+        iter = widget.get_active_iter()
+        if iter != None:
+            server = model.get(iter, 1)[0]
+            server_model = self.server_view.servers[server]
+            self.task_new_cate_ls.clear()
+            for cate_name in server_model.cates:
+                dir = server_model.conf[cate_name]
+                self.task_new_cate_ls.append([cate_name[5:], dir])
+            self.task_new_cate_combobox.set_active(0)
+
     def on_task_new_action_activate(self, action, data = None):
         # set current page of the notebook
         action_dict = {
@@ -103,8 +130,10 @@ class YanerApp(SingleInstanceApp):
         self.task_new_nb.set_current_page(page)
         # init the server combobox
         self.task_new_server_ls.clear()
-        for (server, model) in self.server_view.servers.iteritems():
-            iter = self.task_new_server_ls.append([model.info.name, server])
+        for server in self.server_view.server_list:
+            model = self.server_view.servers[server]
+            iter = self.task_new_server_ls.append([model.conf.name, server])
+        self.task_new_server_combobox.set_active(0)
         # run the dialog
         response = self.task_new_dialog.run()
         self.task_new_dialog.hide()
@@ -112,7 +141,6 @@ class YanerApp(SingleInstanceApp):
             pass
 
     def on_about_action_activate(self, widget, data = None):
-        print data
         self.about_dialog.run()
         self.about_dialog.hide()
         

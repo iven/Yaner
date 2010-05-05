@@ -35,7 +35,15 @@
     <columns>
       <!-- column-name name -->
       <column type="gchararray"/>
-      <!-- column-name section -->
+      <!-- column-name server -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="task_new_cate_ls">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name dir -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -1283,6 +1291,7 @@
                           <object class="GtkComboBox" id="task_new_server_combobox">
                             <property name="visible">True</property>
                             <property name="model">task_new_server_ls</property>
+                            <signal name="changed" handler="on_task_new_server_combobox_changed"/>
                             <child>
                               <object class="GtkCellRendererText" id="task_new_server_renderer"/>
                               <attributes>
@@ -1310,6 +1319,14 @@
                         <child>
                           <object class="GtkComboBox" id="task_new_cate_combobox">
                             <property name="visible">True</property>
+                            <property name="model">task_new_cate_ls</property>
+                            <signal name="changed" handler="on_task_new_cate_combobox_changed"/>
+                            <child>
+                              <object class="GtkCellRendererText" id="task_new_cate_renderer"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
                           </object>
                           <packing>
                             <property name="left_attach">2</property>
@@ -1333,6 +1350,8 @@
                           <object class="GtkFileChooserButton" id="task_new_dir_chooser">
                             <property name="visible">True</property>
                             <property name="action">select-folder</property>
+                            <property name="title" translatable="yes">Select download directory</property>
+                            <signal name="selection_changed" handler="on_task_new_dir_chooser_selection_changed"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>

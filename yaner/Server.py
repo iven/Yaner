@@ -51,8 +51,7 @@ class ServerModel:
         # Category Iters
         self.cate_iters = {}
         for cate_name in self.cates:
-            key_name = 'cate_' + cate_name
-            iter = treestore.append(self.completed_iter, ["gtk-directory", cate_name])
+            iter = treestore.append(self.completed_iter, ["gtk-directory", cate_name[5:]])
             self.cate_iters[cate_name] = iter
         self.treeview = treeview
         self.treestore = treestore
@@ -67,11 +66,12 @@ class ServerView:
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
         # TreeModel
+        server_list = main_window.conf_file.main.servers.split(',')
         servers = {}
         server_conf_file = ConfigFile(UServerConfigFile)
-        for server in main_window.conf_file.main.servers.split(','):
-            server_conf = getattr(server_conf_file, server)
-            server_cates = getattr(main_window.conf_file.cate, server).split(',')
+        for server in server_list:
+            server_conf = server_conf_file[server]
+            server_cates = main_window.conf_file.cate[server].split(',')
             server_model = ServerModel(self, treestore, server_conf, server_cates)
             servers[server] = server_model
 
@@ -79,6 +79,7 @@ class ServerView:
         self.treeview = treeview
         self.treestore = treestore
         self.selection = selection
+        self.server_list = server_list
         self.servers = servers
 
     def on_selection_changed(self, selection, data = None):
