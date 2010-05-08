@@ -148,8 +148,7 @@ class YanerApp(SingleInstanceApp):
         self.task_new_nb.set_current_page(page)
         # init the server cb
         self.task_new_server_ls.clear()
-        for server in self.server_view.server_list:
-            model = self.server_view.servers[server]
+        for (server, model) in self.server_view.servers.iteritems():
             self.task_new_server_ls.append([model.conf.name, server])
         self.task_new_server_cb.set_active(0)
         # run the dialog

@@ -29,6 +29,7 @@ from twisted.web import xmlrpc
 
 from yaner.Constants import U_SERVER_CONFIG_FILE, _
 from yaner.Configuration import ConfigFile
+from yaner.ODict import ODict
 
 class ServerModel:
     """
@@ -39,7 +40,6 @@ class ServerModel:
     def __init__(self, treeview, treestore, server_conf, server_cates):
         # Preferences
         self.conf = server_conf
-        self.cates = server_cates
         self.connected = False
         self.proxy = xmlrpc.Proxy(self.__get_conn_str())
         # Iters
@@ -52,13 +52,14 @@ class ServerModel:
         self.recycled_iter = treestore.append(self.server_iter,
                 ["gtk-cancel", _("Recycled")])
         # Category Iters
-        self.cate_iters = {}
-        for cate_name in self.cates:
+        cates = ODict()
+        for cate_name in server_cates:
             cate_iter = treestore.append(self.completed_iter,
                     ["gtk-directory", cate_name[5:]])
-            self.cate_iters[cate_name] = cate_iter
+            cates[cate_name] = cate_iter
         self.treeview = treeview
         self.treestore = treestore
+        self.cates = cates
 
     def __get_conn_str(self):
         """
@@ -76,10 +77,9 @@ class ServerView:
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
         # TreeModel
-        server_list = main_window.conf_file.main.servers.split(',')
-        servers = {}
+        servers = ODict()
         server_conf_file = ConfigFile(U_SERVER_CONFIG_FILE)
-        for server in server_list:
+        for server in main_window.conf_file.main.servers.split(','):
             server_conf = server_conf_file[server]
             server_cates = main_window.conf_file.cate[server].split(',')
             server_model = ServerModel(self, treestore, 
@@ -90,7 +90,6 @@ class ServerView:
         self.treeview = treeview
         self.treestore = treestore
         self.selection = selection
-        self.server_list = server_list
         self.servers = servers
 
     def on_selection_changed(self, selection, data = None):

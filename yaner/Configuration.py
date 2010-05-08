@@ -27,15 +27,17 @@ of Yaner, but could also be used by other programs.
 
 import ConfigParser
 
-class ConfigFile(dict):
+from yaner.ODict import ODict
+
+class ConfigFile(ODict):
     "Sections dict of config file handles add and del sections."
 
     def __init__(self, config_file):
         parser = ConfigParser.ConfigParser()
         parser.read(config_file)
-        section_dict = dict((section, ConfigSection(parser, section)) \
-                for section in parser.sections())
-        dict.__init__(self, section_dict)
+        section_list = [(section, ConfigSection(parser, section)) \
+                for section in parser.sections()]
+        ODict.__init__(self, section_list)
         self.parser = parser
         self.config_file = config_file
 
@@ -52,7 +54,7 @@ class ConfigFile(dict):
         """
         if not self.has_key(section):
             self.parser.add_section(section)
-            dict.__setitem__(self, section,
+            ODict.__setitem__(self, section,
                     ConfigSection(self.parser, section))
         for (key, value) in option_dict.items():
             self[section][key] = value
@@ -62,17 +64,17 @@ class ConfigFile(dict):
         To delete a section, simply use "del config_file[key]".
         """
         self.parser.remove_section(section)
-        dict.__delitem__(self, section)
+        ODict.__delitem__(self, section)
 
     def __del__(self):
         with open(self.config_file, 'w') as cfile:
             self.parser.write(cfile)
 
-class ConfigSection(dict):
+class ConfigSection(ODict):
     "A section of config file with dict features."
 
     def __init__(self, config_parser, section):
-        dict.__init__(self, config_parser.items(section))
+        ODict.__init__(self, config_parser.items(section))
         self.parser = config_parser
         self.section = section
 
@@ -84,9 +86,9 @@ class ConfigSection(dict):
 
     def __setitem__(self, key, value):
         self.parser.set(self.section, key, value)
-        dict.__setitem__(self, key, value)
+        ODict.__setitem__(self, key, value)
 
     def __delitem__(self, key):
         self.parser.remove_option(self.section, key)
-        dict.__delitem__(self, key)
+        ODict.__delitem__(self, key)
 
