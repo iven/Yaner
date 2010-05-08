@@ -20,20 +20,29 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+"""
+    This file contains the super class of a single instance application
+like Yaner, but could also be used by other programs.
+"""
+
 import socket
 
 class SingleInstanceApp:
     "Single Instance Application"
 
     def __init__(self, temp_name):
-        self.s = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         try:
-            self.s.bind('\0' + temp_name)
+            self.sock.bind('\0' + temp_name)
         except IOError:
             print "Another instance is already running."
             self.on_instance_exists()
 
     def on_instance_exists(self):
+        """
+        This method is called when an instance of the program already
+        exists. It may be overwritten by subclasses.
+        """
         import sys
         sys.exit(0)
 

@@ -20,25 +20,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+"""
+    This is the entry to the main application of Yaner, and should be
+placed under a directory in $PATH.
+    We just do some requirement checking here, and then load the main
+window of the application.
+"""
 import pygtk
 pygtk.require('2.0')
 import gtk
 
-if gtk.pygtk_version < (2,12,0):
+if gtk.pygtk_version < (2, 12, 0):
     raise SystemExit(' * Error: PyGtk 2.12.0 or later required')
 
 try:
     from twisted.internet import gtk2reactor
 except ImportError:
-    raise SystemExit(' * Error: the "twisted" module is missing. Check if it is installed properly.')
+    raise SystemExit(' * Error: the "twisted" module is missing. \
+            Check if it is installed properly.')
 else:
     gtk2reactor.install()
     from twisted.internet import reactor
 
-try:
+#try:
     from yaner.Application import YanerApp
-except ImportError:
-    raise SystemExit(' * Error: the "yaner" module is missing. Check if it is installed properly.')
+#except ImportError:
+#    raise SystemExit(' * Error: the "yaner" module is missing. \
+#            Check if it is installed properly.')
 
 YanerApp()
 reactor.run()

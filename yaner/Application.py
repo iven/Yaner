@@ -20,14 +20,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import pygtk
+"""
+    This file contains the main application class of Yaner, mostly
+GUI related.
+"""
+
 import gtk
 import os
 import shutil
 
 from yaner.Constants import *
-from yaner.Server import *
-from yaner.SingleInstance import *
+from yaner.Server import ServerView
+from yaner.Configuration import ConfigFile
+from yaner.SingleInstance import SingleInstanceApp
 
 class YanerApp(SingleInstanceApp):
     "Main Application"
@@ -36,7 +41,7 @@ class YanerApp(SingleInstanceApp):
         SingleInstanceApp.__init__(self, "yaner")
         # Builder
         self.builder = gtk.Builder()
-        self.builder.add_from_file(GladeFile)
+        self.builder.add_from_file(GLADE_FILE)
         self.builder.connect_signals(self)
         #
         self.main_window = self.builder.get_object("main_window")
@@ -45,20 +50,17 @@ class YanerApp(SingleInstanceApp):
         self.init_paths()
         self.init_filefilters()
         # Main Config
-        self.conf_file = ConfigFile(UMainConfigFile)
+        self.conf_file = ConfigFile(U_MAIN_CONFIG_FILE)
         # Server View
         server_tv = self.builder.get_object("server_tv")
         server_ts = self.builder.get_object("server_ts")
-        self.server_view = ServerView(self, server_tv, server_ts);
-        # About Dialog
-        self.about_dialog = self.builder.get_object("about_dialog")
-        self.about_dialog.set_version(Version)
+        self.server_view = ServerView(self, server_tv, server_ts)
         # Task New Dialog
         self.task_new_dialog = self.builder.get_object("task_new_dialog")
         self.task_new_nb = self.builder.get_object("task_new_nb")
-        self.task_new_server_combobox = self.builder.get_object("task_new_server_combobox")
+        self.task_new_server_cb = self.builder.get_object("task_new_server_cb")
         self.task_new_server_ls = self.builder.get_object("task_new_server_ls")
-        self.task_new_cate_combobox = self.builder.get_object("task_new_cate_combobox")
+        self.task_new_cate_cb = self.builder.get_object("task_new_cate_cb")
         self.task_new_cate_ls = self.builder.get_object("task_new_cate_ls")
         self.task_new_dir_entry = self.builder.get_object("task_new_dir_entry")
         # Show the window
@@ -73,16 +75,17 @@ class YanerApp(SingleInstanceApp):
         if colormap:
             gtk.widget_set_default_colormap(colormap)
 
-    def init_paths(self):
+    @staticmethod
+    def init_paths():
         """
         Init UConfigDir and config files.
         """
-        if not os.path.exists(UConfigDir):
-            os.makedirs(UConfigDir)
-        if not os.path.exists(UMainConfigFile):
-            shutil.copy(MainConfigFile, UConfigDir)
-        if not os.path.exists(UServerConfigFile):
-            shutil.copy(ServerConfigFile, UConfigDir)
+        if not os.path.exists(U_CONFIG_DIR):
+            os.makedirs(U_CONFIG_DIR)
+        if not os.path.exists(U_MAIN_CONFIG_FILE):
+            shutil.copy(MAIN_CONFIG_FILE, U_CONFIG_DIR)
+        if not os.path.exists(U_SERVER_CONFIG_FILE):
+            shutil.copy(SERVER_CONFIG_FILE, U_CONFIG_DIR)
 
     def init_filefilters(self):
         """
@@ -94,32 +97,47 @@ class YanerApp(SingleInstanceApp):
         metalink_filefilter.add_mime_type("application/xml")
 
     def on_instance_exists(self):
+        """
+        Being called when another instance exists. Currently just quits.
+        """
         SingleInstanceApp.on_instance_exists(self)
 
-    def on_task_new_dir_chooser_selection_changed(self, widget, data = None):
-        dir = widget.get_filename()
-        self.task_new_dir_entry.set_text(dir)
+    def on_task_new_dir_chooser_changed(self, widget):
+        """
+        When directory chooser selection changed, update the directory entry.
+        """
+        directory = widget.get_filename()
+        self.task_new_dir_entry.set_text(directory)
 
-    def on_task_new_cate_combobox_changed(self, widget, data = None):
+    def on_task_new_cate_cb_changed(self, widget):
+        """
+        When category combobox selection changed, update the directory entry.
+        """
         model = widget.get_model()
-        iter = widget.get_active_iter()
-        if iter != None:
-            dir = model.get(iter, 1)[0]
-            self.task_new_dir_entry.set_text(dir)
+        aiter = widget.get_active_iter()
+        if aiter != None:
+            directory = model.get(aiter, 1)[0]
+            self.task_new_dir_entry.set_text(directory)
 
-    def on_task_new_server_combobox_changed(self, widget, data = None):
+    def on_task_new_server_cb_changed(self, widget):
+        """
+        When server combobox selection changed, update the category combobox.
+        """
         model = widget.get_model()
-        iter = widget.get_active_iter()
-        if iter != None:
-            server = model.get(iter, 1)[0]
+        aiter = widget.get_active_iter()
+        if aiter != None:
+            server = model.get(aiter, 1)[0]
             server_model = self.server_view.servers[server]
             self.task_new_cate_ls.clear()
             for cate_name in server_model.cates:
-                dir = server_model.conf[cate_name]
-                self.task_new_cate_ls.append([cate_name[5:], dir])
-            self.task_new_cate_combobox.set_active(0)
+                directory = server_model.conf[cate_name]
+                self.task_new_cate_ls.append([cate_name[5:], directory])
+            self.task_new_cate_cb.set_active(0)
 
-    def on_task_new_action_activate(self, action, data = None):
+    def on_task_new_action_activate(self, action):
+        """
+        Popup new task dialog and process.
+        """
         # set current page of the notebook
         action_dict = {
                 "task_new_normal_action": TASK_NORMAL,
@@ -128,29 +146,32 @@ class YanerApp(SingleInstanceApp):
                 }
         page = action_dict[action.get_property('name')]
         self.task_new_nb.set_current_page(page)
-        # init the server combobox
+        # init the server cb
         self.task_new_server_ls.clear()
         for server in self.server_view.server_list:
             model = self.server_view.servers[server]
-            iter = self.task_new_server_ls.append([model.conf.name, server])
-        self.task_new_server_combobox.set_active(0)
+            self.task_new_server_ls.append([model.conf.name, server])
+        self.task_new_server_cb.set_active(0)
         # run the dialog
         response = self.task_new_dialog.run()
         self.task_new_dialog.hide()
         if response == gtk.RESPONSE_OK:
             pass
 
-    def on_about_action_activate(self, widget, data = None):
-        self.about_dialog.run()
-        self.about_dialog.hide()
+    @staticmethod
+    def on_about_action_activate(about_dialog):
+        """
+        Show about dialog.
+        """
+        about_dialog.set_version(VERSION)
+        about_dialog.run()
+        about_dialog.hide()
         
-    def on_quit_action_activate(self, widget, data = None):
-        self.on_quit()
-
-    def on_main_window_destroy(self, widget, data = None):
-        self.on_quit()
-
-    def on_quit(self):
+    @staticmethod
+    def on_quit_action_activate(widget):
+        """
+        Main window quit callback.
+        """
         gtk.widget_pop_colormap()
         gtk.main_quit()
 

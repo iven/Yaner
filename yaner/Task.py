@@ -20,6 +20,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import pygtk
-import gtk
+"""
+    This file contains classes about download tasks.
+"""
+
+#import gtk
 

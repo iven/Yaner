@@ -20,51 +20,46 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import gtk
-from os import path
-from xdg.BaseDirectory import xdg_config_home
+"""
+    This file contains the global constants of Yaner.
+"""
 
-# Optional Imports
-#
-#try:
-#    import sexy
-#    has_sexy = True
-#except ImportError:
-#    has_sexy = False
+from os.path import join as _join
+from xdg.BaseDirectory import xdg_config_home as _config_home
 
 # Paths
 #
 # Global
-DataDir = "@prefix@/share/yaner"
-IconDir = path.join(DataDir, "icons")
-PixmapDir = path.join(DataDir, "images")
-ConfigDir = path.join(DataDir, "config")
-GladeDir = path.join(DataDir, "glade")
-GladeFile = path.join(GladeDir, "yaner.glade")
-MainConfigFile = path.join(ConfigDir, "yaner.conf")
-ServerConfigFile = path.join(ConfigDir, "servers.conf")
+_DATA_DIR = "@prefix@/share/yaner"
+#ICONDIR = _join(DATADIR, "icons")
+#PIXMAPDIR = _join(DATADIR, "images")
+_CONFIG_DIR = _join(_DATA_DIR, "config")
+_GLADE_DIR = _join(_DATA_DIR, "glade")
+GLADE_FILE = _join(_GLADE_DIR, "yaner.glade")
+MAIN_CONFIG_FILE = _join(_CONFIG_DIR, "yaner.conf")
+SERVER_CONFIG_FILE = _join(_CONFIG_DIR, "servers.conf")
 # User
-UConfigDir = path.join(xdg_config_home, "yaner")
-UMainConfigFile = path.join(UConfigDir, "yaner.conf")
-UServerConfigFile = path.join(UConfigDir, "servers.conf")
+U_CONFIG_DIR = _join(_config_home, "yaner")
+U_MAIN_CONFIG_FILE = _join(U_CONFIG_DIR, "yaner.conf")
+U_SERVER_CONFIG_FILE = _join(U_CONFIG_DIR, "servers.conf")
 
 # Task types
 #
 (
     TASK_NORMAL,
     TASK_BT,
-    TASK_METALINK,
-    TASK_TYPES
-) = range(4)
+    TASK_METALINK
+) = range(3)
+
 # Version
 #
-Version = "@version@"
+VERSION = "@version@"
 
 # Translation
 #
-import locale
-import gettext
-locale.setlocale(locale.LC_ALL, "")
-gettext.bindtextdomain("iscoder", DataDir + "/locale")
-gettext.textdomain("iscoder")
-_ = gettext.gettext
+import locale as _locale
+import gettext as _gettext
+_locale.setlocale(_locale.LC_ALL, "")
+_gettext.bindtextdomain("iscoder", _DATA_DIR + "/locale")
+_gettext.textdomain("iscoder")
+_ = _gettext.gettext

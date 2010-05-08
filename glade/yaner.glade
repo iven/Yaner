@@ -52,7 +52,7 @@
     <property name="height_request">500</property>
     <property name="title" translatable="yes">Yaner - Faster than a flash of lightning</property>
     <property name="icon_name">emblem-downloads</property>
-    <signal name="destroy" handler="on_main_window_destroy"/>
+    <signal name="destroy" handler="on_quit_action_activate"/>
     <child>
       <object class="GtkVBox" id="main_vbox">
         <property name="visible">True</property>
@@ -370,7 +370,7 @@
   </object>
   <object class="GtkAction" id="about_action">
     <property name="stock_id">gtk-about</property>
-    <signal name="activate" handler="on_about_action_activate"/>
+    <signal name="activate" handler="on_about_action_activate" object="about_dialog"/>
   </object>
   <object class="GtkAction" id="quit_action">
     <property name="stock_id">gtk-quit</property>
@@ -1288,10 +1288,10 @@
                         <property name="column_spacing">10</property>
                         <property name="row_spacing">5</property>
                         <child>
-                          <object class="GtkComboBox" id="task_new_server_combobox">
+                          <object class="GtkComboBox" id="task_new_server_cb">
                             <property name="visible">True</property>
                             <property name="model">task_new_server_ls</property>
-                            <signal name="changed" handler="on_task_new_server_combobox_changed"/>
+                            <signal name="changed" handler="on_task_new_server_cb_changed"/>
                             <child>
                               <object class="GtkCellRendererText" id="task_new_server_renderer"/>
                               <attributes>
@@ -1317,10 +1317,10 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkComboBox" id="task_new_cate_combobox">
+                          <object class="GtkComboBox" id="task_new_cate_cb">
                             <property name="visible">True</property>
                             <property name="model">task_new_cate_ls</property>
-                            <signal name="changed" handler="on_task_new_cate_combobox_changed"/>
+                            <signal name="changed" handler="on_task_new_cate_cb_changed"/>
                             <child>
                               <object class="GtkCellRendererText" id="task_new_cate_renderer"/>
                               <attributes>
@@ -1351,7 +1351,7 @@
                             <property name="visible">True</property>
                             <property name="action">select-folder</property>
                             <property name="title" translatable="yes">Select download directory</property>
-                            <signal name="selection_changed" handler="on_task_new_dir_chooser_selection_changed"/>
+                            <signal name="selection_changed" handler="on_task_new_dir_chooser_changed"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>

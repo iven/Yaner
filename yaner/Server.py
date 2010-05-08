@@ -20,14 +20,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import pygtk
+"""
+    This file contains classes about aria2 servers.
+"""
+
 import gtk
-import os
 from twisted.web import xmlrpc
 
-from yaner.Constants import *
-from yaner.Constants import _
-from yaner.Configuration import *
+from yaner.Constants import U_SERVER_CONFIG_FILE, _
+from yaner.Configuration import ConfigFile
 
 class ServerModel:
     """
@@ -40,21 +41,30 @@ class ServerModel:
         self.conf = server_conf
         self.cates = server_cates
         self.connected = False
-        self.conn_str = 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
-                % self.conf
-        self.proxy = xmlrpc.Proxy(self.conn_str)
+        self.proxy = xmlrpc.Proxy(self.__get_conn_str())
         # Iters
-        self.iter = treestore.append(None, ["gtk-disconnect", self.conf.name])
-        self.queuing_iter = treestore.append(self.iter, ["gtk-media-play", _("Queuing")])
-        self.completed_iter = treestore.append(self.iter, ["gtk-apply", _("Completed")])
-        self.recycled_iter = treestore.append(self.iter, ["gtk-cancel", _("Recycled")])
+        self.server_iter = treestore.append(None,
+                ["gtk-disconnect", self.conf.name])
+        self.queuing_iter = treestore.append(self.server_iter,
+                ["gtk-media-play", _("Queuing")])
+        self.completed_iter = treestore.append(self.server_iter,
+                ["gtk-apply", _("Completed")])
+        self.recycled_iter = treestore.append(self.server_iter,
+                ["gtk-cancel", _("Recycled")])
         # Category Iters
         self.cate_iters = {}
         for cate_name in self.cates:
-            iter = treestore.append(self.completed_iter, ["gtk-directory", cate_name[5:]])
-            self.cate_iters[cate_name] = iter
+            cate_iter = treestore.append(self.completed_iter,
+                    ["gtk-directory", cate_name[5:]])
+            self.cate_iters[cate_name] = cate_iter
         self.treeview = treeview
         self.treestore = treestore
+
+    def __get_conn_str(self):
+        """
+        Generate a connection string used by xmlrpc.
+        """
+        return 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' % self.conf
 
 class ServerView:
     """
@@ -68,11 +78,12 @@ class ServerView:
         # TreeModel
         server_list = main_window.conf_file.main.servers.split(',')
         servers = {}
-        server_conf_file = ConfigFile(UServerConfigFile)
+        server_conf_file = ConfigFile(U_SERVER_CONFIG_FILE)
         for server in server_list:
             server_conf = server_conf_file[server]
             server_cates = main_window.conf_file.cate[server].split(',')
-            server_model = ServerModel(self, treestore, server_conf, server_cates)
+            server_model = ServerModel(self, treestore, 
+                    server_conf, server_cates)
             servers[server] = server_model
 
         self.main_win = main_window
@@ -83,5 +94,9 @@ class ServerView:
         self.servers = servers
 
     def on_selection_changed(self, selection, data = None):
+        """
+        TreeView selection changed callback, changing the model of
+        TaskView according to the selected row.
+        """
         pass
 
