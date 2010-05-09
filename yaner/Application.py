@@ -103,11 +103,20 @@ class YanerApp(SingleInstanceApp):
         """
         widgets = {}
         widgets['nb'] = builder.get_object("task_new_nb")
+
         widgets['server_cb'] = builder.get_object("task_new_server_cb")
         widgets['server_ls'] = builder.get_object("task_new_server_ls")
         widgets['cate_cb'] = builder.get_object("task_new_cate_cb")
         widgets['cate_ls'] = builder.get_object("task_new_cate_ls")
-        widgets['dir_entry'] = builder.get_object("task_new_dir_entry")
+
+        widgets['normal_uri_textview'] = builder.get_object(
+                "task_new_normal_uri_textview")
+        widgets['bt_uri_textview'] = builder.get_object(
+                "task_new_bt_uri_textview")
+        widgets['bt_file_chooser'] = builder.get_object(
+                "task_new_bt_file_chooser")
+        widgets['metalink_file_chooser'] = builder.get_object(
+                "task_new_metalink_file_chooser")
         return widgets
 
     @staticmethod
@@ -123,6 +132,7 @@ class YanerApp(SingleInstanceApp):
         prefs['seed-time'] = builder.get_object('seed_time_adjustment')
         prefs['seed-ratio'] = builder.get_object('seed_ratio_adjustment')
         prefs['metalink-servers'] = builder.get_object('servers_adjustment')
+        prefs['dir'] = builder.get_object("task_new_dir_entry")
         prefs['metalink-location'] = builder.get_object(
                 'task_new_location_entry')
         prefs['metalink-language'] = builder.get_object(
@@ -140,7 +150,7 @@ class YanerApp(SingleInstanceApp):
         When directory chooser selection changed, update the directory entry.
         """
         directory = dir_chooser.get_filename()
-        self.task_new_widgets['dir_entry'].set_text(directory)
+        self.task_new_prefs['dir'].set_text(directory)
 
     def on_task_new_cate_cb_changed(self, cate_cb):
         """
@@ -150,7 +160,7 @@ class YanerApp(SingleInstanceApp):
         aiter = cate_cb.get_active_iter()
         if aiter != None:
             directory = model.get(aiter, 1)[0]
-            self.task_new_widgets['dir_entry'].set_text(directory)
+            self.task_new_prefs['dir'].set_text(directory)
 
     def on_task_new_server_cb_changed(self, server_cb):
         """
@@ -172,6 +182,8 @@ class YanerApp(SingleInstanceApp):
         """
         Popup new task dialog and process.
         """
+        widgets = self.task_new_widgets
+        default_conf = self.conf_file.default
         # set current page of the notebook
         action_dict = {
                 "task_new_normal_action": TASK_NORMAL,
@@ -179,24 +191,69 @@ class YanerApp(SingleInstanceApp):
                 "task_new_metalink_action": TASK_METALINK,
                 }
         page = action_dict[action.get_property('name')]
-        self.task_new_widgets['nb'].set_current_page(page)
-        # init the server cb
-        self.task_new_widgets['server_ls'].clear()
-        for (server, model) in self.server_view.servers.iteritems():
-            self.task_new_widgets['server_ls'].append([model.conf.name, server])
-        self.task_new_widgets['server_cb'].set_active(0)
-        # init other fields
-        default_conf = self.conf_file.default
+        widgets['nb'].set_current_page(page)
+        # init default configuration
         for (pref, widget) in self.task_new_prefs.iteritems():
             if hasattr(widget, 'set_value'):
                 widget.set_value(float(default_conf[pref]))
             elif hasattr(widget, 'set_text'):
                 widget.set_text(default_conf[pref])
+        # init the server cb
+        widgets['server_ls'].clear()
+        for (server, model) in self.server_view.servers.iteritems():
+            widgets['server_ls'].append([model.conf.name, server])
+        widgets['server_cb'].set_active(0)
         # run the dialog
         response = self.task_new_dialog.run()
-        self.task_new_dialog.hide()
-        if response == gtk.RESPONSE_OK:
-            pass
+        while response == gtk.RESPONSE_OK:
+            if self.create_new_task():
+                self.task_new_dialog.hide()
+                break
+            else:
+                response = self.task_new_dialog.run()
+
+    def create_new_task(self):
+        """
+        Create a new download task from default configuration
+        and new task dialog.
+        Returns True for success, False for failure.
+        """
+        widgets = self.task_new_widgets
+        task_type = widgets['nb'].get_current_page()
+        (uris, torrent, metalink) = (None,) * 3
+        if task_type == TASK_METALINK:
+            metalink = widgets['metalink_file_chooser'].get_filename()
+            if not metalink:
+                return False
+        elif task_type == TASK_NORMAL:
+            tbuffer = widgets['normal_uri_textview'].get_buffer()
+        elif task_type == TASK_BT:
+            tbuffer = widgets['bt_uri_textview'].get_buffer()
+            torrent = widgets['bt_file_chooser'].get_filename()
+            if not torrent:
+                return False
+        return True
+
+#        if task_type in (TASK_NORMAL, TASK_BT):
+#            start_iter = buff
+#            uris = ""
+#        # get server
+#        model = widgets['server_cb'].get_model()
+#        aiter = widgets['server_cb'].get_active_iter()
+#        server = model.get(aiter, 1)[0]
+#        # get category
+#        model = widgets['cate_cb'].get_model()
+#        aiter = widgets['cate_cb'].get_active_iter()
+#        cate = 'cate_' + model.get(aiter, 0)[0]
+#        # task options
+#        task_options = default_conf.copy()
+#        for (pref, widget) in self.task_new_prefs.iteritems():
+#            if hasattr(widget, 'get_value'):
+#                task_options[pref] = widget.get_value()
+#            elif hasattr(widget, 'set_text'):
+#                task_options[pref] = widget.get_text()
+#
+#        print server, cate, task_options
 
     @staticmethod
     def on_about_action_activate(about_dialog):
