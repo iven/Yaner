@@ -161,8 +161,8 @@
             <child>
               <object class="GtkMenuToolButton" id="task_new_tool_item">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="related_action">task_new_normal_action</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Add new task</property>
                 <property name="stock_id">gtk-new</property>
                 <property name="menu">task_new_menu</property>
@@ -1197,7 +1197,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
-                                    <property name="adjustment">split_adjustment</property>
+                                    <property name="adjustment">servers_adjustment</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -1351,7 +1351,7 @@
                             <property name="visible">True</property>
                             <property name="action">select-folder</property>
                             <property name="title" translatable="yes">Select download directory</property>
-                            <signal name="selection_changed" handler="on_task_new_dir_chooser_changed"/>
+                            <signal name="selection_changed" handler="on_task_new_dir_chooser_changed" object="task_new_dir_entry"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -1494,5 +1494,11 @@
   <object class="GtkAction" id="task_new_metalink_action">
     <property name="label" translatable="yes">Metalink</property>
     <signal name="activate" handler="on_task_new_action_activate" object="task_new_metalink_action"/>
+  </object>
+  <object class="GtkAdjustment" id="servers_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">20</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">5</property>
   </object>
 </interface>

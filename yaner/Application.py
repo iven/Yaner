@@ -40,37 +40,38 @@ class YanerApp(SingleInstanceApp):
     def __init__(self):
         SingleInstanceApp.__init__(self, "yaner")
         # Builder
-        self.builder = gtk.Builder()
-        self.builder.add_from_file(GLADE_FILE)
-        self.builder.connect_signals(self)
+        builder = gtk.Builder()
+        builder.add_from_file(GLADE_FILE)
+        builder.connect_signals(self)
+        # Main Window
+        self.main_window = builder.get_object("main_window")
+        # File Filters
+        filefilters = {}
+        filefilters['torrent'] = builder.get_object("torrent_filefilter")
+        filefilters['metalink'] = builder.get_object("metalink_filefilter")
         #
-        self.main_window = self.builder.get_object("main_window")
-        #
-        self.init_rgba()
+        self.init_rgba(self.main_window)
         self.init_paths()
-        self.init_filefilters()
+        self.init_filefilters(filefilters)
         # Main Config
         self.conf_file = ConfigFile(U_MAIN_CONFIG_FILE)
         # Server View
-        server_tv = self.builder.get_object("server_tv")
-        server_ts = self.builder.get_object("server_ts")
+        server_tv = builder.get_object("server_tv")
+        server_ts = builder.get_object("server_ts")
         self.server_view = ServerView(self, server_tv, server_ts)
         # Task New Dialog
-        self.task_new_dialog = self.builder.get_object("task_new_dialog")
-        self.task_new_nb = self.builder.get_object("task_new_nb")
-        self.task_new_server_cb = self.builder.get_object("task_new_server_cb")
-        self.task_new_server_ls = self.builder.get_object("task_new_server_ls")
-        self.task_new_cate_cb = self.builder.get_object("task_new_cate_cb")
-        self.task_new_cate_ls = self.builder.get_object("task_new_cate_ls")
-        self.task_new_dir_entry = self.builder.get_object("task_new_dir_entry")
+        self.task_new_dialog = builder.get_object("task_new_dialog")
+        self.task_new_widgets = self.task_new_get_widgets(builder)
+        self.task_new_prefs = self.task_new_get_prefs(builder)
         # Show the window
         self.main_window.show()
 
-    def init_rgba(self):
+    @staticmethod
+    def init_rgba(window):
         """
         Init rgba.
         """
-        screen = self.main_window.get_screen()
+        screen = window.get_screen()
         colormap = screen.get_rgba_colormap()
         if colormap:
             gtk.widget_set_default_colormap(colormap)
@@ -87,14 +88,46 @@ class YanerApp(SingleInstanceApp):
         if not os.path.exists(U_SERVER_CONFIG_FILE):
             shutil.copy(SERVER_CONFIG_FILE, U_CONFIG_DIR)
 
-    def init_filefilters(self):
+    @staticmethod
+    def init_filefilters(filefilters):
         """
         Init Filefilters.
         """
-        torrent_filefilter = self.builder.get_object("torrent_filefilter")
-        torrent_filefilter.add_mime_type("application/x-bittorrent")
-        metalink_filefilter = self.builder.get_object("metalink_filefilter")
-        metalink_filefilter.add_mime_type("application/xml")
+        filefilters['torrent'].add_mime_type("application/x-bittorrent")
+        filefilters['metalink'].add_mime_type("application/xml")
+
+    @staticmethod
+    def task_new_get_widgets(builder):
+        """
+        Get a dict of widget of new task dialog for future use.
+        """
+        widgets = {}
+        widgets['nb'] = builder.get_object("task_new_nb")
+        widgets['server_cb'] = builder.get_object("task_new_server_cb")
+        widgets['server_ls'] = builder.get_object("task_new_server_ls")
+        widgets['cate_cb'] = builder.get_object("task_new_cate_cb")
+        widgets['cate_ls'] = builder.get_object("task_new_cate_ls")
+        widgets['dir_entry'] = builder.get_object("task_new_dir_entry")
+        return widgets
+
+    @staticmethod
+    def task_new_get_prefs(builder):
+        """
+        Get a dict of widget corresponding to a preference in the
+        configuration file of new task dialog for future use.
+        """
+        prefs = {}
+        prefs['split'] = builder.get_object('split_adjustment')
+        prefs['bt-max-open-files'] = builder.get_object('max_files_adjustment')
+        prefs['bt-max-peers'] = builder.get_object('max_peers_adjustment')
+        prefs['seed-time'] = builder.get_object('seed_time_adjustment')
+        prefs['seed-ratio'] = builder.get_object('seed_ratio_adjustment')
+        prefs['metalink-servers'] = builder.get_object('servers_adjustment')
+        prefs['metalink-location'] = builder.get_object(
+                'task_new_location_entry')
+        prefs['metalink-language'] = builder.get_object(
+                'task_new_language_entry')
+        return prefs
 
     def on_instance_exists(self):
         """
@@ -102,37 +135,38 @@ class YanerApp(SingleInstanceApp):
         """
         SingleInstanceApp.on_instance_exists(self)
 
-    def on_task_new_dir_chooser_changed(self, widget):
+    def on_task_new_dir_chooser_changed(self, dir_chooser):
         """
         When directory chooser selection changed, update the directory entry.
         """
-        directory = widget.get_filename()
-        self.task_new_dir_entry.set_text(directory)
+        directory = dir_chooser.get_filename()
+        self.task_new_widgets['dir_entry'].set_text(directory)
 
-    def on_task_new_cate_cb_changed(self, widget):
+    def on_task_new_cate_cb_changed(self, cate_cb):
         """
         When category combobox selection changed, update the directory entry.
         """
-        model = widget.get_model()
-        aiter = widget.get_active_iter()
+        model = cate_cb.get_model()
+        aiter = cate_cb.get_active_iter()
         if aiter != None:
             directory = model.get(aiter, 1)[0]
-            self.task_new_dir_entry.set_text(directory)
+            self.task_new_widgets['dir_entry'].set_text(directory)
 
-    def on_task_new_server_cb_changed(self, widget):
+    def on_task_new_server_cb_changed(self, server_cb):
         """
         When server combobox selection changed, update the category combobox.
         """
-        model = widget.get_model()
-        aiter = widget.get_active_iter()
+        model = server_cb.get_model()
+        aiter = server_cb.get_active_iter()
         if aiter != None:
             server = model.get(aiter, 1)[0]
             server_model = self.server_view.servers[server]
-            self.task_new_cate_ls.clear()
+            self.task_new_widgets['cate_ls'].clear()
             for cate_name in server_model.cates:
                 directory = server_model.conf[cate_name]
-                self.task_new_cate_ls.append([cate_name[5:], directory])
-            self.task_new_cate_cb.set_active(0)
+                self.task_new_widgets['cate_ls'].append(
+                        [cate_name[5:], directory])
+            self.task_new_widgets['cate_cb'].set_active(0)
 
     def on_task_new_action_activate(self, action):
         """
@@ -145,12 +179,19 @@ class YanerApp(SingleInstanceApp):
                 "task_new_metalink_action": TASK_METALINK,
                 }
         page = action_dict[action.get_property('name')]
-        self.task_new_nb.set_current_page(page)
+        self.task_new_widgets['nb'].set_current_page(page)
         # init the server cb
-        self.task_new_server_ls.clear()
+        self.task_new_widgets['server_ls'].clear()
         for (server, model) in self.server_view.servers.iteritems():
-            self.task_new_server_ls.append([model.conf.name, server])
-        self.task_new_server_cb.set_active(0)
+            self.task_new_widgets['server_ls'].append([model.conf.name, server])
+        self.task_new_widgets['server_cb'].set_active(0)
+        # init other fields
+        default_conf = self.conf_file.default
+        for (pref, widget) in self.task_new_prefs.iteritems():
+            if hasattr(widget, 'set_value'):
+                widget.set_value(float(default_conf[pref]))
+            elif hasattr(widget, 'set_text'):
+                widget.set_text(default_conf[pref])
         # run the dialog
         response = self.task_new_dialog.run()
         self.task_new_dialog.hide()

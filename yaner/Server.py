@@ -71,7 +71,7 @@ class ServerView:
     """
     Aria2 server treeview in the left pane.
     """
-    def __init__(self, main_window, treeview, treestore):
+    def __init__(self, main_app, treeview, treestore):
         # TreeSelection
         selection = treeview.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
@@ -79,14 +79,14 @@ class ServerView:
         # TreeModel
         servers = ODict()
         server_conf_file = ConfigFile(U_SERVER_CONFIG_FILE)
-        for server in main_window.conf_file.main.servers.split(','):
+        for server in main_app.conf_file.main.servers.split(','):
             server_conf = server_conf_file[server]
-            server_cates = main_window.conf_file.cate[server].split(',')
+            server_cates = main_app.conf_file.cate[server].split(',')
             server_model = ServerModel(self, treestore, 
                     server_conf, server_cates)
             servers[server] = server_model
 
-        self.main_win = main_window
+        self.main_app = main_app
         self.treeview = treeview
         self.treestore = treestore
         self.selection = selection
