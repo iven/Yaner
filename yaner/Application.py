@@ -126,18 +126,41 @@ class YanerApp(SingleInstanceApp):
         configuration file of new task dialog for future use.
         """
         prefs = {}
+        prefs['dir'] = builder.get_object("task_new_dir_entry")
+        prefs['out'] = builder.get_object("task_new_rename_entry")
+        prefs['referer'] = builder.get_object("task_new_referer_entry")
+        prefs['http-user'] = builder.get_object("task_new_http_user_entry")
+        prefs['http-passwd'] = builder.get_object("task_new_http_pass_entry")
+        prefs['ftp-user'] = builder.get_object("task_new_ftp_user_entry")
+        prefs['ftp-passwd'] = builder.get_object("task_new_ftp_pass_entry")
         prefs['split'] = builder.get_object('split_adjustment')
         prefs['bt-max-open-files'] = builder.get_object('max_files_adjustment')
         prefs['bt-max-peers'] = builder.get_object('max_peers_adjustment')
         prefs['seed-time'] = builder.get_object('seed_time_adjustment')
         prefs['seed-ratio'] = builder.get_object('seed_ratio_adjustment')
-        prefs['metalink-servers'] = builder.get_object('servers_adjustment')
-        prefs['dir'] = builder.get_object("task_new_dir_entry")
+        prefs['bt-prioritize-piece'] = builder.get_object(
+                "task_new_prioritize_checkbutton")
+        prefs['metalink-servers'] = builder.get_object(
+                'servers_adjustment')
         prefs['metalink-location'] = builder.get_object(
                 'task_new_location_entry')
         prefs['metalink-language'] = builder.get_object(
                 'task_new_language_entry')
+        prefs['metalink-os'] = builder.get_object(
+                'os_adjustment')
+        prefs['metalink-version'] = builder.get_object(
+                'version_adjustment')
         return prefs
+
+    def task_new_get_active_server(self):
+        """
+        Get the server and model selected of the server combobox.
+        """
+        index = self.task_new_widgets['server_cb'].get_active()
+        if index != -1:
+            return self.server_view.servers.items()[index]
+        else:
+            return None
 
     def on_instance_exists(self):
         """
@@ -156,21 +179,19 @@ class YanerApp(SingleInstanceApp):
         """
         When category combobox selection changed, update the directory entry.
         """
-        model = cate_cb.get_model()
-        aiter = cate_cb.get_active_iter()
-        if aiter != None:
-            directory = model.get(aiter, 1)[0]
+        index = cate_cb.get_active()
+        server_model = self.task_new_get_active_server()[1]
+        if index != -1 and server_model != None:
+            cate = server_model.cates.keys()[index]
+            directory = server_model.conf[cate]
             self.task_new_prefs['dir'].set_text(directory)
 
     def on_task_new_server_cb_changed(self, server_cb):
         """
         When server combobox selection changed, update the category combobox.
         """
-        model = server_cb.get_model()
-        aiter = server_cb.get_active_iter()
-        if aiter != None:
-            server = model.get(aiter, 1)[0]
-            server_model = self.server_view.servers[server]
+        server_model = self.task_new_get_active_server()[1]
+        if server_model != None:
             self.task_new_widgets['cate_ls'].clear()
             for cate_name in server_model.cates:
                 directory = server_model.conf[cate_name]
@@ -228,33 +249,42 @@ class YanerApp(SingleInstanceApp):
             params.append(widgets['metalink_file_chooser'].get_filename())
         elif task_type == TASK_NORMAL:
             tbuffer = widgets['normal_uri_textview'].get_buffer()
-        elif task_type == TASK_BT:
-            tbuffer = widgets['bt_uri_textview'].get_buffer()
-            params.append(widgets['bt_file_chooser'].get_filename())
-        if task_type in (TASK_NORMAL, TASK_BT):
             start = tbuffer.get_start_iter()
             end = tbuffer.get_end_iter()
-            buf_text = tbuffer.get_text(start, end)
-            params.append([uri.strip() for uri in buf_text.split("\n") if uri])
-        if not all(params):
+            uris = tbuffer.get_text(start, end)
+            params.append([uri.strip() for uri in uris.split("\n") if uri.strip()])
+        elif task_type == TASK_BT:
+            params.append(widgets['bt_file_chooser'].get_filename())
+            tbuffer = widgets['bt_uri_textview'].get_buffer()
+            start = tbuffer.get_start_iter()
+            end = tbuffer.get_end_iter()
+            uris = tbuffer.get_text(start, end)
+            uris = [uri.strip() for uri in uris.split("\n") if uri.strip()]
+            if uris:
+                params.append(uris)
+        if not params[0]:
             return False
         # get server
-        model = widgets['server_cb'].get_model()
-        aiter = widgets['server_cb'].get_active_iter()
-        server = model.get(aiter, 1)[0]
+        (server, server_model) = self.task_new_get_active_server()
         # get category
-        model = widgets['cate_cb'].get_model()
-        aiter = widgets['cate_cb'].get_active_iter()
-        cate = 'cate_' + model.get(aiter, 0)[0]
+        cate_index = widgets['cate_cb'].get_active()
+        cate = server_model.cates.keys()[cate_index]
         # task options
         task_options = default_conf.copy()
         for (pref, widget) in self.task_new_prefs.iteritems():
             if hasattr(widget, 'get_value'):
                 task_options[pref] = widget.get_value()
-            elif hasattr(widget, 'set_text'):
+            elif hasattr(widget, 'get_text'):
                 task_options[pref] = widget.get_text()
-
-        print params, server, cate, task_options
+        # clear empty items
+        for (pref, value) in task_options.iteritems():
+            if not value:
+                del task_options[pref]
+        # bt prioritize
+        if self.task_new_prefs['bt-prioritize-piece'].get_active():
+            task_options['bt-prioritize-piece'] = 'head,tail'
+        params.append(task_options)
+        #print params, server, cate
         return True
 
     @staticmethod
