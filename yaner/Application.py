@@ -182,6 +182,7 @@ class YanerApp(SingleInstanceApp):
         """
         Popup new task dialog and process.
         """
+        # TODO: Clear last URIs before dialog runs
         widgets = self.task_new_widgets
         default_conf = self.conf_file.default
         # set current page of the notebook
@@ -207,10 +208,10 @@ class YanerApp(SingleInstanceApp):
         response = self.task_new_dialog.run()
         while response == gtk.RESPONSE_OK:
             if self.create_new_task():
-                self.task_new_dialog.hide()
                 break
             else:
                 response = self.task_new_dialog.run()
+        self.task_new_dialog.hide()
 
     def create_new_task(self):
         """
@@ -219,41 +220,42 @@ class YanerApp(SingleInstanceApp):
         Returns True for success, False for failure.
         """
         widgets = self.task_new_widgets
+        default_conf = self.conf_file.default
         task_type = widgets['nb'].get_current_page()
-        (uris, torrent, metalink) = (None,) * 3
+        # get uris
+        params = []
         if task_type == TASK_METALINK:
-            metalink = widgets['metalink_file_chooser'].get_filename()
-            if not metalink:
-                return False
+            params.append(widgets['metalink_file_chooser'].get_filename())
         elif task_type == TASK_NORMAL:
             tbuffer = widgets['normal_uri_textview'].get_buffer()
         elif task_type == TASK_BT:
             tbuffer = widgets['bt_uri_textview'].get_buffer()
-            torrent = widgets['bt_file_chooser'].get_filename()
-            if not torrent:
-                return False
-        return True
+            params.append(widgets['bt_file_chooser'].get_filename())
+        if task_type in (TASK_NORMAL, TASK_BT):
+            start = tbuffer.get_start_iter()
+            end = tbuffer.get_end_iter()
+            buf_text = tbuffer.get_text(start, end)
+            params.append([uri.strip() for uri in buf_text.split("\n") if uri])
+        if not all(params):
+            return False
+        # get server
+        model = widgets['server_cb'].get_model()
+        aiter = widgets['server_cb'].get_active_iter()
+        server = model.get(aiter, 1)[0]
+        # get category
+        model = widgets['cate_cb'].get_model()
+        aiter = widgets['cate_cb'].get_active_iter()
+        cate = 'cate_' + model.get(aiter, 0)[0]
+        # task options
+        task_options = default_conf.copy()
+        for (pref, widget) in self.task_new_prefs.iteritems():
+            if hasattr(widget, 'get_value'):
+                task_options[pref] = widget.get_value()
+            elif hasattr(widget, 'set_text'):
+                task_options[pref] = widget.get_text()
 
-#        if task_type in (TASK_NORMAL, TASK_BT):
-#            start_iter = buff
-#            uris = ""
-#        # get server
-#        model = widgets['server_cb'].get_model()
-#        aiter = widgets['server_cb'].get_active_iter()
-#        server = model.get(aiter, 1)[0]
-#        # get category
-#        model = widgets['cate_cb'].get_model()
-#        aiter = widgets['cate_cb'].get_active_iter()
-#        cate = 'cate_' + model.get(aiter, 0)[0]
-#        # task options
-#        task_options = default_conf.copy()
-#        for (pref, widget) in self.task_new_prefs.iteritems():
-#            if hasattr(widget, 'get_value'):
-#                task_options[pref] = widget.get_value()
-#            elif hasattr(widget, 'set_text'):
-#                task_options[pref] = widget.get_text()
-#
-#        print server, cate, task_options
+        print params, server, cate, task_options
+        return True
 
     @staticmethod
     def on_about_action_activate(about_dialog):
