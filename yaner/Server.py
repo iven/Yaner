@@ -25,6 +25,7 @@
 """
 
 import gtk
+import gobject
 from twisted.web import xmlrpc
 
 from yaner.Constants import U_SERVER_CONFIG_FILE, _
@@ -40,26 +41,37 @@ class ServerModel:
     def __init__(self, treeview, treestore, server_conf, server_cates):
         # Preferences
         self.conf = server_conf
-        self.connected = False
+        self.__connected = False
         self.proxy = xmlrpc.Proxy(self.__get_conn_str())
         # Iters
-        self.server_iter = treestore.append(None,
+        server_iter = treestore.append(None,
                 ["gtk-disconnect", self.conf.name])
-        self.queuing_iter = treestore.append(self.server_iter,
+        queuing_iter = treestore.append(server_iter,
                 ["gtk-media-play", _("Queuing")])
-        self.completed_iter = treestore.append(self.server_iter,
+        completed_iter = treestore.append(server_iter,
                 ["gtk-apply", _("Completed")])
-        self.recycled_iter = treestore.append(self.server_iter,
+        recycled_iter = treestore.append(server_iter,
                 ["gtk-cancel", _("Recycled")])
         # Category Iters
         cates = ODict()
         for cate_name in server_cates:
-            cate_iter = treestore.append(self.completed_iter,
+            cate_iter = treestore.append(completed_iter,
                     ["gtk-directory", cate_name[5:]])
             cates[cate_name] = cate_iter
+        # Setup task list model for each iter
+        iter_list = [server_iter, queuing_iter, completed_iter, recycled_iter]
+        iter_list.extend(cates.values())
+        iters = ODict()
+        for key in iter_list:
+            iters[key] = gtk.TreeStore(gobject.TYPE_STRING,
+                    gobject.TYPE_STRING, gobject.TYPE_STRING,
+                    gobject.TYPE_STRING, gobject.TYPE_STRING,
+                    gobject.TYPE_STRING, gobject.TYPE_STRING,
+                    gobject.TYPE_INT)
         self.treeview = treeview
         self.treestore = treestore
         self.cates = cates
+        self.iters = iters
 
     def __get_conn_str(self):
         """

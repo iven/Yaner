@@ -31,6 +31,7 @@ import shutil
 
 from yaner.Constants import *
 from yaner.Server import ServerView
+from yaner.Task import Task
 from yaner.Configuration import ConfigFile
 from yaner.SingleInstance import SingleInstanceApp
 
@@ -59,6 +60,7 @@ class YanerApp(SingleInstanceApp):
         server_tv = builder.get_object("server_tv")
         server_ts = builder.get_object("server_ts")
         self.server_view = ServerView(self, server_tv, server_ts)
+        self.tasklist_view = builder.get_object('tasklist_tv')
         # Task New Dialog
         self.task_new_dialog = builder.get_object("task_new_dialog")
         self.task_new_widgets = self.task_new_get_widgets(builder)
@@ -81,8 +83,8 @@ class YanerApp(SingleInstanceApp):
         """
         Init UConfigDir and config files.
         """
-        if not os.path.exists(U_CONFIG_DIR):
-            os.makedirs(U_CONFIG_DIR)
+        if not os.path.exists(U_TASK_CONFIG_DIR):
+            os.makedirs(U_TASK_CONFIG_DIR)
         if not os.path.exists(U_MAIN_CONFIG_FILE):
             shutil.copy(MAIN_CONFIG_FILE, U_CONFIG_DIR)
         if not os.path.exists(U_SERVER_CONFIG_FILE):
@@ -160,7 +162,7 @@ class YanerApp(SingleInstanceApp):
         if index != -1:
             return self.server_view.servers.items()[index]
         else:
-            return None
+            return (None, None)
 
     def on_instance_exists(self):
         """
@@ -252,7 +254,8 @@ class YanerApp(SingleInstanceApp):
             start = tbuffer.get_start_iter()
             end = tbuffer.get_end_iter()
             uris = tbuffer.get_text(start, end)
-            params.append([uri.strip() for uri in uris.split("\n") if uri.strip()])
+            uris = [uri.strip() for uri in uris.split("\n") if uri.strip()]
+            params.append(uris)
         elif task_type == TASK_BT:
             params.append(widgets['bt_file_chooser'].get_filename())
             tbuffer = widgets['bt_uri_textview'].get_buffer()
@@ -270,20 +273,23 @@ class YanerApp(SingleInstanceApp):
         cate_index = widgets['cate_cb'].get_active()
         cate = server_model.cates.keys()[cate_index]
         # task options
-        task_options = default_conf.copy()
+        task_options = dict(default_conf)
         for (pref, widget) in self.task_new_prefs.iteritems():
-            if hasattr(widget, 'get_value'):
-                task_options[pref] = widget.get_value()
+            if pref == 'seed-ratio':
+                task_options[pref] = str(widget.get_value())
+            elif hasattr(widget, 'get_value'):
+                task_options[pref] = str(int(widget.get_value()))
             elif hasattr(widget, 'get_text'):
                 task_options[pref] = widget.get_text()
         # clear empty items
-        for (pref, value) in task_options.iteritems():
+        for (pref, value) in task_options.items():
             if not value:
                 del task_options[pref]
         # bt prioritize
         if self.task_new_prefs['bt-prioritize-piece'].get_active():
             task_options['bt-prioritize-piece'] = 'head,tail'
         params.append(task_options)
+        Task(self, task_type, server, cate, params)
         #print params, server, cate
         return True
 
@@ -302,7 +308,9 @@ class YanerApp(SingleInstanceApp):
         Main window quit callback.
         """
         gtk.widget_pop_colormap()
-        gtk.main_quit()
+        from twisted.internet import reactor
+        #gtk.main_quit()
+        reactor.stop()
 
 if __name__ == '__main__':
     YanerApp()

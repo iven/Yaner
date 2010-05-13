@@ -40,6 +40,7 @@ MAIN_CONFIG_FILE = _join(_CONFIG_DIR, "yaner.conf")
 SERVER_CONFIG_FILE = _join(_CONFIG_DIR, "servers.conf")
 # User
 U_CONFIG_DIR = _join(_config_home, "yaner")
+U_TASK_CONFIG_DIR = _join(_config_home, "tasks")
 U_MAIN_CONFIG_FILE = _join(U_CONFIG_DIR, "yaner.conf")
 U_SERVER_CONFIG_FILE = _join(U_CONFIG_DIR, "servers.conf")
 

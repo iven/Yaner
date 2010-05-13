@@ -26,6 +26,7 @@ of Yaner, but could also be used by other programs.
 """
 
 import ConfigParser
+import os
 
 from yaner.ODict import ODict
 
@@ -33,6 +34,8 @@ class ConfigFile(ODict):
     "Sections dict of config file handles add and del sections."
 
     def __init__(self, config_file):
+        if not os.path.exists(config_file):
+            open(config_file, 'w').close()
         parser = ConfigParser.ConfigParser()
         parser.read(config_file)
         section_list = [(section, ConfigSection(parser, section)) \
@@ -44,8 +47,12 @@ class ConfigFile(ODict):
     def __str__(self):
         return self.config_file
 
-    def __getattr__(self, key):
-        return self[key]
+    def __getattr__(self, section):
+        if not self.has_key(section):
+            self.parser.add_section(section)
+            ODict.__setitem__(self, section,
+                    ConfigSection(self.parser, section))
+        return self[section]
 
     def __setitem__(self, section, option_dict):
         """
@@ -56,7 +63,7 @@ class ConfigFile(ODict):
             self.parser.add_section(section)
             ODict.__setitem__(self, section,
                     ConfigSection(self.parser, section))
-        for (key, value) in option_dict.items():
+        for (key, value) in option_dict.iteritems():
             self[section][key] = value
 
     def __delitem__(self, section):
