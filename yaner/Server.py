@@ -63,11 +63,17 @@ class ServerModel:
         iter_list.extend(cates.values())
         iters = ODict()
         for key in iter_list:
-            iters[key] = gtk.TreeStore(gobject.TYPE_STRING,
-                    gobject.TYPE_STRING, gobject.TYPE_STRING,
-                    gobject.TYPE_STRING, gobject.TYPE_STRING,
-                    gobject.TYPE_STRING, gobject.TYPE_STRING,
-                    gobject.TYPE_INT)
+            iters[key] = gtk.TreeStore(
+                    gobject.TYPE_STRING, # gid
+                    gobject.TYPE_STRING, # status
+                    gobject.TYPE_STRING, # name
+                    gobject.TYPE_FLOAT,  # progress value
+                    gobject.TYPE_STRING, # progress text
+                    gobject.TYPE_STRING, # size
+                    gobject.TYPE_STRING, # download speed
+                    gobject.TYPE_STRING, # upload speed
+                    gobject.TYPE_INT     # connections
+                    )
         self.treeview = treeview
         self.treestore = treestore
         self.cates = cates

@@ -24,75 +24,163 @@
     This file contains classes about download tasks.
 """
 
-#import gtk
 import glib
 import os
+from twisted.web import xmlrpc
 
 from yaner.Constants import TASK_NORMAL, TASK_BT, TASK_METALINK
 from yaner.Constants import U_TASK_CONFIG_DIR
 from yaner.Configuration import ConfigFile
 
-# TODO: Error Handle
+# TODO: Error handle, queuing iter, metalink multiple gids
 
 class Task:
-    def __init__(self, main_app, task_type, server, cate, params):
-        server_model = main_app.server_view.servers[server]
-        proxy = server_model.proxy
-        task_iter = server_model.cates[cate]
-        model = server_model.iters[task_iter]
-        main_app.tasklist_view.set_model(model)
-        method = ("Uri", "Torrent", "Metalink")[task_type]
-        deferred = proxy.callRemote("aria2.add" + method, params[0], params[1])
-        deferred.addCallback(self.add_task, task_type, server, cate, params)
+    """
+    General task class.
+    """
+    def __init__(self, main_app):
+        # get server
+        (server, server_model) = main_app.task_new_get_active_server()
+        # get proxy
+        server_proxy = server_model.proxy
+        # get category
+        cate_index = main_app.task_new_widgets['cate_cb'].get_active()
+        (cate, cate_iter) = server_model.cates.items()[cate_index]
+        cate_model = server_model.iters[cate_iter]
+        # set current tasklist model
+        main_app.tasklist_view.set_model(cate_model)
+        # task options
+        options = dict(main_app.conf_file.default_conf)
+        for (pref, widget) in main_app.task_new_prefs.iteritems():
+            if pref == 'seed-ratio':
+                options[pref] = str(widget.get_value())
+            elif hasattr(widget, 'get_value'):
+                options[pref] = str(int(widget.get_value()))
+            elif hasattr(widget, 'get_text'):
+                options[pref] = widget.get_text()
+        # clear empty items
+        for (pref, value) in options.items():
+            if not value:
+                del options[pref]
+        # bt prioritize
+        if main_app.task_new_prefs['bt-prioritize-piece'].get_active():
+            options['bt-prioritize-piece'] = 'head,tail'
+
         self.main_app = main_app
-        self.server_model = server_model
-        self.proxy = proxy
-        self.model = model
+        #self.server_model = server_model
+        self.cate_model = cate_model
+        self.server_proxy = server_proxy
+        self.options = options
+        self.info = {'server': server, 'cate': cate}
+        self.conf_file = None
+        self.iter = None
 
-    def add_task(self, gid, task_type, server, cate, params):
-        print 'success'
-        self.gid = gid
-        file_name = '_'.join((server, cate, gid))
+    def add_task(self, gid):
+        """
+        Add a new task when gid is received.
+        An iter is added to cate_model and configuration
+        file for this task is created.
+        """
+        print 'success #%s' % gid
+        options = self.options
+        self.info['gid'] = gid
+
+        file_name = '%(server)s_%(cate)s_%(gid)s' % self.info
         conf = ConfigFile(os.path.join(U_TASK_CONFIG_DIR, file_name))
-        # get URIs
-        if task_type == TASK_NORMAL:
-            conf.info['uris'] = ','.join(params[0])
-        elif task_type == TASK_BT:
-            conf.info['torrent'] = params[0]
-            if len(params) > 2:
-                conf.info['uris'] = ','.join(params[1])
-        elif task_type == TASK_METALINK:
-            conf.info['metalink'] = params[0]
-        # other options
-        conf.info['server'] = server
-        conf.info['cate'] = cate
-        conf.info['type'] = task_type
-        conf['options'] = params[-1]
-        self.conf = conf
-        deferred = self.proxy.callRemote("aria2.tellStatus", gid)
-        deferred.addCallback(self.add_iter, conf.options)
+        conf['info'] = self.info
+        conf['options'] = options
 
-    def add_iter(self, status, options):
-        self.iter = self.model.append(None, [
-            status['gid'], status['status'], options['out'], 
-            options['dir'], status['totalLength'],
-            status['downloadSpeed'], status['uploadSpeed'],
-            int(status['connections'])])
+        self.iter = self.cate_model.append(None,
+                [conf.info.gid, "gtk-new",
+                    self.task_name, 0, '', '', '', '', 1])
 
         glib.timeout_add_seconds(1, self.call_tell_status)
+        self.conf_file = conf
 
     def call_tell_status(self):
-        deferred = self.proxy.callRemote("aria2.tellStatus", self.gid)
+        """
+        Call server for the status of this task.
+        Return True means keep calling it when timeout.
+        """
+        deferred = self.server_proxy.callRemote(
+                "aria2.tellStatus", self.conf_file.info.gid)
         deferred.addCallback(self.update_iter)
         return True
 
     def update_iter(self, status):
-        options = self.conf.options
-        self.model.set(self.iter, 0, status['gid'],
-                1, status['status'], 2, options['out'], 
-                3, options['dir'], 4, status['totalLength'],
-                5, status['downloadSpeed'], 6, status['uploadSpeed'],
-                7, int(status['connections']))
+        """
+        Update data fields of the task iter.
+        """
+        if status['totalLength'] != '0':
+            comp_length = status['completedLength']
+            total_length = status['totalLength']
+            percent = float(comp_length) / int(total_length) * 100
+            self.cate_model.set(self.iter,
+                    3, percent, 4, '%.2f%%' % percent,
+                    5, '%s / %s' % (comp_length, total_length),
+                    6, status['downloadSpeed'], 7, status['uploadSpeed'],
+                    8, int(status['connections']))
 
-        self.status = status
+class MetalinkTask(Task):
+    """
+    Metalink Task Class
+    """
+    def __init__(self, main_app, metalink):
+        Task.__init__(self, main_app)
+        self.info['type'] = TASK_METALINK
+        self.info['metalink'] = metalink
+        # Task name
+        self.task_name = 'New Metalink Task'
+        # Encode file
+        with open(metalink) as m_file:
+            m_binary = xmlrpc.Binary(m_file.read())
+        # Call server for new task
+        deferred = self.server_proxy.callRemote(
+                "aria2.addMetalink", m_binary, self.options)
+        deferred.addCallback(self.add_task)
+
+class BTTask(Task):
+    """
+    BT Task Class
+    """
+    def __init__(self, main_app, torrent, uris):
+        Task.__init__(self, main_app)
+        self.info['type'] = TASK_BT
+        self.info['torrent'] = torrent
+        # Task name
+        self.task_name = 'New BT Task'
+        # Encode file
+        with open(torrent) as t_file:
+            t_binary = xmlrpc.Binary(t_file.read())
+        # Call server for new task
+        if uris:
+            self.info['uris'] = ','.join(uris)
+            deferred = self.server_proxy.callRemote(
+                    "aria2.addTorrent", t_binary, uris, self.options)
+        else:
+            deferred = self.server_proxy.callRemote(
+                    "aria2.addTorrent", t_binary, self.options)
+        deferred.addCallback(self.add_task)
+
+class NormalTask(Task):
+    """
+    Normal Task Class
+    """
+    def __init__(self, main_app, uris):
+        Task.__init__(self, main_app)
+        self.info['type'] = TASK_NORMAL
+        self.info['uris'] = ','.join(uris)
+        # Task name
+        if 'out' in self.options:
+            self.task_name = self.options['out']
+        else:
+            for uri in uris:
+                if '/' in uri:
+                    self.task_name = uri.split('/')[-1]
+            else:
+                self.task_name = "New Normal Task"
+        # Call server for new task
+        deferred = self.server_proxy.callRemote(
+                "aria2.addUri", uris, self.options)
+        deferred.addCallback(self.add_task)
 

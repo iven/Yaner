@@ -31,7 +31,7 @@ import shutil
 
 from yaner.Constants import *
 from yaner.Server import ServerView
-from yaner.Task import Task
+from yaner.Task import NormalTask, BTTask, MetalinkTask
 from yaner.Configuration import ConfigFile
 from yaner.SingleInstance import SingleInstanceApp
 
@@ -98,6 +98,34 @@ class YanerApp(SingleInstanceApp):
         filefilters['torrent'].add_mime_type("application/x-bittorrent")
         filefilters['metalink'].add_mime_type("application/xml")
 
+    def create_new_task(self):
+        """
+        Create a new download task from default configuration
+        and new task dialog.
+        Returns True for success, False for failure.
+        """
+        widgets = self.task_new_widgets
+        task_type = widgets['nb'].get_current_page()
+
+        if task_type == TASK_METALINK:
+            metalink = widgets['metalink_file_chooser'].get_filename()
+            if os.path.exists(metalink):
+                MetalinkTask(self, metalink)
+                return True
+        elif task_type == TASK_NORMAL:
+            uris = self.task_new_get_uris(widgets['normal_uri_textview'])
+            if uris:
+                NormalTask(self, uris)
+                return True
+        elif task_type == TASK_BT:
+            torrent = widgets['bt_file_chooser'].get_filename()
+            uris = self.task_new_get_uris(widgets['bt_uri_textview'])
+            if os.path.exists(torrent):
+                BTTask(self, torrent, uris)
+                return True
+
+        return False
+
     @staticmethod
     def task_new_get_widgets(builder):
         """
@@ -163,6 +191,18 @@ class YanerApp(SingleInstanceApp):
             return self.server_view.servers.items()[index]
         else:
             return (None, None)
+
+    @staticmethod
+    def task_new_get_uris(textview):
+        """
+        Get URIs from textviews, returning a tuple of URIs.
+        """
+        tbuffer = textview.get_buffer()
+        uris = tbuffer.get_text(
+                tbuffer.get_start_iter(),
+                tbuffer.get_end_iter()
+                )
+        return [uri.strip() for uri in uris.split("\n") if uri.strip()]
 
     def on_instance_exists(self):
         """
@@ -235,63 +275,6 @@ class YanerApp(SingleInstanceApp):
             else:
                 response = self.task_new_dialog.run()
         self.task_new_dialog.hide()
-
-    def create_new_task(self):
-        """
-        Create a new download task from default configuration
-        and new task dialog.
-        Returns True for success, False for failure.
-        """
-        widgets = self.task_new_widgets
-        default_conf = self.conf_file.default
-        task_type = widgets['nb'].get_current_page()
-        # get uris
-        params = []
-        if task_type == TASK_METALINK:
-            params.append(widgets['metalink_file_chooser'].get_filename())
-        elif task_type == TASK_NORMAL:
-            tbuffer = widgets['normal_uri_textview'].get_buffer()
-            start = tbuffer.get_start_iter()
-            end = tbuffer.get_end_iter()
-            uris = tbuffer.get_text(start, end)
-            uris = [uri.strip() for uri in uris.split("\n") if uri.strip()]
-            params.append(uris)
-        elif task_type == TASK_BT:
-            params.append(widgets['bt_file_chooser'].get_filename())
-            tbuffer = widgets['bt_uri_textview'].get_buffer()
-            start = tbuffer.get_start_iter()
-            end = tbuffer.get_end_iter()
-            uris = tbuffer.get_text(start, end)
-            uris = [uri.strip() for uri in uris.split("\n") if uri.strip()]
-            if uris:
-                params.append(uris)
-        if not params[0]:
-            return False
-        # get server
-        (server, server_model) = self.task_new_get_active_server()
-        # get category
-        cate_index = widgets['cate_cb'].get_active()
-        cate = server_model.cates.keys()[cate_index]
-        # task options
-        task_options = dict(default_conf)
-        for (pref, widget) in self.task_new_prefs.iteritems():
-            if pref == 'seed-ratio':
-                task_options[pref] = str(widget.get_value())
-            elif hasattr(widget, 'get_value'):
-                task_options[pref] = str(int(widget.get_value()))
-            elif hasattr(widget, 'get_text'):
-                task_options[pref] = widget.get_text()
-        # clear empty items
-        for (pref, value) in task_options.items():
-            if not value:
-                del task_options[pref]
-        # bt prioritize
-        if self.task_new_prefs['bt-prioritize-piece'].get_active():
-            task_options['bt-prioritize-piece'] = 'head,tail'
-        params.append(task_options)
-        Task(self, task_type, server, cate, params)
-        #print params, server, cate
-        return True
 
     @staticmethod
     def on_about_action_activate(about_dialog):
