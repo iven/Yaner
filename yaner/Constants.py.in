@@ -40,7 +40,7 @@ MAIN_CONFIG_FILE = _join(_CONFIG_DIR, "yaner.conf")
 SERVER_CONFIG_FILE = _join(_CONFIG_DIR, "servers.conf")
 # User
 U_CONFIG_DIR = _join(_config_home, "yaner")
-U_TASK_CONFIG_DIR = _join(_config_home, "tasks")
+U_TASK_CONFIG_DIR = _join(U_CONFIG_DIR, "tasks")
 U_MAIN_CONFIG_FILE = _join(U_CONFIG_DIR, "yaner.conf")
 U_SERVER_CONFIG_FILE = _join(U_CONFIG_DIR, "servers.conf")
 
@@ -51,6 +51,15 @@ U_SERVER_CONFIG_FILE = _join(U_CONFIG_DIR, "servers.conf")
     TASK_BT,
     TASK_METALINK
 ) = range(3)
+
+# Iter types
+(
+    ITER_SERVER,
+    ITER_QUEUING,
+    ITER_COMPLETED,
+    ITER_RECYCLED,
+    ITER_COUNT
+) = range(5)
 
 # Version
 #

@@ -28,11 +28,10 @@ import glib
 import os
 from twisted.web import xmlrpc
 
-from yaner.Constants import TASK_NORMAL, TASK_BT, TASK_METALINK
-from yaner.Constants import U_TASK_CONFIG_DIR
+from yaner.Constants import *
 from yaner.Configuration import ConfigFile
 
-# TODO: Error handle, queuing iter, metalink multiple gids
+# TODO: Error handle, metalink multiple gids
 
 class Task:
     """
@@ -45,10 +44,7 @@ class Task:
         server_proxy = server_model.proxy
         # get category
         cate_index = main_app.task_new_widgets['cate_cb'].get_active()
-        (cate, cate_iter) = server_model.cates.items()[cate_index]
-        cate_model = server_model.iters[cate_iter]
-        # set current tasklist model
-        main_app.tasklist_view.set_model(cate_model)
+        cate = server_model.cates.keys()[cate_index]
         # task options
         options = dict(main_app.conf_file.default_conf)
         for (pref, widget) in main_app.task_new_prefs.iteritems():
@@ -67,8 +63,7 @@ class Task:
             options['bt-prioritize-piece'] = 'head,tail'
 
         self.main_app = main_app
-        #self.server_model = server_model
-        self.cate_model = cate_model
+        self.server_model = server_model
         self.server_proxy = server_proxy
         self.options = options
         self.info = {'server': server, 'cate': cate}
@@ -78,7 +73,7 @@ class Task:
     def add_task(self, gid):
         """
         Add a new task when gid is received.
-        An iter is added to cate_model and configuration
+        An iter is added to queuing model and configuration
         file for this task is created.
         """
         print 'success #%s' % gid
@@ -90,9 +85,10 @@ class Task:
         conf['info'] = self.info
         conf['options'] = options
 
-        self.iter = self.cate_model.append(None,
-                [conf.info.gid, "gtk-new",
-                    self.task_name, 0, '', '', '', '', 1])
+        queuing_model = self.server_model.iters.values()[ITER_QUEUING]
+        self.main_app.tasklist_view.set_model(queuing_model)
+        self.iter = queuing_model.append(None, [conf.info.gid,
+            "gtk-new", self.task_name, 0, '', '', '', '', 1])
 
         glib.timeout_add_seconds(1, self.call_tell_status)
         self.conf_file = conf
@@ -115,7 +111,7 @@ class Task:
             comp_length = status['completedLength']
             total_length = status['totalLength']
             percent = float(comp_length) / int(total_length) * 100
-            self.cate_model.set(self.iter,
+            self.server_model.iters.values()[ITER_QUEUING].set(self.iter,
                     3, percent, 4, '%.2f%%' % percent,
                     5, '%s / %s' % (comp_length, total_length),
                     6, status['downloadSpeed'], 7, status['uploadSpeed'],
