@@ -24,14 +24,17 @@
     This file contains classes about download tasks.
 """
 
+import gtk
 import glib
 import os
+import xmlrpclib
 from twisted.web import xmlrpc
+from twisted.internet.error import ConnectionRefusedError
 
 from yaner.Constants import *
 from yaner.Configuration import ConfigFile
 
-# TODO: Error handle, metalink multiple gids
+# TODO: metalink multiple gids
 
 class Task:
     """
@@ -69,6 +72,7 @@ class Task:
         self.info = {'server': server, 'cate': cate}
         self.conf_file = None
         self.iter = None
+        self.healthy = False
 
     def add_task(self, gid):
         """
@@ -77,6 +81,7 @@ class Task:
         file for this task is created.
         """
         print 'success #%s' % gid
+
         options = self.options
         self.info['gid'] = gid
 
@@ -92,6 +97,17 @@ class Task:
 
         glib.timeout_add_seconds(1, self.call_tell_status)
         self.conf_file = conf
+        self.healthy = True
+
+    def add_task_error(self, failure):
+        err_type = failure.check(ConnectionRefusedError, xmlrpclib.Fault)
+        dialog = gtk.MessageDialog(self.main_app.main_window,
+                gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                failure.getErrorMessage())
+        dialog.run()
+        dialog.destroy()
+        return failure
 
     def call_tell_status(self):
         """
@@ -100,13 +116,17 @@ class Task:
         """
         deferred = self.server_proxy.callRemote(
                 "aria2.tellStatus", self.conf_file.info.gid)
-        deferred.addCallback(self.update_iter)
-        return True
+        deferred.addCallbacks(self.update_iter, self.update_iter_error)
+        return self.healthy
 
     def update_iter(self, status):
         """
         Update data fields of the task iter.
         """
+        if not 'totalLength' in status:
+            self.server_model.iters.values()[ITER_QUEUING].set(self.iter,
+                    3, 100, 4, '100%',)
+            self.healthy = False
         if status['totalLength'] != '0':
             comp_length = status['completedLength']
             total_length = status['totalLength']
@@ -116,6 +136,18 @@ class Task:
                     5, '%s / %s' % (comp_length, total_length),
                     6, status['downloadSpeed'], 7, status['uploadSpeed'],
                     8, int(status['connections']))
+
+    def update_iter_error(self, failure):
+        err_type = failure.check(ConnectionRefusedError, xmlrpclib.Fault)
+        if self.healthy:
+            self.healthy = False
+            dialog = gtk.MessageDialog(self.main_app.main_window,
+                    gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                    failure.getErrorMessage())
+            dialog.run()
+            dialog.destroy()
+        return failure
 
 class MetalinkTask(Task):
     """
@@ -133,7 +165,7 @@ class MetalinkTask(Task):
         # Call server for new task
         deferred = self.server_proxy.callRemote(
                 "aria2.addMetalink", m_binary, self.options)
-        deferred.addCallback(self.add_task)
+        deferred.addCallbacks(self.add_task, self.add_task_error)
 
 class BTTask(Task):
     """
@@ -156,7 +188,7 @@ class BTTask(Task):
         else:
             deferred = self.server_proxy.callRemote(
                     "aria2.addTorrent", t_binary, self.options)
-        deferred.addCallback(self.add_task)
+        deferred.addCallbacks(self.add_task, self.add_task_error)
 
 class NormalTask(Task):
     """
@@ -178,5 +210,5 @@ class NormalTask(Task):
         # Call server for new task
         deferred = self.server_proxy.callRemote(
                 "aria2.addUri", uris, self.options)
-        deferred.addCallback(self.add_task)
+        deferred.addCallbacks(self.add_task, self.add_task_error)
 

@@ -28,7 +28,8 @@ import gtk
 import gobject
 from twisted.web import xmlrpc
 
-from yaner.Constants import U_SERVER_CONFIG_FILE, _
+from yaner.Constants import *
+from yaner.Constants import _
 from yaner.Configuration import ConfigFile
 from yaner.ODict import ODict
 
@@ -41,7 +42,7 @@ class ServerModel:
     def __init__(self, treeview, treestore, server_conf, server_cates):
         # Preferences
         self.conf = server_conf
-        self.__connected = False
+        self.connected = False
         self.proxy = xmlrpc.Proxy(self.__get_conn_str())
         # Iters
         server_iter = treestore.append(None,
@@ -84,6 +85,14 @@ class ServerModel:
         Generate a connection string used by xmlrpc.
         """
         return 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' % self.conf
+
+    def set_connected(self, connected):
+        """
+        Set if client is connected to the server.
+        """
+        self.connected = connected
+        self.treestore.set(self.iters.keys()[ITER_SERVER], 0,
+                'gtk-connect' if connected else 'gtk-disconnect')
 
 class ServerView:
     """
