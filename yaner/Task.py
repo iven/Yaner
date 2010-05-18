@@ -123,11 +123,13 @@ class Task:
         """
         Update data fields of the task iter.
         """
-        if not 'totalLength' in status:
+        if status['status'] == 'complete':
             self.server_model.iters.values()[ITER_QUEUING].set(self.iter,
                     3, 100, 4, '100%',)
             self.healthy = False
-        if status['totalLength'] != '0':
+        elif not 'totalLength' in status:
+            print status
+        elif status['totalLength'] != '0':
             comp_length = status['completedLength']
             total_length = status['totalLength']
             percent = float(comp_length) / int(total_length) * 100
@@ -136,6 +138,8 @@ class Task:
                     5, '%s / %s' % (comp_length, total_length),
                     6, status['downloadSpeed'], 7, status['uploadSpeed'],
                     8, int(status['connections']))
+        else:
+            print status
 
     def update_iter_error(self, failure):
         err_type = failure.check(ConnectionRefusedError, xmlrpclib.Fault)
