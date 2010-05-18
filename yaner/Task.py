@@ -24,6 +24,7 @@
     This file contains classes about download tasks.
 """
 
+from __future__ import division
 import gtk
 import glib
 import os
@@ -32,9 +33,8 @@ from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError
 
 from yaner.Constants import *
+from yaner.Pretty import psize, pspeed
 from yaner.Configuration import ConfigFile
-
-# TODO: metalink multiple gids
 
 class Task:
     """
@@ -83,6 +83,9 @@ class Task:
         print 'success #%s' % gid
 
         options = self.options
+        # Workaround for Metalink. TODO: Fix this workaround.
+        if isinstance(gid, list):
+            gid = gid[-1]
         self.info['gid'] = gid
 
         file_name = '%(server)s_%(cate)s_%(gid)s' % self.info
@@ -132,12 +135,11 @@ class Task:
         elif status['totalLength'] != '0':
             comp_length = status['completedLength']
             total_length = status['totalLength']
-            percent = float(comp_length) / int(total_length) * 100
+            percent = int(comp_length) / int(total_length) * 100
             self.server_model.iters.values()[ITER_QUEUING].set(self.iter,
-                    3, percent, 4, '%.2f%%' % percent,
-                    5, '%s / %s' % (comp_length, total_length),
-                    6, status['downloadSpeed'], 7, status['uploadSpeed'],
-                    8, int(status['connections']))
+                    3, percent, 4, '%.2f%% / %s' % (percent, psize(comp_length)),
+                    5, psize(total_length), 6, pspeed(status['downloadSpeed']),
+                    7, pspeed(status['uploadSpeed']), 8, int(status['connections']))
         else:
             print status
 
@@ -209,6 +211,7 @@ class NormalTask(Task):
             for uri in uris:
                 if '/' in uri:
                     self.task_name = uri.split('/')[-1]
+                    break
             else:
                 self.task_name = "New Normal Task"
         # Call server for new task
