@@ -119,10 +119,39 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="view_menu">
+              <object class="GtkMenuItem" id="task_menu">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">_View</property>
+                <property name="label" translatable="yes">_Task</property>
                 <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="task_sub_menu">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="task_start_item">
+                        <property name="visible">True</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="related_action">task_start_action</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="task_pause_item">
+                        <property name="visible">True</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="related_action">task_pause_action</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="task_remove_item">
+                        <property name="visible">True</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="related_action">task_remove_action</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
             <child>
@@ -157,11 +186,53 @@
             <child>
               <object class="GtkMenuToolButton" id="task_new_tool_item">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="related_action">task_new_normal_action</property>
                 <property name="label" translatable="yes">Add new task</property>
                 <property name="stock_id">gtk-new</property>
                 <property name="menu">task_new_menu</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="separatortoolitem1">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="task_start_toolbutton">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">task_start_action</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="task_pause_toolbutton">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">task_pause_action</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="task_remove_toolbutton">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">task_remove_action</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1453,9 +1524,9 @@
     </action-widgets>
   </object>
   <object class="GtkAdjustment" id="split_adjustment">
+    <property name="value">5</property>
     <property name="lower">1</property>
     <property name="upper">20</property>
-    <property name="value">5</property>
     <property name="step_increment">1</property>
     <property name="page_increment">5</property>
   </object>
@@ -1465,28 +1536,28 @@
   <object class="GtkFileFilter" id="torrent_filefilter"/>
   <object class="GtkFileFilter" id="metalink_filefilter"/>
   <object class="GtkAdjustment" id="max_files_adjustment">
+    <property name="value">100</property>
     <property name="lower">1</property>
     <property name="upper">1024</property>
-    <property name="value">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="max_peers_adjustment">
+    <property name="value">55</property>
     <property name="lower">1</property>
     <property name="upper">1024</property>
-    <property name="value">55</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="seed_time_adjustment">
-    <property name="upper">36000</property>
     <property name="value">120</property>
+    <property name="upper">36000</property>
     <property name="step_increment">15</property>
     <property name="page_increment">60</property>
   </object>
   <object class="GtkAdjustment" id="seed_ratio_adjustment">
-    <property name="upper">100</property>
     <property name="value">2</property>
+    <property name="upper">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
@@ -1507,5 +1578,20 @@
     <property name="upper">20</property>
     <property name="step_increment">1</property>
     <property name="page_increment">5</property>
+  </object>
+  <object class="GtkAction" id="task_remove_action">
+    <property name="label">Remove</property>
+    <property name="stock_id">gtk-remove</property>
+    <signal name="activate" handler="on_task_remove_action_activate"/>
+  </object>
+  <object class="GtkAction" id="task_pause_action">
+    <property name="label">Pause</property>
+    <property name="stock_id">gtk-media-pause</property>
+    <signal name="activate" handler="on_task_pause_action_activate"/>
+  </object>
+  <object class="GtkAction" id="task_start_action">
+    <property name="label">Start</property>
+    <property name="stock_id">gtk-media-play</property>
+    <signal name="activate" handler="on_task_start_action_activate"/>
   </object>
 </interface>
