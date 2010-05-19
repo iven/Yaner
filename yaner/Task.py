@@ -103,7 +103,10 @@ class Task:
         self.healthy = True
 
     def add_task_error(self, failure):
-        err_type = failure.check(ConnectionRefusedError, xmlrpclib.Fault)
+        """
+        Handle errors occured when calling add_task.
+        """
+        failure.check(ConnectionRefusedError, xmlrpclib.Fault)
         dialog = gtk.MessageDialog(self.main_app.main_window,
                 gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                 gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
@@ -138,9 +141,12 @@ class Task:
             percent = int(comp_length) / int(total_length) * 100 \
                     if total_length != '0' else 0
             self.server_model.iters.values()[ITER_QUEUING].set(self.iter,
-                    3, percent, 4, '%.2f%% / %s' % (percent, psize(comp_length)),
-                    5, psize(total_length), 6, pspeed(status['downloadSpeed']),
-                    7, pspeed(status['uploadSpeed']), 8, int(status['connections']))
+                    3, percent,
+                    4, '%.2f%% / %s' % (percent, psize(comp_length)),
+                    5, psize(total_length),
+                    6, pspeed(status['downloadSpeed']),
+                    7, pspeed(status['uploadSpeed']),
+                    8, int(status['connections']))
 
     def update_iter_error(self, failure):
         err_type = failure.check(ConnectionRefusedError, xmlrpclib.Fault)
@@ -186,13 +192,9 @@ class BTTask(Task):
         with open(torrent) as t_file:
             t_binary = xmlrpc.Binary(t_file.read())
         # Call server for new task
-        if uris:
-            self.info['uris'] = ','.join(uris)
-            deferred = self.server_proxy.callRemote(
-                    "aria2.addTorrent", t_binary, uris, self.options)
-        else:
-            deferred = self.server_proxy.callRemote(
-                    "aria2.addTorrent", t_binary, self.options)
+        self.info['uris'] = ','.join(uris)
+        deferred = self.server_proxy.callRemote(
+                "aria2.addTorrent", t_binary, uris, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
 class NormalTask(Task):
