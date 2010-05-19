@@ -132,16 +132,15 @@ class Task:
             self.healthy = False
         elif not 'totalLength' in status:
             print status
-        elif status['totalLength'] != '0':
+        else:
             comp_length = status['completedLength']
             total_length = status['totalLength']
-            percent = int(comp_length) / int(total_length) * 100
+            percent = int(comp_length) / int(total_length) * 100 \
+                    if total_length != '0' else 0
             self.server_model.iters.values()[ITER_QUEUING].set(self.iter,
                     3, percent, 4, '%.2f%% / %s' % (percent, psize(comp_length)),
                     5, psize(total_length), 6, pspeed(status['downloadSpeed']),
                     7, pspeed(status['uploadSpeed']), 8, int(status['connections']))
-        else:
-            print status
 
     def update_iter_error(self, failure):
         err_type = failure.check(ConnectionRefusedError, xmlrpclib.Fault)
