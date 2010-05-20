@@ -28,6 +28,7 @@ GUI related.
 import gtk
 import os
 import shutil
+from twisted.internet import reactor
 
 from yaner.Constants import *
 from yaner.Server import ServerView
@@ -55,11 +56,12 @@ class YanerApp(SingleInstanceApp):
         filefilters['metalink'] = builder.get_object("metalink_filefilter")
         self.init_filefilters(filefilters)
         # Main Config
-        self.conf_file = ConfigFile(U_MAIN_CONFIG_FILE)
+        self.conf = ConfigFile(U_MAIN_CONFIG_FILE)
         # Server View
         server_tv = builder.get_object("server_tv")
         server_ts = builder.get_object("server_ts")
         self.server_view = ServerView(self, server_tv, server_ts)
+        # Task List View
         self.tasklist_view = builder.get_object('tasklist_tv')
         # Task New Dialog
         self.task_new_dialog = builder.get_object("task_new_dialog")
@@ -182,16 +184,6 @@ class YanerApp(SingleInstanceApp):
                 'version_adjustment')
         return prefs
 
-    def task_new_get_active_server(self):
-        """
-        Get the server and model selected of the server combobox.
-        """
-        index = self.task_new_widgets['server_cb'].get_active()
-        if index != -1:
-            return self.server_view.servers.items()[index]
-        else:
-            return (None, None)
-
     @staticmethod
     def task_new_get_uris(textview):
         """
@@ -221,22 +213,22 @@ class YanerApp(SingleInstanceApp):
         """
         When category combobox selection changed, update the directory entry.
         """
-        index = cate_cb.get_active()
-        server_model = self.task_new_get_active_server()[1]
-        if index != -1 and server_model != None:
-            cate = server_model.cates.keys()[index]
-            directory = server_model.conf[cate]
+        active_iter = cate_cb.get_active_iter()
+        if active_iter != None:
+            model = self.task_new_widgets['cate_ls']
+            directory = model.get(active_iter, 1)[0]
             self.task_new_prefs['dir'].set_text(directory)
 
     def on_task_new_server_cb_changed(self, server_cb):
         """
         When server combobox selection changed, update the category combobox.
         """
-        server_model = self.task_new_get_active_server()[1]
-        if server_model != None:
+        index = server_cb.get_active()
+        if index != -1:
+            s_dict = self.server_view.servers.values()[index]
             self.task_new_widgets['cate_ls'].clear()
-            for cate_name in server_model.cates:
-                directory = server_model.conf[cate_name]
+            for cate_name in s_dict['cates']:
+                directory = s_dict['conf'][cate_name]
                 self.task_new_widgets['cate_ls'].append(
                         [cate_name[5:], directory])
             self.task_new_widgets['cate_cb'].set_active(0)
@@ -247,7 +239,7 @@ class YanerApp(SingleInstanceApp):
         """
         # TODO: Clear last URIs before dialog runs
         widgets = self.task_new_widgets
-        default_conf = self.conf_file.default
+        default_conf = self.conf.default
         # set current page of the notebook
         action_dict = {
                 "task_new_normal_action": TASK_NORMAL,
@@ -264,10 +256,11 @@ class YanerApp(SingleInstanceApp):
                 widget.set_text(default_conf[pref])
         # init the server cb
         widgets['server_ls'].clear()
-        for (server, model) in self.server_view.servers.iteritems():
-            widgets['server_ls'].append([model.conf.name, server])
+        for s_dict in self.server_view.servers.itervalues():
+            widgets['server_ls'].append([s_dict['conf']['name'], ])
         widgets['server_cb'].set_active(0)
         # run the dialog
+        # TODO: response signal connect ?
         response = self.task_new_dialog.run()
         while response == gtk.RESPONSE_OK:
             if self.create_new_task():
@@ -291,8 +284,6 @@ class YanerApp(SingleInstanceApp):
         Main window quit callback.
         """
         gtk.widget_pop_colormap()
-        from twisted.internet import reactor
-        #gtk.main_quit()
         reactor.stop()
 
 if __name__ == '__main__':

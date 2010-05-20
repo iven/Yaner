@@ -42,14 +42,13 @@ class Task:
     """
     def __init__(self, main_app):
         # get server
-        (server, server_model) = main_app.task_new_get_active_server()
-        # get proxy
-        server_proxy = server_model.proxy
+        index = main_app.task_new_widgets['server_cb'].get_active()
+        (server, s_dict) = main_app.server_view.servers.items()[index]
         # get category
         cate_index = main_app.task_new_widgets['cate_cb'].get_active()
-        cate = server_model.cates.keys()[cate_index]
+        cate = s_dict['cates'][cate_index]
         # task options
-        options = dict(main_app.conf_file.default_conf)
+        options = dict(main_app.conf.default)
         for (pref, widget) in main_app.task_new_prefs.iteritems():
             if pref == 'seed-ratio':
                 options[pref] = str(widget.get_value())
@@ -66,11 +65,10 @@ class Task:
             options['bt-prioritize-piece'] = 'head,tail'
 
         self.main_app = main_app
-        self.server_model = server_model
-        self.server_proxy = server_proxy
+        self.s_dict = s_dict
         self.options = options
         self.info = {'server': server, 'cate': cate}
-        self.conf_file = None
+        self.conf = None
         self.iter = None
         self.healthy = False
 
@@ -84,22 +82,20 @@ class Task:
 
         options = self.options
         # Workaround for Metalink. TODO: Fix this workaround.
-        if isinstance(gid, list):
-            gid = gid[-1]
-        self.info['gid'] = gid
+        self.info['gid'] = gid[-1] if type(gid) is list else gid
 
         file_name = '%(server)s_%(cate)s_%(gid)s' % self.info
         conf = ConfigFile(os.path.join(U_TASK_CONFIG_DIR, file_name))
         conf['info'] = self.info
         conf['options'] = options
 
-        queuing_model = self.server_model.iters.values()[ITER_QUEUING]
+        queuing_model = self.s_dict['iters'].values()[ITER_QUEUING]
         self.main_app.tasklist_view.set_model(queuing_model)
         self.iter = queuing_model.append(None, [conf.info.gid,
             "gtk-new", self.task_name, 0, '', '', '', '', 1])
 
         glib.timeout_add_seconds(1, self.call_tell_status)
-        self.conf_file = conf
+        self.conf = conf
         self.healthy = True
 
     def add_task_error(self, failure):
@@ -120,8 +116,8 @@ class Task:
         Call server for the status of this task.
         Return True means keep calling it when timeout.
         """
-        deferred = self.server_proxy.callRemote(
-                "aria2.tellStatus", self.conf_file.info.gid)
+        deferred = self.s_dict['proxy'].callRemote(
+                "aria2.tellStatus", self.conf.info.gid)
         deferred.addCallbacks(self.update_iter, self.update_iter_error)
         return self.healthy
 
@@ -130,8 +126,8 @@ class Task:
         Update data fields of the task iter.
         """
         if status['status'] == 'complete':
-            self.server_model.iters.values()[ITER_QUEUING].set(self.iter,
-                    3, 100, 4, '100%',)
+            self.s_dict['iters'].values()[ITER_QUEUING].set(
+                    self.iter, 3, 100, 4, '100%')
             self.healthy = False
         elif not 'totalLength' in status:
             print status
@@ -140,7 +136,7 @@ class Task:
             total_length = status['totalLength']
             percent = int(comp_length) / int(total_length) * 100 \
                     if total_length != '0' else 0
-            self.server_model.iters.values()[ITER_QUEUING].set(self.iter,
+            self.s_dict['iters'].values()[ITER_QUEUING].set(self.iter,
                     3, percent,
                     4, '%.2f%% / %s' % (percent, psize(comp_length)),
                     5, psize(total_length),
@@ -174,7 +170,7 @@ class MetalinkTask(Task):
         with open(metalink) as m_file:
             m_binary = xmlrpc.Binary(m_file.read())
         # Call server for new task
-        deferred = self.server_proxy.callRemote(
+        deferred = self.s_dict['proxy'].callRemote(
                 "aria2.addMetalink", m_binary, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
@@ -193,7 +189,7 @@ class BTTask(Task):
             t_binary = xmlrpc.Binary(t_file.read())
         # Call server for new task
         self.info['uris'] = ','.join(uris)
-        deferred = self.server_proxy.callRemote(
+        deferred = self.s_dict['proxy'].callRemote(
                 "aria2.addTorrent", t_binary, uris, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
@@ -216,7 +212,7 @@ class NormalTask(Task):
             else:
                 self.task_name = "New Normal Task"
         # Call server for new task
-        deferred = self.server_proxy.callRemote(
+        deferred = self.s_dict['proxy'].callRemote(
                 "aria2.addUri", uris, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
