@@ -40,19 +40,19 @@ class YanerApp(SingleInstanceApp):
 
     def __init__(self):
         SingleInstanceApp.__init__(self, "yaner")
+        # Init paths
+        self.init_paths()
         # Builder
         builder = gtk.Builder()
         builder.add_from_file(GLADE_FILE)
         builder.connect_signals(self)
         # Main Window
         self.main_window = builder.get_object("main_window")
+        self.init_rgba(self.main_window)
         # File Filters
         filefilters = {}
         filefilters['torrent'] = builder.get_object("torrent_filefilter")
         filefilters['metalink'] = builder.get_object("metalink_filefilter")
-        #
-        self.init_rgba(self.main_window)
-        self.init_paths()
         self.init_filefilters(filefilters)
         # Main Config
         self.conf_file = ConfigFile(U_MAIN_CONFIG_FILE)

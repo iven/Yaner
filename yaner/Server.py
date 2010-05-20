@@ -124,5 +124,5 @@ class ServerView:
         TreeView selection changed callback, changing the model of
         TaskView according to the selected row.
         """
-        pass
+        (treemodel, treeiter) = selection.get_selected()
 

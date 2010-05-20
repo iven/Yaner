@@ -186,13 +186,26 @@
             <child>
               <object class="GtkMenuToolButton" id="task_new_tool_item">
                 <property name="visible">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="related_action">task_new_normal_action</property>
                 <property name="label" translatable="yes">Add new task</property>
-                <property name="stock_id">gtk-new</property>
+                <property name="stock_id">gtk-add</property>
                 <property name="menu">task_new_menu</property>
               </object>
               <packing>
                 <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="task_remove_toolbutton">
+                <property name="visible">True</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">task_remove_action</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
@@ -220,18 +233,6 @@
                 <property name="visible">True</property>
                 <property name="use_action_appearance">True</property>
                 <property name="related_action">task_pause_action</property>
-                <property name="use_underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="task_remove_toolbutton">
-                <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
-                <property name="related_action">task_remove_action</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
