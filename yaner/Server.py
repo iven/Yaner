@@ -28,43 +28,49 @@ import gtk
 import gobject
 from twisted.web import xmlrpc
 
-from yaner.Constants import *
+from yaner.Constants import U_SERVER_CONFIG_FILE, ITER_COMPLETED
 from yaner.Constants import _
 from yaner.Configuration import ConfigFile
 from yaner.ODict import ODict
 
-class ServerModel:
+class Server:
     """
-    Aria2 server tree model of the left pane in the main window.
+    Tree model for each aria2 server of the left pane in the main window.
     This contains queuing, completed, recycled tasks as its children.
+    'group': the ServerGroup which the Server is in.
+    'conf': the server ConfigFile.
+    'iter': iter of the server itself.
+    'cates': the categories list of the server.
+    'iters': iters list other than server iter.
+    'model': tasklist models of each iter.
+    'proxy': xmlrpc server proxy.
+    'connected: a boolean if the xmlrpc server is connected.
     """
 
-    def __init__(self, treeview, treestore, server_conf, server_cates):
+    def __init__(self, group, conf):
+        store = group.store
         # Preferences
-        self.conf = server_conf
+        self.group = group
+        self.conf = conf
         self.connected = False
         self.proxy = xmlrpc.Proxy(self.__get_conn_str())
+        # Categories
+        self.cates = conf.cates.split(',')
         # Iters
-        server_iter = treestore.append(None,
-                ["gtk-disconnect", self.conf.name])
-        queuing_iter = treestore.append(server_iter,
-                ["gtk-media-play", _("Queuing")])
-        completed_iter = treestore.append(server_iter,
-                ["gtk-apply", _("Completed")])
-        recycled_iter = treestore.append(server_iter,
-                ["gtk-cancel", _("Recycled")])
-        # Category Iters
-        cates = ODict()
-        for cate_name in server_cates:
-            cate_iter = treestore.append(completed_iter,
+        self.iter = store.append(None, ["gtk-disconnect", conf.name])
+        self.iters = [
+                store.append(self.iter, ["gtk-media-play", _("Queuing")]),
+                store.append(self.iter, ["gtk-apply", _("Completed")]),
+                store.append(self.iter, ["gtk-cancel", _("Recycled")]),
+                ]
+        for cate_name in self.cates:
+            cate_iter = store.append(self.iters[ITER_COMPLETED],
                     ["gtk-directory", cate_name[5:]])
-            cates[cate_name] = cate_iter
-        # Setup task list model for each iter
-        iter_list = [server_iter, queuing_iter, completed_iter, recycled_iter]
-        iter_list.extend(cates.values())
-        iters = ODict()
-        for key in iter_list:
-            iters[key] = gtk.TreeStore(
+            self.iters.append(cate_iter)
+        # Models
+        self.models = []
+        for i in xrange(len(self.iters)):
+            self.models.append(gtk.TreeStore(
                     gobject.TYPE_STRING, # gid
                     gobject.TYPE_STRING, # status
                     gobject.TYPE_STRING, # name
@@ -74,11 +80,7 @@ class ServerModel:
                     gobject.TYPE_STRING, # download speed
                     gobject.TYPE_STRING, # upload speed
                     gobject.TYPE_INT     # connections
-                    )
-        self.treeview = treeview
-        self.treestore = treestore
-        self.cates = cates
-        self.iters = iters
+                    ))
 
     def __get_conn_str(self):
         """
@@ -91,38 +93,32 @@ class ServerModel:
         Set if client is connected to the server.
         """
         self.connected = connected
-        self.treestore.set(self.iters.keys()[ITER_SERVER], 0,
+        self.group.store.set(self.iter, 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
 
-class ServerView:
+class ServerGroup:
     """
-    Aria2 server treeview in the left pane.
+    Aria2 server group in the treeview of the left pane.
     """
-    def __init__(self, main_app, treeview, treestore):
+    def __init__(self, main_app, view, store):
+        self.main_app = main_app
+        self.view = view
+        self.store = store
+        self.servers = ODict()
+        # TreeModel
+        self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
+        for server in main_app.conf.main.servers.split(','):
+            self.servers[server] = Server(self, self.conf[server])
         # TreeSelection
-        selection = treeview.get_selection()
+        selection = view.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
-        # TreeModel
-        servers = ODict()
-        server_conf_file = ConfigFile(U_SERVER_CONFIG_FILE)
-        for server in main_app.conf_file.main.servers.split(','):
-            server_conf = server_conf_file[server]
-            server_cates = main_app.conf_file.cate[server].split(',')
-            server_model = ServerModel(self, treestore, 
-                    server_conf, server_cates)
-            servers[server] = server_model
 
-        self.main_app = main_app
-        self.treeview = treeview
-        self.treestore = treestore
-        self.selection = selection
-        self.servers = servers
-
-    def on_selection_changed(self, selection, data = None):
+    def on_selection_changed(self, selection):
         """
         TreeView selection changed callback, changing the model of
         TaskView according to the selected row.
         """
-        (treemodel, treeiter) = selection.get_selected()
+        #(model, selected_iter) = selection.get_selected()
+        pass
 

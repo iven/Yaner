@@ -54,12 +54,11 @@ U_SERVER_CONFIG_FILE = _join(U_CONFIG_DIR, "servers.conf")
 
 # Iter types
 (
-    ITER_SERVER,
     ITER_QUEUING,
     ITER_COMPLETED,
     ITER_RECYCLED,
     ITER_COUNT
-) = range(5)
+) = range(4)
 
 # Version
 #
