@@ -59,8 +59,7 @@ class YanerApp(SingleInstanceApp):
         self.conf = ConfigFile(U_MAIN_CONFIG_FILE)
         # Server View
         server_tv = builder.get_object("server_tv")
-        server_ts = builder.get_object("server_ts")
-        self.server_group = ServerGroup(self, server_tv, server_ts)
+        self.server_group = ServerGroup(self, server_tv)
         # Task List View
         self.tasklist_view = builder.get_object('tasklist_tv')
         # Task New Dialog

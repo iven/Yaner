@@ -28,7 +28,8 @@ import gtk
 import gobject
 from twisted.web import xmlrpc
 
-from yaner.Constants import U_SERVER_CONFIG_FILE, ITER_COMPLETED
+from yaner.Constants import U_SERVER_CONFIG_FILE
+from yaner.Constants import ITER_COMPLETED, ITER_COUNT
 from yaner.Constants import _
 from yaner.Configuration import ConfigFile
 from yaner.ODict import ODict
@@ -48,7 +49,7 @@ class Server:
     """
 
     def __init__(self, group, conf):
-        store = group.store
+        model = group.view.get_model()
         # Preferences
         self.group = group
         self.conf = conf
@@ -57,14 +58,14 @@ class Server:
         # Categories
         self.cates = conf.cates.split(',')
         # Iters
-        self.iter = store.append(None, ["gtk-disconnect", conf.name])
+        self.iter = model.append(None, ["gtk-disconnect", conf.name])
         self.iters = [
-                store.append(self.iter, ["gtk-media-play", _("Queuing")]),
-                store.append(self.iter, ["gtk-apply", _("Completed")]),
-                store.append(self.iter, ["gtk-cancel", _("Recycled")]),
+                model.append(self.iter, ["gtk-media-play", _("Queuing")]),
+                model.append(self.iter, ["gtk-apply", _("Completed")]),
+                model.append(self.iter, ["gtk-cancel", _("Recycled")]),
                 ]
         for cate_name in self.cates:
-            cate_iter = store.append(self.iters[ITER_COMPLETED],
+            cate_iter = model.append(self.iters[ITER_COMPLETED],
                     ["gtk-directory", cate_name[5:]])
             self.iters.append(cate_iter)
         # Models
@@ -93,17 +94,16 @@ class Server:
         Set if client is connected to the server.
         """
         self.connected = connected
-        self.group.store.set(self.iter, 0,
+        self.group.model.set(self.iter, 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
 
 class ServerGroup:
     """
     Aria2 server group in the treeview of the left pane.
     """
-    def __init__(self, main_app, view, store):
+    def __init__(self, main_app, view):
         self.main_app = main_app
         self.view = view
-        self.store = store
         self.servers = ODict()
         # TreeModel
         self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
@@ -119,6 +119,11 @@ class ServerGroup:
         TreeView selection changed callback, changing the model of
         TaskView according to the selected row.
         """
-        #(model, selected_iter) = selection.get_selected()
-        pass
+        (model, selected_iter) = selection.get_selected()
+        path = model.get_path(selected_iter)
+        if len(path) > 1:
+            server_index = path[0]
+            model_index = path[-1] + (0, ITER_COUNT)[len(path) - 2]
+            tasklist_model = self.servers.values()[server_index].models[model_index]
+            self.main_app.tasklist_view.set_model(tasklist_model)
 
