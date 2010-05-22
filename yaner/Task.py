@@ -43,10 +43,10 @@ class Task:
     def __init__(self, main_app):
         # get server
         index = main_app.task_new_widgets['server_cb'].get_active()
-        (server, s_dict) = main_app.server_view.servers.items()[index]
+        (server_name, server) = main_app.server_group.servers.items()[index]
         # get category
         cate_index = main_app.task_new_widgets['cate_cb'].get_active()
-        cate = s_dict['cates'][cate_index]
+        cate_name = server.cates[cate_index]
         # task options
         options = dict(main_app.conf.default)
         for (pref, widget) in main_app.task_new_prefs.iteritems():
@@ -65,9 +65,9 @@ class Task:
             options['bt-prioritize-piece'] = 'head,tail'
 
         self.main_app = main_app
-        self.s_dict = s_dict
+        self.server = server
         self.options = options
-        self.info = {'server': server, 'cate': cate}
+        self.info = {'server': server_name, 'cate': cate_name}
         self.conf = None
         self.iter = None
         self.healthy = False
@@ -89,7 +89,7 @@ class Task:
         conf['info'] = self.info
         conf['options'] = options
 
-        queuing_model = self.s_dict['iters'].values()[ITER_QUEUING]
+        queuing_model = self.server.models[ITER_QUEUING]
         self.main_app.tasklist_view.set_model(queuing_model)
         self.iter = queuing_model.append(None, [conf.info.gid,
             "gtk-new", self.task_name, 0, '', '', '', '', 1])
@@ -116,7 +116,7 @@ class Task:
         Call server for the status of this task.
         Return True means keep calling it when timeout.
         """
-        deferred = self.s_dict['proxy'].callRemote(
+        deferred = self.server.proxy.callRemote(
                 "aria2.tellStatus", self.conf.info.gid)
         deferred.addCallbacks(self.update_iter, self.update_iter_error)
         return self.healthy
@@ -126,7 +126,7 @@ class Task:
         Update data fields of the task iter.
         """
         if status['status'] == 'complete':
-            self.s_dict['iters'].values()[ITER_QUEUING].set(
+            self.server.models[ITER_QUEUING].set(
                     self.iter, 3, 100, 4, '100%')
             self.healthy = False
         elif not 'totalLength' in status:
@@ -136,7 +136,7 @@ class Task:
             total_length = status['totalLength']
             percent = int(comp_length) / int(total_length) * 100 \
                     if total_length != '0' else 0
-            self.s_dict['iters'].values()[ITER_QUEUING].set(self.iter,
+            self.server.models[ITER_QUEUING].set(self.iter,
                     3, percent,
                     4, '%.2f%% / %s' % (percent, psize(comp_length)),
                     5, psize(total_length),
@@ -170,7 +170,7 @@ class MetalinkTask(Task):
         with open(metalink) as m_file:
             m_binary = xmlrpc.Binary(m_file.read())
         # Call server for new task
-        deferred = self.s_dict['proxy'].callRemote(
+        deferred = self.server.proxy.callRemote(
                 "aria2.addMetalink", m_binary, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
@@ -189,7 +189,7 @@ class BTTask(Task):
             t_binary = xmlrpc.Binary(t_file.read())
         # Call server for new task
         self.info['uris'] = ','.join(uris)
-        deferred = self.s_dict['proxy'].callRemote(
+        deferred = self.server.proxy.callRemote(
                 "aria2.addTorrent", t_binary, uris, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
@@ -212,7 +212,7 @@ class NormalTask(Task):
             else:
                 self.task_name = "New Normal Task"
         # Call server for new task
-        deferred = self.s_dict['proxy'].callRemote(
+        deferred = self.server.proxy.callRemote(
                 "aria2.addUri", uris, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 

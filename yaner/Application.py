@@ -31,7 +31,7 @@ import shutil
 from twisted.internet import reactor
 
 from yaner.Constants import *
-from yaner.Server import ServerView
+from yaner.Server import ServerGroup
 from yaner.Task import NormalTask, BTTask, MetalinkTask
 from yaner.Configuration import ConfigFile
 from yaner.SingleInstance import SingleInstanceApp
@@ -60,7 +60,7 @@ class YanerApp(SingleInstanceApp):
         # Server View
         server_tv = builder.get_object("server_tv")
         server_ts = builder.get_object("server_ts")
-        self.server_view = ServerView(self, server_tv, server_ts)
+        self.server_group = ServerGroup(self, server_tv, server_ts)
         # Task List View
         self.tasklist_view = builder.get_object('tasklist_tv')
         # Task New Dialog
@@ -225,10 +225,10 @@ class YanerApp(SingleInstanceApp):
         """
         index = server_cb.get_active()
         if index != -1:
-            s_dict = self.server_view.servers.values()[index]
+            server = self.server_group.servers.values()[index]
             self.task_new_widgets['cate_ls'].clear()
-            for cate_name in s_dict['cates']:
-                directory = s_dict['conf'][cate_name]
+            for cate_name in server.cates:
+                directory = server.conf[cate_name]
                 self.task_new_widgets['cate_ls'].append(
                         [cate_name[5:], directory])
             self.task_new_widgets['cate_cb'].set_active(0)
@@ -256,8 +256,8 @@ class YanerApp(SingleInstanceApp):
                 widget.set_text(default_conf[pref])
         # init the server cb
         widgets['server_ls'].clear()
-        for s_dict in self.server_view.servers.itervalues():
-            widgets['server_ls'].append([s_dict['conf']['name'], ])
+        for server in self.server_group.servers.itervalues():
+            widgets['server_ls'].append([server.conf.name])
         widgets['server_cb'].set_active(0)
         # run the dialog
         # TODO: response signal connect ?

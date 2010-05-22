@@ -33,55 +33,44 @@ from yaner.Constants import _
 from yaner.Configuration import ConfigFile
 from yaner.ODict import ODict
 
-class ServerView:
+class Server:
     """
-    Aria2 server treeview in the left pane.
+    Tree model for each aria2 server of the left pane in the main window.
+    This contains queuing, completed, recycled tasks as its children.
+    'group': the ServerGroup which the Server is in.
+    'conf': the server ConfigFile.
+    'iter': iter of the server itself.
+    'cates': the categories list of the server.
+    'iters': iters list other than server iter.
+    'model': tasklist models of each iter.
+    'proxy': xmlrpc server proxy.
+    'connected: a boolean if the xmlrpc server is connected.
     """
-    def __init__(self, main_app, view, store):
-        self.main_app = main_app
-        self.view = view
-        self.store = store
-        self.servers = ODict()
-        # TreeModel
-        self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
-        for server in main_app.conf.main.servers.split(','):
-            self.servers[server] = self.__init_server(server)
-        # TreeSelection
-        selection = view.get_selection()
-        selection.set_mode(gtk.SELECTION_SINGLE)
-        selection.connect("changed", self.on_selection_changed)
 
-    def __init_server(self, server):
-        """
-        Generate the server dict by server name.
-        'conf': the server ConfigFile.
-        'cates': the categories list of the server.
-        'iter': iter of the server itself.
-        'iters': a dict with iters as keys and tasklist models as values.
-        'proxy': xmlrpc server proxy.
-        'connected: a boolean if the xmlrpc server is connected.
-        TODO: Add 'models'
-        """
-        s_dict = ODict()
-        s_dict['conf'] = self.conf[server]
-        s_dict['cates'] = self.main_app.conf.cate[server].split(',')
-        s_dict['iters'] = ODict()
-        # Generate iters list
-        store = self.store
-        s_dict['iter'] = store.append(None,
-                ["gtk-disconnect", s_dict['conf'].name])
-        iters_list = [
-                store.append(s_dict['iter'], ["gtk-media-play", _("Queuing")]),
-                store.append(s_dict['iter'], ["gtk-apply", _("Completed")]),
-                store.append(s_dict['iter'], ["gtk-cancel", _("Recycled")]),
+    def __init__(self, group, conf):
+        store = group.store
+        # Preferences
+        self.group = group
+        self.conf = conf
+        self.connected = False
+        self.proxy = xmlrpc.Proxy(self.__get_conn_str())
+        # Categories
+        self.cates = conf.cates.split(',')
+        # Iters
+        self.iter = store.append(None, ["gtk-disconnect", conf.name])
+        self.iters = [
+                store.append(self.iter, ["gtk-media-play", _("Queuing")]),
+                store.append(self.iter, ["gtk-apply", _("Completed")]),
+                store.append(self.iter, ["gtk-cancel", _("Recycled")]),
                 ]
-        for cate_name in s_dict['cates']:
-            cate_iter = store.append(iters_list[ITER_COMPLETED],
+        for cate_name in self.cates:
+            cate_iter = store.append(self.iters[ITER_COMPLETED],
                     ["gtk-directory", cate_name[5:]])
-            iters_list.append(cate_iter)
-        # Create a model for each iter for tasklist treeview
-        for key in iters_list:
-            s_dict['iters'][key] = gtk.TreeStore(
+            self.iters.append(cate_iter)
+        # Models
+        self.models = []
+        for i in xrange(len(self.iters)):
+            self.models.append(gtk.TreeStore(
                     gobject.TYPE_STRING, # gid
                     gobject.TYPE_STRING, # status
                     gobject.TYPE_STRING, # name
@@ -91,27 +80,39 @@ class ServerView:
                     gobject.TYPE_STRING, # download speed
                     gobject.TYPE_STRING, # upload speed
                     gobject.TYPE_INT     # connections
-                    )
-        s_dict['proxy'] = xmlrpc.Proxy(self.__get_conn_str(s_dict['conf']))
-        s_dict['connected'] = False
+                    ))
 
-        return s_dict
-
-    @staticmethod
-    def __get_conn_str(attr_dict):
+    def __get_conn_str(self):
         """
         Generate a connection string used by xmlrpc.
         """
-        return 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' % attr_dict
+        return 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' % self.conf
 
-    def server_set_connected(self, server, connected):
+    def set_connected(self, connected):
         """
         Set if client is connected to the server.
         """
-        s_dict = self.servers[server]
-        s_dict['connected'] = connected
-        self.store.set(s_dict['iter'], 0,
+        self.connected = connected
+        self.group.store.set(self.iter, 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
+
+class ServerGroup:
+    """
+    Aria2 server group in the treeview of the left pane.
+    """
+    def __init__(self, main_app, view, store):
+        self.main_app = main_app
+        self.view = view
+        self.store = store
+        self.servers = ODict()
+        # TreeModel
+        self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
+        for server in main_app.conf.main.servers.split(','):
+            self.servers[server] = Server(self, self.conf[server])
+        # TreeSelection
+        selection = view.get_selection()
+        selection.set_mode(gtk.SELECTION_SINGLE)
+        selection.connect("changed", self.on_selection_changed)
 
     def on_selection_changed(self, selection):
         """
