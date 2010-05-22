@@ -78,16 +78,13 @@ class Task:
         An iter is added to queuing model and configuration
         file for this task is created.
         """
-        print 'success #%s' % gid
-
-        options = self.options
         # Workaround for Metalink. TODO: Fix this workaround.
         self.info['gid'] = gid[-1] if type(gid) is list else gid
 
         file_name = '%(server)s_%(cate)s_%(gid)s' % self.info
         conf = ConfigFile(os.path.join(U_TASK_CONFIG_DIR, file_name))
         conf['info'] = self.info
-        conf['options'] = options
+        conf['options'] = self.options
 
         queuing_model = self.server.models[ITER_QUEUING]
         self.main_app.tasklist_view.set_model(queuing_model)
@@ -145,7 +142,10 @@ class Task:
                     8, int(status['connections']))
 
     def update_iter_error(self, failure):
-        err_type = failure.check(ConnectionRefusedError, xmlrpclib.Fault)
+        """
+        Handle errors occured when calling update_iter.
+        """
+        failure.check(ConnectionRefusedError, xmlrpclib.Fault)
         if self.healthy:
             self.healthy = False
             dialog = gtk.MessageDialog(self.main_app.main_window,

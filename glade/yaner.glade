@@ -127,8 +127,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="task_start_item">
                         <property name="visible">True</property>
-                        <property name="related_action">task_start_action</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="related_action">task_start_action</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -136,8 +136,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="task_pause_item">
                         <property name="visible">True</property>
-                        <property name="related_action">task_pause_action</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="related_action">task_pause_action</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -145,8 +145,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="task_remove_item">
                         <property name="visible">True</property>
-                        <property name="related_action">task_remove_action</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="related_action">task_remove_action</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -187,7 +187,6 @@
             <child>
               <object class="GtkMenuToolButton" id="task_new_tool_item">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="related_action">task_new_normal_action</property>
                 <property name="label" translatable="yes">Add new task</property>
                 <property name="stock_id">gtk-add</property>
@@ -200,8 +199,8 @@
             <child>
               <object class="GtkToolButton" id="task_remove_toolbutton">
                 <property name="visible">True</property>
-                <property name="related_action">task_remove_action</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">task_remove_action</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -220,8 +219,8 @@
             <child>
               <object class="GtkToolButton" id="task_start_toolbutton">
                 <property name="visible">True</property>
-                <property name="related_action">task_start_action</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">task_start_action</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -232,8 +231,8 @@
             <child>
               <object class="GtkToolButton" id="task_pause_toolbutton">
                 <property name="visible">True</property>
-                <property name="related_action">task_pause_action</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">task_pause_action</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -502,6 +501,7 @@
     <property name="icon_name">emblem-downloads</property>
     <property name="type_hint">normal</property>
     <property name="has_separator">False</property>
+    <signal name="response" handler="on_task_new_dialog_response"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="task_new_dialog_vbox">
         <property name="visible">True</property>

@@ -29,7 +29,7 @@ import gobject
 from twisted.web import xmlrpc
 
 from yaner.Constants import U_SERVER_CONFIG_FILE
-from yaner.Constants import ITER_COMPLETED, ITER_COUNT
+from yaner.Constants import ITER_COMPLETED, ITER_SERVER, ITER_COUNT
 from yaner.Constants import _
 from yaner.Configuration import ConfigFile
 from yaner.ODict import ODict
@@ -40,9 +40,8 @@ class Server:
     This contains queuing, completed, recycled tasks as its children.
     'group': the ServerGroup which the Server is in.
     'conf': the server ConfigFile.
-    'iter': iter of the server itself.
     'cates': the categories list of the server.
-    'iters': iters list other than server iter.
+    'iters': iters list.
     'model': tasklist models of each iter.
     'proxy': xmlrpc server proxy.
     'connected: a boolean if the xmlrpc server is connected.
@@ -58,11 +57,12 @@ class Server:
         # Categories
         self.cates = conf.cates.split(',')
         # Iters
-        self.iter = model.append(None, ["gtk-disconnect", conf.name])
+        server_iter = model.append(None, ["gtk-disconnect", conf.name])
         self.iters = [
-                model.append(self.iter, ["gtk-media-play", _("Queuing")]),
-                model.append(self.iter, ["gtk-apply", _("Completed")]),
-                model.append(self.iter, ["gtk-cancel", _("Recycled")]),
+                server_iter,
+                model.append(server_iter, ["gtk-media-play", _("Queuing")]),
+                model.append(server_iter, ["gtk-apply", _("Completed")]),
+                model.append(server_iter, ["gtk-cancel", _("Recycled")]),
                 ]
         for cate_name in self.cates:
             cate_iter = model.append(self.iters[ITER_COMPLETED],
@@ -94,7 +94,7 @@ class Server:
         Set if client is connected to the server.
         """
         self.connected = connected
-        self.group.model.set(self.iter, 0,
+        self.group.model.set(self.iters[ITER_SERVER], 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
 
 class ServerGroup:
@@ -121,9 +121,10 @@ class ServerGroup:
         """
         (model, selected_iter) = selection.get_selected()
         path = model.get_path(selected_iter)
+        # if not the server iter
         if len(path) > 1:
-            server_index = path[0]
-            model_index = path[-1] + (0, ITER_COUNT)[len(path) - 2]
-            tasklist_model = self.servers.values()[server_index].models[model_index]
+            model_index = path[-1] + (1, ITER_COUNT)[len(path) - 2]
+            server = self.servers.values()[path[0]]
+            tasklist_model = server.models[model_index]
             self.main_app.tasklist_view.set_model(tasklist_model)
 

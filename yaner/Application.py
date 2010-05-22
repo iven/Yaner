@@ -99,34 +99,6 @@ class YanerApp(SingleInstanceApp):
         filefilters['torrent'].add_mime_type("application/x-bittorrent")
         filefilters['metalink'].add_mime_type("application/xml")
 
-    def create_new_task(self):
-        """
-        Create a new download task from default configuration
-        and new task dialog.
-        Returns True for success, False for failure.
-        """
-        widgets = self.task_new_widgets
-        task_type = widgets['nb'].get_current_page()
-
-        if task_type == TASK_METALINK:
-            metalink = widgets['metalink_file_chooser'].get_filename()
-            if os.path.exists(metalink):
-                MetalinkTask(self, metalink)
-                return True
-        elif task_type == TASK_NORMAL:
-            uris = self.task_new_get_uris(widgets['normal_uri_textview'])
-            if uris:
-                NormalTask(self, uris)
-                return True
-        elif task_type == TASK_BT:
-            torrent = widgets['bt_file_chooser'].get_filename()
-            uris = self.task_new_get_uris(widgets['bt_uri_textview'])
-            if os.path.exists(torrent):
-                BTTask(self, torrent, uris)
-                return True
-
-        return False
-
     @staticmethod
     def task_new_get_widgets(builder):
         """
@@ -232,6 +204,33 @@ class YanerApp(SingleInstanceApp):
                         [cate_name[5:], directory])
             self.task_new_widgets['cate_cb'].set_active(0)
 
+    def on_task_new_dialog_response(self, dialog, response):
+        """
+        Create a new download task if uris are provided.
+        """
+        if response != gtk.RESPONSE_OK:
+            dialog.hide()
+
+        widgets = self.task_new_widgets
+        task_type = widgets['nb'].get_current_page()
+
+        if task_type == TASK_METALINK:
+            metalink = widgets['metalink_file_chooser'].get_filename()
+            if metalink and os.path.exists(metalink):
+                MetalinkTask(self, metalink)
+                dialog.hide()
+        elif task_type == TASK_NORMAL:
+            uris = self.task_new_get_uris(widgets['normal_uri_textview'])
+            if uris:
+                NormalTask(self, uris)
+                dialog.hide()
+        elif task_type == TASK_BT:
+            torrent = widgets['bt_file_chooser'].get_filename()
+            uris = self.task_new_get_uris(widgets['bt_uri_textview'])
+            if torrent and os.path.exists(torrent):
+                BTTask(self, torrent, uris)
+                dialog.hide()
+
     def on_task_new_action_activate(self, action):
         """
         Popup new task dialog and process.
@@ -259,22 +258,24 @@ class YanerApp(SingleInstanceApp):
             widgets['server_ls'].append([server.conf.name])
         widgets['server_cb'].set_active(0)
         # run the dialog
-        # TODO: response signal connect ?
-        response = self.task_new_dialog.run()
-        while response == gtk.RESPONSE_OK:
-            if self.create_new_task():
-                break
-            else:
-                response = self.task_new_dialog.run()
-        self.task_new_dialog.hide()
+        self.task_new_dialog.run()
 
     def on_task_remove_action_activate(self, action):
+        """
+        Being called when task_remove_action activated.
+        """
         pass
 
     def on_task_start_action_activate(self, action):
+        """
+        Being called when task_start_action activated.
+        """
         pass
 
     def on_task_pause_action_activate(self, action):
+        """
+        Being called when task_pause_action activated.
+        """
         pass
 
     @staticmethod
@@ -287,7 +288,7 @@ class YanerApp(SingleInstanceApp):
         about_dialog.hide()
         
     @staticmethod
-    def on_quit_action_activate(widget):
+    def on_quit_action_activate(action):
         """
         Main window quit callback.
         """
