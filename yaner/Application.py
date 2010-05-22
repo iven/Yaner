@@ -276,6 +276,15 @@ class YanerApp(SingleInstanceApp):
                 response = self.task_new_dialog.run()
         self.task_new_dialog.hide()
 
+    def on_task_remove_action_activate(self, action):
+        pass
+
+    def on_task_start_action_activate(self, action):
+        pass
+
+    def on_task_pause_action_activate(self, action):
+        pass
+
     @staticmethod
     def on_about_action_activate(about_dialog):
         """
