@@ -33,6 +33,7 @@ from twisted.internet import reactor
 from yaner.Constants import *
 from yaner.Server import ServerGroup
 from yaner.Task import NormalTask, BTTask, MetalinkTask
+from yaner.TaskNew import TaskNew
 from yaner.Configuration import ConfigFile
 from yaner.SingleInstance import SingleInstanceApp
 
@@ -45,16 +46,12 @@ class YanerApp(SingleInstanceApp):
         self.init_paths()
         # Builder
         builder = gtk.Builder()
-        builder.add_from_file(GLADE_FILE)
+        builder.add_from_file(MAIN_UI_FILE)
         builder.connect_signals(self)
+        self.builder = builder
         # Main Window
         self.main_window = builder.get_object("main_window")
         self.init_rgba(self.main_window)
-        # File Filters
-        filefilters = {}
-        filefilters['torrent'] = builder.get_object("torrent_filefilter")
-        filefilters['metalink'] = builder.get_object("metalink_filefilter")
-        self.init_filefilters(filefilters)
         # Main Config
         self.conf = ConfigFile(U_MAIN_CONFIG_FILE)
         # Server View
@@ -62,10 +59,8 @@ class YanerApp(SingleInstanceApp):
         self.server_group = ServerGroup(self, server_tv)
         # Task List View
         self.tasklist_view = builder.get_object('tasklist_tv')
-        # Task New Dialog
-        self.task_new_dialog = builder.get_object("task_new_dialog")
-        self.task_new_widgets = self.task_new_get_widgets(builder)
-        self.task_new_prefs = self.task_new_get_prefs(builder)
+        # Task New
+        self.task_new = TaskNew(self)
         # Show the window
         self.main_window.show()
 
@@ -91,174 +86,18 @@ class YanerApp(SingleInstanceApp):
         if not os.path.exists(U_SERVER_CONFIG_FILE):
             shutil.copy(SERVER_CONFIG_FILE, U_CONFIG_DIR)
 
-    @staticmethod
-    def init_filefilters(filefilters):
-        """
-        Init Filefilters.
-        """
-        filefilters['torrent'].add_mime_type("application/x-bittorrent")
-        filefilters['metalink'].add_mime_type("application/xml")
-
-    @staticmethod
-    def task_new_get_widgets(builder):
-        """
-        Get a dict of widget of new task dialog for future use.
-        """
-        widgets = {}
-        widgets['nb'] = builder.get_object("task_new_nb")
-
-        widgets['server_cb'] = builder.get_object("task_new_server_cb")
-        widgets['server_ls'] = builder.get_object("task_new_server_ls")
-        widgets['cate_cb'] = builder.get_object("task_new_cate_cb")
-        widgets['cate_ls'] = builder.get_object("task_new_cate_ls")
-
-        widgets['normal_uri_textview'] = builder.get_object(
-                "task_new_normal_uri_textview")
-        widgets['bt_uri_textview'] = builder.get_object(
-                "task_new_bt_uri_textview")
-        widgets['bt_file_chooser'] = builder.get_object(
-                "task_new_bt_file_chooser")
-        widgets['metalink_file_chooser'] = builder.get_object(
-                "task_new_metalink_file_chooser")
-        return widgets
-
-    @staticmethod
-    def task_new_get_prefs(builder):
-        """
-        Get a dict of widget corresponding to a preference in the
-        configuration file of new task dialog for future use.
-        """
-        prefs = {}
-        prefs['dir'] = builder.get_object("task_new_dir_entry")
-        prefs['out'] = builder.get_object("task_new_rename_entry")
-        prefs['referer'] = builder.get_object("task_new_referer_entry")
-        prefs['http-user'] = builder.get_object("task_new_http_user_entry")
-        prefs['http-passwd'] = builder.get_object("task_new_http_pass_entry")
-        prefs['ftp-user'] = builder.get_object("task_new_ftp_user_entry")
-        prefs['ftp-passwd'] = builder.get_object("task_new_ftp_pass_entry")
-        prefs['split'] = builder.get_object('split_adjustment')
-        prefs['bt-max-open-files'] = builder.get_object('max_files_adjustment')
-        prefs['bt-max-peers'] = builder.get_object('max_peers_adjustment')
-        prefs['seed-time'] = builder.get_object('seed_time_adjustment')
-        prefs['seed-ratio'] = builder.get_object('seed_ratio_adjustment')
-        prefs['bt-prioritize-piece'] = builder.get_object(
-                "task_new_prioritize_checkbutton")
-        prefs['metalink-servers'] = builder.get_object(
-                'servers_adjustment')
-        prefs['metalink-location'] = builder.get_object(
-                'task_new_location_entry')
-        prefs['metalink-language'] = builder.get_object(
-                'task_new_language_entry')
-        prefs['metalink-os'] = builder.get_object(
-                'os_adjustment')
-        prefs['metalink-version'] = builder.get_object(
-                'version_adjustment')
-        return prefs
-
-    @staticmethod
-    def task_new_get_uris(textview):
-        """
-        Get URIs from textviews, returning a tuple of URIs.
-        """
-        tbuffer = textview.get_buffer()
-        uris = tbuffer.get_text(
-                tbuffer.get_start_iter(),
-                tbuffer.get_end_iter()
-                )
-        return [uri.strip() for uri in uris.split("\n") if uri.strip()]
-
     def on_instance_exists(self):
         """
         Being called when another instance exists. Currently just quits.
         """
         SingleInstanceApp.on_instance_exists(self)
 
-    def on_task_new_dir_chooser_changed(self, dir_chooser):
-        """
-        When directory chooser selection changed, update the directory entry.
-        """
-        directory = dir_chooser.get_filename()
-        self.task_new_prefs['dir'].set_text(directory)
-
-    def on_task_new_cate_cb_changed(self, cate_cb):
-        """
-        When category combobox selection changed, update the directory entry.
-        """
-        active_iter = cate_cb.get_active_iter()
-        if active_iter != None:
-            model = self.task_new_widgets['cate_ls']
-            directory = model.get(active_iter, 1)[0]
-            self.task_new_prefs['dir'].set_text(directory)
-
-    def on_task_new_server_cb_changed(self, server_cb):
-        """
-        When server combobox selection changed, update the category combobox.
-        """
-        index = server_cb.get_active()
-        if index != -1:
-            server = self.server_group.servers.values()[index]
-            self.task_new_widgets['cate_ls'].clear()
-            for cate_name in server.cates:
-                directory = server.conf[cate_name]
-                self.task_new_widgets['cate_ls'].append(
-                        [cate_name[5:], directory])
-            self.task_new_widgets['cate_cb'].set_active(0)
-
-    def on_task_new_dialog_response(self, dialog, response):
-        """
-        Create a new download task if uris are provided.
-        """
-        if response != gtk.RESPONSE_OK:
-            dialog.hide()
-
-        widgets = self.task_new_widgets
-        task_type = widgets['nb'].get_current_page()
-
-        if task_type == TASK_METALINK:
-            metalink = widgets['metalink_file_chooser'].get_filename()
-            if metalink and os.path.exists(metalink):
-                MetalinkTask(self, metalink)
-                dialog.hide()
-        elif task_type == TASK_NORMAL:
-            uris = self.task_new_get_uris(widgets['normal_uri_textview'])
-            if uris:
-                NormalTask(self, uris)
-                dialog.hide()
-        elif task_type == TASK_BT:
-            torrent = widgets['bt_file_chooser'].get_filename()
-            uris = self.task_new_get_uris(widgets['bt_uri_textview'])
-            if torrent and os.path.exists(torrent):
-                BTTask(self, torrent, uris)
-                dialog.hide()
 
     def on_task_new_action_activate(self, action):
         """
-        Popup new task dialog and process.
+        Being called when task_new_action activated.
         """
-        # TODO: Clear last URIs before dialog runs
-        widgets = self.task_new_widgets
-        default_conf = self.conf.default
-        # set current page of the notebook
-        action_dict = {
-                "task_new_normal_action": TASK_NORMAL,
-                "task_new_bt_action": TASK_BT,
-                "task_new_metalink_action": TASK_METALINK,
-                }
-        page = action_dict[action.get_property('name')]
-        widgets['nb'].set_current_page(page)
-        # init default configuration
-        for (pref, widget) in self.task_new_prefs.iteritems():
-            if hasattr(widget, 'set_value'):
-                widget.set_value(float(default_conf[pref]))
-            elif hasattr(widget, 'set_text'):
-                widget.set_text(default_conf[pref])
-        # init the server cb
-        widgets['server_ls'].clear()
-        for server in self.server_group.servers.itervalues():
-            widgets['server_ls'].append([server.conf.name])
-        widgets['server_cb'].set_active(0)
-        # run the dialog
-        self.task_new_dialog.run()
+        self.task_new.run_dialog(action)
 
     def on_task_remove_action_activate(self, action):
         """

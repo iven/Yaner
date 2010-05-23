@@ -1,499 +1,8 @@
 <?xml version="1.0"?>
 <interface>
-  <requires lib="gtk+" version="2.18"/>
+  <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkTreeStore" id="taskinfo_ts"/>
-  <object class="GtkTreeStore" id="server_ts">
-    <columns>
-      <!-- column-name server_status -->
-      <column type="gchararray"/>
-      <!-- column-name server_name -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkTreeStore" id="tasklist_ts">
-    <columns>
-      <!-- column-name task_gid -->
-      <column type="gchararray"/>
-      <!-- column-name task_status -->
-      <column type="gchararray"/>
-      <!-- column-name task_name -->
-      <column type="gchararray"/>
-      <!-- column-name task_dir -->
-      <column type="gchararray"/>
-      <!-- column-name task_size -->
-      <column type="gchararray"/>
-      <!-- column-name task_down_speed -->
-      <column type="gchararray"/>
-      <!-- column-name task_up_speed -->
-      <column type="gchararray"/>
-      <!-- column-name task_connections -->
-      <column type="gint"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="task_new_cate_ls">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name dir -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="task_new_server_ls">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkWindow" id="main_window">
-    <property name="width_request">700</property>
-    <property name="height_request">500</property>
-    <property name="title" translatable="yes">Yaner - Faster than a flash of lightning</property>
-    <property name="icon_name">emblem-downloads</property>
-    <signal name="destroy" handler="on_quit_action_activate"/>
-    <child>
-      <object class="GtkVBox" id="main_vbox">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkMenuBar" id="main_menu_bar">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkMenuItem" id="file_menu">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_File</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="file_sub_menu">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkImageMenuItem" id="task_new_item">
-                        <property name="label">gtk-new</property>
-                        <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                        <accelerator key="n" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-                        <child type="submenu">
-                          <object class="GtkMenu" id="task_new_menu">
-                            <property name="visible">True</property>
-                            <child>
-                              <object class="GtkMenuItem" id="task_new_normal_item">
-                                <property name="visible">True</property>
-                                <property name="related_action">task_new_normal_action</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkMenuItem" id="task_new_bt_item">
-                                <property name="visible">True</property>
-                                <property name="related_action">task_new_bt_action</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkMenuItem" id="task_new_metalink_item">
-                                <property name="visible">True</property>
-                                <property name="related_action">task_new_metalink_action</property>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorMenuItem" id="separator1_item">
-                        <property name="visible">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="quit_item">
-                        <property name="visible">True</property>
-                        <property name="related_action">quit_action</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                        <accelerator key="q" signal="activate" modifiers="GDK_CONTROL_MASK"/>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="task_menu">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_Task</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="task_sub_menu">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkImageMenuItem" id="task_start_item">
-                        <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
-                        <property name="related_action">task_start_action</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="task_pause_item">
-                        <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
-                        <property name="related_action">task_pause_action</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="task_remove_item">
-                        <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
-                        <property name="related_action">task_remove_action</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="help_menu">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_Help</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="help_sub_menu">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkImageMenuItem" id="about_item">
-                        <property name="visible">True</property>
-                        <property name="related_action">about_action</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkToolbar" id="toolbar">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkMenuToolButton" id="task_new_tool_item">
-                <property name="visible">True</property>
-                <property name="related_action">task_new_normal_action</property>
-                <property name="label" translatable="yes">Add new task</property>
-                <property name="stock_id">gtk-add</property>
-                <property name="menu">task_new_menu</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="task_remove_toolbutton">
-                <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
-                <property name="related_action">task_remove_action</property>
-                <property name="use_underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparatorToolItem" id="separatortoolitem1">
-                <property name="visible">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="task_start_toolbutton">
-                <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
-                <property name="related_action">task_start_action</property>
-                <property name="use_underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="task_pause_toolbutton">
-                <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
-                <property name="related_action">task_pause_action</property>
-                <property name="use_underline">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkHPaned" id="main_hpaned">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <child>
-              <object class="GtkScrolledWindow" id="server_sw">
-                <property name="width_request">150</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">automatic</property>
-                <property name="vscrollbar_policy">automatic</property>
-                <child>
-                  <object class="GtkTreeView" id="server_tv">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="model">server_ts</property>
-                    <property name="headers_visible">False</property>
-                    <property name="headers_clickable">False</property>
-                    <property name="search_column">1</property>
-                    <child>
-                      <object class="GtkTreeViewColumn" id="server_tc">
-                        <property name="title">Servers</property>
-                        <child>
-                          <object class="GtkCellRendererPixbuf" id="server_status_renderer"/>
-                          <attributes>
-                            <attribute name="stock-id">0</attribute>
-                          </attributes>
-                        </child>
-                        <child>
-                          <object class="GtkCellRendererText" id="server_name_renderer"/>
-                          <attributes>
-                            <attribute name="markup">1</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="resize">False</property>
-                <property name="shrink">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkVPaned" id="main_vpaned">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkScrolledWindow" id="tasklist_sw">
-                    <property name="height_request">150</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
-                    <child>
-                      <object class="GtkTreeView" id="tasklist_tv">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="rules_hint">True</property>
-                        <property name="enable_grid_lines">vertical</property>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="gid_tc">
-                            <property name="resizable">True</property>
-                            <property name="title">GID</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="task_gid_renderer"/>
-                              <attributes>
-                                <attribute name="text">0</attribute>
-                              </attributes>
-                            </child>
-                            <child>
-                              <object class="GtkCellRendererPixbuf" id="task_status_renderer"/>
-                              <attributes>
-                                <attribute name="stock-id">1</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="name_tc">
-                            <property name="resizable">True</property>
-                            <property name="title">Name</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="task_name_renderer"/>
-                              <attributes>
-                                <attribute name="text">2</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="progress_tc">
-                            <property name="resizable">True</property>
-                            <property name="title">Progress</property>
-                            <child>
-                              <object class="GtkCellRendererProgress" id="task_progress_renderer"/>
-                              <attributes>
-                                <attribute name="text">4</attribute>
-                                <attribute name="value">3</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="size_tc">
-                            <property name="resizable">True</property>
-                            <property name="title">Size</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="task_size_renderer"/>
-                              <attributes>
-                                <attribute name="text">5</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="down_speed_tc">
-                            <property name="resizable">True</property>
-                            <property name="title">DownSpeed</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="task_down_speed_renderer"/>
-                              <attributes>
-                                <attribute name="text">6</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="up_speed_tc">
-                            <property name="resizable">True</property>
-                            <property name="title">UpSpeed</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="task_up_speed_renderer"/>
-                              <attributes>
-                                <attribute name="text">7</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="connections_tc">
-                            <property name="resizable">True</property>
-                            <property name="title">Connections</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="task_connections_renderer"/>
-                              <attributes>
-                                <attribute name="text">8</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="resize">True</property>
-                    <property name="shrink">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkScrolledWindow" id="taskinfo_sw">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
-                    <child>
-                      <object class="GtkTreeView" id="taskinfo_tv">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="model">taskinfo_ts</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="resize">True</property>
-                    <property name="shrink">True</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkStatusbar" id="statusbar">
-            <property name="visible">True</property>
-            <property name="spacing">2</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkAction" id="about_action">
-    <property name="stock_id">gtk-about</property>
-    <signal name="activate" handler="on_about_action_activate" object="about_dialog"/>
-  </object>
-  <object class="GtkAction" id="quit_action">
-    <property name="stock_id">gtk-quit</property>
-    <signal name="activate" handler="on_quit_action_activate"/>
-  </object>
-  <object class="GtkAboutDialog" id="about_dialog">
-    <property name="border_width">5</property>
-    <property name="title" translatable="yes">About Yaner</property>
-    <property name="window_position">center-on-parent</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="icon_name">emblem-downloads</property>
-    <property name="type_hint">normal</property>
-    <property name="has_separator">False</property>
-    <property name="program_name">Yaner</property>
-    <property name="copyright" translatable="yes">Copyright &#xA9; 2010 Iven Day(Xu Lijian)</property>
-    <property name="website">http://www.kissuki.com/</property>
-    <property name="authors">Iven Day(Xu Lijian) &lt;ivenvd@gmail.com&gt;</property>
-    <property name="logo_icon_name">emblem-downloads</property>
-    <child internal-child="vbox">
-      <object class="GtkVBox" id="about_dialog_vbox">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="about_dialog_action_area">
-            <property name="visible">True</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkDialog" id="task_new_dialog">
+  <object class="GtkDialog" id="dialog">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Add new task</property>
     <property name="modal">True</property>
@@ -501,50 +10,50 @@
     <property name="icon_name">emblem-downloads</property>
     <property name="type_hint">normal</property>
     <property name="has_separator">False</property>
-    <signal name="response" handler="on_task_new_dialog_response"/>
+    <signal name="response" handler="on_dialog_response"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="task_new_dialog_vbox">
+      <object class="GtkVBox" id="dialog_vbox">
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkVBox" id="task_new_vbox">
+          <object class="GtkVBox" id="vbox">
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <property name="spacing">5</property>
             <child>
-              <object class="GtkNotebook" id="task_new_nb">
+              <object class="GtkNotebook" id="nb">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <child>
-                  <object class="GtkVBox" id="task_new_normal_vbox">
+                  <object class="GtkVBox" id="normal_vbox">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
-                      <object class="GtkFrame" id="task_new_normal_uri_frame">
+                      <object class="GtkFrame" id="normal_uri_frame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="task_new_normal_uri_alignment">
+                          <object class="GtkAlignment" id="normal_uri_alignment">
                             <property name="visible">True</property>
                             <property name="top_padding">5</property>
                             <property name="bottom_padding">5</property>
                             <property name="left_padding">12</property>
                             <property name="right_padding">5</property>
                             <child>
-                              <object class="GtkScrolledWindow" id="task_new_normal_uri_sw">
+                              <object class="GtkScrolledWindow" id="normal_uri_sw">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="hscrollbar_policy">automatic</property>
                                 <property name="vscrollbar_policy">automatic</property>
                                 <property name="shadow_type">in</property>
                                 <child>
-                                  <object class="GtkTextView" id="task_new_normal_uri_textview">
+                                  <object class="GtkTextView" id="normal_uri_textview">
                                     <property name="height_request">70</property>
                                     <property name="visible">True</property>
-                                    <property name="has_focus">True</property>
+                                    <property name="can_focus">True</property>
                                   </object>
                                 </child>
                               </object>
@@ -552,7 +61,7 @@
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="task_new_normal_uri_label">
+                          <object class="GtkLabel" id="normal_uri_label">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">&lt;b&gt;URI(s)&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
@@ -564,26 +73,26 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="task_new_normal_setting_frame">
+                      <object class="GtkFrame" id="normal_setting_frame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="task_new_normal_setting_alignment">
+                          <object class="GtkAlignment" id="normal_setting_alignment">
                             <property name="visible">True</property>
                             <property name="top_padding">5</property>
                             <property name="bottom_padding">5</property>
                             <property name="left_padding">12</property>
                             <property name="right_padding">5</property>
                             <child>
-                              <object class="GtkTable" id="task_new_normal_setting_table">
+                              <object class="GtkTable" id="normal_setting_table">
                                 <property name="visible">True</property>
                                 <property name="n_rows">2</property>
                                 <property name="n_columns">4</property>
                                 <property name="column_spacing">10</property>
                                 <property name="row_spacing">5</property>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_referer_label">
+                                  <object class="GtkLabel" id="referer_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Referer:</property>
@@ -594,7 +103,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_rename_label">
+                                  <object class="GtkLabel" id="rename_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Rename:</property>
@@ -607,7 +116,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_referer_entry">
+                                  <object class="GtkEntry" id="referer_entry">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
@@ -618,7 +127,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_rename_entry">
+                                  <object class="GtkEntry" id="rename_entry">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
@@ -632,7 +141,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_split_label">
+                                  <object class="GtkLabel" id="split_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Connections:</property>
@@ -647,7 +156,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="task_new_split_spinbutton">
+                                  <object class="GtkSpinButton" id="split_spinbutton">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
@@ -667,7 +176,7 @@
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="task_new_normal_setting_label">
+                          <object class="GtkLabel" id="normal_setting_label">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">&lt;b&gt;Settings&lt;/b&gt; - Optional</property>
                             <property name="use_markup">True</property>
@@ -680,26 +189,26 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="task_new_auth_frame">
+                      <object class="GtkFrame" id="auth_frame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="task_new_auth_alignment">
+                          <object class="GtkAlignment" id="auth_alignment">
                             <property name="visible">True</property>
                             <property name="top_padding">5</property>
                             <property name="bottom_padding">5</property>
                             <property name="left_padding">12</property>
                             <property name="right_padding">5</property>
                             <child>
-                              <object class="GtkTable" id="task_new_auth_table">
+                              <object class="GtkTable" id="auth_table">
                                 <property name="visible">True</property>
                                 <property name="n_rows">2</property>
                                 <property name="n_columns">5</property>
                                 <property name="column_spacing">10</property>
                                 <property name="row_spacing">5</property>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_http_user_label">
+                                  <object class="GtkLabel" id="http_user_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">User:</property>
@@ -711,7 +220,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_http_user_entry">
+                                  <object class="GtkEntry" id="http_user_entry">
                                     <property name="width_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -724,7 +233,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_ftp_pass_label">
+                                  <object class="GtkLabel" id="ftp_pass_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Password:</property>
@@ -738,7 +247,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_ftp_pass_entry">
+                                  <object class="GtkEntry" id="ftp_pass_entry">
                                     <property name="width_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -754,7 +263,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_http_pass_label">
+                                  <object class="GtkLabel" id="http_pass_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Password:</property>
@@ -766,7 +275,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_http_pass_entry">
+                                  <object class="GtkEntry" id="http_pass_entry">
                                     <property name="width_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -780,7 +289,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_ftp_user_label">
+                                  <object class="GtkLabel" id="ftp_user_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">User:</property>
@@ -794,7 +303,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_ftp_user_entry">
+                                  <object class="GtkEntry" id="ftp_user_entry">
                                     <property name="width_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -809,7 +318,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_http_label">
+                                  <object class="GtkLabel" id="http_label">
                                     <property name="visible">True</property>
                                     <property name="label" translatable="yes">&lt;b&gt;HTTP&lt;/b&gt;</property>
                                     <property name="use_markup">True</property>
@@ -819,7 +328,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_ftp_label">
+                                  <object class="GtkLabel" id="ftp_label">
                                     <property name="visible">True</property>
                                     <property name="label" translatable="yes">&lt;b&gt;FTP&lt;/b&gt;</property>
                                     <property name="use_markup">True</property>
@@ -835,7 +344,7 @@
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="task_new_auth_label">
+                          <object class="GtkLabel" id="auth_label">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">&lt;b&gt;Authorization&lt;/b&gt; - Optional</property>
                             <property name="use_markup">True</property>
@@ -850,7 +359,7 @@
                   </object>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="task_new_normal_label">
+                  <object class="GtkLabel" id="normal_label">
                     <property name="visible">True</property>
                     <property name="label" translatable="yes">Normal / BT Magnet</property>
                   </object>
@@ -859,24 +368,24 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="task_new_bt_vbox">
+                  <object class="GtkVBox" id="bt_vbox">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
-                      <object class="GtkFrame" id="task_new_bt_file_frame">
+                      <object class="GtkFrame" id="bt_file_frame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="task_new_bt_file_alignment">
+                          <object class="GtkAlignment" id="bt_file_alignment">
                             <property name="visible">True</property>
                             <property name="top_padding">5</property>
                             <property name="bottom_padding">5</property>
                             <property name="left_padding">12</property>
                             <property name="right_padding">5</property>
                             <child>
-                              <object class="GtkFileChooserButton" id="task_new_bt_file_chooser">
+                              <object class="GtkFileChooserButton" id="bt_file_chooser">
                                 <property name="visible">True</property>
                                 <property name="filter">torrent_filefilter</property>
                                 <property name="title" translatable="yes"></property>
@@ -885,7 +394,7 @@
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="task_new_bt_file_label">
+                          <object class="GtkLabel" id="bt_file_label">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">&lt;b&gt;Torrent File&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
@@ -898,26 +407,26 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="task_new_bt_uri_frame">
+                      <object class="GtkFrame" id="bt_uri_frame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="task_new_bt_uri_alignment">
+                          <object class="GtkAlignment" id="bt_uri_alignment">
                             <property name="visible">True</property>
                             <property name="top_padding">5</property>
                             <property name="bottom_padding">5</property>
                             <property name="left_padding">12</property>
                             <property name="right_padding">5</property>
                             <child>
-                              <object class="GtkScrolledWindow" id="task_new_bt_uri_sw">
+                              <object class="GtkScrolledWindow" id="bt_uri_sw">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="hscrollbar_policy">automatic</property>
                                 <property name="vscrollbar_policy">automatic</property>
                                 <property name="shadow_type">in</property>
                                 <child>
-                                  <object class="GtkTextView" id="task_new_bt_uri_textview">
+                                  <object class="GtkTextView" id="bt_uri_textview">
                                     <property name="height_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -928,7 +437,7 @@
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="task_new_bt_uri_label">
+                          <object class="GtkLabel" id="bt_uri_label">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">&lt;b&gt;URI(s)&lt;/b&gt; - Optional</property>
                             <property name="use_markup">True</property>
@@ -940,26 +449,26 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="task_new_bt_setting_frame">
+                      <object class="GtkFrame" id="bt_setting_frame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="task_new_bt_setting_alignment">
+                          <object class="GtkAlignment" id="bt_setting_alignment">
                             <property name="visible">True</property>
                             <property name="top_padding">5</property>
                             <property name="bottom_padding">5</property>
                             <property name="left_padding">12</property>
                             <property name="right_padding">5</property>
                             <child>
-                              <object class="GtkTable" id="task_new_bt_setting_table">
+                              <object class="GtkTable" id="bt_setting_table">
                                 <property name="visible">True</property>
                                 <property name="n_rows">3</property>
                                 <property name="n_columns">4</property>
                                 <property name="column_spacing">10</property>
                                 <property name="row_spacing">5</property>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_max_files_label">
+                                  <object class="GtkLabel" id="max_files_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Max open files:</property>
@@ -970,7 +479,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_seed_time_label">
+                                  <object class="GtkLabel" id="seed_time_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Seed time(min):</property>
@@ -983,7 +492,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_seed_ratio_label">
+                                  <object class="GtkLabel" id="seed_ratio_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Seed ratio:</property>
@@ -998,7 +507,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="task_new_seed_ratio_spinbutton">
+                                  <object class="GtkSpinButton" id="seed_ratio_spinbutton">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
@@ -1016,7 +525,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="task_new_max_files_spinbutton">
+                                  <object class="GtkSpinButton" id="max_files_spinbutton">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
@@ -1029,7 +538,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="task_new_max_peers_spinbutton">
+                                  <object class="GtkSpinButton" id="max_peers_spinbutton">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
@@ -1042,7 +551,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_max_peers_label">
+                                  <object class="GtkLabel" id="max_peers_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Max peers:</property>
@@ -1055,7 +564,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="task_new_seed_time_spinbutton">
+                                  <object class="GtkSpinButton" id="seed_time_spinbutton">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
@@ -1070,7 +579,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkCheckButton" id="task_new_prioritize_checkbutton">
+                                  <object class="GtkCheckButton" id="prioritize_checkbutton">
                                     <property name="label" translatable="yes">Preview mode - Try to download first and last pieces first</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -1088,7 +597,7 @@
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="task_new_normal_setting_label1">
+                          <object class="GtkLabel" id="bt_setting_label">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">&lt;b&gt;Settings&lt;/b&gt; - Optional</property>
                             <property name="use_markup">True</property>
@@ -1106,7 +615,7 @@
                   </packing>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="task_new_bt_label">
+                  <object class="GtkLabel" id="bt_label">
                     <property name="visible">True</property>
                     <property name="label" translatable="yes">BitTorrent</property>
                   </object>
@@ -1116,24 +625,24 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="task_new_metalink_vbox">
+                  <object class="GtkVBox" id="metalink_vbox">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
-                      <object class="GtkFrame" id="task_new_metalink_file_frame">
+                      <object class="GtkFrame" id="metalink_file_frame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="task_new_metalink_file_alignment">
+                          <object class="GtkAlignment" id="metalink_file_alignment">
                             <property name="visible">True</property>
                             <property name="top_padding">5</property>
                             <property name="bottom_padding">5</property>
                             <property name="left_padding">12</property>
                             <property name="right_padding">5</property>
                             <child>
-                              <object class="GtkFileChooserButton" id="task_new_metalink_file_chooser">
+                              <object class="GtkFileChooserButton" id="metalink_file_chooser">
                                 <property name="visible">True</property>
                                 <property name="filter">metalink_filefilter</property>
                                 <property name="title" translatable="yes"></property>
@@ -1142,7 +651,7 @@
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="task_new_metalink_file_label">
+                          <object class="GtkLabel" id="metalink_file_label">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">&lt;b&gt;Metalink File&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
@@ -1155,26 +664,26 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="task_new_metalink_setting_frame">
+                      <object class="GtkFrame" id="metalink_setting_frame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="task_new_metalink_setting_alignment">
+                          <object class="GtkAlignment" id="metalink_setting_alignment">
                             <property name="visible">True</property>
                             <property name="top_padding">5</property>
                             <property name="bottom_padding">5</property>
                             <property name="left_padding">12</property>
                             <property name="right_padding">5</property>
                             <child>
-                              <object class="GtkTable" id="task_new_metalink_setting_table">
+                              <object class="GtkTable" id="metalink_setting_table">
                                 <property name="visible">True</property>
                                 <property name="n_rows">5</property>
                                 <property name="n_columns">2</property>
                                 <property name="column_spacing">10</property>
                                 <property name="row_spacing">5</property>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_servers_label">
+                                  <object class="GtkLabel" id="servers_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Download servers:</property>
@@ -1185,7 +694,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_location_label">
+                                  <object class="GtkLabel" id="location_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Prefered locations:</property>
@@ -1198,7 +707,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_location_entry">
+                                  <object class="GtkEntry" id="location_entry">
                                     <property name="width_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -1214,7 +723,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_language_label">
+                                  <object class="GtkLabel" id="language_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Language:</property>
@@ -1227,7 +736,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_language_entry">
+                                  <object class="GtkEntry" id="language_entry">
                                     <property name="width_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -1243,7 +752,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_version_entry">
+                                  <object class="GtkEntry" id="version_entry">
                                     <property name="width_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -1259,7 +768,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="task_new_os_entry">
+                                  <object class="GtkEntry" id="os_entry">
                                     <property name="width_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -1275,7 +784,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="task_new_servers_spinbutton">
+                                  <object class="GtkSpinButton" id="servers_spinbutton">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
@@ -1288,7 +797,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_os_label">
+                                  <object class="GtkLabel" id="os_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">OS:</property>
@@ -1301,7 +810,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="task_new_version_label">
+                                  <object class="GtkLabel" id="version_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
                                     <property name="label" translatable="yes">Version:</property>
@@ -1318,9 +827,9 @@
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="task_new_auth_label1">
+                          <object class="GtkLabel" id="metalink_setting_label">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Authorization&lt;/b&gt; - Optional</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Settings&lt;/b&gt; - Optional</property>
                             <property name="use_markup">True</property>
                           </object>
                         </child>
@@ -1336,7 +845,7 @@
                   </packing>
                 </child>
                 <child type="tab">
-                  <object class="GtkLabel" id="task_new_metalink_label">
+                  <object class="GtkLabel" id="metalink_label">
                     <property name="visible">True</property>
                     <property name="label" translatable="yes">Metalink</property>
                   </object>
@@ -1351,31 +860,31 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFrame" id="task_new_save_frame">
+              <object class="GtkFrame" id="save_frame">
                 <property name="visible">True</property>
                 <property name="label_xalign">0</property>
                 <property name="shadow_type">none</property>
                 <child>
-                  <object class="GtkAlignment" id="task_new_save_alignment">
+                  <object class="GtkAlignment" id="save_alignment">
                     <property name="visible">True</property>
                     <property name="top_padding">5</property>
                     <property name="bottom_padding">5</property>
                     <property name="left_padding">12</property>
                     <property name="right_padding">5</property>
                     <child>
-                      <object class="GtkTable" id="task_new_save_table">
+                      <object class="GtkTable" id="save_table">
                         <property name="visible">True</property>
                         <property name="n_rows">2</property>
                         <property name="n_columns">3</property>
                         <property name="column_spacing">10</property>
                         <property name="row_spacing">5</property>
                         <child>
-                          <object class="GtkComboBox" id="task_new_server_cb">
+                          <object class="GtkComboBox" id="server_cb">
                             <property name="visible">True</property>
-                            <property name="model">task_new_server_ls</property>
-                            <signal name="changed" handler="on_task_new_server_cb_changed"/>
+                            <property name="model">server_ls</property>
+                            <signal name="changed" handler="on_server_cb_changed"/>
                             <child>
-                              <object class="GtkCellRendererText" id="task_new_server_renderer"/>
+                              <object class="GtkCellRendererText" id="server_renderer"/>
                               <attributes>
                                 <attribute name="text">0</attribute>
                               </attributes>
@@ -1388,7 +897,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="task_new_cate_label">
+                          <object class="GtkLabel" id="cate_label">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Category:</property>
@@ -1399,12 +908,12 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkComboBox" id="task_new_cate_cb">
+                          <object class="GtkComboBox" id="cate_cb">
                             <property name="visible">True</property>
-                            <property name="model">task_new_cate_ls</property>
-                            <signal name="changed" handler="on_task_new_cate_cb_changed"/>
+                            <property name="model">cate_ls</property>
+                            <signal name="changed" handler="on_cate_cb_changed"/>
                             <child>
-                              <object class="GtkCellRendererText" id="task_new_cate_renderer"/>
+                              <object class="GtkCellRendererText" id="cate_renderer"/>
                               <attributes>
                                 <attribute name="text">0</attribute>
                               </attributes>
@@ -1416,7 +925,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="task_new_dir_label">
+                          <object class="GtkLabel" id="dir_label">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Directory:</property>
@@ -1429,11 +938,11 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkFileChooserButton" id="task_new_dir_chooser">
+                          <object class="GtkFileChooserButton" id="dir_chooser">
                             <property name="visible">True</property>
                             <property name="action">select-folder</property>
                             <property name="title" translatable="yes">Select download directory</property>
-                            <signal name="selection_changed" handler="on_task_new_dir_chooser_changed"/>
+                            <signal name="selection_changed" handler="on_dir_chooser_changed"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -1443,7 +952,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="task_new_dir_entry">
+                          <object class="GtkEntry" id="dir_entry">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="invisible_char">&#x25CF;</property>
@@ -1461,7 +970,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkLabel" id="task_new_save_label">
+                  <object class="GtkLabel" id="save_label">
                     <property name="visible">True</property>
                     <property name="label" translatable="yes">&lt;b&gt;Server and Category&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
@@ -1480,11 +989,11 @@
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="task_new_dialog_action_area">
+          <object class="GtkHButtonBox" id="dialog_action_area">
             <property name="visible">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="task_new_cancel_button">
+              <object class="GtkButton" id="cancel_button">
                 <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1498,7 +1007,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="task_new_ok_button">
+              <object class="GtkButton" id="ok_button">
                 <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1521,59 +1030,23 @@
       </object>
     </child>
     <action-widgets>
-      <action-widget response="-6">task_new_cancel_button</action-widget>
-      <action-widget response="-5">task_new_ok_button</action-widget>
+      <action-widget response="-6">cancel_button</action-widget>
+      <action-widget response="-5">ok_button</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkAdjustment" id="split_adjustment">
-    <property name="value">5</property>
-    <property name="lower">1</property>
-    <property name="upper">20</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">5</property>
+  <object class="GtkListStore" id="cate_ls">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name dir -->
+      <column type="gchararray"/>
+    </columns>
   </object>
-  <object class="GtkStatusIcon" id="statusicon">
-    <property name="icon_name">emblem-downloads</property>
-  </object>
-  <object class="GtkFileFilter" id="torrent_filefilter"/>
-  <object class="GtkFileFilter" id="metalink_filefilter"/>
-  <object class="GtkAdjustment" id="max_files_adjustment">
-    <property name="value">100</property>
-    <property name="lower">1</property>
-    <property name="upper">1024</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="max_peers_adjustment">
-    <property name="value">55</property>
-    <property name="lower">1</property>
-    <property name="upper">1024</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="seed_time_adjustment">
-    <property name="value">120</property>
-    <property name="upper">36000</property>
-    <property name="step_increment">15</property>
-    <property name="page_increment">60</property>
-  </object>
-  <object class="GtkAdjustment" id="seed_ratio_adjustment">
-    <property name="value">2</property>
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkAction" id="task_new_normal_action">
-    <property name="label">HTTP/FTP/BT Magnet</property>
-    <signal name="activate" handler="on_task_new_action_activate" object="task_new_normal_action"/>
-  </object>
-  <object class="GtkAction" id="task_new_bt_action">
-    <property name="label">BitTorrent</property>
-    <signal name="activate" handler="on_task_new_action_activate" object="task_new_bt_action"/>
-  </object>
-  <object class="GtkAction" id="task_new_metalink_action">
-    <property name="label">Metalink</property>
-    <signal name="activate" handler="on_task_new_action_activate" object="task_new_metalink_action"/>
+  <object class="GtkListStore" id="server_ls">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
   </object>
   <object class="GtkAdjustment" id="servers_adjustment">
     <property name="lower">1</property>
@@ -1581,19 +1054,34 @@
     <property name="step_increment">1</property>
     <property name="page_increment">5</property>
   </object>
-  <object class="GtkAction" id="task_remove_action">
-    <property name="label">Remove</property>
-    <property name="stock_id">gtk-remove</property>
-    <signal name="activate" handler="on_task_remove_action_activate"/>
+  <object class="GtkAdjustment" id="seed_ratio_adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
   </object>
-  <object class="GtkAction" id="task_pause_action">
-    <property name="label">Pause</property>
-    <property name="stock_id">gtk-media-pause</property>
-    <signal name="activate" handler="on_task_pause_action_activate"/>
+  <object class="GtkAdjustment" id="seed_time_adjustment">
+    <property name="upper">36000</property>
+    <property name="step_increment">15</property>
+    <property name="page_increment">60</property>
   </object>
-  <object class="GtkAction" id="task_start_action">
-    <property name="label">Start</property>
-    <property name="stock_id">gtk-media-play</property>
-    <signal name="activate" handler="on_task_start_action_activate"/>
+  <object class="GtkAdjustment" id="max_peers_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">1024</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="max_files_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">1024</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="split_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">20</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">5</property>
+  </object>
+  <object class="GtkFileFilter" id="metalink_filefilter"/>
+  <object class="GtkFileFilter" id="torrent_filefilter"/>
 </interface>

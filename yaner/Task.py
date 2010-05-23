@@ -41,15 +41,16 @@ class Task:
     General task class.
     """
     def __init__(self, main_app):
+        # TODO: Move this to TaskNew
         # get server
-        index = main_app.task_new_widgets['server_cb'].get_active()
+        index = main_app.task_new.widgets['server_cb'].get_active()
         (server_name, server) = main_app.server_group.servers.items()[index]
         # get category
-        cate_index = main_app.task_new_widgets['cate_cb'].get_active()
+        cate_index = main_app.task_new.widgets['cate_cb'].get_active()
         cate_name = server.cates[cate_index]
         # task options
         options = dict(main_app.conf.default)
-        for (pref, widget) in main_app.task_new_prefs.iteritems():
+        for (pref, widget) in main_app.task_new.prefs.iteritems():
             if pref == 'seed-ratio':
                 options[pref] = str(widget.get_value())
             elif hasattr(widget, 'get_value'):
@@ -61,7 +62,7 @@ class Task:
             if not value:
                 del options[pref]
         # bt prioritize
-        if main_app.task_new_prefs['bt-prioritize-piece'].get_active():
+        if main_app.task_new.prefs['bt-prioritize-piece'].get_active():
             options['bt-prioritize-piece'] = 'head,tail'
 
         self.main_app = main_app

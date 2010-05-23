@@ -35,7 +35,8 @@ _DATA_DIR = "@prefix@/share/yaner"
 #PIXMAPDIR = _join(DATADIR, "images")
 _CONFIG_DIR = _join(_DATA_DIR, "config")
 _GLADE_DIR = _join(_DATA_DIR, "glade")
-GLADE_FILE = _join(_GLADE_DIR, "yaner.glade")
+MAIN_UI_FILE = _join(_GLADE_DIR, "main.ui")
+TASK_NEW_UI_FILE = _join(_GLADE_DIR, "task_new.ui")
 MAIN_CONFIG_FILE = _join(_CONFIG_DIR, "yaner.conf")
 SERVER_CONFIG_FILE = _join(_CONFIG_DIR, "servers.conf")
 # User
