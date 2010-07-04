@@ -36,7 +36,7 @@ from yaner.Constants import *
 from yaner.Pretty import psize, pspeed
 from yaner.Configuration import ConfigFile
 
-class Task:
+class TaskMixin:
     """
     General task class.
     """
@@ -131,12 +131,12 @@ class Task:
             dialog.destroy()
         return failure
 
-class MetalinkTask(Task):
+class MetalinkTask(TaskMixin):
     """
     Metalink Task Class
     """
     def __init__(self, main_app, metalink, info, options):
-        Task.__init__(self, main_app, info, options)
+        TaskMixin.__init__(self, main_app, info, options)
         self.info['type'] = TASK_METALINK
         self.info['metalink'] = metalink
         # Task name
@@ -149,12 +149,12 @@ class MetalinkTask(Task):
                 "aria2.addMetalink", m_binary, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
-class BTTask(Task):
+class BTTask(TaskMixin):
     """
     BT Task Class
     """
     def __init__(self, main_app, torrent, uris, info, options):
-        Task.__init__(self, main_app, info, options)
+        TaskMixin.__init__(self, main_app, info, options)
         self.info['type'] = TASK_BT
         self.info['torrent'] = torrent
         # Task name
@@ -168,12 +168,12 @@ class BTTask(Task):
                 "aria2.addTorrent", t_binary, uris, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
-class NormalTask(Task):
+class NormalTask(TaskMixin):
     """
     Normal Task Class
     """
     def __init__(self, main_app, uris, info, options):
-        Task.__init__(self, main_app, info, options)
+        TaskMixin.__init__(self, main_app, info, options)
         self.info['type'] = TASK_NORMAL
         self.info['uris'] = ','.join(uris)
         # Task name
