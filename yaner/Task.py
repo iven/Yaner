@@ -40,35 +40,11 @@ class Task:
     """
     General task class.
     """
-    def __init__(self, main_app):
-        # TODO: Move this to TaskNew
-        # get server
-        index = main_app.task_new.widgets['server_cb'].get_active()
-        (server_name, server) = main_app.server_group.servers.items()[index]
-        # get category
-        cate_index = main_app.task_new.widgets['cate_cb'].get_active()
-        cate_name = server.cates[cate_index]
-        # task options
-        options = dict(main_app.conf.default)
-        for (pref, widget) in main_app.task_new.prefs.iteritems():
-            if pref == 'seed-ratio':
-                options[pref] = str(widget.get_value())
-            elif hasattr(widget, 'get_value'):
-                options[pref] = str(int(widget.get_value()))
-            elif hasattr(widget, 'get_text'):
-                options[pref] = widget.get_text()
-        # clear empty items
-        for (pref, value) in options.items():
-            if not value:
-                del options[pref]
-        # bt prioritize
-        if main_app.task_new.prefs['bt-prioritize-piece'].get_active():
-            options['bt-prioritize-piece'] = 'head,tail'
-
+    def __init__(self, main_app, info, options):
         self.main_app = main_app
-        self.server = server
+        self.server = main_app.server_group.servers[info['server']]
         self.options = options
-        self.info = {'server': server_name, 'cate': cate_name}
+        self.info = info
         self.conf = None
         self.iter = None
         self.healthy = False
@@ -79,7 +55,7 @@ class Task:
         An iter is added to queuing model and configuration
         file for this task is created.
         """
-        # Workaround for Metalink. TODO: Fix this workaround.
+        # FIXME: Workaround for Metalink.
         self.info['gid'] = gid[-1] if type(gid) is list else gid
 
         file_name = '%(server)s_%(cate)s_%(gid)s' % self.info
@@ -124,10 +100,8 @@ class Task:
         Update data fields of the task iter.
         """
         if status['status'] == 'complete':
-            self.server.models[ITER_QUEUING].set(
-                    self.iter, 3, 100, 4, '100%')
             self.healthy = False
-        elif not 'totalLength' in status:
+        if not 'totalLength' in status:
             print status
         else:
             comp_length = status['completedLength']
@@ -161,8 +135,8 @@ class MetalinkTask(Task):
     """
     Metalink Task Class
     """
-    def __init__(self, main_app, metalink):
-        Task.__init__(self, main_app)
+    def __init__(self, main_app, metalink, info, options):
+        Task.__init__(self, main_app, info, options)
         self.info['type'] = TASK_METALINK
         self.info['metalink'] = metalink
         # Task name
@@ -179,8 +153,8 @@ class BTTask(Task):
     """
     BT Task Class
     """
-    def __init__(self, main_app, torrent, uris):
-        Task.__init__(self, main_app)
+    def __init__(self, main_app, torrent, uris, info, options):
+        Task.__init__(self, main_app, info, options)
         self.info['type'] = TASK_BT
         self.info['torrent'] = torrent
         # Task name
@@ -198,8 +172,8 @@ class NormalTask(Task):
     """
     Normal Task Class
     """
-    def __init__(self, main_app, uris):
-        Task.__init__(self, main_app)
+    def __init__(self, main_app, uris, info, options):
+        Task.__init__(self, main_app, info, options)
         self.info['type'] = TASK_NORMAL
         self.info['uris'] = ','.join(uris)
         # Task name
