@@ -26,7 +26,10 @@
 
 import gtk
 import gobject
+import os
+from subprocess import Popen
 from twisted.web import xmlrpc
+from twisted.internet.error import ConnectionRefusedError
 
 from yaner.Constants import U_SERVER_CONFIG_FILE
 from yaner.Constants import ITER_COMPLETED, ITER_SERVER, ITER_COUNT
@@ -97,6 +100,41 @@ class Server:
         self.group.model.set(self.iters[ITER_SERVER], 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
 
+class LocalServer(Server):
+    """
+    Server class for localhost.
+    """
+
+    def __init__(self, group, conf):
+        Server.__init__(self, group, conf)
+        self.server_process = None
+        deferred = self.proxy.callRemote("aria2.getVersion")
+        deferred.addCallbacks(self.connect_ok, self.connect_error)
+
+    def connect_ok(self, rtnval):
+        """
+        When connection succeeded, set "connected" to True.
+        """
+        self.set_connected(True)
+
+    def connect_error(self, failure):
+        """
+        When connection refused, restart local server.
+        """
+        failure.check(ConnectionRefusedError)
+        self.__open_server()
+
+    def __open_server(self):
+        self.server_process = Popen([
+            'aria2c', '--enable-xml-rpc', '--xml-rpc-listen-all',
+            '--xml-rpc-listen-port=%s' % self.conf.port,
+            '--xml-rpc-user=%s' % self.conf.user,
+            '--xml-rpc-passwd=%s' % self.conf.passwd
+            ])
+
+    def __del__(self):
+        self.server_process.terminate()
+
 class ServerGroup:
     """
     Aria2 server group in the treeview of the left pane.
@@ -107,6 +145,7 @@ class ServerGroup:
         self.servers = ODict()
         # TreeModel
         self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
+        self.servers['local'] = LocalServer(self, self.conf['local'])
         for server in main_app.conf.main.servers.split(','):
             self.servers[server] = Server(self, self.conf[server])
         # TreeSelection

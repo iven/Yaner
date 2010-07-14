@@ -126,11 +126,12 @@ class YanerApp(SingleInstanceApp):
         about_dialog.run()
         about_dialog.hide()
         
-    @staticmethod
-    def on_quit_action_activate(action):
+    def on_quit_action_activate(self, action):
         """
         Main window quit callback.
         """
+        # Kill local aria2c process
+        del self.server_group.servers['local']
         gtk.widget_pop_colormap()
         reactor.stop()
 
