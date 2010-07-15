@@ -25,8 +25,8 @@
 """
 
 import gtk
+import glib
 import gobject
-import os
 from subprocess import Popen
 from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError
@@ -97,19 +97,24 @@ class Server:
         Set if client is connected to the server.
         """
         self.connected = connected
-        self.group.model.set(self.iters[ITER_SERVER], 0,
+        self.group.view.get_model().set(self.iters[ITER_SERVER], 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
 
-class LocalServer(Server):
-    """
-    Server class for localhost.
-    """
-
-    def __init__(self, group, conf):
-        Server.__init__(self, group, conf)
-        self.server_process = None
-        deferred = self.proxy.callRemote("aria2.getVersion")
+    def get_session_info(self):
+        """
+        Call aria2 server for session info.
+        """
+        deferred = self.proxy.callRemote("aria2.getSessionInfo")
         deferred.addCallbacks(self.connect_ok, self.connect_error)
+        deferred.addCallback(self.check_session)
+        return False
+
+    def check_session(self, session_info):
+        """
+        Check if aria2c is still last session.
+        """
+        # TODO: Check session
+        pass
 
     def connect_ok(self, rtnval):
         """
@@ -119,12 +124,20 @@ class LocalServer(Server):
 
     def connect_error(self, failure):
         """
-        When connection refused, restart local server.
+        When connection refused, set "connected" to False.
         """
+        # XXX: Other errors?
         failure.check(ConnectionRefusedError)
-        self.__open_server()
+        self.set_connected(False)
 
-    def __open_server(self):
+class LocalServer(Server):
+    """
+    Server class for localhost.
+    """
+
+    def __init__(self, group, conf):
+        Server.__init__(self, group, conf)
+        # open aria2c server
         self.server_process = Popen([
             'aria2c', '--enable-xml-rpc', '--xml-rpc-listen-all',
             '--xml-rpc-listen-port=%s' % self.conf.port,
@@ -143,15 +156,18 @@ class ServerGroup:
         self.main_app = main_app
         self.view = view
         self.servers = ODict()
-        # TreeModel
-        self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
-        self.servers['local'] = LocalServer(self, self.conf['local'])
-        for server in main_app.conf.main.servers.split(','):
-            self.servers[server] = Server(self, self.conf[server])
         # TreeSelection
         selection = view.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
+        # TreeModel
+        self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
+        self.servers['local'] = LocalServer(self, self.conf['local'])
+        for server_name in main_app.conf.main.servers.split(','):
+            server = Server(self, self.conf[server_name])
+            self.servers[server_name] = server
+        for server in self.servers.itervalues():
+            glib.timeout_add_seconds(1, server.get_session_info)
 
     def on_selection_changed(self, selection):
         """
