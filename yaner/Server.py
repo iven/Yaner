@@ -29,7 +29,7 @@ import glib
 import gobject
 from subprocess import Popen
 from twisted.web import xmlrpc
-from twisted.internet.error import ConnectionRefusedError
+from twisted.internet.error import ConnectionRefusedError, ConnectionLost
 
 from yaner.Constants import U_SERVER_CONFIG_FILE
 from yaner.Constants import ITER_COMPLETED, ITER_SERVER, ITER_COUNT
@@ -51,7 +51,7 @@ class Server:
     """
 
     def __init__(self, group, conf):
-        model = group.view.get_model()
+        model = group.model
         # Preferences
         self.group = group
         self.conf = conf
@@ -97,7 +97,7 @@ class Server:
         Set if client is connected to the server.
         """
         self.connected = connected
-        self.group.view.get_model().set(self.iters[ITER_SERVER], 0,
+        self.group.model.set(self.iters[ITER_SERVER], 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
 
     def get_session_info(self):
@@ -114,21 +114,25 @@ class Server:
         Check if aria2c is still last session.
         """
         # TODO: Check session
-        pass
+        if self.conf.session != session_info['sessionId']:
+            self.conf.session = session_info['sessionId']
 
     def connect_ok(self, rtnval):
         """
         When connection succeeded, set "connected" to True.
         """
         self.set_connected(True)
+        return rtnval
 
     def connect_error(self, failure):
         """
         When connection refused, set "connected" to False.
         """
         # XXX: Other errors?
-        failure.check(ConnectionRefusedError)
+        failure.check(ConnectionRefusedError, ConnectionLost)
         self.set_connected(False)
+
+        return failure
 
 class LocalServer(Server):
     """
@@ -154,7 +158,7 @@ class ServerGroup:
     """
     def __init__(self, main_app, view):
         self.main_app = main_app
-        self.view = view
+        self.model = view.get_model()
         self.servers = ODict()
         # TreeSelection
         selection = view.get_selection()

@@ -230,16 +230,20 @@ class TaskNew:
         if task_type == TASK_METALINK:
             metalink = self.widgets['metalink_file_chooser'].get_filename()
             if metalink and os.path.exists(metalink):
-                MetalinkTask(self.main_app, metalink, info, options)
+                info['metalink'] = metalink
+                MetalinkTask(self.main_app, info, options)
                 dialog.hide()
         elif task_type == TASK_NORMAL:
             uris = self.__get_uris(self.widgets['normal_uri_textview'])
             if uris:
-                NormalTask(self.main_app, uris, info, options)
+                info['uris'] = '|'.join(uris)
+                NormalTask(self.main_app, info, options)
                 dialog.hide()
         elif task_type == TASK_BT:
             torrent = self.widgets['bt_file_chooser'].get_filename()
             uris = self.__get_uris(self.widgets['bt_uri_textview'])
             if torrent and os.path.exists(torrent):
-                BTTask(self.main_app, torrent, uris, info, options)
+                info['torrent'] = torrent
+                info['uris'] = '|'.join(uris)
+                BTTask(self.main_app, info, options)
                 dialog.hide()

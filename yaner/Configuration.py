@@ -86,7 +86,7 @@ class ConfigSection(ODict):
         self.section = section
 
     def __str__(self):
-        return self.section
+        return dict.__str__(self)
 
     def __getattr__(self, key):
         return self[key]
