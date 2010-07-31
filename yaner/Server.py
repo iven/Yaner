@@ -26,13 +26,16 @@
 
 import gtk
 import gobject
+import os
+import uuid
 from twisted.web import xmlrpc
 
-from yaner.Constants import U_SERVER_CONFIG_FILE
+from yaner.Constants import U_SERVER_CONFIG_FILE, U_TASK_CONFIG_DIR
 from yaner.Constants import ITER_COMPLETED, ITER_SERVER, ITER_COUNT
 from yaner.Constants import _
 from yaner.Configuration import ConfigFile
 from yaner.ODict import ODict
+from yaner.Task import TASK_CLASSES
 
 class Server:
     """
@@ -96,6 +99,21 @@ class Server:
         self.connected = connected
         self.group.model.set(self.iters[ITER_SERVER], 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
+
+    def add_task(self, info = None, options = None, conf = None, is_new = True):
+        """
+        Add task to server, from info + options, or conf.
+        If a task is new added to the server, is_new should be True.
+        if we just want to display an existing task on the server, is_new will be False.
+        """
+        if conf == None:
+            # Must be new task, generate a conf file for it.
+            file_name = str(uuid.uuid1())
+            conf = ConfigFile(os.path.join(U_TASK_CONFIG_DIR, file_name))
+            conf['info'] = info
+            conf['options'] = options
+
+        TASK_CLASSES[int(conf.info.type)](self, conf, is_new)
 
 class ServerGroup:
     """

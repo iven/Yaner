@@ -217,3 +217,9 @@ class NormalTask(Task):
                 "aria2.addUri", uris, self.options)
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
+TASK_CLASSES = (
+    NormalTask,
+    BTTask,
+    MetalinkTask
+    )
+
