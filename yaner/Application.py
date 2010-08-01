@@ -59,6 +59,8 @@ class YanerApp(SingleInstanceApp):
         self.server_group = ServerGroup(self, server_tv)
         # Task List View
         self.tasklist_view = builder.get_object('tasklist_tv')
+        selection = self.tasklist_view.get_selection()
+        selection.set_mode(gtk.SELECTION_MULTIPLE)
         # Task New
         self.task_new = TaskNew(self)
         # Show the window
@@ -91,7 +93,6 @@ class YanerApp(SingleInstanceApp):
         Being called when another instance exists. Currently just quits.
         """
         SingleInstanceApp.on_instance_exists(self)
-
 
     def on_task_new_action_activate(self, action):
         """
