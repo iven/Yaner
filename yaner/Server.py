@@ -25,10 +25,13 @@
 """
 
 import gtk
+import glib
 import gobject
 import os
 import uuid
+from subprocess import Popen
 from twisted.web import xmlrpc
+from twisted.internet.error import ConnectionRefusedError, ConnectionLost
 
 from yaner.Constants import U_SERVER_CONFIG_FILE, U_TASK_CONFIG_DIR
 from yaner.Constants import ITER_COMPLETED, ITER_SERVER, ITER_COUNT
@@ -51,7 +54,7 @@ class Server:
     """
 
     def __init__(self, group, conf):
-        model = group.view.get_model()
+        model = group.model
         # Preferences
         self.group = group
         self.conf = conf
@@ -115,22 +118,78 @@ class Server:
 
         TASK_CLASSES[int(conf.info.type)](self, conf, is_new)
 
+    def get_session_info(self):
+        """
+        Call aria2 server for session info.
+        """
+        deferred = self.proxy.callRemote("aria2.getSessionInfo")
+        deferred.addCallbacks(self.connect_ok, self.connect_error)
+        deferred.addCallback(self.check_session)
+        return False
+
+    def check_session(self, session_info):
+        """
+        Check if aria2c is still last session.
+        """
+        # TODO: Check session
+        if self.conf.session != session_info['sessionId']:
+            self.conf.session = session_info['sessionId']
+
+    def connect_ok(self, rtnval):
+        """
+        When connection succeeded, set "connected" to True.
+        """
+        self.set_connected(True)
+        return rtnval
+
+    def connect_error(self, failure):
+        """
+        When connection refused, set "connected" to False.
+        """
+        # XXX: Other errors?
+        failure.check(ConnectionRefusedError, ConnectionLost)
+        self.set_connected(False)
+
+        return failure
+
+class LocalServer(Server):
+    """
+    Server class for localhost.
+    """
+
+    def __init__(self, group, conf):
+        Server.__init__(self, group, conf)
+        # open aria2c server
+        self.server_process = Popen([
+            'aria2c', '--enable-xml-rpc', '--xml-rpc-listen-all',
+            '--xml-rpc-listen-port=%s' % self.conf.port,
+            '--xml-rpc-user=%s' % self.conf.user,
+            '--xml-rpc-passwd=%s' % self.conf.passwd
+            ])
+
+    def __del__(self):
+        self.server_process.terminate()
+
 class ServerGroup:
     """
     Aria2 server group in the treeview of the left pane.
     """
     def __init__(self, main_app, view):
         self.main_app = main_app
-        self.view = view
+        self.model = view.get_model()
         self.servers = ODict()
-        # TreeModel
-        self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
-        for server in main_app.conf.main.servers.split(','):
-            self.servers[server] = Server(self, self.conf[server])
         # TreeSelection
         selection = view.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
+        # TreeModel
+        self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
+        self.servers['local'] = LocalServer(self, self.conf['local'])
+        for server_name in main_app.conf.main.servers.split(','):
+            server = Server(self, self.conf[server_name])
+            self.servers[server_name] = server
+        for server in self.servers.itervalues():
+            glib.timeout_add_seconds(1, server.get_session_info)
 
     def on_selection_changed(self, selection):
         """

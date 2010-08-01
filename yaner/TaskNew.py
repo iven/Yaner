@@ -138,7 +138,6 @@ class TaskNew:
         """
         Popup new task dialog.
         """
-        # TODO: Clear last URIs before dialog runs
         widgets = self.widgets
         default_conf = self.main_app.conf.default
         # set current page of the notebook
@@ -201,22 +200,50 @@ class TaskNew:
         if response != gtk.RESPONSE_OK:
             dialog.hide()
 
-        widgets = self.widgets
-        task_type = widgets['nb'].get_current_page()
+        task_type = self.widgets['nb'].get_current_page()
+        info = {}
+
+        # get server
+        server_index = self.widgets['server_cb'].get_active()
+        (info['server'], server) = \
+                self.main_app.server_group.servers.items()[server_index]
+        # get category
+        cate_index = self.widgets['cate_cb'].get_active()
+        info['cate'] = server.cates[cate_index]
+        # task options
+        options = dict(self.main_app.conf.default)
+        for (pref, widget) in self.prefs.iteritems():
+            if pref == 'seed-ratio':
+                options[pref] = str(widget.get_value())
+            elif hasattr(widget, 'get_value'):
+                options[pref] = str(int(widget.get_value()))
+            elif hasattr(widget, 'get_text'):
+                options[pref] = widget.get_text()
+        # clear empty items
+        for (pref, value) in options.items():
+            if not value:
+                del options[pref]
+        # bt prioritize
+        if self.prefs['bt-prioritize-piece'].get_active():
+            options['bt-prioritize-piece'] = 'head,tail'
 
         if task_type == TASK_METALINK:
-            metalink = widgets['metalink_file_chooser'].get_filename()
+            metalink = self.widgets['metalink_file_chooser'].get_filename()
             if metalink and os.path.exists(metalink):
-                MetalinkTask(self.main_app, metalink)
+                info['metalink'] = metalink
+                MetalinkTask(self.main_app, info, options)
                 dialog.hide()
         elif task_type == TASK_NORMAL:
-            uris = self.__get_uris(widgets['normal_uri_textview'])
+            uris = self.__get_uris(self.widgets['normal_uri_textview'])
             if uris:
-                NormalTask(self.main_app, uris)
+                info['uris'] = '|'.join(uris)
+                NormalTask(self.main_app, info, options)
                 dialog.hide()
         elif task_type == TASK_BT:
-            torrent = widgets['bt_file_chooser'].get_filename()
-            uris = self.__get_uris(widgets['bt_uri_textview'])
+            torrent = self.widgets['bt_file_chooser'].get_filename()
+            uris = self.__get_uris(self.widgets['bt_uri_textview'])
             if torrent and os.path.exists(torrent):
-                BTTask(self.main_app, torrent, uris)
+                info['torrent'] = torrent
+                info['uris'] = '|'.join(uris)
+                BTTask(self.main_app, info, options)
                 dialog.hide()

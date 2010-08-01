@@ -48,18 +48,18 @@ U_SERVER_CONFIG_FILE = _join(U_CONFIG_DIR, "servers.conf")
 # Task types
 #
 (
-    TASK_NORMAL,
-    TASK_BT,
-    TASK_METALINK
+TASK_NORMAL,
+TASK_BT,
+TASK_METALINK
 ) = range(3)
 
 # Iter types
 (
-    ITER_SERVER,
-    ITER_QUEUING,
-    ITER_COMPLETED,
-    ITER_RECYCLED,
-    ITER_COUNT
+ITER_SERVER,
+ITER_QUEUING,
+ITER_COMPLETED,
+ITER_RECYCLED,
+ITER_COUNT
 ) = range(5)
 
 # Version
