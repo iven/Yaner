@@ -28,6 +28,7 @@ import gtk
 import glib
 import gobject
 import os
+import glob
 import uuid
 from subprocess import Popen
 from twisted.web import xmlrpc
@@ -53,10 +54,11 @@ class Server:
     'connected: a boolean if the xmlrpc server is connected.
     """
 
-    def __init__(self, group, conf):
+    def __init__(self, group, id, conf):
         model = group.model
         # Preferences
         self.group = group
+        self.uuid = id
         self.conf = conf
         self.connected = False
         self.proxy = xmlrpc.Proxy(self.__get_conn_str())
@@ -103,13 +105,13 @@ class Server:
         self.group.model.set(self.iters[ITER_SERVER], 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
 
-    def add_task(self, info = None, options = None, conf = None, is_new = True):
+    def add_task(self, info, options, conf = None, is_new = True):
         """
         Add task to server, from info + options, or conf.
         If a task is new added to the server, is_new should be True.
         if we just want to display an existing task on the server, is_new will be False.
         """
-        if conf == None:
+        if info != None and options != None:
             # Must be new task, generate a conf file for it.
             file_name = str(uuid.uuid1())
             conf = ConfigFile(os.path.join(U_TASK_CONFIG_DIR, file_name))
@@ -131,9 +133,12 @@ class Server:
         """
         Check if aria2c is still last session.
         """
-        # TODO: Check session
-        if self.conf.session != session_info['sessionId']:
+        is_new = (self.conf.session != session_info['sessionId'])
+        if is_new:
             self.conf.session = session_info['sessionId']
+        for conf in self.group.task_confs:
+            if conf.info.server == self.uuid:
+                self.add_task(None, None, conf, is_new)
 
     def connect_ok(self, rtnval):
         """
@@ -157,8 +162,8 @@ class LocalServer(Server):
     Server class for localhost.
     """
 
-    def __init__(self, group, conf):
-        Server.__init__(self, group, conf)
+    def __init__(self, group, id, conf):
+        Server.__init__(self, group, id, conf)
         # open aria2c server
         self.server_process = Popen([
             'aria2c', '--enable-xml-rpc', '--xml-rpc-listen-all',
@@ -178,16 +183,21 @@ class ServerGroup:
         self.main_app = main_app
         self.model = view.get_model()
         self.servers = ODict()
+        # Task Config Files
+        conf_files = glob.glob(os.path.join(U_TASK_CONFIG_DIR, '*'))
+        self.task_confs = [ConfigFile(conf) for conf in conf_files]
         # TreeSelection
         selection = view.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
         # TreeModel
         self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
-        self.servers['local'] = LocalServer(self, self.conf['local'])
-        for server_name in main_app.conf.main.servers.split(','):
-            server = Server(self, self.conf[server_name])
-            self.servers[server_name] = server
+        self.servers['local'] = LocalServer(self, 'local', self.conf['local'])
+        other_servers = main_app.conf.main.servers
+        if other_servers:
+            for server_name in other_servers.split(','):
+                server = Server(self, server_name, self.conf[server_name])
+                self.servers[server_name] = server
         for server in self.servers.itervalues():
             glib.timeout_add_seconds(1, server.get_session_info)
 

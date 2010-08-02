@@ -199,6 +199,7 @@ class TaskNew:
         """
         if response != gtk.RESPONSE_OK:
             dialog.hide()
+            return
 
         task_type = self.widgets['nb'].get_current_page()
         info = {}
@@ -231,13 +232,17 @@ class TaskNew:
             metalink = self.widgets['metalink_file_chooser'].get_filename()
             if metalink and os.path.exists(metalink):
                 info['metalink'] = metalink
-                MetalinkTask(self.main_app, info, options)
+                info['type'] = TASK_METALINK
+                info['name'] = 'New Metalink Task'
+                server.add_task(info, options)
                 dialog.hide()
         elif task_type == TASK_NORMAL:
             uris = self.__get_uris(self.widgets['normal_uri_textview'])
             if uris:
                 info['uris'] = '|'.join(uris)
-                NormalTask(self.main_app, info, options)
+                info['type'] = TASK_NORMAL
+                info['name'] = "New Normal Task"
+                server.add_task(info, options)
                 dialog.hide()
         elif task_type == TASK_BT:
             torrent = self.widgets['bt_file_chooser'].get_filename()
@@ -245,5 +250,7 @@ class TaskNew:
             if torrent and os.path.exists(torrent):
                 info['torrent'] = torrent
                 info['uris'] = '|'.join(uris)
-                BTTask(self.main_app, info, options)
+                info['type'] = TASK_BT
+                info['name'] = 'New BT Task'
+                server.add_task(info, options)
                 dialog.hide()
