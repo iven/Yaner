@@ -28,7 +28,6 @@ import os
 import gtk
 
 from yaner.Constants import *
-from yaner.Task import NormalTask, BTTask, MetalinkTask
 
 class TaskNew:
     """

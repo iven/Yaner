@@ -38,12 +38,16 @@ _GLADE_DIR = _join(_DATA_DIR, "glade")
 MAIN_UI_FILE = _join(_GLADE_DIR, "main.ui")
 TASK_NEW_UI_FILE = _join(_GLADE_DIR, "task_new.ui")
 MAIN_CONFIG_FILE = _join(_CONFIG_DIR, "yaner.conf")
-SERVER_CONFIG_FILE = _join(_CONFIG_DIR, "servers.conf")
+LOCAL_CATE_UUID = "7aa5a20a-a2af-11df-8233-0024545db8c1"
+LOCAL_CATE_CONFIG_FILE = _join(_CONFIG_DIR, LOCAL_CATE_UUID)
+LOCAL_SERVER_UUID = "eb2d6f1e-a1d1-11df-a717-0024545db8c1"
+LOCAL_SERVER_CONFIG_FILE = _join(_CONFIG_DIR, LOCAL_SERVER_UUID)
 # User
 U_CONFIG_DIR = _join(_config_home, "yaner")
-U_TASK_CONFIG_DIR = _join(U_CONFIG_DIR, "tasks")
 U_MAIN_CONFIG_FILE = _join(U_CONFIG_DIR, "yaner.conf")
-U_SERVER_CONFIG_FILE = _join(U_CONFIG_DIR, "servers.conf")
+U_TASK_CONFIG_DIR = _join(U_CONFIG_DIR, "tasks")
+U_CATE_CONFIG_DIR = _join(U_CONFIG_DIR, "cates")
+U_SERVER_CONFIG_DIR = _join(U_CONFIG_DIR, "servers")
 
 # Task types
 #
@@ -71,6 +75,6 @@ VERSION = "@version@"
 import locale as _locale
 import gettext as _gettext
 _locale.setlocale(_locale.LC_ALL, "")
-_gettext.bindtextdomain("iscoder", _DATA_DIR + "/locale")
-_gettext.textdomain("iscoder")
+_gettext.bindtextdomain("yaner", _DATA_DIR + "/locale")
+_gettext.textdomain("yaner")
 _ = _gettext.gettext

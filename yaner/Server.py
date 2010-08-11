@@ -28,53 +28,52 @@ import gtk
 import glib
 import gobject
 import os
-import glob
 import uuid
 from subprocess import Popen
 from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError, ConnectionLost
 
-from yaner.Constants import U_SERVER_CONFIG_FILE, U_TASK_CONFIG_DIR
-from yaner.Constants import ITER_COMPLETED, ITER_SERVER, ITER_COUNT
+from yaner.Category import Category
+from yaner.Constants import *
 from yaner.Constants import _
 from yaner.Configuration import ConfigFile
 from yaner.ODict import ODict
-from yaner.Task import TASK_CLASSES
 
 class Server:
     """
     Tree model for each aria2 server of the left pane in the main window.
     This contains queuing, completed, recycled tasks as its children.
     'group': the ServerGroup which the Server is in.
-    'conf': the server ConfigFile.
-    'cates': the categories list of the server.
     'iters': iters list.
     'model': tasklist models of each iter.
     'proxy': xmlrpc server proxy.
     'connected: a boolean if the xmlrpc server is connected.
     """
 
-    def __init__(self, group, id, conf):
+    instances = {}
+
+    def __init__(self, group, server_uuid):
         model = group.model
         # Preferences
         self.group = group
-        self.uuid = id
-        self.conf = conf
+        self.uuid = server_uuid
         self.connected = False
         self.proxy = xmlrpc.Proxy(self.__get_conn_str())
-        # Categories
-        self.cates = conf.cates.split(',')
         # Iters
-        server_iter = model.append(None, ["gtk-disconnect", conf.name])
+        server_iter = model.append(None,
+                ["gtk-disconnect", self.get_conf().info.name])
         self.iters = [
                 server_iter,
                 model.append(server_iter, ["gtk-media-play", _("Queuing")]),
                 model.append(server_iter, ["gtk-apply", _("Completed")]),
                 model.append(server_iter, ["gtk-cancel", _("Recycled")]),
                 ]
-        for cate_name in self.cates:
+        # TODO: Category Class
+        for cate_uuid in self.get_cate_uuids():
+            cate = Category(cate_uuid)
             cate_iter = model.append(self.iters[ITER_COMPLETED],
-                    ["gtk-directory", cate_name[5:]])
+                    ["gtk-directory", cate.get_name()])
+            cate.set_iter(cate_iter)
             self.iters.append(cate_iter)
         # Models
         self.models = []
@@ -91,11 +90,15 @@ class Server:
                     gobject.TYPE_INT     # connections
                     ))
 
+        # Add self to the global dict
+        self.instances[self.uuid] = self
+
     def __get_conn_str(self):
         """
         Generate a connection string used by xmlrpc.
         """
-        return 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' % self.conf
+        return 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
+                % self.get_conf().info
 
     def set_connected(self, connected):
         """
@@ -105,20 +108,25 @@ class Server:
         self.group.model.set(self.iters[ITER_SERVER], 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
 
-    def add_task(self, info, options, conf = None, is_new = True):
+    def get_conf(self):
         """
-        Add task to server, from info + options, or conf.
-        If a task is new added to the server, is_new should be True.
-        if we just want to display an existing task on the server, is_new will be False.
+        Get server ConfigFile.
         """
-        if info != None and options != None:
-            # Must be new task, generate a conf file for it.
-            file_name = str(uuid.uuid1())
-            conf = ConfigFile(os.path.join(U_TASK_CONFIG_DIR, file_name))
-            conf['info'] = info
-            conf['options'] = options
+        return ConfigFile.instances[self.uuid]
 
-        TASK_CLASSES[int(conf.info.type)](self, conf, is_new)
+    def get_cate_uuids(self):
+        """
+        Get server category uuids.
+        """
+        cate_uuids = self.get_conf().info.cates.split(',')
+        return cate_uuids if cate_uuids != [''] else []
+
+    def get_cates(self):
+        """
+        Get server category instances.
+        """
+        return (Category.instances[cate_uuid]
+                for cate_uuid in self.get_cate_uuids())
 
     def get_session_info(self):
         """
@@ -133,12 +141,13 @@ class Server:
         """
         Check if aria2c is still last session.
         """
-        is_new = (self.conf.session != session_info['sessionId'])
+        is_new = (self.get_conf().info.session != session_info['sessionId'])
         if is_new:
-            self.conf.session = session_info['sessionId']
-        for conf in self.group.task_confs:
-            if conf.info.server == self.uuid:
-                self.add_task(None, None, conf, is_new)
+            self.get_conf().info.session = session_info['sessionId']
+        for cate in self.get_cates():
+            for task_uuid in cate.get_task_uuids():
+                task_conf = ConfigFile.instances[task_uuid]
+                cate.add_task(None, None, task_conf, is_new)
 
     def connect_ok(self, rtnval):
         """
@@ -162,14 +171,15 @@ class LocalServer(Server):
     Server class for localhost.
     """
 
-    def __init__(self, group, id, conf):
-        Server.__init__(self, group, id, conf)
+    def __init__(self, group, server_uuid):
+        Server.__init__(self, group, server_uuid)
         # open aria2c server
+        conf = self.get_conf()
         self.server_process = Popen([
             'aria2c', '--enable-xml-rpc', '--xml-rpc-listen-all',
-            '--xml-rpc-listen-port=%s' % self.conf.port,
-            '--xml-rpc-user=%s' % self.conf.user,
-            '--xml-rpc-passwd=%s' % self.conf.passwd
+            '--xml-rpc-listen-port=%s' % conf.info.port,
+            '--xml-rpc-user=%s' % conf.info.user,
+            '--xml-rpc-passwd=%s' % conf.info.passwd
             ])
 
     def __del__(self):
@@ -183,22 +193,17 @@ class ServerGroup:
         self.main_app = main_app
         self.model = view.get_model()
         self.servers = ODict()
-        # Task Config Files
-        conf_files = glob.glob(os.path.join(U_TASK_CONFIG_DIR, '*'))
-        self.task_confs = [ConfigFile(conf) for conf in conf_files]
         # TreeSelection
         selection = view.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
         # TreeModel
-        self.conf = ConfigFile(U_SERVER_CONFIG_FILE)
-        self.servers['local'] = LocalServer(self, 'local', self.conf['local'])
+        LocalServer(self, LOCAL_SERVER_UUID)
         other_servers = main_app.conf.main.servers
         if other_servers:
-            for server_name in other_servers.split(','):
-                server = Server(self, server_name, self.conf[server_name])
-                self.servers[server_name] = server
-        for server in self.servers.itervalues():
+            for server_uuid in other_servers.split(','):
+                Server(self, server_uuid)
+        for server in Server.instances.itervalues():
             glib.timeout_add_seconds(1, server.get_session_info)
 
     def on_selection_changed(self, selection):

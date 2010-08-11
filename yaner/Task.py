@@ -27,20 +27,20 @@
 from __future__ import division
 import gtk
 import glib
-import os
-import uuid
 import xmlrpclib
 from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError
 
 from yaner.Constants import *
 from yaner.Pretty import psize, pspeed
-from yaner.Configuration import ConfigFile
 
 class TaskMixin:
     """
     General task class.
     """
+
+    instances = {}
+
     def __init__(self, server, conf, is_new):
         self.server = server
         self.conf = conf
@@ -51,16 +51,20 @@ class TaskMixin:
             conf.info['gid'] = ''
         self.add_iter()
 
+        # Add self to the global dict
+        self.instances[self.conf.info.uuid] = self
+
     def add_task(self, gid):
         """
         Add a new task when gid is received.
-        An iter is added to queuing model and configuration
-        file for this task is created.
         """
         # FIXME: Workaround for Metalink.
         self.conf.info['gid'] = gid[-1] if type(gid) is list else gid
 
     def add_iter(self):
+        """
+        Add an iter to the queuing model and start updating it.
+        """
         queuing_model = self.server.models[ITER_QUEUING]
         self.main_app.tasklist_view.set_model(queuing_model)
         self.iter = queuing_model.append(None, [self.conf.info.gid,

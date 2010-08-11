@@ -27,12 +27,12 @@ GUI related.
 
 import gtk
 import os
+import glob
 import shutil
 from twisted.internet import reactor
 
 from yaner.Constants import *
-from yaner.Server import ServerGroup
-from yaner.Task import NormalTask, BTTask, MetalinkTask
+from yaner.Server import ServerGroup, Server
 from yaner.TaskNew import TaskNew
 from yaner.Configuration import ConfigFile
 from yaner.SingleInstance import SingleInstanceApp
@@ -43,7 +43,10 @@ class YanerApp(SingleInstanceApp):
     def __init__(self):
         SingleInstanceApp.__init__(self, "yaner")
         # Init paths
-        self.init_paths()
+        self.__init_paths()
+        # Init Config
+        self.__init_confs()
+        self.conf = ConfigFile(U_MAIN_CONFIG_FILE)
         # Builder
         builder = gtk.Builder()
         builder.add_from_file(MAIN_UI_FILE)
@@ -51,9 +54,7 @@ class YanerApp(SingleInstanceApp):
         self.builder = builder
         # Main Window
         self.main_window = builder.get_object("main_window")
-        self.init_rgba(self.main_window)
-        # Main Config
-        self.conf = ConfigFile(U_MAIN_CONFIG_FILE)
+        self.__init_rgba(self.main_window)
         # Server View
         server_tv = builder.get_object("server_tv")
         self.server_group = ServerGroup(self, server_tv)
@@ -67,7 +68,7 @@ class YanerApp(SingleInstanceApp):
         self.main_window.show()
 
     @staticmethod
-    def init_rgba(window):
+    def __init_rgba(window):
         """
         Init rgba.
         """
@@ -77,16 +78,32 @@ class YanerApp(SingleInstanceApp):
             gtk.widget_set_default_colormap(colormap)
 
     @staticmethod
-    def init_paths():
+    def __init_paths():
         """
-        Init UConfigDir and config files.
+        Create UConfigDir and config files during first start.
         """
-        if not os.path.exists(U_TASK_CONFIG_DIR):
+        if not os.path.exists(U_CONFIG_DIR):
             os.makedirs(U_TASK_CONFIG_DIR)
-        if not os.path.exists(U_MAIN_CONFIG_FILE):
+            os.makedirs(U_CATE_CONFIG_DIR)
+            os.makedirs(U_SERVER_CONFIG_DIR)
             shutil.copy(MAIN_CONFIG_FILE, U_CONFIG_DIR)
-        if not os.path.exists(U_SERVER_CONFIG_FILE):
-            shutil.copy(SERVER_CONFIG_FILE, U_CONFIG_DIR)
+            shutil.copy(LOCAL_CATE_CONFIG_FILE, U_CATE_CONFIG_DIR)
+            shutil.copy(LOCAL_SERVER_CONFIG_FILE, U_SERVER_CONFIG_DIR)
+
+    @staticmethod
+    def __init_confs():
+        """
+        Read config files during start.
+        """
+        conf_dirs = {
+                U_CONFIG_DIR: '*.conf',
+                U_TASK_CONFIG_DIR: '*',
+                U_CATE_CONFIG_DIR: '*',
+                U_SERVER_CONFIG_DIR: '*',
+                }
+        for (conf_dir, wildcard) in conf_dirs.iteritems():
+            for conf_file in glob.glob(os.path.join(conf_dir, wildcard)):
+                ConfigFile(conf_file)
 
     def on_instance_exists(self):
         """
@@ -132,7 +149,7 @@ class YanerApp(SingleInstanceApp):
         Main window quit callback.
         """
         # Kill local aria2c process
-        del self.server_group.servers['local']
+        del Server.instances[LOCAL_SERVER_UUID]
         gtk.widget_pop_colormap()
         reactor.stop()
 

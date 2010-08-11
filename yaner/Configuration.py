@@ -27,11 +27,14 @@ of Yaner, but could also be used by other programs.
 
 import ConfigParser
 import os
+from os.path import basename
 
 from yaner.ODict import ODict
 
 class ConfigFile(ODict):
     "Sections dict of config file handles add and del sections."
+
+    instances = {}
 
     def __init__(self, config_file):
         if not os.path.exists(config_file):
@@ -43,6 +46,9 @@ class ConfigFile(ODict):
         ODict.__init__(self, section_list)
         self.parser = parser
         self.config_file = config_file
+
+        # Add self to the global dict
+        self.instances[basename(config_file)] = self
 
     def __str__(self):
         return self.config_file
