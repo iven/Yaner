@@ -28,9 +28,9 @@ import os
 import gtk
 import uuid
 
-from yaner.Server import Server
-from yaner.Category import Category
-from yaner.Constants import *
+from Yaner.Server import Server
+from Yaner.Category import Category
+from Yaner.Constants import *
 
 class TaskNew:
     """

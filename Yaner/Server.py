@@ -31,10 +31,10 @@ from subprocess import Popen
 from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError, ConnectionLost
 
-from yaner.Category import Category
-from yaner.Constants import *
-from yaner.Constants import _
-from yaner.Configuration import ConfigFile
+from Yaner.Category import Category
+from Yaner.Constants import *
+from Yaner.Constants import _
+from Yaner.Configuration import ConfigFile
 
 class Server:
     """

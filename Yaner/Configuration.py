@@ -29,7 +29,7 @@ import ConfigParser
 import os
 from os.path import basename
 
-from yaner.ODict import ODict
+from Yaner.ODict import ODict
 
 class ConfigFile(ODict):
     "Sections dict of config file handles add and del sections."

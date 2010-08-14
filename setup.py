@@ -101,13 +101,13 @@ with open("VERSION") as version_file:
     if "=" in version:
         version = version.split("=")[1]
 
-with open(os.path.join("yaner/Constants.py.in")) as f:
+with open(os.path.join("Yaner/Constants.py.in")) as f:
     data = f.read()
 
 data = data.replace("@prefix@", prefix)
 data = data.replace("@version@", version)
 
-with open(os.path.join("yaner/Constants.py"), "w") as f:
+with open(os.path.join("Yaner/Constants.py"), "w") as f:
     f.write(data)
 
 data_files = []
@@ -130,7 +130,7 @@ for dir, subdirs, files in os.walk("images/"):
     if len(images) > 0:
         data_files.append((local_icon_path + dir[7:], images))
 
-podir = os.path.join (os.path.realpath ("."), "po")
+podir = os.path.realpath("./po")
 if os.path.isdir (podir):
     buildcmd = "msgfmt -o build/locale/%s/yaner.mo po/%s.po"
     mopath = "build/locale/%s/yaner.mo"
@@ -146,7 +146,7 @@ if os.path.isdir (podir):
                 os.system (buildcmd % (name, name))
             data_files.append ((destpath % name, [mopath % name]))
 
-gladedir = os.path.join (os.path.realpath ("."), "glade")
+gladedir = os.path.realpath("./glade")
 if os.path.isdir (gladedir):
     glade_files = []
     destpath = "share/yaner/glade/"
@@ -154,13 +154,15 @@ if os.path.isdir (gladedir):
         glade_files.append("/".join((gladedir, file)))
     data_files.append((destpath, glade_files))
 
-configdir = os.path.join (os.path.realpath ("."), "config")
+configdir = os.path.realpath("./config")
 if os.path.isdir (configdir):
     config_files = []
     destpath = "share/yaner/config/"
     for file in os.listdir (configdir):
         config_files.append("/".join((configdir, file)))
     data_files.append((destpath, config_files))
+
+data_files.append(('share/applications/', [os.path.realpath('./yaner.desktop')]))
 
 setup (
         name             = "yaner",
@@ -171,14 +173,14 @@ setup (
         url              = "http://www.kissuki.com/",
         license          = "GPL",
         data_files       = data_files,
-        packages         = ["yaner"],
-        scripts          = ["yaner-gtk"],
+        packages         = ["Yaner"],
+        scripts          = ["yaner"],
         cmdclass         = {"uninstall" : uninstall,
                             "install" : install,
                             "install_data" : install_data}
      )
 
-os.remove ("yaner/Constants.py")
+os.remove ("Yaner/Constants.py")
 
 #if sys.argv[1] == "install":
 #    gtk_update_icon_cache = "gtk-update-icon-cache -f -t %s/share/{,yaner/}icons/hicolor" % prefix

@@ -31,8 +31,8 @@ import xmlrpclib
 from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError
 
-from yaner.Constants import *
-from yaner.Pretty import psize, pspeed
+from Yaner.Constants import *
+from Yaner.Pretty import psize, pspeed
 
 class TaskMixin:
     """

@@ -43,7 +43,7 @@ else:
     from twisted.internet import reactor
 
 #try:
-    from yaner.Application import YanerApp
+    from Yaner.Application import YanerApp
 #except ImportError:
 #    raise SystemExit(' * Error: the "yaner" module is missing. \
 #            Check if it is installed properly.')

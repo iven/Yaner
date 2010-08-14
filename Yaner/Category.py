@@ -26,9 +26,9 @@
 
 import os
 
-from yaner.Constants import *
-from yaner.Task import TaskMixin, TASK_CLASSES
-from yaner.Configuration import ConfigFile
+from Yaner.Constants import *
+from Yaner.Task import TaskMixin, TASK_CLASSES
+from Yaner.Configuration import ConfigFile
 
 class Category:
     """

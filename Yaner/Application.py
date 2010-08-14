@@ -31,11 +31,11 @@ import glob
 import shutil
 from twisted.internet import reactor
 
-from yaner.Constants import *
-from yaner.Server import ServerGroup, Server
-from yaner.TaskNew import TaskNew
-from yaner.Configuration import ConfigFile
-from yaner.SingleInstance import SingleInstanceApp
+from Yaner.Constants import *
+from Yaner.Server import ServerGroup, Server
+from Yaner.TaskNew import TaskNew
+from Yaner.Configuration import ConfigFile
+from Yaner.SingleInstance import SingleInstanceApp
 
 class YanerApp(SingleInstanceApp):
     "Main Application"
