@@ -66,7 +66,6 @@ class Server:
                 model.append(server_iter, ["gtk-apply", _("Completed")]),
                 model.append(server_iter, ["gtk-cancel", _("Recycled")]),
                 ]
-        # TODO: Category Class
         for cate_uuid in self.get_cate_uuids():
             cate = Category(self, cate_uuid)
             cate_iter = model.append(self.iters[ITER_COMPLETED],
