@@ -41,18 +41,29 @@ class TaskMixin:
 
     instances = {}
 
-    def __init__(self, server, conf, is_new):
-        self.server = server
+    def __init__(self, cate, conf):
+        self.server = cate.server
+        self.cate = cate
         self.conf = conf
-        self.main_app = server.group.main_app
+        self.main_app = self.server.group.main_app
         self.iter = None
         self.healthy = False
-        if is_new:
-            conf.info['gid'] = ''
         self.add_iter()
 
         # Add self to the global dict
-        self.instances[self.conf.info.uuid] = self
+        self.instances[conf.info.uuid] = self
+
+    def get_uris(self):
+        """
+        Get URIs from config file.
+        """
+        return self.conf.info.uris.split('|')
+
+    def get_options(self):
+        """
+        Get options from config file.
+        """
+        return dict(self.conf.options)
 
     def add_task(self, gid):
         """
@@ -68,7 +79,7 @@ class TaskMixin:
         queuing_model = self.server.models[ITER_QUEUING]
         self.main_app.tasklist_view.set_model(queuing_model)
         self.iter = queuing_model.append(None, [self.conf.info.gid,
-            "gtk-new", self.conf.info.name, 0, '', '', '', '', 1])
+            "gtk-new", self.conf.info.name, 0, '', '', '', '', 0])
 
         glib.timeout_add_seconds(1, self.call_tell_status)
         self.healthy = True
@@ -137,48 +148,56 @@ class MetalinkTask(TaskMixin):
     """
     Metalink Task Class
     """
-    def __init__(self, server, conf, is_new):
-        TaskMixin.__init__(self, server, conf, is_new)
-        if is_new:
-            # Encode file
-            with open(conf.info.metalink) as m_file:
-                m_binary = xmlrpc.Binary(m_file.read())
-            # Call server for new task
-            deferred = self.server.proxy.callRemote(
-                    "aria2.addMetalink", m_binary, dict(conf.options))
-            deferred.addCallbacks(self.add_task, self.add_task_error)
+    def __init__(self, cate, conf):
+        TaskMixin.__init__(self, cate, conf)
+        # Encode file
+        with open(conf.info.metalink) as m_file:
+            self.m_binary = xmlrpc.Binary(m_file.read())
+
+    def start(self):
+        """
+        Start the task.
+        """
+        deferred = self.server.proxy.callRemote(
+                "aria2.addMetalink", self.m_binary, self.get_options())
+        deferred.addCallbacks(self.add_task, self.add_task_error)
 
 class BTTask(TaskMixin):
     """
     BT Task Class
     """
-    def __init__(self, server, conf, is_new):
-        TaskMixin.__init__(self, server, conf, is_new)
-        if is_new:
-            # Encode file
-            with open(conf.info.torrent) as t_file:
-                t_binary = xmlrpc.Binary(t_file.read())
-            # Call server for new task
-            deferred = self.server.proxy.callRemote(
-                    "aria2.addTorrent", t_binary,
-                    conf.info.uris.split('|'), dict(conf.options))
-            deferred.addCallbacks(self.add_task, self.add_task_error)
+    def __init__(self, cate, conf):
+        TaskMixin.__init__(self, cate, conf)
+        # Encode file
+        with open(conf.info.torrent) as t_file:
+            self.t_binary = xmlrpc.Binary(t_file.read())
+
+    def start(self):
+        """
+        Start the task.
+        """
+        deferred = self.server.proxy.callRemote(
+                "aria2.addTorrent", self.t_binary,
+                self.get_uris(), self.get_options())
+        deferred.addCallbacks(self.add_task, self.add_task_error)
 
 class NormalTask(TaskMixin):
     """
     Normal Task Class
     """
-    def __init__(self, server, conf, is_new):
-        TaskMixin.__init__(self, server, conf, is_new)
-        if is_new:
-            # Call server for new task
-            deferred = self.server.proxy.callRemote("aria2.addUri",
-                    conf.info.uris.split('|'), dict(conf.options))
-            deferred.addCallbacks(self.add_task, self.add_task_error)
+    def __init__(self, cate, conf):
+        TaskMixin.__init__(self, cate, conf)
+
+    def start(self):
+        """
+        Start the task.
+        """
+        deferred = self.server.proxy.callRemote("aria2.addUri",
+                self.get_uris(), self.get_options())
+        deferred.addCallbacks(self.add_task, self.add_task_error)
 
 TASK_CLASSES = (
-    NormalTask,
-    BTTask,
-    MetalinkTask
-    )
-
+        NormalTask,
+        BTTask,
+        MetalinkTask
+        )

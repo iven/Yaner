@@ -26,7 +26,10 @@
 
 import os
 import gtk
+import uuid
 
+from yaner.Server import Server
+from yaner.Category import Category
 from yaner.Constants import *
 
 class TaskNew:
@@ -38,94 +41,136 @@ class TaskNew:
         builder = gtk.Builder()
         builder.add_from_file(TASK_NEW_UI_FILE)
         builder.connect_signals(self)
+        self.builder = builder
 
-        self.widgets = self.__get_widgets(builder)
-        self.prefs = self.__get_prefs(builder)
-        filefilters = self.__get_filefilters(builder)
-        self.__init_filefilters(filefilters)
+        self.widgets = {}
+        self.prefs = {}
+        self.__init_filefilters()
 
         self.main_app = main_app
     
-    @staticmethod
-    def __init_filefilters(filefilters):
+    def __init_filefilters(self):
         """
         Init Filefilters.
         """
-        filefilters['torrent'].add_mime_type("application/x-bittorrent")
-        filefilters['metalink'].add_mime_type("application/xml")
+        torrent_filefilter = self.builder.get_object("torrent_filefilter")
+        metalink_filefilter = self.builder.get_object("metalink_filefilter")
+        torrent_filefilter.add_mime_type("application/x-bittorrent")
+        metalink_filefilter.add_mime_type("application/xml")
 
-    @staticmethod
-    def __get_filefilters(builder):
+    def __get_widgets(self):
         """
-        Get a dict of filefilters of new task dialog for future use.
+        Get a dict of widget of new task dialog.
         """
-        filefilters = {}
-        filefilters['torrent'] = builder.get_object("torrent_filefilter")
-        filefilters['metalink'] = builder.get_object("metalink_filefilter")
-        return filefilters
+        if self.widgets == {}:
+            builder = self.builder
+            widgets = self.widgets
+            widgets['dialog'] = builder.get_object("dialog")
+            widgets['nb'] = builder.get_object("nb")
 
-    @staticmethod
-    def __get_widgets(builder):
-        """
-        Get a dict of widget of new task dialog for future use.
-        """
-        widgets = {}
-        widgets['dialog'] = builder.get_object("dialog")
-        widgets['nb'] = builder.get_object("nb")
+            widgets['server_cb'] = builder.get_object("server_cb")
+            widgets['server_ls'] = builder.get_object("server_ls")
+            widgets['cate_cb'] = builder.get_object("cate_cb")
+            widgets['cate_ls'] = builder.get_object("cate_ls")
 
-        widgets['server_cb'] = builder.get_object("server_cb")
-        widgets['server_ls'] = builder.get_object("server_ls")
-        widgets['cate_cb'] = builder.get_object("cate_cb")
-        widgets['cate_ls'] = builder.get_object("cate_ls")
+            widgets['normal_uri_textview'] = builder.get_object(
+                    "normal_uri_textview")
+            widgets['bt_uri_textview'] = builder.get_object(
+                    "bt_uri_textview")
+            widgets['bt_file_chooser'] = builder.get_object(
+                    "bt_file_chooser")
+            widgets['metalink_file_chooser'] = builder.get_object(
+                    "metalink_file_chooser")
+        return self.widgets
 
-        widgets['normal_uri_textview'] = builder.get_object(
-                "normal_uri_textview")
-        widgets['bt_uri_textview'] = builder.get_object(
-                "bt_uri_textview")
-        widgets['bt_file_chooser'] = builder.get_object(
-                "bt_file_chooser")
-        widgets['metalink_file_chooser'] = builder.get_object(
-                "metalink_file_chooser")
-        return widgets
-
-    @staticmethod
-    def __get_prefs(builder):
+    def __get_prefs(self):
         """
         Get a dict of widget corresponding to a preference in the
-        configuration file of new task dialog for future use.
+        configuration file of new task dialog.
         """
-        prefs = {}
-        prefs['dir'] = builder.get_object("dir_entry")
-        prefs['out'] = builder.get_object("rename_entry")
-        prefs['referer'] = builder.get_object("referer_entry")
-        prefs['http-user'] = builder.get_object("http_user_entry")
-        prefs['http-passwd'] = builder.get_object("http_pass_entry")
-        prefs['ftp-user'] = builder.get_object("ftp_user_entry")
-        prefs['ftp-passwd'] = builder.get_object("ftp_pass_entry")
-        prefs['split'] = builder.get_object('split_adjustment')
-        prefs['bt-max-open-files'] = builder.get_object('max_files_adjustment')
-        prefs['bt-max-peers'] = builder.get_object('max_peers_adjustment')
-        prefs['seed-time'] = builder.get_object('seed_time_adjustment')
-        prefs['seed-ratio'] = builder.get_object('seed_ratio_adjustment')
-        prefs['bt-prioritize-piece'] = builder.get_object(
-                "prioritize_checkbutton")
-        prefs['metalink-servers'] = builder.get_object(
-                'servers_adjustment')
-        prefs['metalink-location'] = builder.get_object(
-                'location_entry')
-        prefs['metalink-language'] = builder.get_object(
-                'language_entry')
-        prefs['metalink-os'] = builder.get_object(
-                'os_adjustment')
-        prefs['metalink-version'] = builder.get_object(
-                'version_adjustment')
-        return prefs
+        if self.prefs == {}:
+            builder = self.builder
+            prefs = self.prefs
+            prefs['dir'] = builder.get_object("dir_entry")
+            prefs['out'] = builder.get_object("rename_entry")
+            prefs['referer'] = builder.get_object("referer_entry")
+            prefs['http-user'] = builder.get_object("http_user_entry")
+            prefs['http-passwd'] = builder.get_object("http_pass_entry")
+            prefs['ftp-user'] = builder.get_object("ftp_user_entry")
+            prefs['ftp-passwd'] = builder.get_object("ftp_pass_entry")
+            prefs['split'] = builder.get_object('split_adjustment')
+            prefs['bt-max-open-files'] = builder.get_object(
+                    'max_files_adjustment')
+            prefs['bt-max-peers'] = builder.get_object(
+                    'max_peers_adjustment')
+            prefs['seed-time'] = builder.get_object(
+                    'seed_time_adjustment')
+            prefs['seed-ratio'] = builder.get_object(
+                    'seed_ratio_adjustment')
+            prefs['bt-prioritize-piece'] = builder.get_object(
+                    "prioritize_checkbutton")
+            prefs['metalink-servers'] = builder.get_object(
+                    'servers_adjustment')
+            prefs['metalink-location'] = builder.get_object(
+                    'location_entry')
+            prefs['metalink-language'] = builder.get_object(
+                    'language_entry')
+            prefs['metalink-os'] = builder.get_object(
+                    'os_adjustment')
+            prefs['metalink-version'] = builder.get_object(
+                    'version_adjustment')
+        return self.prefs
 
-    @staticmethod
-    def __get_uris(textview):
+    def __get_active_server(self):
+        """
+        Get current selected Server.
+        """
+        active_iter = self.widgets['server_cb'].get_active_iter()
+        if active_iter != None:
+            server_uuid = self.widgets['server_ls'].get(active_iter, 1)[0]
+            return Server.instances[server_uuid]
+        else:
+            return None
+
+    def __get_active_cate(self):
+        """
+        Get current selected Category.
+        """
+        active_iter = self.widgets['cate_cb'].get_active_iter()
+        if active_iter != None:
+            cate_uuid = self.widgets['cate_ls'].get(active_iter, 1)[0]
+            return Category.instances[cate_uuid]
+        else:
+            return None
+
+    def __get_options(self):
+        """
+        Get current set task options.
+        """
+        options = self.main_app.get_default_options()
+        for (pref, widget) in self.__get_prefs().iteritems():
+            if pref == 'seed-ratio':
+                options[pref] = str(widget.get_value())
+            elif hasattr(widget, 'get_value'):
+                options[pref] = str(int(widget.get_value()))
+            elif hasattr(widget, 'get_text'):
+                text = widget.get_text()
+                if text != '':
+                    options[pref] = text
+        if self.prefs['bt-prioritize-piece'].get_active():
+            options['bt-prioritize-piece'] = 'head,tail'
+        return options
+
+    def __get_uris(self, task_type):
         """
         Get URIs from textviews, returning a tuple of URIs.
         """
+        if task_type == TASK_NORMAL:
+            textview = self.widgets['normal_uri_textview']
+        elif task_type == TASK_BT:
+            textview = self.widgets['bt_uri_textview']
+        else:
+            return ""
         tbuffer = textview.get_buffer()
         uris = tbuffer.get_text(
                 tbuffer.get_start_iter(),
@@ -133,12 +178,28 @@ class TaskNew:
                 )
         return [uri.strip() for uri in uris.split("\n") if uri.strip()]
 
+    def __get_metadata_file(self, task_type):
+        """
+        Get metadata file for BT and Metalink tasks.
+        """
+        if task_type == TASK_METALINK:
+            metadata_file = self.widgets['metalink_file_chooser'].get_filename()
+        elif task_type == TASK_BT:
+            metadata_file = self.widgets['bt_file_chooser'].get_filename()
+        else:
+            return ""
+
+        if os.path.exists(metadata_file):
+            return metadata_file
+        else:
+            return ""
+
     def run_dialog(self, action):
         """
         Popup new task dialog.
         """
-        widgets = self.widgets
-        default_conf = self.main_app.conf.default
+        widgets = self.__get_widgets()
+        default_conf = self.main_app.get_default_options()
         # set current page of the notebook
         actions = (
                 "task_new_normal_action",
@@ -148,15 +209,15 @@ class TaskNew:
         page = actions.index(action.get_property('name'))
         widgets['nb'].set_current_page(page)
         # init default configuration
-        for (pref, widget) in self.prefs.iteritems():
+        for (pref, widget) in self.__get_prefs().iteritems():
             if hasattr(widget, 'set_value'):
                 widget.set_value(float(default_conf[pref]))
             elif hasattr(widget, 'set_text'):
                 widget.set_text(default_conf[pref])
         # init the server cb
         widgets['server_ls'].clear()
-        for server in self.main_app.server_group.servers.itervalues():
-            widgets['server_ls'].append([server.conf.name, ])
+        for server in self.main_app.server_group.get_servers():
+            widgets['server_ls'].append([server.get_name(), server.uuid])
         widgets['server_cb'].set_active(0)
         # run the dialog
         widgets['dialog'].run()
@@ -172,24 +233,19 @@ class TaskNew:
         """
         When category combobox selection changed, update the directory entry.
         """
-        active_iter = cate_cb.get_active_iter()
-        if active_iter != None:
-            model = self.widgets['cate_ls']
-            directory = model.get(active_iter, 1)[0]
-            self.prefs['dir'].set_text(directory)
+        active_cate = self.__get_active_cate()
+        if active_cate != None:
+            self.prefs['dir'].set_text(active_cate.get_dir())
 
     def on_server_cb_changed(self, server_cb):
         """
         When server combobox selection changed, update the category combobox.
         """
-        index = server_cb.get_active()
-        if index != -1:
-            server = self.main_app.server_group.servers.values()[index]
+        active_server = self.__get_active_server()
+        if active_server != None:
             self.widgets['cate_ls'].clear()
-            for cate_name in server.cates:
-                directory = server.conf[cate_name]
-                self.widgets['cate_ls'].append(
-                        [cate_name[5:], directory])
+            for cate in active_server.get_cates():
+                self.widgets['cate_ls'].append([cate.get_name(), cate.uuid])
             self.widgets['cate_cb'].set_active(0)
 
     def on_dialog_response(self, dialog, response):
@@ -201,55 +257,31 @@ class TaskNew:
             return
 
         task_type = self.widgets['nb'].get_current_page()
+        uris = self.__get_uris(task_type)
+        metadata_file = self.__get_metadata_file(task_type)
+        options = self.__get_options()
+        cate = self.__get_active_cate()
         info = {}
+        info['server'] = self.__get_active_server().uuid
+        info['cate'] = cate.uuid
+        info['uuid'] = str(uuid.uuid1())
+        info['gid'] = ''
 
-        # get server
-        server_index = self.widgets['server_cb'].get_active()
-        (info['server'], server) = \
-                self.main_app.server_group.servers.items()[server_index]
-        # get category
-        cate_index = self.widgets['cate_cb'].get_active()
-        info['cate'] = server.cates[cate_index]
-        # task options
-        options = dict(self.main_app.conf.default)
-        for (pref, widget) in self.prefs.iteritems():
-            if pref == 'seed-ratio':
-                options[pref] = str(widget.get_value())
-            elif hasattr(widget, 'get_value'):
-                options[pref] = str(int(widget.get_value()))
-            elif hasattr(widget, 'get_text'):
-                options[pref] = widget.get_text()
-        # clear empty items
-        for (pref, value) in options.items():
-            if not value:
-                del options[pref]
-        # bt prioritize
-        if self.prefs['bt-prioritize-piece'].get_active():
-            options['bt-prioritize-piece'] = 'head,tail'
+        if task_type == TASK_METALINK and metadata_file:
+            info['metalink'] = metadata_file
+            info['type'] = TASK_METALINK
+            info['name'] = 'New Metalink Task'
+        elif task_type == TASK_NORMAL and uris:
+            info['uris'] = '|'.join(uris)
+            info['type'] = TASK_NORMAL
+            info['name'] = "New Normal Task"
+        elif task_type == TASK_BT and metadata_file:
+            info['torrent'] = metadata_file
+            info['uris'] = '|'.join(uris)
+            info['type'] = TASK_BT
+            info['name'] = 'New BT Task'
+        else:
+            return
+        cate.add_task(info, options)
+        dialog.hide()
 
-        if task_type == TASK_METALINK:
-            metalink = self.widgets['metalink_file_chooser'].get_filename()
-            if metalink and os.path.exists(metalink):
-                info['metalink'] = metalink
-                info['type'] = TASK_METALINK
-                info['name'] = 'New Metalink Task'
-                server.add_task(info, options)
-                dialog.hide()
-        elif task_type == TASK_NORMAL:
-            uris = self.__get_uris(self.widgets['normal_uri_textview'])
-            if uris:
-                info['uris'] = '|'.join(uris)
-                info['type'] = TASK_NORMAL
-                info['name'] = "New Normal Task"
-                server.add_task(info, options)
-                dialog.hide()
-        elif task_type == TASK_BT:
-            torrent = self.widgets['bt_file_chooser'].get_filename()
-            uris = self.__get_uris(self.widgets['bt_uri_textview'])
-            if torrent and os.path.exists(torrent):
-                info['torrent'] = torrent
-                info['uris'] = '|'.join(uris)
-                info['type'] = TASK_BT
-                info['name'] = 'New BT Task'
-                server.add_task(info, options)
-                dialog.hide()

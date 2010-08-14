@@ -27,8 +27,6 @@
 import gtk
 import glib
 import gobject
-import os
-import uuid
 from subprocess import Popen
 from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError, ConnectionLost
@@ -37,7 +35,6 @@ from yaner.Category import Category
 from yaner.Constants import *
 from yaner.Constants import _
 from yaner.Configuration import ConfigFile
-from yaner.ODict import ODict
 
 class Server:
     """
@@ -58,10 +55,11 @@ class Server:
         self.group = group
         self.uuid = server_uuid
         self.connected = False
+        self.conf = ConfigFile.instances[self.uuid]
         self.proxy = xmlrpc.Proxy(self.__get_conn_str())
         # Iters
         server_iter = model.append(None,
-                ["gtk-disconnect", self.get_conf().info.name])
+                ["gtk-disconnect", self.get_name()])
         self.iters = [
                 server_iter,
                 model.append(server_iter, ["gtk-media-play", _("Queuing")]),
@@ -70,7 +68,7 @@ class Server:
                 ]
         # TODO: Category Class
         for cate_uuid in self.get_cate_uuids():
-            cate = Category(cate_uuid)
+            cate = Category(self, cate_uuid)
             cate_iter = model.append(self.iters[ITER_COMPLETED],
                     ["gtk-directory", cate.get_name()])
             cate.set_iter(cate_iter)
@@ -78,7 +76,7 @@ class Server:
         # Models
         self.models = []
         for i in xrange(len(self.iters)):
-            self.models.append(gtk.TreeStore(
+            model = gtk.TreeStore(
                     gobject.TYPE_STRING, # gid
                     gobject.TYPE_STRING, # status
                     gobject.TYPE_STRING, # name
@@ -88,7 +86,8 @@ class Server:
                     gobject.TYPE_STRING, # download speed
                     gobject.TYPE_STRING, # upload speed
                     gobject.TYPE_INT     # connections
-                    ))
+                    )
+            self.models.append(model)
 
         # Add self to the global dict
         self.instances[self.uuid] = self
@@ -98,7 +97,7 @@ class Server:
         Generate a connection string used by xmlrpc.
         """
         return 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
-                % self.get_conf().info
+                % self.conf.info
 
     def set_connected(self, connected):
         """
@@ -108,25 +107,25 @@ class Server:
         self.group.model.set(self.iters[ITER_SERVER], 0,
                 'gtk-connect' if connected else 'gtk-disconnect')
 
-    def get_conf(self):
+    def get_name(self):
         """
-        Get server ConfigFile.
+        Get server name.
         """
-        return ConfigFile.instances[self.uuid]
+        return self.conf.info.name
 
     def get_cate_uuids(self):
         """
         Get server category uuids.
         """
-        cate_uuids = self.get_conf().info.cates.split(',')
+        cate_uuids = self.conf.info.cates.split(',')
         return cate_uuids if cate_uuids != [''] else []
 
     def get_cates(self):
         """
         Get server category instances.
         """
-        return (Category.instances[cate_uuid]
-                for cate_uuid in self.get_cate_uuids())
+        return [Category.instances[cate_uuid]
+                for cate_uuid in self.get_cate_uuids()]
 
     def get_session_info(self):
         """
@@ -137,17 +136,31 @@ class Server:
         deferred.addCallback(self.check_session)
         return False
 
+    def get_session(self):
+        """
+        Get session id from config file.
+        """
+        return self.conf.info.session
+
+    def set_session(self, session):
+        """
+        Set new session id in config file.
+        """
+        self.conf.info.session = session
+
     def check_session(self, session_info):
         """
         Check if aria2c is still last session.
         """
-        is_new = (self.get_conf().info.session != session_info['sessionId'])
-        if is_new:
-            self.get_conf().info.session = session_info['sessionId']
+        is_new_session = (self.get_session() != session_info['sessionId'])
+        self.set_session(session_info['sessionId'])
         for cate in self.get_cates():
             for task_uuid in cate.get_task_uuids():
                 task_conf = ConfigFile.instances[task_uuid]
-                cate.add_task(None, None, task_conf, is_new)
+                if is_new_session:
+                    # gid is useless, set it to '' to avoid updating iter.
+                    task_conf.info.gid = ''
+                cate.add_task(None, None, task_conf)
 
     def connect_ok(self, rtnval):
         """
@@ -174,16 +187,12 @@ class LocalServer(Server):
     def __init__(self, group, server_uuid):
         Server.__init__(self, group, server_uuid)
         # open aria2c server
-        conf = self.get_conf()
         self.server_process = Popen([
             'aria2c', '--enable-xml-rpc', '--xml-rpc-listen-all',
-            '--xml-rpc-listen-port=%s' % conf.info.port,
-            '--xml-rpc-user=%s' % conf.info.user,
-            '--xml-rpc-passwd=%s' % conf.info.passwd
+            '--xml-rpc-listen-port=%s' % self.conf.info.port,
+            '--xml-rpc-user=%s' % self.conf.info.user,
+            '--xml-rpc-passwd=%s' % self.conf.info.passwd
             ])
-
-    def __del__(self):
-        self.server_process.terminate()
 
 class ServerGroup:
     """
@@ -192,19 +201,35 @@ class ServerGroup:
     def __init__(self, main_app, view):
         self.main_app = main_app
         self.model = view.get_model()
-        self.servers = ODict()
         # TreeSelection
         selection = view.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
         # TreeModel
-        LocalServer(self, LOCAL_SERVER_UUID)
-        other_servers = main_app.conf.main.servers
-        if other_servers:
-            for server_uuid in other_servers.split(','):
+        for server_uuid in self.get_server_uuids():
+            if server_uuid == LOCAL_SERVER_UUID:
+                LocalServer(self, server_uuid)
+            else:
                 Server(self, server_uuid)
         for server in Server.instances.itervalues():
             glib.timeout_add_seconds(1, server.get_session_info)
+
+    def get_server_uuids(self):
+        """
+        Get server uuids according to the order in the main config.
+        """
+        server_uuids = self.main_app.conf.info.servers.split(',')
+        if server_uuids == ['']:
+            server_uuids = []
+        server_uuids.insert(0, LOCAL_SERVER_UUID)
+        return server_uuids
+
+    def get_servers(self):
+        """
+        Get server instances according to the order in the main config.
+        """
+        return [Server.instances[server_uuid]
+                for server_uuid in self.get_server_uuids()]
 
     def on_selection_changed(self, selection):
         """
@@ -216,7 +241,7 @@ class ServerGroup:
         # if not the server iter
         if len(path) > 1:
             model_index = path[-1] + (1, ITER_COUNT)[len(path) - 2]
-            server = self.servers.values()[path[0]]
+            server = self.get_servers()[path[0]]
             tasklist_model = server.models[model_index]
             self.main_app.tasklist_view.set_model(tasklist_model)
 

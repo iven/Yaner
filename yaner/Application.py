@@ -46,7 +46,7 @@ class YanerApp(SingleInstanceApp):
         self.__init_paths()
         # Init Config
         self.__init_confs()
-        self.conf = ConfigFile(U_MAIN_CONFIG_FILE)
+        self.conf = ConfigFile.instances[U_MAIN_CONFIG_UUID]
         # Builder
         builder = gtk.Builder()
         builder.add_from_file(MAIN_UI_FILE)
@@ -105,6 +105,12 @@ class YanerApp(SingleInstanceApp):
             for conf_file in glob.glob(os.path.join(conf_dir, wildcard)):
                 ConfigFile(conf_file)
 
+    def get_default_options(self):
+        """
+        Get task default options.
+        """
+        return dict(self.conf.default)
+
     def on_instance_exists(self):
         """
         Being called when another instance exists. Currently just quits.
@@ -144,12 +150,13 @@ class YanerApp(SingleInstanceApp):
         about_dialog.run()
         about_dialog.hide()
         
-    def on_quit_action_activate(self, action):
+    @staticmethod
+    def on_quit_action_activate(action):
         """
         Main window quit callback.
         """
         # Kill local aria2c process
-        del Server.instances[LOCAL_SERVER_UUID]
+        Server.instances[LOCAL_SERVER_UUID].server_process.terminate()
         gtk.widget_pop_colormap()
         reactor.stop()
 

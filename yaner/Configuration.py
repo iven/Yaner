@@ -41,10 +41,10 @@ class ConfigFile(ODict):
             open(config_file, 'w').close()
         parser = ConfigParser.ConfigParser()
         parser.read(config_file)
-        section_list = [(section, ConfigSection(parser, section)) \
+        self.parser = parser
+        section_list = [(section, ConfigSection(self, section)) \
                 for section in parser.sections()]
         ODict.__init__(self, section_list)
-        self.parser = parser
         self.config_file = config_file
 
         # Add self to the global dict
@@ -53,12 +53,11 @@ class ConfigFile(ODict):
     def __str__(self):
         return self.config_file
 
-    def __getattr__(self, section):
-        if not self.has_key(section):
-            self.parser.add_section(section)
-            ODict.__setitem__(self, section,
-                    ConfigSection(self.parser, section))
-        return self[section]
+    def __getattr__(self, attr):
+        if self.has_key(attr):
+            return self[attr]
+        else:
+            return ODict.__getattr__(self, attr)
 
     def __setitem__(self, section, option_dict):
         """
@@ -68,9 +67,10 @@ class ConfigFile(ODict):
         if not self.has_key(section):
             self.parser.add_section(section)
             ODict.__setitem__(self, section,
-                    ConfigSection(self.parser, section))
+                    ConfigSection(self, section))
         for (key, value) in option_dict.iteritems():
             self[section][key] = value
+        self.save()
 
     def __delitem__(self, section):
         """
@@ -78,17 +78,22 @@ class ConfigFile(ODict):
         """
         self.parser.remove_section(section)
         ODict.__delitem__(self, section)
+        self.save()
 
-    def __del__(self):
+    def save(self):
+        """
+        Write changes to the disk.
+        """
         with open(self.config_file, 'w') as cfile:
             self.parser.write(cfile)
 
 class ConfigSection(ODict):
     "A section of config file with dict features."
 
-    def __init__(self, config_parser, section):
-        ODict.__init__(self, config_parser.items(section))
-        self.parser = config_parser
+    def __init__(self, config_file, section):
+        ODict.__init__(self, config_file.parser.items(section))
+        self.config_file = config_file
+        self.parser = config_file.parser
         self.section = section
 
     def __str__(self):
@@ -100,8 +105,16 @@ class ConfigSection(ODict):
     def __setitem__(self, key, value):
         self.parser.set(self.section, key, value)
         ODict.__setitem__(self, key, value)
+        self.save()
 
     def __delitem__(self, key):
         self.parser.remove_option(self.section, key)
         ODict.__delitem__(self, key)
+        self.save()
+
+    def save(self):
+        """
+        Write changes to the disk.
+        """
+        self.config_file.save()
 

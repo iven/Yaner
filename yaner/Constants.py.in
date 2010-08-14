@@ -44,7 +44,8 @@ LOCAL_SERVER_UUID = "eb2d6f1e-a1d1-11df-a717-0024545db8c1"
 LOCAL_SERVER_CONFIG_FILE = _join(_CONFIG_DIR, LOCAL_SERVER_UUID)
 # User
 U_CONFIG_DIR = _join(_config_home, "yaner")
-U_MAIN_CONFIG_FILE = _join(U_CONFIG_DIR, "yaner.conf")
+U_MAIN_CONFIG_UUID = "yaner.conf"
+U_MAIN_CONFIG_FILE = _join(U_CONFIG_DIR, U_MAIN_CONFIG_UUID)
 U_TASK_CONFIG_DIR = _join(U_CONFIG_DIR, "tasks")
 U_CATE_CONFIG_DIR = _join(U_CONFIG_DIR, "cates")
 U_SERVER_CONFIG_DIR = _join(U_CONFIG_DIR, "servers")

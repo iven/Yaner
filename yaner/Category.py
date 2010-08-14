@@ -24,8 +24,11 @@
     This file contains classes about download categories.
 """
 
+import os
+
+from yaner.Constants import *
+from yaner.Task import TaskMixin, TASK_CLASSES
 from yaner.Configuration import ConfigFile
-from yaner.Task import TASK_CLASSES
 
 class Category:
     """
@@ -35,38 +38,55 @@ class Category:
 
     instances = {}
 
-    def __init__(self, cate_uuid):
+    def __init__(self, server, cate_uuid):
+        self.server = server
         self.uuid = cate_uuid
+        self.conf = ConfigFile.instances[self.uuid]
         self.citer = None
 
         # Add self to the global dict
         self.instances[self.uuid] = self
 
-    def get_conf(self):
-        """
-        Get category ConfigFile.
-        """
-        return ConfigFile.instances[self.uuid]
-
     def get_task_uuids(self):
         """
         Get server task uuids.
         """
-        task_uuids = self.get_conf().info.tasks.split(',')
+        task_uuids = self.conf.info.tasks.split(',')
         return task_uuids if task_uuids != [''] else []
+
+    def set_task_uuids(self, task_uuids):
+        """
+        Set server task uuids.
+        task_uuids is a tuple.
+        """
+        self.conf.info['tasks'] = ','.join(task_uuids)
+
+    def add_task_uuid(self, task_uuid):
+        """
+        Add a task uuid to config file.
+        """
+        task_uuids = self.get_task_uuids()
+        task_uuids.append(task_uuid)
+        self.set_task_uuids(task_uuids)
 
     def get_tasks(self):
         """
         Get category task instances.
         """
-        return (TaskMixin.instances[task_uuid]
-                for task_uuid in self.get_task_uuids())
+        return [TaskMixin.instances[task_uuid]
+                for task_uuid in self.get_task_uuids()]
 
     def get_name(self):
         """
         Get category name.
         """
-        return self.get_conf().info.name
+        return self.conf.info.name
+
+    def get_dir(self):
+        """
+        Get category directory.
+        """
+        return self.conf.info.dir
 
     def set_iter(self, cate_iter):
         """
@@ -74,19 +94,20 @@ class Category:
         """
         self.citer = cate_iter
 
-    def add_task(self, info, options, conf = None, is_new = True):
+    def add_task(self, info, options, conf = None):
         """
         Add task to category, from info + options, or conf.
-        If a task is new added to the category, is_new should be True.
-        if we just want to display an existing task on the server, is_new will be False.
         """
-        if info != None and options != None:
+        is_new_task = (info != None) and (options != None)
+        if is_new_task:
             # Must be new task, generate a conf file for it.
-            task_uuid = str(uuid.uuid1())
-            task_conf = ConfigFile(os.path.join(U_TASK_CONFIG_DIR, task_uuid))
-            info['uuid'] = task_uuid
-            task_conf['info'] = info
-            task_conf['options'] = options
-
-        TASK_CLASSES[int(conf.info.type)](self, conf, is_new)
+            task_uuid = info['uuid']
+            conf = ConfigFile(os.path.join(U_TASK_CONFIG_DIR, task_uuid))
+            conf['info'] = info
+            conf['options'] = options
+            # Add task uuid to category config file
+            self.add_task_uuid(task_uuid)
+        task = TASK_CLASSES[int(conf.info.type)](self, conf)
+        if is_new_task:
+            task.start()
 

@@ -1034,20 +1034,6 @@
       <action-widget response="-5">ok_button</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkListStore" id="cate_ls">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name dir -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="server_ls">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
   <object class="GtkAdjustment" id="servers_adjustment">
     <property name="lower">1</property>
     <property name="upper">20</property>
@@ -1084,4 +1070,20 @@
   </object>
   <object class="GtkFileFilter" id="metalink_filefilter"/>
   <object class="GtkFileFilter" id="torrent_filefilter"/>
+  <object class="GtkListStore" id="cate_ls">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name uuid -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="server_ls">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name uuid -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
 </interface>
