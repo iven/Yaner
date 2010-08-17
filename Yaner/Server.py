@@ -204,6 +204,7 @@ class ServerGroup:
         selection = view.get_selection()
         selection.set_mode(gtk.SELECTION_SINGLE)
         selection.connect("changed", self.on_selection_changed)
+        self.selection = selection
         # TreeModel
         for server_uuid in self.get_server_uuids():
             if server_uuid == LOCAL_SERVER_UUID:

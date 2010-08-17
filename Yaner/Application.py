@@ -49,6 +49,7 @@ class YanerApp(SingleInstanceApp):
         self.conf = ConfigFile.instances[U_MAIN_CONFIG_UUID]
         # Builder
         builder = gtk.Builder()
+        builder.set_translation_domain('yaner')
         builder.add_from_file(MAIN_UI_FILE)
         builder.connect_signals(self)
         self.builder = builder

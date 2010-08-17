@@ -1,0 +1,178 @@
+# Chinese translations for PACKAGE package
+# PACKAGE 软件包的简体中文翻译.
+# Copyright (C) 2010 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#  <ivenvd@gmail.com>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: yaner 0.0.5\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-08-17 15:52+0800\n"
+"PO-Revision-Date: 2010-08-17 15:18+0800\n"
+"Last-Translator:  <ivenvd@gmail.com>\n"
+"Language-Team: Chinese (simplified)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../Yaner/Server.py:65
+msgid "Queuing"
+msgstr "排队中"
+
+#: ../Yaner/Server.py:66
+msgid "Completed"
+msgstr "已完成"
+
+#: ../Yaner/Server.py:67
+msgid "Recycled"
+msgstr "回收站"
+
+#: ../glade/main.ui:37
+msgid "Yaner - Faster than a flash of lightning"
+msgstr "掩耳 - 迅雷不及掩耳"
+
+#: ../glade/main.ui:50
+msgid "_File"
+msgstr "文件(_F)"
+
+#: ../glade/main.ui:111
+msgid "_Task"
+msgstr "任务(_T)"
+
+#: ../glade/main.ui:149
+msgid "_Help"
+msgstr "帮助(_H)"
+
+#: ../glade/main.ui:180 ../glade/task_new.ui:7
+msgid "Add new task"
+msgstr "添加新任务"
+
+#: ../glade/main.ui:484
+msgid "About Yaner"
+msgstr "关于掩耳"
+
+#: ../glade/main.ui:491
+msgid "Copyright © 2010 Iven Day(Xu Lijian)"
+msgstr "Copyright © 2010 Iven Day(许立剑)"
+
+#: ../glade/task_new.ui:66
+msgid "<b>URI(s)</b>"
+msgstr "<b>下载地址</b>"
+
+#: ../glade/task_new.ui:98
+msgid "Referer:"
+msgstr "引用页"
+
+#: ../glade/task_new.ui:109
+msgid "Rename:"
+msgstr "重命名"
+
+#: ../glade/task_new.ui:147
+msgid "Connections:"
+msgstr "连接数"
+
+#: ../glade/task_new.ui:181 ../glade/task_new.ui:602 ../glade/task_new.ui:832
+msgid "<b>Settings</b> - Optional"
+msgstr "<b>设置</b> - 可选"
+
+#: ../glade/task_new.ui:214 ../glade/task_new.ui:295
+msgid "User:"
+msgstr "用户名"
+
+#: ../glade/task_new.ui:239 ../glade/task_new.ui:269
+msgid "Password:"
+msgstr "密码"
+
+#: ../glade/task_new.ui:323
+msgid "<b>HTTP</b>"
+msgstr ""
+
+#: ../glade/task_new.ui:333
+msgid "<b>FTP</b>"
+msgstr ""
+
+#: ../glade/task_new.ui:349
+msgid "<b>Authorization</b> - Optional"
+msgstr "<b>验证</b> - 可选"
+
+#: ../glade/task_new.ui:364
+msgid "Normal / BT Magnet"
+msgstr "普通 / BT 磁力链接"
+
+#: ../glade/task_new.ui:399
+msgid "<b>Torrent File</b>"
+msgstr "<b>种子文件</b>"
+
+#: ../glade/task_new.ui:442
+msgid "<b>URI(s)</b> - Optional"
+msgstr "<b>下载地址</b> - 可选"
+
+#: ../glade/task_new.ui:474
+msgid "Max open files:"
+msgstr "最大打开文件数："
+
+#: ../glade/task_new.ui:485
+msgid "Seed time(min):"
+msgstr "做种时间（分钟）："
+
+#: ../glade/task_new.ui:498
+msgid "Seed ratio:"
+msgstr "做种比例："
+
+#: ../glade/task_new.ui:557
+msgid "Max peers:"
+msgstr "最大节点数："
+
+#: ../glade/task_new.ui:583
+msgid "Preview mode - Try to download first and last pieces first"
+msgstr "预览模式 - 试着优先下载文件首尾部分"
+
+#: ../glade/task_new.ui:620
+msgid "BitTorrent"
+msgstr ""
+
+#: ../glade/task_new.ui:656
+msgid "<b>Metalink File</b>"
+msgstr "<b>Metalink 文件</b>"
+
+#: ../glade/task_new.ui:689
+msgid "Download servers:"
+msgstr "下载服务器："
+
+#: ../glade/task_new.ui:700
+msgid "Prefered locations:"
+msgstr "优先地理位置："
+
+#: ../glade/task_new.ui:729
+msgid "Language:"
+msgstr "语言："
+
+#: ../glade/task_new.ui:803
+msgid "OS:"
+msgstr "操作系统："
+
+#: ../glade/task_new.ui:816
+msgid "Version:"
+msgstr "版本号："
+
+#: ../glade/task_new.ui:850
+msgid "Metalink"
+msgstr ""
+
+#: ../glade/task_new.ui:903
+msgid "Category:"
+msgstr "分类："
+
+#: ../glade/task_new.ui:931
+msgid "Directory:"
+msgstr "目录："
+
+#: ../glade/task_new.ui:944
+msgid "Select download directory"
+msgstr "选择下载目录"
+
+#: ../glade/task_new.ui:975
+msgid "<b>Server and Category</b>"
+msgstr "<b>服务端和分类</b>"

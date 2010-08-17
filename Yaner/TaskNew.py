@@ -39,6 +39,7 @@ class TaskNew:
     def __init__(self, main_app):
         # GTK+ Builder
         builder = gtk.Builder()
+        builder.set_translation_domain('yaner')
         builder.add_from_file(TASK_NEW_UI_FILE)
         builder.connect_signals(self)
         self.builder = builder

@@ -65,18 +65,21 @@
                             <child>
                               <object class="GtkMenuItem" id="task_new_normal_item">
                                 <property name="visible">True</property>
+                                <property name="use_action_appearance">True</property>
                                 <property name="related_action">task_new_normal_action</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkMenuItem" id="task_new_bt_item">
                                 <property name="visible">True</property>
+                                <property name="use_action_appearance">True</property>
                                 <property name="related_action">task_new_bt_action</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkMenuItem" id="task_new_metalink_item">
                                 <property name="visible">True</property>
+                                <property name="use_action_appearance">True</property>
                                 <property name="related_action">task_new_metalink_action</property>
                               </object>
                             </child>
@@ -113,17 +116,16 @@
                     <child>
                       <object class="GtkImageMenuItem" id="task_start_item">
                         <property name="visible">True</property>
-                        <property name="related_action">task_start_action</property>
                         <property name="use_action_appearance">True</property>
-                        <property name="use_underline">True</property>
+                        <property name="related_action">task_start_action</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="task_pause_item">
                         <property name="visible">True</property>
-                        <property name="related_action">task_pause_action</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="related_action">task_pause_action</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -131,8 +133,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="task_remove_item">
                         <property name="visible">True</property>
-                        <property name="related_action">task_remove_action</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="related_action">task_remove_action</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -186,8 +188,8 @@
             <child>
               <object class="GtkToolButton" id="task_remove_toolbutton">
                 <property name="visible">True</property>
-                <property name="related_action">task_remove_action</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">task_remove_action</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -206,8 +208,8 @@
             <child>
               <object class="GtkToolButton" id="task_start_toolbutton">
                 <property name="visible">True</property>
-                <property name="related_action">task_start_action</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">task_start_action</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -218,8 +220,8 @@
             <child>
               <object class="GtkToolButton" id="task_pause_toolbutton">
                 <property name="visible">True</property>
-                <property name="related_action">task_pause_action</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">task_pause_action</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -238,8 +240,8 @@
             <child>
               <object class="GtkToolButton" id="about_toolbutton">
                 <property name="visible">True</property>
-                <property name="related_action">about_action</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">about_action</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -250,8 +252,8 @@
             <child>
               <object class="GtkToolButton" id="quit_toolbutton">
                 <property name="visible">True</property>
-                <property name="related_action">quit_action</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">quit_action</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
