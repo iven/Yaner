@@ -96,6 +96,7 @@ data = data.replace("@version@", version)
 with open(join("Yaner/Constants.py"), "w") as f:
     f.write(data)
 
+data_files = []
 po_buildcmd = "msgfmt -o build/locale/%s/yaner.mo po/%s.po"
 for po_file in glob('po/*.po'):
     po_name = splitext(basename(po_file))[0]
@@ -103,10 +104,8 @@ for po_file in glob('po/*.po'):
         if not isdir("build/locale/" + po_name):
             os.makedirs("build/locale/" + po_name)
         os.system(po_buildcmd % (po_name, po_name))
-
-data_files = []
-data_files.append(("share/locale/%s/LC_MESSAGES" % po_name,
-    glob('build/locale/%s/yaner.mo' % po_name)))
+    data_files.append(("share/locale/%s/LC_MESSAGES" % po_name,
+        glob('build/locale/%s/yaner.mo' % po_name)))
 data_files.append(("share/yaner/glade/", glob('glade/*')))
 data_files.append(("share/yaner/config/", glob('config/*')))
 data_files.append(('share/applications/', ['yaner.desktop']))
