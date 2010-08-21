@@ -45,7 +45,6 @@ class TaskMixin:
         self.server = cate.server
         self.cate = cate
         self.conf = conf
-        self.main_app = self.server.group.main_app
         self.iter = None
         self.healthy = False
         self.add_iter()
@@ -76,8 +75,9 @@ class TaskMixin:
         """
         Add an iter to the queuing model and start updating it.
         """
-        queuing_model = self.server.models[ITER_QUEUING]
-        self.main_app.tasklist_view.set_model(queuing_model)
+        server = self.server
+        server.group.select_iter(server.iters[ITER_QUEUING])
+        queuing_model = server.models[ITER_QUEUING]
         self.iter = queuing_model.append(None, [self.conf.info.gid,
             "gtk-new", self.conf.info.name, 0, '', '', '', '', 0])
 

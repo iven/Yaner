@@ -231,6 +231,12 @@ class ServerGroup:
         return [Server.instances[server_uuid]
                 for server_uuid in self.get_server_uuids()]
 
+    def select_iter(self, iter):
+        """
+        Set selected iter, and update task list view.
+        """
+        self.selection.select_iter(iter)
+
     def on_selection_changed(self, selection):
         """
         TreeView selection changed callback, changing the model of
