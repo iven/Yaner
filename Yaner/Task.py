@@ -79,7 +79,8 @@ class TaskMixin:
         server.group.select_iter(server.iters[ITER_QUEUING])
         queuing_model = server.models[ITER_QUEUING]
         self.iter = queuing_model.append(None, [self.conf.info.gid,
-            "gtk-new", self.conf.info.name, 0, '', '', '', '', 0])
+            "gtk-new", self.conf.info.name, 0, '', '', '', '', 0,
+            self.conf.info.uuid])
 
         glib.timeout_add_seconds(1, self.call_tell_status)
         self.healthy = True

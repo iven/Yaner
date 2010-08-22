@@ -84,7 +84,8 @@ class Server:
                     gobject.TYPE_STRING, # size
                     gobject.TYPE_STRING, # download speed
                     gobject.TYPE_STRING, # upload speed
-                    gobject.TYPE_INT     # connections
+                    gobject.TYPE_INT,    # connections
+                    gobject.TYPE_STRING, # uuid
                     )
             self.models.append(model)
 
@@ -231,11 +232,11 @@ class ServerGroup:
         return [Server.instances[server_uuid]
                 for server_uuid in self.get_server_uuids()]
 
-    def select_iter(self, iter):
+    def select_iter(self, citer):
         """
         Set selected iter, and update task list view.
         """
-        self.selection.select_iter(iter)
+        self.selection.select_iter(citer)
 
     def on_selection_changed(self, selection):
         """
