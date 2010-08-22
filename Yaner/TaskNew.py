@@ -266,6 +266,8 @@ class TaskNew:
         info['server'] = self.__get_active_server().uuid
         info['cate'] = cate.uuid
         info['uuid'] = str(uuid.uuid1())
+        info['percent'] = 0
+        info['size'] = 0
         info['gid'] = ''
 
         if task_type == TASK_METALINK and metadata_file:

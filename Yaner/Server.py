@@ -159,7 +159,7 @@ class Server:
                 task_conf = ConfigFile.instances[task_uuid]
                 if is_new_session:
                     # gid is useless, set it to '' to avoid updating iter.
-                    task_conf.info.gid = ''
+                    task_conf.info['gid'] = ''
                 cate.add_task(None, None, task_conf)
 
     def connect_ok(self, rtnval):
@@ -209,7 +209,9 @@ class ServerGroup:
         # TreeModel
         for server_uuid in self.get_server_uuids():
             if server_uuid == LOCAL_SERVER_UUID:
-                LocalServer(self, server_uuid)
+                server = LocalServer(self, server_uuid)
+                view.expand_row('0', True)
+                self.select_iter(server.iters[ITER_QUEUING])
             else:
                 Server(self, server_uuid)
         for server in Server.instances.itervalues():
@@ -244,11 +246,12 @@ class ServerGroup:
         TaskView according to the selected row.
         """
         (model, selected_iter) = selection.get_selected()
-        path = model.get_path(selected_iter)
-        # if not the server iter
-        if len(path) > 1:
-            model_index = path[-1] + (1, ITER_COUNT)[len(path) - 2]
-            server = self.get_servers()[path[0]]
-            tasklist_model = server.models[model_index]
-            self.main_app.tasklist_view.set_model(tasklist_model)
+        if isinstance(selected_iter, gtk.TreeIter):
+            path = model.get_path(selected_iter)
+            # if not the server iter
+            if len(path) > 1:
+                model_index = path[-1] + (1, ITER_COUNT)[len(path) - 2]
+                server = self.get_servers()[path[0]]
+                tasklist_model = server.models[model_index]
+                self.main_app.tasklist_view.set_model(tasklist_model)
 

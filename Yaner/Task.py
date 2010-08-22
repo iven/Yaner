@@ -46,7 +46,6 @@ class TaskMixin:
         self.cate = cate
         self.conf = conf
         self.iter = None
-        self.healthy = False
         self.add_iter()
 
         # Add self to the global dict
@@ -70,20 +69,21 @@ class TaskMixin:
         """
         # FIXME: Workaround for Metalink.
         self.conf.info['gid'] = gid[-1] if type(gid) is list else gid
+        self.server.group.select_iter(self.server.iters[ITER_QUEUING])
+        glib.timeout_add_seconds(1, self.call_tell_status)
 
     def add_iter(self):
         """
         Add an iter to the queuing model and start updating it.
         """
         server = self.server
-        server.group.select_iter(server.iters[ITER_QUEUING])
         queuing_model = server.models[ITER_QUEUING]
+        percent = float(self.conf.info.percent)
+        size = int(self.conf.info.size)
         self.iter = queuing_model.append(None, [self.conf.info.gid,
-            "gtk-new", self.conf.info.name, 0, '', '', '', '', 0,
-            self.conf.info.uuid])
-
-        glib.timeout_add_seconds(1, self.call_tell_status)
-        self.healthy = True
+            "gtk-new", self.conf.info.name, percent,
+            '%.2f%% / %s' % (percent, psize(percent * size / 100)),
+            psize(size), '', '', 0, self.conf.info.uuid])
 
     def add_task_error(self, failure):
         """
@@ -107,19 +107,27 @@ class TaskMixin:
             deferred = self.server.proxy.callRemote(
                     "aria2.tellStatus", self.conf.info.gid)
             deferred.addCallbacks(self.update_iter, self.update_iter_error)
-        return self.healthy
+            return True
+        else:
+            return False
 
     def update_iter(self, status):
         """
         Update data fields of the task iter.
         """
+        comp_length = status['completedLength']
+        total_length = status['totalLength']
         if status['status'] == 'complete':
-            self.healthy = False
-        if not 'totalLength' in status:
-            print status
+            self.conf.info['gid'] = ''
+            percent = 100
+            self.server.models[ITER_QUEUING].set(self.iter,
+                    3, percent,
+                    4, '100%',
+                    5, psize(total_length),
+                    6, 0,
+                    7, 0,
+                    8, 0)
         else:
-            comp_length = status['completedLength']
-            total_length = status['totalLength']
             percent = int(comp_length) / int(total_length) * 100 \
                     if total_length != '0' else 0
             self.server.models[ITER_QUEUING].set(self.iter,
@@ -129,14 +137,18 @@ class TaskMixin:
                     6, pspeed(status['downloadSpeed']),
                     7, pspeed(status['uploadSpeed']),
                     8, int(status['connections']))
+        if total_length != self.conf.info.size:
+            self.conf.info['size'] = total_length
+        if percent != self.conf.info.percent:
+            self.conf.info['percent'] = percent
 
     def update_iter_error(self, failure):
         """
         Handle errors occured when calling update_iter.
         """
         failure.check(ConnectionRefusedError, xmlrpclib.Fault)
-        if self.healthy:
-            self.healthy = False
+        if self.conf.info.gid:
+            self.conf.info['gid'] = ''
             dialog = gtk.MessageDialog(self.main_app.main_window,
                     gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
                     gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,

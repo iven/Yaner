@@ -34,6 +34,7 @@ from twisted.internet import reactor
 from Yaner.Constants import *
 from Yaner.Server import ServerGroup, Server
 from Yaner.TaskNew import TaskNew
+from Yaner.Task import TaskMixin
 from Yaner.Configuration import ConfigFile
 from Yaner.SingleInstance import SingleInstanceApp
 
@@ -56,13 +57,13 @@ class YanerApp(SingleInstanceApp):
         # Main Window
         self.main_window = builder.get_object("main_window")
         self.__init_rgba(self.main_window)
-        # Server View
-        server_tv = builder.get_object("server_tv")
-        self.server_group = ServerGroup(self, server_tv)
         # Task List View
         self.tasklist_view = builder.get_object('tasklist_tv')
         selection = self.tasklist_view.get_selection()
         selection.set_mode(gtk.SELECTION_MULTIPLE)
+        # Server View
+        server_tv = builder.get_object("server_tv")
+        self.server_group = ServerGroup(self, server_tv)
         # Task New
         self.task_new = TaskNew(self)
         # Show the window
@@ -106,6 +107,14 @@ class YanerApp(SingleInstanceApp):
             for conf_file in glob.glob(os.path.join(conf_dir, wildcard)):
                 ConfigFile(conf_file)
 
+    @staticmethod
+    def __get_task_from_iter(model, titer):
+        """
+        Get Task class from a given iter.
+        """
+        task_uuid = model.get(titer, 9)[0]
+        return TaskMixin.instances[task_uuid]
+        
     def get_default_options(self):
         """
         Get task default options.
@@ -134,7 +143,14 @@ class YanerApp(SingleInstanceApp):
         """
         Being called when task_start_action activated.
         """
-        pass
+        def start_task(treemodel, path, titer):
+            """
+            Start downloading a task from given iter.
+            This doesn't means unpausing.
+            """
+            self.__get_task_from_iter(treemodel, titer).start()
+        selection = self.tasklist_view.get_selection()
+        selection.selected_foreach(start_task)
 
     def on_task_pause_action_activate(self, action):
         """
