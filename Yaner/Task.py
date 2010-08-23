@@ -27,6 +27,7 @@
 from __future__ import division
 import gtk
 import glib
+import os
 import xmlrpclib
 from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError
@@ -129,19 +130,23 @@ class TaskMixin:
         comp_length = status['completedLength']
         total_length = status['totalLength']
         if status['status'] == 'complete':
-            self.conf.info['gid'] = ''
             percent = 100
             self.server.models[ITER_QUEUING].set(self.iter,
+                    0, self.conf.info.gid,
+                    2, self.conf.info.name,
                     3, percent,
                     4, '%.2f%% / %s' % (percent, psize(comp_length)),
                     5, psize(total_length),
                     6, 0,
                     7, 0,
                     8, 0)
+            self.conf.info['gid'] = ''
         else:
             percent = int(comp_length) / int(total_length) * 100 \
                     if total_length != '0' else 0
             self.server.models[ITER_QUEUING].set(self.iter,
+                    0, self.conf.info.gid,
+                    2, self.conf.info.name,
                     3, percent,
                     4, '%.2f%% / %s' % (percent, psize(comp_length)),
                     5, psize(total_length),
@@ -198,6 +203,16 @@ class BTTask(TaskMixin):
                 self.get_uris(), self.get_options())
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
+    def update_iter(self, status):
+        """
+        Update data fields of the task iter.
+        """
+        if status.has_key('bittorrent'):
+            name = status['bittorrent']['info']['name']
+            if name != self.conf.info.name:
+                self.conf.info['name'] = name
+        TaskMixin.update_iter(self, status)
+
 class NormalTask(TaskMixin):
     """
     Normal Task Class
@@ -213,8 +228,18 @@ class NormalTask(TaskMixin):
                 self.get_uris(), self.get_options())
         deferred.addCallbacks(self.add_task, self.add_task_error)
 
+    def update_iter(self, status):
+        """
+        Update data fields of the task iter.
+        """
+        name = os.path.basename(status['files'][0]['path'])
+        if name != self.conf.info.name:
+            self.conf.info['name'] = name
+        TaskMixin.update_iter(self, status)
+
 TASK_CLASSES = (
         NormalTask,
         BTTask,
         MetalinkTask
         )
+

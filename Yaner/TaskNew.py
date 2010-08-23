@@ -273,16 +273,19 @@ class TaskNew:
         if task_type == TASK_METALINK and metadata_file:
             info['metalink'] = metadata_file
             info['type'] = TASK_METALINK
-            info['name'] = metadata_file
+            info['name'] = os.path.basename(metadata_file)
         elif task_type == TASK_NORMAL and uris:
             info['uris'] = '|'.join(uris)
             info['type'] = TASK_NORMAL
-            info['name'] = uris[0]
+            if options.has_key('out'):
+                info['name'] = options['out']
+            else:
+                info['name'] = os.path.basename(uris[0])
         elif task_type == TASK_BT and metadata_file:
             info['torrent'] = metadata_file
             info['uris'] = '|'.join(uris)
             info['type'] = TASK_BT
-            info['name'] = metadata_file
+            info['name'] = os.path.basename(metadata_file)
         else:
             return
         cate.add_task(info, options)
