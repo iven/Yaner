@@ -51,6 +51,22 @@ class TaskMixin:
         # Add self to the global dict
         self.instances[conf.info.uuid] = self
 
+    def pause(self):
+        """
+        Pause the task.
+        """
+        deferred = self.server.proxy.callRemote(
+                "aria2.pause", self.conf.info.gid)
+        # TODO: Error handling.
+
+    def unpause(self):
+        """
+        Unpause the task.
+        """
+        deferred = self.server.proxy.callRemote(
+                "aria2.unpause", self.conf.info.gid)
+        # TODO: Error handling.
+
     def get_uris(self):
         """
         Get URIs from config file.
@@ -90,12 +106,7 @@ class TaskMixin:
         Handle errors occured when calling add_task.
         """
         failure.check(ConnectionRefusedError, xmlrpclib.Fault)
-        dialog = gtk.MessageDialog(self.main_app.main_window,
-                gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                failure.getErrorMessage())
-        dialog.run()
-        dialog.destroy()
+        print failure.getErrorMessage()
         return failure
 
     def call_tell_status(self):
@@ -122,7 +133,7 @@ class TaskMixin:
             percent = 100
             self.server.models[ITER_QUEUING].set(self.iter,
                     3, percent,
-                    4, '100%',
+                    4, '%.2f%% / %s' % (percent, psize(comp_length)),
                     5, psize(total_length),
                     6, 0,
                     7, 0,
@@ -147,14 +158,7 @@ class TaskMixin:
         Handle errors occured when calling update_iter.
         """
         failure.check(ConnectionRefusedError, xmlrpclib.Fault)
-        if self.conf.info.gid:
-            self.conf.info['gid'] = ''
-            dialog = gtk.MessageDialog(self.main_app.main_window,
-                    gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                    failure.getErrorMessage())
-            dialog.run()
-            dialog.destroy()
+        print failure.getErrorMessage()
         return failure
 
 class MetalinkTask(TaskMixin):

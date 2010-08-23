@@ -133,30 +133,43 @@ class YanerApp(SingleInstanceApp):
         """
         self.task_new.run_dialog(action)
 
-    def on_task_remove_action_activate(self, action):
+    def on_task_batch_action_activate(self, action):
         """
-        Being called when task_remove_action activated.
-        """
-        pass
-
-    def on_task_start_action_activate(self, action):
-        """
-        Being called when task_start_action activated.
+        Being called when task_start/pause/remove_action activated.
         """
         def start_task(treemodel, path, titer):
             """
             Start downloading a task from given iter.
-            This doesn't means unpausing.
+            If task is already started, unpause it.
             """
-            self.__get_task_from_iter(treemodel, titer).start()
-        selection = self.tasklist_view.get_selection()
-        selection.selected_foreach(start_task)
+            task = self.__get_task_from_iter(treemodel, titer)
+            if task.conf.info.gid:
+                task.unpause()
+            else:
+                task.start()
 
-    def on_task_pause_action_activate(self, action):
-        """
-        Being called when task_pause_action activated.
-        """
-        pass
+        def pause_task(treemodel, path, titer):
+            """
+            Pause downloading a task from given iter.
+            """
+            task = self.__get_task_from_iter(treemodel, titer)
+            task.pause()
+
+        def remove_task(treemodel, path, titer):
+            """
+            Remove a task from given iter.
+            """
+            task = self.__get_task_from_iter(treemodel, titer)
+            #task.remove()
+
+        action_dict = {
+                "task_start_action": start_task,
+                "task_pause_action": pause_task,
+                "task_remove_action": remove_task,
+                }
+        
+        selection = self.tasklist_view.get_selection()
+        selection.selected_foreach(action_dict[action.get_property('name')])
 
     @staticmethod
     def on_about_action_activate(about_dialog):

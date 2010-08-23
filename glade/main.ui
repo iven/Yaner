@@ -118,6 +118,7 @@
                         <property name="visible">True</property>
                         <property name="use_action_appearance">True</property>
                         <property name="related_action">task_start_action</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -532,16 +533,16 @@
   <object class="GtkAction" id="task_remove_action">
     <property name="label">Remove</property>
     <property name="stock_id">gtk-remove</property>
-    <signal name="activate" handler="on_task_remove_action_activate"/>
+    <signal name="activate" handler="on_task_batch_action_activate"/>
   </object>
   <object class="GtkAction" id="task_pause_action">
     <property name="label">Pause</property>
     <property name="stock_id">gtk-media-pause</property>
-    <signal name="activate" handler="on_task_pause_action_activate"/>
+    <signal name="activate" handler="on_task_batch_action_activate"/>
   </object>
   <object class="GtkAction" id="task_start_action">
     <property name="label">Start</property>
     <property name="stock_id">gtk-media-play</property>
-    <signal name="activate" handler="on_task_start_action_activate"/>
+    <signal name="activate" handler="on_task_batch_action_activate"/>
   </object>
 </interface>
