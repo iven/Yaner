@@ -265,7 +265,7 @@ class TaskNew:
         info = {}
         info['server'] = self.__get_active_server().uuid
         info['cate'] = cate.uuid
-        info['uuid'] = str(uuid.uuid1())
+        info['uuid'] = str(uuid.uuid4())
         info['percent'] = 0
         info['size'] = 0
         info['gid'] = ''

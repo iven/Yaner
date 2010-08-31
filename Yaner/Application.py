@@ -114,7 +114,7 @@ class YanerApp(SingleInstanceApp):
         """
         task_uuid = model.get(titer, 9)[0]
         return TaskMixin.instances[task_uuid]
-        
+
     def get_default_options(self):
         """
         Get task default options.
@@ -167,7 +167,7 @@ class YanerApp(SingleInstanceApp):
                 "task_pause_action": pause_task,
                 "task_remove_action": remove_task,
                 }
-        
+
         selection = self.tasklist_view.get_selection()
         selection.selected_foreach(action_dict[action.get_property('name')])
 
@@ -179,7 +179,7 @@ class YanerApp(SingleInstanceApp):
         about_dialog.set_version(VERSION)
         about_dialog.run()
         about_dialog.hide()
-        
+
     @staticmethod
     def on_quit_action_activate(action):
         """
