@@ -28,6 +28,7 @@ from __future__ import division
 import glib
 import os
 import xmlrpclib
+from pynotify import Notification
 from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError
 
@@ -51,13 +52,25 @@ class TaskMixin:
         # Add self to the global dict
         self.instances[conf.info.uuid] = self
 
+    def __on_paused(self, retval):
+        """
+        Being called when task is paused.
+        """
+        pass
+
+    def __on_unpaused(self, retval):
+        """
+        Being called when task is unpaused.
+        """
+        pass
+
     def pause(self):
         """
         Pause the task.
         """
         deferred = self.server.proxy.callRemote(
                 "aria2.pause", self.conf.info.gid)
-        # TODO: Error handling.
+        deferred.addCallbacks(self.__on_paused, self.on_twisted_error)
 
     def unpause(self):
         """
@@ -65,7 +78,7 @@ class TaskMixin:
         """
         deferred = self.server.proxy.callRemote(
                 "aria2.unpause", self.conf.info.gid)
-        # TODO: Error handling.
+        deferred.addCallbacks(self.__on_unpaused, self.on_twisted_error)
 
     def get_uris(self):
         """
@@ -92,24 +105,16 @@ class TaskMixin:
             '%.2f%% / %s' % (percent, psize(percent * size / 100)),
             psize(size), '', '', 0, self.conf.info.uuid])
 
-    def started(self, gid):
+    def on_started(self, gid):
         """
         Start updating iter when gid is received.
         """
         # FIXME: Workaround for Metalink.
         self.conf.info['gid'] = gid[-1] if type(gid) is list else gid
         self.server.group.select_iter(self.server.iters[ITER_QUEUING])
-        glib.timeout_add_seconds(1, self.__get_status)
+        glib.timeout_add_seconds(1, self.__call_for_status)
 
-    def start_error(self, failure):
-        """
-        Handle errors occured when calling start().
-        """
-        failure.check(ConnectionRefusedError, xmlrpclib.Fault)
-        print failure.getErrorMessage()
-        return failure
-
-    def __get_status(self):
+    def __call_for_status(self):
         """
         Call server for the status of this task.
         Return True means keep calling it when timeout.
@@ -117,7 +122,7 @@ class TaskMixin:
         if self.conf.info.gid:
             deferred = self.server.proxy.callRemote(
                     "aria2.tellStatus", self.conf.info.gid)
-            deferred.addCallbacks(self.__update_iter, self.__get_status_error)
+            deferred.addCallbacks(self.__update_iter, self.on_twisted_error)
             return True
         else:
             return False
@@ -157,13 +162,12 @@ class TaskMixin:
         if percent != self.conf.info.percent:
             self.conf.info['percent'] = percent
 
-    def __get_status_error(self, failure):
+    def on_twisted_error(self, failure):
         """
-        Handle errors occured when calling update_iter.
+        Handle errors occured when calling some functions via twisted.
         """
-        failure.check(ConnectionRefusedError, xmlrpclib.Fault)
-        print failure.getErrorMessage()
-        return failure
+        message = failure.getErrorMessage()
+        Notification(_('Network Error'), message, APP_ICON_NAME).show()
 
 class MetalinkTask(TaskMixin):
     """
@@ -181,7 +185,7 @@ class MetalinkTask(TaskMixin):
         """
         deferred = self.server.proxy.callRemote(
                 "aria2.addMetalink", self.m_binary, self.get_options())
-        deferred.addCallbacks(self.started, self.start_error)
+        deferred.addCallbacks(self.on_started, self.on_twisted_error)
 
 class BTTask(TaskMixin):
     """
@@ -200,7 +204,7 @@ class BTTask(TaskMixin):
         deferred = self.server.proxy.callRemote(
                 "aria2.addTorrent", self.t_binary,
                 self.get_uris(), self.get_options())
-        deferred.addCallbacks(self.started, self.start_error)
+        deferred.addCallbacks(self.on_started, self.on_twisted_error)
 
     def __update_iter(self, status):
         """
@@ -225,7 +229,7 @@ class NormalTask(TaskMixin):
         """
         deferred = self.server.proxy.callRemote("aria2.addUri",
                 self.get_uris(), self.get_options())
-        deferred.addCallbacks(self.started, self.start_error)
+        deferred.addCallbacks(self.on_started, self.on_twisted_error)
 
     def __update_iter(self, status):
         """

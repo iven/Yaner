@@ -42,6 +42,14 @@ else:
     gtk2reactor.install()
     from twisted.internet import reactor
 
+try:
+    import pynotify
+except ImportError:
+    raise SystemExit(' * Error: the "pynotify" module is missing. \
+            Check if it is installed properly.')
+else:
+    pynotify.init('yaner')
+
 #try:
     from Yaner.Application import YanerApp
 #except ImportError:

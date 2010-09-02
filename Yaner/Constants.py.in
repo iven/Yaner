@@ -32,6 +32,7 @@ from xdg.BaseDirectory import xdg_config_home as _config_home
 # Global
 _DATA_DIR = "@prefix@/share/yaner"
 #ICONDIR = _join(DATADIR, "icons")
+APP_ICON_NAME = 'emblem-downloads'
 #PIXMAPDIR = _join(DATADIR, "images")
 _CONFIG_DIR = _join(_DATA_DIR, "config")
 _GLADE_DIR = _join(_DATA_DIR, "glade")

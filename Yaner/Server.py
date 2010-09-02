@@ -28,6 +28,7 @@ import gtk
 import glib
 import gobject
 from subprocess import Popen
+from pynotify import Notification
 from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError, ConnectionLost
 
@@ -99,7 +100,7 @@ class Server:
         return 'http://%(user)s:%(passwd)s@%(host)s:%(port)s/rpc' \
                 % self.conf.info
 
-    def set_connected(self, connected):
+    def set_connected(self, connected = True):
         """
         Set if client is connected to the server.
         """
@@ -127,14 +128,20 @@ class Server:
         return [Category.instances[cate_uuid]
                 for cate_uuid in self.get_cate_uuids()]
 
-    def get_session_info(self):
+    def call_for_session_info(self):
         """
         Call aria2 server for session info.
         """
         deferred = self.proxy.callRemote("aria2.getSessionInfo")
-        deferred.addCallbacks(self.connect_ok, self.connect_error)
-        deferred.addCallback(self.check_session)
+        deferred.addCallbacks(self.on_got_session_info, self.on_twisted_error)
         return False
+
+    def on_got_session_info(self, session_info):
+        """
+        When got session info, check if it is a new session.
+        """
+        self.set_connected(True)
+        self.check_session_info(session_info)
 
     def get_session(self):
         """
@@ -148,7 +155,7 @@ class Server:
         """
         self.conf.info['session'] = session
 
-    def check_session(self, session_info):
+    def check_session_info(self, session_info):
         """
         Check if aria2c is still last session.
         """
@@ -162,22 +169,13 @@ class Server:
                     task_conf.info['gid'] = ''
                 cate.add_task(None, None, task_conf)
 
-    def connect_ok(self, rtnval):
+    def on_twisted_error(self, failure):
         """
-        When connection succeeded, set "connected" to True.
+        Handle errors occured when calling some functions via twisted.
         """
-        self.set_connected(True)
-        return rtnval
-
-    def connect_error(self, failure):
-        """
-        When connection refused, set "connected" to False.
-        """
-        # XXX: Other errors?
-        failure.check(ConnectionRefusedError, ConnectionLost)
         self.set_connected(False)
-
-        return failure
+        message = failure.getErrorMessage()
+        Notification(_('Network Error'), message, APP_ICON_NAME).show()
 
 class LocalServer(Server):
     """
@@ -215,7 +213,7 @@ class ServerGroup:
             else:
                 Server(self, server_uuid)
         for server in Server.instances.itervalues():
-            glib.timeout_add_seconds(1, server.get_session_info)
+            glib.timeout_add_seconds(1, server.call_for_session_info)
 
     def get_server_uuids(self):
         """
