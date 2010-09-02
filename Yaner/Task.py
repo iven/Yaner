@@ -25,7 +25,6 @@
 """
 
 from __future__ import division
-import gtk
 import glib
 import os
 import xmlrpclib
@@ -47,7 +46,7 @@ class TaskMixin:
         self.cate = cate
         self.conf = conf
         self.iter = None
-        self.add_iter()
+        self.__add_iter()
 
         # Add self to the global dict
         self.instances[conf.info.uuid] = self
@@ -80,16 +79,7 @@ class TaskMixin:
         """
         return dict(self.conf.options)
 
-    def add_task(self, gid):
-        """
-        Add a new task when gid is received.
-        """
-        # FIXME: Workaround for Metalink.
-        self.conf.info['gid'] = gid[-1] if type(gid) is list else gid
-        self.server.group.select_iter(self.server.iters[ITER_QUEUING])
-        glib.timeout_add_seconds(1, self.call_tell_status)
-
-    def add_iter(self):
+    def __add_iter(self):
         """
         Add an iter to the queuing model and start updating it.
         """
@@ -102,15 +92,24 @@ class TaskMixin:
             '%.2f%% / %s' % (percent, psize(percent * size / 100)),
             psize(size), '', '', 0, self.conf.info.uuid])
 
-    def add_task_error(self, failure):
+    def started(self, gid):
         """
-        Handle errors occured when calling add_task.
+        Start updating iter when gid is received.
+        """
+        # FIXME: Workaround for Metalink.
+        self.conf.info['gid'] = gid[-1] if type(gid) is list else gid
+        self.server.group.select_iter(self.server.iters[ITER_QUEUING])
+        glib.timeout_add_seconds(1, self.__get_status)
+
+    def start_error(self, failure):
+        """
+        Handle errors occured when calling start().
         """
         failure.check(ConnectionRefusedError, xmlrpclib.Fault)
         print failure.getErrorMessage()
         return failure
 
-    def call_tell_status(self):
+    def __get_status(self):
         """
         Call server for the status of this task.
         Return True means keep calling it when timeout.
@@ -118,12 +117,12 @@ class TaskMixin:
         if self.conf.info.gid:
             deferred = self.server.proxy.callRemote(
                     "aria2.tellStatus", self.conf.info.gid)
-            deferred.addCallbacks(self.update_iter, self.update_iter_error)
+            deferred.addCallbacks(self.__update_iter, self.__get_status_error)
             return True
         else:
             return False
 
-    def update_iter(self, status):
+    def __update_iter(self, status):
         """
         Update data fields of the task iter.
         """
@@ -158,7 +157,7 @@ class TaskMixin:
         if percent != self.conf.info.percent:
             self.conf.info['percent'] = percent
 
-    def update_iter_error(self, failure):
+    def __get_status_error(self, failure):
         """
         Handle errors occured when calling update_iter.
         """
@@ -182,7 +181,7 @@ class MetalinkTask(TaskMixin):
         """
         deferred = self.server.proxy.callRemote(
                 "aria2.addMetalink", self.m_binary, self.get_options())
-        deferred.addCallbacks(self.add_task, self.add_task_error)
+        deferred.addCallbacks(self.started, self.start_error)
 
 class BTTask(TaskMixin):
     """
@@ -201,9 +200,9 @@ class BTTask(TaskMixin):
         deferred = self.server.proxy.callRemote(
                 "aria2.addTorrent", self.t_binary,
                 self.get_uris(), self.get_options())
-        deferred.addCallbacks(self.add_task, self.add_task_error)
+        deferred.addCallbacks(self.started, self.start_error)
 
-    def update_iter(self, status):
+    def __update_iter(self, status):
         """
         Update data fields of the task iter.
         """
@@ -211,7 +210,7 @@ class BTTask(TaskMixin):
             name = status['bittorrent']['info']['name']
             if name != self.conf.info.name:
                 self.conf.info['name'] = name
-        TaskMixin.update_iter(self, status)
+        TaskMixin.__update_iter(self, status)
 
 class NormalTask(TaskMixin):
     """
@@ -226,16 +225,16 @@ class NormalTask(TaskMixin):
         """
         deferred = self.server.proxy.callRemote("aria2.addUri",
                 self.get_uris(), self.get_options())
-        deferred.addCallbacks(self.add_task, self.add_task_error)
+        deferred.addCallbacks(self.started, self.start_error)
 
-    def update_iter(self, status):
+    def __update_iter(self, status):
         """
         Update data fields of the task iter.
         """
         name = os.path.basename(status['files'][0]['path'])
         if name != self.conf.info.name:
             self.conf.info['name'] = name
-        TaskMixin.update_iter(self, status)
+        TaskMixin.__update_iter(self, status)
 
 TASK_CLASSES = (
         NormalTask,
