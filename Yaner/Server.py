@@ -146,7 +146,7 @@ class Server:
         """
         Set new session id in config file.
         """
-        self.conf.info.session = session
+        self.conf.info['session'] = session
 
     def check_session(self, session_info):
         """
