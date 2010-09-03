@@ -33,6 +33,7 @@ from twisted.web import xmlrpc
 from twisted.internet.error import ConnectionRefusedError
 
 from Yaner.Constants import *
+from Yaner.Constants import _
 from Yaner.Pretty import psize, pspeed
 
 class TaskMixin:
@@ -56,13 +57,13 @@ class TaskMixin:
         """
         Being called when task is paused.
         """
-        pass
+        self.set_status_icon('paused')
 
     def __on_unpaused(self, retval):
         """
         Being called when task is unpaused.
         """
-        pass
+        self.set_status_icon('unpaused')
 
     def pause(self):
         """
@@ -92,6 +93,20 @@ class TaskMixin:
         """
         return dict(self.conf.options)
 
+    def set_status_icon(self, status):
+        """
+        Set the status icon of the iter.
+        """
+        status_dict = {
+                'running': 'gtk-media-play',
+                'paused': 'gtk-media-pause',
+                'unpaused': 'gtk-media-play',
+                'completed': 'gtk-apply',
+                'error': 'gtk-stop',
+                }
+        self.server.models[ITER_QUEUING].set(self.iter,
+                1, status_dict[status])
+
     def __add_iter(self):
         """
         Add an iter to the queuing model and start updating it.
@@ -100,10 +115,18 @@ class TaskMixin:
         queuing_model = server.models[ITER_QUEUING]
         percent = float(self.conf.info.percent)
         size = int(self.conf.info.size)
-        self.iter = queuing_model.append(None, [self.conf.info.gid,
-            "gtk-new", self.conf.info.name, percent,
+        self.iter = queuing_model.append(None, [
+            self.conf.info.gid,
+            "gtk-media-pause",
+            self.conf.info.name,
+            percent,
             '%.2f%% / %s' % (percent, psize(percent * size / 100)),
-            psize(size), '', '', 0, self.conf.info.uuid])
+            psize(size),
+            '',
+            '',
+            0,
+            self.conf.info.uuid,
+            ])
 
     def on_started(self, gid):
         """
@@ -112,6 +135,7 @@ class TaskMixin:
         # FIXME: Workaround for Metalink.
         self.conf.info['gid'] = gid[-1] if type(gid) is list else gid
         self.server.group.select_iter(self.server.iters[ITER_QUEUING])
+        self.set_status_icon('running')
         glib.timeout_add_seconds(1, self.__call_for_status)
 
     def __call_for_status(self):
@@ -122,12 +146,12 @@ class TaskMixin:
         if self.conf.info.gid:
             deferred = self.server.proxy.callRemote(
                     "aria2.tellStatus", self.conf.info.gid)
-            deferred.addCallbacks(self.__update_iter, self.on_twisted_error)
+            deferred.addCallbacks(self.update_iter, self.on_twisted_error)
             return True
         else:
             return False
 
-    def __update_iter(self, status):
+    def update_iter(self, status):
         """
         Update data fields of the task iter.
         """
@@ -144,6 +168,7 @@ class TaskMixin:
                     6, 0,
                     7, 0,
                     8, 0)
+            self.set_status_icon('completed')
             self.conf.info['gid'] = ''
         else:
             percent = int(comp_length) / int(total_length) * 100 \
@@ -166,6 +191,7 @@ class TaskMixin:
         """
         Handle errors occured when calling some functions via twisted.
         """
+        self.set_status_icon('error')
         message = failure.getErrorMessage()
         Notification(_('Network Error'), message, APP_ICON_NAME).show()
 
@@ -206,7 +232,7 @@ class BTTask(TaskMixin):
                 self.get_uris(), self.get_options())
         deferred.addCallbacks(self.on_started, self.on_twisted_error)
 
-    def __update_iter(self, status):
+    def update_iter(self, status):
         """
         Update data fields of the task iter.
         """
@@ -214,7 +240,7 @@ class BTTask(TaskMixin):
             name = status['bittorrent']['info']['name']
             if name != self.conf.info.name:
                 self.conf.info['name'] = name
-        TaskMixin.__update_iter(self, status)
+        TaskMixin.update_iter(self, status)
 
 class NormalTask(TaskMixin):
     """
@@ -231,14 +257,14 @@ class NormalTask(TaskMixin):
                 self.get_uris(), self.get_options())
         deferred.addCallbacks(self.on_started, self.on_twisted_error)
 
-    def __update_iter(self, status):
+    def update_iter(self, status):
         """
         Update data fields of the task iter.
         """
         name = os.path.basename(status['files'][0]['path'])
         if name != self.conf.info.name:
             self.conf.info['name'] = name
-        TaskMixin.__update_iter(self, status)
+        TaskMixin.update_iter(self, status)
 
 TASK_CLASSES = (
         NormalTask,

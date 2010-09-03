@@ -1,14 +1,14 @@
-# Chinese translations for PACKAGE package
-# PACKAGE 软件包的简体中文翻译.
-# Copyright (C) 2010 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Chinese translations for yaner package
+# yaner 软件包的简体中文翻译.
+# Copyright (C) 2010 THE yaner'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the yaner package.
 #  <ivenvd@gmail.com>, 2010.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: yaner 0.0.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-08-17 15:52+0800\n"
+"POT-Creation-Date: 2010-09-03 21:11+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -17,17 +17,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../Yaner/Server.py:65
+#: ../Yaner/Server.py:66
 msgid "Queuing"
 msgstr "排队中"
 
-#: ../Yaner/Server.py:66
+#: ../Yaner/Server.py:67
 msgid "Completed"
 msgstr "已完成"
 
-#: ../Yaner/Server.py:67
+#: ../Yaner/Server.py:68
 msgid "Recycled"
 msgstr "回收站"
+
+#: ../Yaner/Server.py:178 ../Yaner/Task.py:195
+msgid "Network Error"
+msgstr ""
 
 #: ../glade/main.ui:37
 msgid "Yaner - Faster than a flash of lightning"
@@ -41,19 +45,19 @@ msgstr "文件(_F)"
 msgid "_Task"
 msgstr "任务(_T)"
 
-#: ../glade/main.ui:149
+#: ../glade/main.ui:150
 msgid "_Help"
 msgstr "帮助(_H)"
 
-#: ../glade/main.ui:180 ../glade/task_new.ui:7
+#: ../glade/main.ui:181 ../glade/task_new.ui:7
 msgid "Add new task"
 msgstr "添加新任务"
 
-#: ../glade/main.ui:484
+#: ../glade/main.ui:485
 msgid "About Yaner"
 msgstr "关于掩耳"
 
-#: ../glade/main.ui:491
+#: ../glade/main.ui:492
 msgid "Copyright © 2010 Iven Day(Xu Lijian)"
 msgstr "Copyright © 2010 Iven Day(许立剑)"
 
