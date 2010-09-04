@@ -30,7 +30,6 @@ import gobject
 from subprocess import Popen
 from pynotify import Notification
 from twisted.web import xmlrpc
-from twisted.internet.error import ConnectionRefusedError, ConnectionLost
 
 from Yaner.Category import Category
 from Yaner.Constants import *

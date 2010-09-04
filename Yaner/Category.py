@@ -120,5 +120,8 @@ class Category:
             task.start()
 
     def remove_task(self, task):
+        """
+        Remove task from categories.
+        """
         self.remove_task_uuid(task.uuid)
 

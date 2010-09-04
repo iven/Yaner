@@ -27,10 +27,8 @@
 from __future__ import division
 import glib
 import os
-import xmlrpclib
 from pynotify import Notification
 from twisted.web import xmlrpc
-from twisted.internet.error import ConnectionRefusedError
 
 from Yaner.Constants import *
 from Yaner.Constants import _
@@ -156,6 +154,7 @@ class TaskMixin:
         """
         Remove the task config file, task iter and instanse.
         """
+        # XXX: Too dirty.
         self.conf.info['gid'] = ''
         self.server.models[ITER_QUEUING].remove(self.iter)
         self.cate.remove_task(self)
