@@ -108,10 +108,12 @@ class YanerApp(SingleInstanceApp):
                 ConfigFile(conf_file)
 
     @staticmethod
-    def __get_task_from_iter(model, titer):
+    def __get_task_from_reference(reference):
         """
-        Get Task class from a given iter.
+        Get Task class from a given reference.
         """
+        model = reference.get_model()
+        titer = model.get_iter(reference.get_path())
         task_uuid = model.get(titer, 9)[0]
         return TaskMixin.instances[task_uuid]
 
@@ -137,30 +139,30 @@ class YanerApp(SingleInstanceApp):
         """
         Being called when task_start/pause/remove_action activated.
         """
-        def start_task(treemodel, path, titer):
+        def start_task(reference):
             """
-            Start downloading a task from given iter.
+            Start downloading a task from given reference.
             If task is already started, unpause it.
             """
-            task = self.__get_task_from_iter(treemodel, titer)
+            task = self.__get_task_from_reference(reference)
             if task.conf.info.gid:
                 task.unpause()
             else:
                 task.start()
 
-        def pause_task(treemodel, path, titer):
+        def pause_task(reference):
             """
-            Pause downloading a task from given iter.
+            Pause downloading a task from given reference.
             """
-            task = self.__get_task_from_iter(treemodel, titer)
+            task = self.__get_task_from_reference(reference)
             task.pause()
 
-        def remove_task(treemodel, path, titer):
+        def remove_task(reference):
             """
-            Remove a task from given iter.
+            Remove a task from given reference.
             """
-            task = self.__get_task_from_iter(treemodel, titer)
-            #task.remove()
+            task = self.__get_task_from_reference(reference)
+            task.remove()
 
         action_dict = {
                 "task_start_action": start_task,
@@ -169,7 +171,11 @@ class YanerApp(SingleInstanceApp):
                 }
 
         selection = self.tasklist_view.get_selection()
-        selection.selected_foreach(action_dict[action.get_property('name')])
+        (model, paths) = selection.get_selected_rows()
+        references = [gtk.TreeRowReference(model, path) for path in paths]
+        for reference in references:
+            if reference.valid():
+                action_dict[action.get_property('name')](reference)
 
     @staticmethod
     def on_about_action_activate(about_dialog):

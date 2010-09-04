@@ -69,6 +69,14 @@ class Category:
         task_uuids.append(task_uuid)
         self.set_task_uuids(task_uuids)
 
+    def remove_task_uuid(self, task_uuid):
+        """
+        Remove a task uuid from the config file.
+        """
+        task_uuids = self.get_task_uuids()
+        task_uuids.remove(task_uuid)
+        self.set_task_uuids(task_uuids)
+
     def get_tasks(self):
         """
         Get category task instances.
@@ -110,4 +118,7 @@ class Category:
         task = TASK_CLASSES[int(conf.info.type)](self, conf)
         if is_new_task:
             task.start()
+
+    def remove_task(self, task):
+        self.remove_task_uuid(task.uuid)
 

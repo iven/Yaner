@@ -48,10 +48,11 @@ class TaskMixin:
         self.cate = cate
         self.conf = conf
         self.iter = None
+        self.uuid = conf.info.uuid
         self.__add_iter()
 
         # Add self to the global dict
-        self.instances[conf.info.uuid] = self
+        self.instances[self.uuid] = self
 
     def __on_paused(self, retval):
         """
@@ -69,17 +70,30 @@ class TaskMixin:
         """
         Pause the task.
         """
-        deferred = self.server.proxy.callRemote(
-                "aria2.pause", self.conf.info.gid)
-        deferred.addCallbacks(self.__on_paused, self.on_twisted_error)
+        if self.conf.info.gid:
+            deferred = self.server.proxy.callRemote(
+                    "aria2.pause", self.conf.info.gid)
+            deferred.addCallbacks(self.__on_paused, self.on_twisted_error)
 
     def unpause(self):
         """
         Unpause the task.
         """
-        deferred = self.server.proxy.callRemote(
-                "aria2.unpause", self.conf.info.gid)
-        deferred.addCallbacks(self.__on_unpaused, self.on_twisted_error)
+        if self.conf.info.gid:
+            deferred = self.server.proxy.callRemote(
+                    "aria2.unpause", self.conf.info.gid)
+            deferred.addCallbacks(self.__on_unpaused, self.on_twisted_error)
+
+    def remove(self):
+        """
+        Remove the task.
+        """
+        if self.conf.info.gid:
+            deferred = self.server.proxy.callRemote(
+                    "aria2.remove", self.conf.info.gid)
+            deferred.addCallbacks(self.on_removed, self.on_twisted_error)
+        else:
+            self.on_removed('')
 
     def get_uris(self):
         """
@@ -125,7 +139,7 @@ class TaskMixin:
             '',
             '',
             0,
-            self.conf.info.uuid,
+            self.uuid,
             ])
 
     def on_started(self, gid):
@@ -137,6 +151,16 @@ class TaskMixin:
         self.server.group.select_iter(self.server.iters[ITER_QUEUING])
         self.set_status_icon('running')
         glib.timeout_add_seconds(1, self.__call_for_status)
+
+    def on_removed(self, gid):
+        """
+        Remove the task config file, task iter and instanse.
+        """
+        self.conf.info['gid'] = ''
+        self.server.models[ITER_QUEUING].remove(self.iter)
+        self.cate.remove_task(self)
+        os.remove(self.conf.config_file)
+        del self
 
     def __call_for_status(self):
         """
@@ -193,7 +217,13 @@ class TaskMixin:
         """
         self.set_status_icon('error')
         message = failure.getErrorMessage()
+        # FIXME: NOT necessary for all errors
+        self.conf.info.gid = ''
         Notification(_('Network Error'), message, APP_ICON_NAME).show()
+
+    def __del__(self):
+        del self.instances[self.uuid]
+        del self.conf
 
 class MetalinkTask(TaskMixin):
     """
@@ -238,7 +268,7 @@ class BTTask(TaskMixin):
         """
         if status.has_key('bittorrent'):
             name = status['bittorrent']['info']['name']
-            if name != self.conf.info.name:
+            if name not in (self.conf.info.name, ''):
                 self.conf.info['name'] = name
         TaskMixin.update_iter(self, status)
 
@@ -262,7 +292,7 @@ class NormalTask(TaskMixin):
         Update data fields of the task iter.
         """
         name = os.path.basename(status['files'][0]['path'])
-        if name != self.conf.info.name:
+        if name not in (self.conf.info.name, ''):
             self.conf.info['name'] = name
         TaskMixin.update_iter(self, status)
 
