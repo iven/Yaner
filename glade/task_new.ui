@@ -9,6 +9,7 @@
     <property name="window_position">center-on-parent</property>
     <property name="icon_name">emblem-downloads</property>
     <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
     <property name="has_separator">False</property>
     <signal name="response" handler="on_dialog_response"/>
     <child internal-child="vbox">
@@ -54,6 +55,7 @@
                                     <property name="height_request">70</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
+                                    <property name="has_focus">True</property>
                                   </object>
                                 </child>
                               </object>
