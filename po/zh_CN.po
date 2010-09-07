@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: yaner 0.0.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-03 21:11+0800\n"
+"POT-Creation-Date: 2010-09-07 23:48+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -17,19 +17,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../Yaner/Server.py:66
+#: ../Yaner/Server.py:65
 msgid "Queuing"
 msgstr "排队中"
 
-#: ../Yaner/Server.py:67
+#: ../Yaner/Server.py:66
 msgid "Completed"
 msgstr "已完成"
 
-#: ../Yaner/Server.py:68
+#: ../Yaner/Server.py:67
 msgid "Recycled"
 msgstr "回收站"
 
-#: ../Yaner/Server.py:178 ../Yaner/Task.py:195
+#: ../Yaner/Server.py:177 ../Yaner/Task.py:221
 msgid "Network Error"
 msgstr ""
 
@@ -61,122 +61,244 @@ msgstr "关于掩耳"
 msgid "Copyright © 2010 Iven Day(Xu Lijian)"
 msgstr "Copyright © 2010 Iven Day(许立剑)"
 
-#: ../glade/task_new.ui:66
-msgid "<b>URI(s)</b>"
-msgstr "<b>下载地址</b>"
+#: ../glade/preferences.ui:7
+msgid "Preferences"
+msgstr "优先地理位置"
 
-#: ../glade/task_new.ui:98
-msgid "Referer:"
-msgstr "引用页"
+#: ../glade/preferences.ui:58
+msgid "Max download speed"
+msgstr "下载服务器"
 
-#: ../glade/task_new.ui:109
-msgid "Rename:"
-msgstr "重命名"
+#: ../glade/preferences.ui:81
+msgid "Max upload speed"
+msgstr ""
 
-#: ../glade/task_new.ui:147
-msgid "Connections:"
-msgstr "连接数"
-
-#: ../glade/task_new.ui:181 ../glade/task_new.ui:602 ../glade/task_new.ui:832
-msgid "<b>Settings</b> - Optional"
+#: ../glade/preferences.ui:112
+msgid "<b>Speed</b> - Global"
 msgstr "<b>设置</b> - 可选"
 
-#: ../glade/task_new.ui:214 ../glade/task_new.ui:295
-msgid "User:"
-msgstr "用户名"
-
-#: ../glade/task_new.ui:239 ../glade/task_new.ui:269
-msgid "Password:"
-msgstr "密码"
-
-#: ../glade/task_new.ui:323
-msgid "<b>HTTP</b>"
+#: ../glade/preferences.ui:144
+msgid "* Connect timeout(sec)"
 msgstr ""
 
-#: ../glade/task_new.ui:333
-msgid "<b>FTP</b>"
+#: ../glade/preferences.ui:167
+msgid "* Timeout(sec)"
 msgstr ""
 
-#: ../glade/task_new.ui:349
-msgid "<b>Authorization</b> - Optional"
-msgstr "<b>验证</b> - 可选"
-
-#: ../glade/task_new.ui:364
-msgid "Normal / BT Magnet"
-msgstr "普通 / BT 磁力链接"
-
-#: ../glade/task_new.ui:399
-msgid "<b>Torrent File</b>"
+#: ../glade/preferences.ui:198
+msgid "<b>Timeout</b>"
 msgstr "<b>种子文件</b>"
 
-#: ../glade/task_new.ui:442
-msgid "<b>URI(s)</b> - Optional"
-msgstr "<b>下载地址</b> - 可选"
-
-#: ../glade/task_new.ui:474
-msgid "Max open files:"
-msgstr "最大打开文件数："
-
-#: ../glade/task_new.ui:485
-msgid "Seed time(min):"
-msgstr "做种时间（分钟）："
-
-#: ../glade/task_new.ui:498
-msgid "Seed ratio:"
-msgstr "做种比例："
-
-#: ../glade/task_new.ui:557
-msgid "Max peers:"
-msgstr "最大节点数："
-
-#: ../glade/task_new.ui:583
-msgid "Preview mode - Try to download first and last pieces first"
-msgstr "预览模式 - 试着优先下载文件首尾部分"
-
-#: ../glade/task_new.ui:620
-msgid "BitTorrent"
+#: ../glade/preferences.ui:230
+msgid "* Max tries"
 msgstr ""
 
-#: ../glade/task_new.ui:656
-msgid "<b>Metalink File</b>"
-msgstr "<b>Metalink 文件</b>"
+#: ../glade/preferences.ui:253
+msgid "* Max file notfound"
+msgstr ""
 
-#: ../glade/task_new.ui:689
-msgid "Download servers:"
-msgstr "下载服务器："
+#: ../glade/preferences.ui:284
+msgid "<b>Retry</b>"
+msgstr "<b>下载地址</b>"
 
-#: ../glade/task_new.ui:700
-msgid "Prefered locations:"
-msgstr "优先地理位置："
+#: ../glade/preferences.ui:300
+msgid "Limits"
+msgstr ""
 
-#: ../glade/task_new.ui:729
-msgid "Language:"
-msgstr "语言："
+#: ../glade/preferences.ui:324
+msgid "* Connections"
+msgstr "连接数"
 
-#: ../glade/task_new.ui:803
-msgid "OS:"
-msgstr "操作系统："
+#: ../glade/preferences.ui:334
+msgid "* Per server connections"
+msgstr "优先地理位置"
 
-#: ../glade/task_new.ui:816
-msgid "Version:"
-msgstr "版本号："
+#: ../glade/preferences.ui:373
+msgid "* Auto renaming"
+msgstr ""
 
-#: ../glade/task_new.ui:850
+#: ../glade/preferences.ui:398
+msgid "Normal"
+msgstr ""
+
+#: ../glade/preferences.ui:423
+msgid "* Max open files"
+msgstr "最大打开文件数"
+
+#: ../glade/preferences.ui:446
+msgid "* Max Peers"
+msgstr "最大节点数"
+
+#: ../glade/preferences.ui:474
+msgid "* Tracker connect timeout(sec)"
+msgstr ""
+
+#: ../glade/preferences.ui:502
+msgid "* Tracker timeout(sec)"
+msgstr ""
+
+#: ../glade/preferences.ui:528
+msgid "! Follow torrent"
+msgstr ""
+
+#: ../glade/preferences.ui:544
+msgid "* Preview mode"
+msgstr ""
+
+#: ../glade/preferences.ui:562
+msgid "* Seed time(min)"
+msgstr "做种时间（分钟）"
+
+#: ../glade/preferences.ui:575
+msgid "* Seed ratio"
+msgstr "做种比例"
+
+#: ../glade/preferences.ui:624
+msgid "Bittorrent"
+msgstr ""
+
+#: ../glade/preferences.ui:649
+msgid "* Download servers"
+msgstr "下载服务器"
+
+#: ../glade/preferences.ui:659
+msgid "* Prefered locations"
+msgstr "优先地理位置"
+
+#: ../glade/preferences.ui:672
+msgid "* Language"
+msgstr "语言"
+
+#: ../glade/preferences.ui:685
+msgid "* Version"
+msgstr "版本号"
+
+#: ../glade/preferences.ui:695
+msgid "! Follow metalink"
+msgstr ""
+
+#: ../glade/preferences.ui:777 ../glade/task_new.ui:852
 msgid "Metalink"
 msgstr ""
 
-#: ../glade/task_new.ui:903
-msgid "Category:"
-msgstr "分类："
+#: ../glade/preferences.ui:793
+msgid ""
+"<i>* This option only applies for new tasks.</i>\n"
+"<i>! Do NOT change this option.</i>"
+msgstr ""
 
-#: ../glade/task_new.ui:931
-msgid "Directory:"
-msgstr "目录："
+#: ../glade/task_new.ui:68
+msgid "<b>URI(s)</b>"
+msgstr "<b>下载地址</b>"
 
-#: ../glade/task_new.ui:944
+#: ../glade/task_new.ui:100
+msgid "Referer"
+msgstr "引用页"
+
+#: ../glade/task_new.ui:111
+msgid "Rename"
+msgstr "重命名"
+
+#: ../glade/task_new.ui:149
+msgid "Connections"
+msgstr "连接数"
+
+#: ../glade/task_new.ui:183 ../glade/task_new.ui:604 ../glade/task_new.ui:834
+msgid "<b>Settings</b> - Optional"
+msgstr "<b>设置</b> - 可选"
+
+#: ../glade/task_new.ui:216 ../glade/task_new.ui:297
+msgid "User"
+msgstr "用户名"
+
+#: ../glade/task_new.ui:241 ../glade/task_new.ui:271
+msgid "Password"
+msgstr "密码"
+
+#: ../glade/task_new.ui:325
+msgid "<b>HTTP</b>"
+msgstr ""
+
+#: ../glade/task_new.ui:335
+msgid "<b>FTP</b>"
+msgstr ""
+
+#: ../glade/task_new.ui:351
+msgid "<b>Authorization</b> - Optional"
+msgstr "<b>验证</b> - 可选"
+
+#: ../glade/task_new.ui:366
+msgid "Normal / BT Magnet"
+msgstr "普通 / BT 磁力链接"
+
+#: ../glade/task_new.ui:401
+msgid "<b>Torrent File</b>"
+msgstr "<b>种子文件</b>"
+
+#: ../glade/task_new.ui:444
+msgid "<b>URI(s)</b> - Optional"
+msgstr "<b>下载地址</b> - 可选"
+
+#: ../glade/task_new.ui:476
+msgid "Max open files"
+msgstr "最大打开文件数"
+
+#: ../glade/task_new.ui:487
+msgid "Seed time(min)"
+msgstr "做种时间（分钟）"
+
+#: ../glade/task_new.ui:500
+msgid "Seed ratio"
+msgstr "做种比例"
+
+#: ../glade/task_new.ui:559
+msgid "Max peers"
+msgstr "最大节点数"
+
+#: ../glade/task_new.ui:585
+msgid "Preview mode - Try to download first and last pieces first"
+msgstr "预览模式 - 试着优先下载文件首尾部分"
+
+#: ../glade/task_new.ui:622
+msgid "BitTorrent"
+msgstr ""
+
+#: ../glade/task_new.ui:658
+msgid "<b>Metalink File</b>"
+msgstr "<b>Metalink 文件</b>"
+
+#: ../glade/task_new.ui:691
+msgid "Download servers"
+msgstr "下载服务器"
+
+#: ../glade/task_new.ui:702
+msgid "Prefered locations"
+msgstr "优先地理位置"
+
+#: ../glade/task_new.ui:731
+msgid "Language"
+msgstr "语言"
+
+#: ../glade/task_new.ui:805
+msgid "OS"
+msgstr "操作系统"
+
+#: ../glade/task_new.ui:818
+msgid "Version"
+msgstr "版本号"
+
+#: ../glade/task_new.ui:905
+msgid "Category"
+msgstr "分类"
+
+#: ../glade/task_new.ui:933
+msgid "Directory"
+msgstr "目录"
+
+#: ../glade/task_new.ui:946
 msgid "Select download directory"
 msgstr "选择下载目录"
 
-#: ../glade/task_new.ui:975
+#: ../glade/task_new.ui:977
 msgid "<b>Server and Category</b>"
 msgstr "<b>服务端和分类</b>"

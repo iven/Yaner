@@ -97,7 +97,7 @@
                                   <object class="GtkLabel" id="referer_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Referer:</property>
+                                    <property name="label" translatable="yes">Referer</property>
                                   </object>
                                   <packing>
                                     <property name="x_options">GTK_FILL</property>
@@ -108,7 +108,7 @@
                                   <object class="GtkLabel" id="rename_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Rename:</property>
+                                    <property name="label" translatable="yes">Rename</property>
                                   </object>
                                   <packing>
                                     <property name="top_attach">1</property>
@@ -146,7 +146,7 @@
                                   <object class="GtkLabel" id="split_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Connections:</property>
+                                    <property name="label" translatable="yes">Connections</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">2</property>
@@ -213,7 +213,7 @@
                                   <object class="GtkLabel" id="http_user_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">User:</property>
+                                    <property name="label" translatable="yes">User</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -238,7 +238,7 @@
                                   <object class="GtkLabel" id="ftp_pass_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Password:</property>
+                                    <property name="label" translatable="yes">Password</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">3</property>
@@ -268,7 +268,7 @@
                                   <object class="GtkLabel" id="http_pass_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Password:</property>
+                                    <property name="label" translatable="yes">Password</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">3</property>
@@ -294,7 +294,7 @@
                                   <object class="GtkLabel" id="ftp_user_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">User:</property>
+                                    <property name="label" translatable="yes">User</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -473,7 +473,7 @@
                                   <object class="GtkLabel" id="max_files_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Max open files:</property>
+                                    <property name="label" translatable="yes">Max open files</property>
                                   </object>
                                   <packing>
                                     <property name="x_options">GTK_FILL</property>
@@ -484,7 +484,7 @@
                                   <object class="GtkLabel" id="seed_time_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Seed time(min):</property>
+                                    <property name="label" translatable="yes">Seed time(min)</property>
                                   </object>
                                   <packing>
                                     <property name="top_attach">1</property>
@@ -497,7 +497,7 @@
                                   <object class="GtkLabel" id="seed_ratio_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Seed ratio:</property>
+                                    <property name="label" translatable="yes">Seed ratio</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">2</property>
@@ -556,7 +556,7 @@
                                   <object class="GtkLabel" id="max_peers_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Max peers:</property>
+                                    <property name="label" translatable="yes">Max peers</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">2</property>
@@ -688,7 +688,7 @@
                                   <object class="GtkLabel" id="servers_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Download servers:</property>
+                                    <property name="label" translatable="yes">Download servers</property>
                                   </object>
                                   <packing>
                                     <property name="x_options">GTK_FILL</property>
@@ -699,7 +699,7 @@
                                   <object class="GtkLabel" id="location_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Prefered locations:</property>
+                                    <property name="label" translatable="yes">Prefered locations</property>
                                   </object>
                                   <packing>
                                     <property name="top_attach">1</property>
@@ -728,7 +728,7 @@
                                   <object class="GtkLabel" id="language_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Language:</property>
+                                    <property name="label" translatable="yes">Language</property>
                                   </object>
                                   <packing>
                                     <property name="top_attach">2</property>
@@ -802,7 +802,7 @@
                                   <object class="GtkLabel" id="os_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">OS:</property>
+                                    <property name="label" translatable="yes">OS</property>
                                   </object>
                                   <packing>
                                     <property name="top_attach">4</property>
@@ -815,7 +815,7 @@
                                   <object class="GtkLabel" id="version_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Version:</property>
+                                    <property name="label" translatable="yes">Version</property>
                                   </object>
                                   <packing>
                                     <property name="top_attach">3</property>
@@ -902,7 +902,7 @@
                           <object class="GtkLabel" id="cate_label">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
-                            <property name="label" translatable="yes">Category:</property>
+                            <property name="label" translatable="yes">Category</property>
                           </object>
                           <packing>
                             <property name="x_options">GTK_FILL</property>
@@ -930,7 +930,7 @@
                           <object class="GtkLabel" id="dir_label">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
-                            <property name="label" translatable="yes">Directory:</property>
+                            <property name="label" translatable="yes">Directory</property>
                           </object>
                           <packing>
                             <property name="top_attach">1</property>
