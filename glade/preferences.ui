@@ -55,7 +55,7 @@
                                   <object class="GtkLabel" id="max_download_speed_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Max download speed</property>
+                                    <property name="label" translatable="yes">Max download speed(KiB/sec)</property>
                                   </object>
                                   <packing>
                                     <property name="y_options">GTK_FILL</property>
@@ -66,6 +66,8 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
+                                    <property name="adjustment">max_download_speed_adjustment</property>
+                                    <property name="numeric">True</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -78,7 +80,7 @@
                                   <object class="GtkLabel" id="max_upload_speed_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">Max upload speed</property>
+                                    <property name="label" translatable="yes">Max upload speed(KiB/sec)</property>
                                   </object>
                                   <packing>
                                     <property name="top_attach">1</property>
@@ -92,6 +94,8 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
+                                    <property name="adjustment">max_upload_speed_adjustment</property>
+                                    <property name="numeric">True</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -152,6 +156,8 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
+                                    <property name="adjustment">connect_timeout_adjustment</property>
+                                    <property name="numeric">True</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -178,6 +184,8 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
+                                    <property name="adjustment">timeout_adjustment</property>
+                                    <property name="numeric">True</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -205,7 +213,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="speed_frame1">
+                      <object class="GtkFrame" id="retry_frame">
                         <property name="visible">True</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
@@ -238,6 +246,8 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
+                                    <property name="adjustment">max_tries_adjustment</property>
+                                    <property name="numeric">True</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -250,7 +260,7 @@
                                   <object class="GtkLabel" id="max_file_notfound_label">
                                     <property name="visible">True</property>
                                     <property name="xalign">0</property>
-                                    <property name="label" translatable="yes">* Max file notfound</property>
+                                    <property name="label" translatable="yes">* Max file not found tries</property>
                                   </object>
                                   <packing>
                                     <property name="top_attach">1</property>
@@ -264,6 +274,8 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="invisible_char">&#x25CF;</property>
+                                    <property name="adjustment">max_file_notfound_adjustment</property>
+                                    <property name="numeric">True</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -345,6 +357,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="adjustment">split_adjustment</property>
+                        <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -358,6 +372,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="adjustment">per_server_connections_adjustment</property>
+                        <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -431,6 +447,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="adjustment">max_files_adjustment</property>
+                        <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -457,6 +475,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="adjustment">max_peers_adjustment</property>
+                        <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -485,6 +505,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="adjustment">tracker_connect_timeout_adjustment</property>
+                        <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -509,10 +531,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="tracker_connect_timeout_spinbutton1">
+                      <object class="GtkSpinButton" id="tracker_timeout_spinbutton">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="adjustment">tracker_timeout_adjustment</property>
+                        <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -582,10 +606,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="tracker_connect_timeout_spinbutton4">
+                      <object class="GtkSpinButton" id="seed_time_spinbutton">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="adjustment">seed_time_adjustment</property>
+                        <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -597,10 +623,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="tracker_connect_timeout_spinbutton5">
+                      <object class="GtkSpinButton" id="seed_ratio_spinbutton">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
+                        <property name="adjustment">seed_ratio_adjustment</property>
+                        <property name="numeric">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -707,19 +735,6 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="servers_entry">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="x_options">GTK_FILL</property>
-                        <property name="y_options">GTK_FILL</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkEntry" id="location_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -760,6 +775,20 @@
                         <property name="right_attach">2</property>
                         <property name="top_attach">3</property>
                         <property name="bottom_attach">4</property>
+                        <property name="x_options">GTK_FILL</property>
+                        <property name="y_options">GTK_FILL</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="servers_spinbutton">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="adjustment">servers_adjustment</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
                         <property name="x_options">GTK_FILL</property>
                         <property name="y_options">GTK_FILL</property>
                       </packing>
@@ -844,5 +873,90 @@
       <action-widget response="-6">cancel_button</action-widget>
       <action-widget response="-5">ok_button</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkAdjustment" id="max_download_speed_adjustment">
+    <property name="upper">100000</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="max_upload_speed_adjustment">
+    <property name="upper">100000</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="connect_timeout_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="timeout_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="max_tries_adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="max_file_notfound_adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="split_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">128</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="per_server_connections_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">4</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="max_files_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">1024</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="max_peers_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">1024</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="tracker_connect_timeout_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="tracker_timeout_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="seed_time_adjustment">
+    <property name="upper">36000</property>
+    <property name="step_increment">15</property>
+    <property name="page_increment">60</property>
+  </object>
+  <object class="GtkAdjustment" id="seed_ratio_adjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="servers_adjustment">
+    <property name="lower">1</property>
+    <property name="upper">20</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
   </object>
 </interface>
