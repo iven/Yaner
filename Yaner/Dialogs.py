@@ -21,7 +21,7 @@
 #
 
 """
-    This file contains the new task dialog of Yaner.
+    This file contains the dialogs of Yaner.
 """
 
 import os
@@ -32,20 +32,69 @@ from Yaner.Server import Server
 from Yaner.Category import Category
 from Yaner.Constants import *
 
-class TaskNew:
+class TaskDialogMixin:
     """
-    This class contains widgets and methods related to new task dialog.
+    This class contains attributes and methods used by task related
+    dialogs.
     """
-    def __init__(self, main_app):
+
+    def __init__(self, glade_file):
         # GTK+ Builder
         builder = gtk.Builder()
         builder.set_translation_domain('yaner')
-        builder.add_from_file(TASK_NEW_UI_FILE)
+        builder.add_from_file(glade_file)
         builder.connect_signals(self)
         self.builder = builder
 
         self.widgets = {}
         self.prefs = {}
+
+    def get_options(self, options):
+        """
+        Get current set task options, based on @options.
+        """
+        options = dict(options)
+        for (pref, widget) in self.get_prefs().iteritems():
+            if pref == 'seed-ratio':
+                options[pref] = str(widget.get_value())
+            elif hasattr(widget, 'get_value'):
+                options[pref] = str(int(widget.get_value()))
+            elif hasattr(widget, 'get_text'):
+                text = widget.get_text()
+                if text != '':
+                    options[pref] = text
+            elif hasattr(widget, 'get_active'):
+                if widget.get_active():
+                    options[pref] = 'true'
+                else:
+                    options[pref] = 'false'
+        if self.prefs['bt-prioritize-piece'].get_active():
+            options['bt-prioritize-piece'] = 'head,tail'
+        else:
+            options['bt-prioritize-piece'] = ''
+        return options
+
+    def set_options(self, options):
+        """
+        Set the status of the widgets in the dialog according to
+        the options in the config file.
+        """
+        for (pref, widget) in self.get_prefs().iteritems():
+            if hasattr(widget, 'set_value'):
+                widget.set_value(float(options[pref]))
+            elif hasattr(widget, 'set_text'):
+                widget.set_text(options[pref])
+            elif hasattr(widget, 'set_active'):
+                widget.set_active(options[pref] == 'true')
+        if options['bt-prioritize-piece'] == 'head,tail':
+            self.get_prefs()['bt-prioritize-piece'].set_active(True)
+
+class TaskNewDialog(TaskDialogMixin):
+    """
+    This class contains widgets and methods related to new task dialog.
+    """
+    def __init__(self, main_app):
+        TaskDialogMixin.__init__(self, TASK_NEW_UI_FILE)
         self.__init_filefilters()
 
         self.main_app = main_app
@@ -84,7 +133,7 @@ class TaskNew:
                     "metalink_file_chooser")
         return self.widgets
 
-    def __get_prefs(self):
+    def get_prefs(self):
         """
         Get a dict of widget corresponding to a preference in the
         configuration file of new task dialog.
@@ -144,24 +193,6 @@ class TaskNew:
         else:
             return None
 
-    def __get_options(self):
-        """
-        Get current set task options.
-        """
-        options = self.main_app.get_default_options()
-        for (pref, widget) in self.__get_prefs().iteritems():
-            if pref == 'seed-ratio':
-                options[pref] = str(widget.get_value())
-            elif hasattr(widget, 'get_value'):
-                options[pref] = str(int(widget.get_value()))
-            elif hasattr(widget, 'get_text'):
-                text = widget.get_text()
-                if text != '':
-                    options[pref] = text
-        if self.prefs['bt-prioritize-piece'].get_active():
-            options['bt-prioritize-piece'] = 'head,tail'
-        return options
-
     def __get_uris(self, task_type):
         """
         Get URIs from textviews, returning a tuple of URIs.
@@ -200,7 +231,6 @@ class TaskNew:
         Popup new task dialog.
         """
         widgets = self.__get_widgets()
-        default_conf = self.main_app.get_default_options()
         # set current page of the notebook
         actions = (
                 "task_new_normal_action",
@@ -210,11 +240,7 @@ class TaskNew:
         page = actions.index(action.get_property('name'))
         widgets['nb'].set_current_page(page)
         # init default configuration
-        for (pref, widget) in self.__get_prefs().iteritems():
-            if hasattr(widget, 'set_value'):
-                widget.set_value(float(default_conf[pref]))
-            elif hasattr(widget, 'set_text'):
-                widget.set_text(default_conf[pref])
+        self.set_options(self.main_app.conf.task)
         # init the server cb
         widgets['server_ls'].clear()
         for server in self.main_app.server_group.get_servers():
@@ -260,7 +286,7 @@ class TaskNew:
         task_type = self.widgets['nb'].get_current_page()
         uris = self.__get_uris(task_type)
         metadata_file = self.__get_metadata_file(task_type)
-        options = self.__get_options()
+        options = self.get_options(self.main_app.conf.task)
         cate = self.__get_active_cate()
         info = {}
         info['server'] = self.__get_active_server().uuid
@@ -289,5 +315,90 @@ class TaskNew:
         else:
             return
         cate.add_task(info, options)
+        dialog.hide()
+
+class TaskProfileDialog(TaskDialogMixin):
+    """
+    This class contains widgets and methods related to default task profile dialog.
+    """
+    def __init__(self, main_app):
+        TaskDialogMixin.__init__(self, TASK_PROFILE_UI_FILE)
+        self.main_app = main_app
+    
+    def __get_widgets(self):
+        """
+        Get a dict of widget of preferences dialog.
+        """
+        if self.widgets == {}:
+            builder = self.builder
+            widgets = self.widgets
+            widgets['dialog'] = builder.get_object("dialog")
+            widgets['nb'] = builder.get_object("nb")
+
+        return self.widgets
+
+    def get_prefs(self):
+        """
+        Get a dict of widget corresponding to a preference in the
+        main configuration file.
+        """
+        if self.prefs == {}:
+            builder = self.builder
+            prefs = self.prefs
+            prefs['split'] = builder.get_object('split_adjustment')
+            prefs['max-connection-per-server'] = builder.get_object(
+                    'per_server_connections_adjustment')
+            prefs['auto-file-renaming'] = builder.get_object(
+                    'auto_renaming_checkbutton')
+            prefs['connect-timeout'] = builder.get_object(
+                    'connect_timeout_adjustment')
+            prefs['timeout'] = builder.get_object(
+                    'timeout_adjustment')
+            prefs['bt-max-open-files'] = builder.get_object(
+                    'max_files_adjustment')
+            prefs['bt-max-peers'] = builder.get_object(
+                    'max_peers_adjustment')
+            prefs['bt-tracker-connect-timeout'] = builder.get_object(
+                    'tracker_connect_timeout_adjustment')
+            prefs['bt-tracker-timeout'] = builder.get_object(
+                    'tracker_timeout_adjustment')
+            prefs['seed-time'] = builder.get_object(
+                    'seed_time_adjustment')
+            prefs['seed-ratio'] = builder.get_object(
+                    'seed_ratio_adjustment')
+            prefs['bt-prioritize-piece'] = builder.get_object(
+                    "prioritize_checkbutton")
+            prefs['metalink-servers'] = builder.get_object(
+                    'servers_adjustment')
+            prefs['metalink-location'] = builder.get_object(
+                    'location_entry')
+            prefs['metalink-language'] = builder.get_object(
+                    'language_entry')
+            prefs['metalink-os'] = builder.get_object(
+                    'os_adjustment')
+            prefs['follow-torrent'] = builder.get_object(
+                    'follow_torrent_adjustment')
+            prefs['follow-metalink'] = builder.get_object(
+                    'follow_metalink_adjustment')
+        return self.prefs
+
+    def run_dialog(self, action):
+        """
+        Popup preferences dialog.
+        """
+        widgets = self.__get_widgets()
+        # init default configuration
+        self.set_options(self.main_app.conf.task)
+        # run the dialog
+        widgets['dialog'].run()
+        
+    def on_dialog_response(self, dialog, response):
+        """
+        Create a new download task if uris are provided.
+        """
+        if response == gtk.RESPONSE_OK:
+            options = self.get_options({})
+            for option in options:
+                self.main_app.conf.task[option] = options[option]
         dialog.hide()
 

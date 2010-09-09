@@ -57,7 +57,7 @@ class ConfigFile(ODict):
         if self.has_key(attr):
             return self[attr]
         else:
-            return ODict.__getattr__(self, attr)
+            return getattr(ODict(self), attr)
 
     def __setitem__(self, section, option_dict):
         """

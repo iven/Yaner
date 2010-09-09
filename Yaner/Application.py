@@ -33,7 +33,7 @@ from twisted.internet import reactor
 
 from Yaner.Constants import *
 from Yaner.Server import ServerGroup, Server
-from Yaner.TaskNew import TaskNew
+from Yaner.Dialogs import TaskNewDialog, TaskProfileDialog
 from Yaner.Task import TaskMixin
 from Yaner.Configuration import ConfigFile
 from Yaner.SingleInstance import SingleInstanceApp
@@ -64,8 +64,9 @@ class YanerApp(SingleInstanceApp):
         # Server View
         server_tv = builder.get_object("server_tv")
         self.server_group = ServerGroup(self, server_tv)
-        # Task New
-        self.task_new = TaskNew(self)
+        # Dialogs
+        self.task_new_dialog = None
+        self.task_profile_dialog = None
         # Show the window
         self.main_window.show()
 
@@ -117,12 +118,6 @@ class YanerApp(SingleInstanceApp):
         task_uuid = model.get(titer, 9)[0]
         return TaskMixin.instances[task_uuid]
 
-    def get_default_options(self):
-        """
-        Get task default options.
-        """
-        return dict(self.conf.default)
-
     def on_instance_exists(self):
         """
         Being called when another instance exists. Currently just quits.
@@ -133,7 +128,17 @@ class YanerApp(SingleInstanceApp):
         """
         Being called when task_new_action activated.
         """
-        self.task_new.run_dialog(action)
+        if self.task_new_dialog == None:
+            self.task_new_dialog = TaskNewDialog(self)
+        self.task_new_dialog.run_dialog(action)
+
+    def on_task_profile_action_activate(self, action):
+        """
+        Being called when task_profile_action activated.
+        """
+        if self.task_profile_dialog == None:
+            self.task_profile_dialog = TaskProfileDialog(self)
+        self.task_profile_dialog.run_dialog(action)
 
     def on_task_batch_action_activate(self, action):
         """

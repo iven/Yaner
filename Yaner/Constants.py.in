@@ -38,6 +38,7 @@ _CONFIG_DIR = _join(_DATA_DIR, "config")
 _GLADE_DIR = _join(_DATA_DIR, "glade")
 MAIN_UI_FILE = _join(_GLADE_DIR, "main.ui")
 TASK_NEW_UI_FILE = _join(_GLADE_DIR, "task_new.ui")
+TASK_PROFILE_UI_FILE = _join(_GLADE_DIR, "task_profile.ui")
 MAIN_CONFIG_FILE = _join(_CONFIG_DIR, "yaner.conf")
 LOCAL_CATE_UUID = "120864b0-5f64-47d2-8efd-c70c20b8a3ab"
 LOCAL_CATE_CONFIG_FILE = _join(_CONFIG_DIR, LOCAL_CATE_UUID)
