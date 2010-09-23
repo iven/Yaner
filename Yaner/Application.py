@@ -36,13 +36,13 @@ from Yaner.Server import ServerGroup, Server
 from Yaner.Dialogs import TaskNewDialog, TaskProfileDialog
 from Yaner.Task import TaskMixin
 from Yaner.Configuration import ConfigFile
-from Yaner.SingleInstance import SingleInstanceApp
+from Yaner.SingleInstance import SingleInstanceAppMixin
 
-class YanerApp(SingleInstanceApp):
+class YanerApp(SingleInstanceAppMixin):
     "Main Application"
 
     def __init__(self):
-        SingleInstanceApp.__init__(self, "yaner")
+        SingleInstanceAppMixin.__init__(self, APP_BUS_NAME)
         # Init paths
         self.__init_paths()
         # Init Config
@@ -122,7 +122,7 @@ class YanerApp(SingleInstanceApp):
         """
         Being called when another instance exists. Currently just quits.
         """
-        SingleInstanceApp.on_instance_exists(self)
+        SingleInstanceAppMixin.on_instance_exists(self)
 
     def on_task_new_action_activate(self, action):
         """

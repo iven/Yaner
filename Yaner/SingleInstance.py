@@ -25,16 +25,20 @@
 like Yaner, but could also be used by other programs.
 """
 
-import socket
+import dbus
+import dbus.service
+import dbus.mainloop.glib
 
-class SingleInstanceApp:
+class SingleInstanceAppMixin:
     "Single Instance Application"
 
-    def __init__(self, temp_name):
-        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    def __init__(self, bus_name):
+        dbus.mainloop.glib.DBusGMainLoop(set_as_default = True)
+        self.bus = dbus.SessionBus()
         try:
-            self.sock.bind('\0' + temp_name)
-        except IOError:
+            self.bus_name = dbus.service.BusName(bus_name,
+                    self.bus, False, True, True)
+        except dbus.exceptions.NameExistsException:
             print "Another instance is already running."
             self.on_instance_exists()
 
