@@ -39,7 +39,6 @@ class SingleInstanceAppMixin:
             self.bus_name = dbus.service.BusName(bus_name,
                     self.bus, False, True, True)
         except dbus.exceptions.NameExistsException:
-            print "Another instance is already running."
             self.on_instance_exists()
 
     def on_instance_exists(self):
@@ -47,6 +46,7 @@ class SingleInstanceAppMixin:
         This method is called when an instance of the program already
         exists. It may be overwritten by subclasses.
         """
+        print "Another instance is already running."
         import sys
         sys.exit(0)
 

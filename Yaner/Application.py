@@ -27,22 +27,31 @@ GUI related.
 
 import gtk
 import os
+import sys
 import glob
 import shutil
+import getopt
 from twisted.internet import reactor
 
+import dbus.service
+
 from Yaner.Constants import *
+from Yaner.Constants import _
 from Yaner.Server import ServerGroup, Server
 from Yaner.Dialogs import TaskNewDialog, TaskProfileDialog
 from Yaner.Task import TaskMixin
 from Yaner.Configuration import ConfigFile
 from Yaner.SingleInstance import SingleInstanceAppMixin
 
-class YanerApp(SingleInstanceAppMixin):
+class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
     "Main Application"
+    bus_object_name = '/app'
 
     def __init__(self):
         SingleInstanceAppMixin.__init__(self, APP_BUS_NAME)
+        dbus.service.Object.__init__(self, self.bus, self.bus_object_name)
+        # Init arguments
+        self.__init_args()
         # Init paths
         self.__init_paths()
         # Init Config
@@ -69,6 +78,20 @@ class YanerApp(SingleInstanceAppMixin):
         self.task_profile_dialog = None
         # Show the window
         self.main_window.show()
+
+    def __init_args(self):
+        """
+        Init args.
+        """
+        ret = self.process_args(sys.argv[1:])
+        if ret not in ('', '@NoArg'):
+            if ret == '@Version':
+                self.version()
+            elif ret == '@Help':
+                self.usage()
+            else:
+                self.usage(ret)
+            sys.exit()
 
     @staticmethod
     def __init_rgba(window):
@@ -118,11 +141,53 @@ class YanerApp(SingleInstanceAppMixin):
         task_uuid = model.get(titer, 9)[0]
         return TaskMixin.instances[task_uuid]
 
+    @dbus.service.method(APP_INTERFACE,
+            in_signature = 'as', out_signature = 's')
+    def process_args(self, args):
+        """
+        Start new task from @args, @args should be sys.argv[1:].
+        """
+        try:
+            opt_list, args = getopt.getopt(args, 'r:n:c:hv',
+                    ['referer=', 'rename=', 'cookie=', 'help', 'version'])
+        except getopt.GetoptError, err:
+            return str(err)
+        options = {}
+        for opt, value in opt_list:
+            if opt in ('-c', '--cookie'):
+                options['header'] = 'Cookie: %s' % value
+            elif opt in ('-n', '--rename'):
+                options['rename'] = value
+            elif opt in ('-r', '--referer'):
+                options['referer'] = value
+            elif opt in ('-v', '--version'):
+                return '@Version'
+            elif opt in ('-h', '--help'):
+                return '@Help'
+        if not args:
+            return '@NoArg'
+        print options, args
+        return ''
+
     def on_instance_exists(self):
         """
-        Being called when another instance exists. Currently just quits.
+        Being called when another instance exists.
         """
-        SingleInstanceAppMixin.on_instance_exists(self)
+        if len(sys.argv) > 1:
+            old_app = self.bus.get_object(APP_BUS_NAME, self.bus_object_name)
+            ret = old_app.process_args(sys.argv[1:])
+            if ret != '':
+                if ret == '@Help':
+                    self.usage()
+                elif ret == '@Version':
+                    self.version()
+                elif ret == '@NoArg':
+                    print _('Error: No URI provided in the arguments.')
+                else:
+                    self.usage(ret)
+            sys.exit()
+        else:
+            SingleInstanceAppMixin.on_instance_exists(self)
 
     def on_task_new_action_activate(self, action):
         """
@@ -200,6 +265,40 @@ class YanerApp(SingleInstanceAppMixin):
         Server.instances[LOCAL_SERVER_UUID].server_process.terminate()
         gtk.widget_pop_colormap()
         reactor.stop()
+
+    @staticmethod
+    def usage(err = ''):
+        """
+        Print help messages.
+        """
+        # Print errors
+        if err:
+            print _('Error: %s') % err
+            print
+        # Print usage and options
+        opts = (('-n, --rename=FILENAME', _('output filename of the task')),
+            ('-r, --referer=URI', _('referer page of the link')),
+            ('-c, --referer=COOKIE',_('cookie in the header')),
+            ('-h, --help', _('display this help and exit')),
+            ('-v, --version', _('output version information and exit')))
+        print _('Usage: yaner [OPTION]... [URI | MAGNET]...')
+        print
+        print _('Options:')
+        for (opt, des) in opts:
+            print '  %-28s%s' % (opt, des)
+
+    @staticmethod
+    def version():
+        """
+        Print version information.
+        """
+        print "yaner %s" % VERSION
+        print 'Copyright (C) 2010 Iven Day (Xu Lijian)'
+        print _("License GPLv3+: GNU GPL version 3 or later"),
+        print '<http://gnu.org/licenses/gpl.html>.'
+        print _("This is free software:"),
+        print _("you are free to change and redistribute it.")
+        print _("There is NO WARRANTY, to the extent permitted by law.")
 
 if __name__ == '__main__':
     YanerApp()

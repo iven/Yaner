@@ -55,6 +55,7 @@ U_SERVER_CONFIG_DIR = _join(U_CONFIG_DIR, "servers")
 # DBus
 #
 APP_BUS_NAME = 'com.kissuki.yaner'
+APP_INTERFACE = 'com.kissuki.yaner'
 
 # Task types
 #
