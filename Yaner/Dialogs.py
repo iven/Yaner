@@ -45,15 +45,16 @@ class TaskDialogMixin:
         builder.add_from_file(glade_file)
         builder.connect_signals(self)
         self.builder = builder
+        self.current_options = {}
 
         self.widgets = {}
         self.prefs = {}
 
-    def get_options(self, options):
+    def update_options(self):
         """
-        Get current set task options, based on @options.
+        Update current set task options from the widgets.
         """
-        options = dict(options)
+        options = self.current_options
         for (pref, widget) in self.get_prefs().iteritems():
             if pref == 'seed-ratio':
                 options[pref] = str(widget.get_value())
@@ -74,11 +75,12 @@ class TaskDialogMixin:
             options['bt-prioritize-piece'] = ''
         return options
 
-    def set_options(self, options):
+    def update_widgets(self):
         """
         Set the status of the widgets in the dialog according to
-        the options in the config file.
+        current options.
         """
+        options = self.current_options
         for (pref, widget) in self.get_prefs().iteritems():
             if hasattr(widget, 'set_value'):
                 widget.set_value(float(options[pref]))
@@ -210,6 +212,19 @@ class TaskNewDialog(TaskDialogMixin):
                 )
         return [uri.strip() for uri in uris.split("\n") if uri.strip()]
 
+    def __set_uris(self, task_type, uris):
+        """
+        Set URIs of textviews, @uris is a tuple of URIs.
+        """
+        if task_type == TASK_NORMAL:
+            textview = self.widgets['normal_uri_textview']
+        elif task_type == TASK_BT:
+            textview = self.widgets['bt_uri_textview']
+        else:
+            return
+        tbuffer = textview.get_buffer()
+        uris = tbuffer.set_text('\n'.join(uris))
+
     def __get_metadata_file(self, task_type):
         """
         Get metadata file for BT and Metalink tasks.
@@ -226,21 +241,19 @@ class TaskNewDialog(TaskDialogMixin):
         else:
             return ""
 
-    def run_dialog(self, action):
+    def run_dialog(self, task_type, options = None, uris = None):
         """
         Popup new task dialog.
         """
         widgets = self.__get_widgets()
         # set current page of the notebook
-        actions = (
-                "task_new_normal_action",
-                "task_new_bt_action",
-                "task_new_metalink_action",
-                )
-        page = actions.index(action.get_property('name'))
-        widgets['nb'].set_current_page(page)
-        # init default configuration
-        self.set_options(self.main_app.conf.task)
+        widgets['nb'].set_current_page(task_type)
+        # init widgets status
+        self.current_options = dict(self.main_app.conf.task)
+        if uris:
+            self.current_options.update(options)
+            self.__set_uris(task_type, uris)
+        self.update_widgets()
         # init the server cb
         widgets['server_ls'].clear()
         for server in self.main_app.server_group.get_servers():
@@ -286,7 +299,8 @@ class TaskNewDialog(TaskDialogMixin):
         task_type = self.widgets['nb'].get_current_page()
         uris = self.__get_uris(task_type)
         metadata_file = self.__get_metadata_file(task_type)
-        options = self.get_options(self.main_app.conf.task)
+        self.update_options()
+        options = self.current_options
         cate = self.__get_active_cate()
         info = {}
         info['server'] = self.__get_active_server().uuid
@@ -382,23 +396,25 @@ class TaskProfileDialog(TaskDialogMixin):
                     'follow_metalink_adjustment')
         return self.prefs
 
-    def run_dialog(self, action):
+    def run_dialog(self):
         """
         Popup preferences dialog.
         """
         widgets = self.__get_widgets()
         # init default configuration
-        self.set_options(self.main_app.conf.task)
+        self.current_options = dict(self.main_app.conf.task)
+        self.update_widgets()
         # run the dialog
         widgets['dialog'].run()
         
     def on_dialog_response(self, dialog, response):
         """
-        Create a new download task if uris are provided.
+        Save the options to the config file.
         """
         if response == gtk.RESPONSE_OK:
-            options = self.get_options({})
-            for option in options:
-                self.main_app.conf.task[option] = options[option]
+            self.current_options = {}
+            self.update_options()
+            for (key, value) in self.current_options.iteritems():
+                self.main_app.conf.task[key] = value
         dialog.hide()
 

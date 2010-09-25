@@ -25,9 +25,8 @@
 GUI related.
 """
 
-import gtk
-import os
-import sys
+import gtk, glib
+import os, sys
 import glob
 import shutil
 import getopt
@@ -50,8 +49,6 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
     def __init__(self):
         SingleInstanceAppMixin.__init__(self, APP_BUS_NAME)
         dbus.service.Object.__init__(self, self.bus, self.bus_object_name)
-        # Init arguments
-        self.__init_args()
         # Init paths
         self.__init_paths()
         # Init Config
@@ -78,6 +75,8 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
         self.task_profile_dialog = None
         # Show the window
         self.main_window.show()
+        # Init arguments
+        self.__init_args()
 
     def __init_args(self):
         """
@@ -152,12 +151,13 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
                     ['referer=', 'rename=', 'cookie=', 'help', 'version'])
         except getopt.GetoptError, err:
             return str(err)
+        # Convert getopt options to dict
         options = {}
         for opt, value in opt_list:
             if opt in ('-c', '--cookie'):
                 options['header'] = 'Cookie: %s' % value
             elif opt in ('-n', '--rename'):
-                options['rename'] = value
+                options['out'] = value
             elif opt in ('-r', '--referer'):
                 options['referer'] = value
             elif opt in ('-v', '--version'):
@@ -166,7 +166,10 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
                 return '@Help'
         if not args:
             return '@NoArg'
-        print options, args
+        # Run task new dialog
+        # FIXME: Use D-Bus to prevent run_dialog() from running twice
+        glib.idle_add(self.get_task_new_dialog().run_dialog,
+                TASK_NORMAL, options, args)
         return ''
 
     def on_instance_exists(self):
@@ -189,21 +192,39 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
         else:
             SingleInstanceAppMixin.on_instance_exists(self)
 
+    def get_task_new_dialog(self):
+        """
+        Get the task new dialog, if not existed, create it.
+        """
+        if self.task_new_dialog == None:
+            self.task_new_dialog = TaskNewDialog(self)
+        return self.task_new_dialog
+
+    def get_task_profile_dialog(self):
+        """
+        Get the task profile dialog, if not existed, create it.
+        """
+        if self.task_profile_dialog == None:
+            self.task_profile_dialog = TaskProfileDialog(self)
+        return self.task_profile_dialog
+
     def on_task_new_action_activate(self, action):
         """
         Being called when task_new_action activated.
         """
-        if self.task_new_dialog == None:
-            self.task_new_dialog = TaskNewDialog(self)
-        self.task_new_dialog.run_dialog(action)
+        actions = (
+                "task_new_normal_action",
+                "task_new_bt_action",
+                "task_new_metalink_action",
+                )
+        task_type = actions.index(action.get_property('name'))
+        self.get_task_new_dialog().run_dialog(task_type)
 
     def on_task_profile_action_activate(self, action):
         """
         Being called when task_profile_action activated.
         """
-        if self.task_profile_dialog == None:
-            self.task_profile_dialog = TaskProfileDialog(self)
-        self.task_profile_dialog.run_dialog(action)
+        self.get_task_profile_dialog().run_dialog()
 
     def on_task_batch_action_activate(self, action):
         """
