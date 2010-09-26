@@ -25,13 +25,12 @@
 GUI related.
 """
 
-import gtk, glib
+import gtk
 import os, sys
 import glob
 import shutil
+import subprocess
 from twisted.internet import reactor
-
-import dbus.service
 
 from Yaner.Constants import *
 from Yaner.Constants import _
@@ -41,13 +40,11 @@ from Yaner.Task import TaskMixin
 from Yaner.Configuration import ConfigFile
 from Yaner.SingleInstance import SingleInstanceAppMixin
 
-class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
+class YanerApp(SingleInstanceAppMixin):
     "Main Application"
-    bus_object_name = '/app'
 
     def __init__(self):
         SingleInstanceAppMixin.__init__(self, APP_BUS_NAME)
-        dbus.service.Object.__init__(self, self.bus, self.bus_object_name)
         # Init paths
         self.__init_paths()
         # Init Config
@@ -70,26 +67,50 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
         server_tv = builder.get_object("server_tv")
         self.server_group = ServerGroup(self, server_tv)
         # Dialogs
-        self.task_new_dialog = None
+        self.task_new_dialog = TaskNewDialog(self)
         self.task_profile_dialog = None
         # Show the window
         self.main_window.show()
         # Init arguments
         self.__init_args()
 
-    def __init_args(self):
+    def __init_args(self, is_first_instance = True):
         """
         Init args.
         """
-        ret = self.process_args(sys.argv[1:])
-        if ret not in ('', '@NoUris'):
-            if ret == '@Version':
-                self.version()
-            elif ret == '@Help':
+        args = sys.argv[1:]
+        options = {}
+        uris = []
+        i = 0
+        while(i < len(args)):
+            if not args[i].startswith('-'):
+                uris.append(args[i])
+            elif args[i] in ('-h', '--help'):
                 self.usage()
+            elif args[i] in ('-v', '--version'):
+                self.version()
+            elif i + 1 < len(args) and not args[i + 1].startswith('-'):
+                # Avoid something like '-r -c' to parse as {'-r': '-c'}
+                if args[i] in ('-r', '--referer'):
+                    options['referer'] = args[i + 1]
+                elif args[i] in ('-c', '--cookie'):
+                    options['header'] = 'Cookie: %s' % args[i + 1]
+                elif args[i] in ('-n', '--rename'):
+                    options['out'] = args[i + 1]
+                else:
+                    self.usage()
+                i += 1
+            i += 1
+        if uris:
+            if is_first_instance:
+                # Run with the same options again
+                subprocess.Popen(sys.argv)
             else:
-                self.usage(ret)
-            sys.exit()
+                options['uris'] = '|'.join(uris)
+                # Run task new dialog
+                task_new_dialog = self.bus.get_object(
+                        APP_BUS_NAME, TASK_NEW_DIALOG_OBJECT)
+                task_new_dialog.run_dialog(TASK_NORMAL, options)
 
     @staticmethod
     def __init_rgba(window):
@@ -139,57 +160,12 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
         task_uuid = model.get(titer, 9)[0]
         return TaskMixin.instances[task_uuid]
 
-    @dbus.service.method(APP_INTERFACE,
-            in_signature = 'as', out_signature = 's')
-    def process_args(self, args):
-        """
-        Start new task from @args, @args should be sys.argv[1:].
-        """
-        options = {}
-        uris = []
-        i = 0
-        while(i < len(args)):
-            if args[i].startswith('-'):
-                if args[i] in ('-h', '--help'):
-                    return '@Help'
-                elif args[i] in ('-v', '--version'):
-                    return '@Version'
-                elif i + 1 < len(args) and not args[i + 1].startswith('-'):
-                    # Avoid something like '-r -c' to parse as {'-r': '-c'}
-                    if args[i] in ('-r', '--referer'):
-                        options['referer'] = args[i + 1]
-                    elif args[i] in ('-c', '--cookie'):
-                        options['header'] = 'Cookie: %s' % args[i + 1]
-                    elif args[i] in ('-n', '--rename'):
-                        options['out'] = args[i + 1]
-                    i += 1
-            else:
-                uris.append(args[i])
-            i += 1
-        if not uris:
-            return '@NoUris'
-        # Run task new dialog
-        # FIXME: Use D-Bus to prevent run_dialog() from running twice
-        glib.idle_add(self.get_task_new_dialog().run_dialog,
-                TASK_NORMAL, options, uris)
-        return ''
-
     def on_instance_exists(self):
         """
         Being called when another instance exists.
         """
         if len(sys.argv) > 1:
-            old_app = self.bus.get_object(APP_BUS_NAME, self.bus_object_name)
-            ret = old_app.process_args(sys.argv[1:])
-            if ret != '':
-                if ret == '@Help':
-                    self.usage()
-                elif ret == '@Version':
-                    self.version()
-                elif ret == '@NoUris':
-                    print _('Error: No URI provided in the arguments.')
-                else:
-                    self.usage(ret)
+            self.__init_args(is_first_instance = False)
             sys.exit()
         else:
             SingleInstanceAppMixin.on_instance_exists(self)
@@ -292,7 +268,7 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
     @staticmethod
     def usage(err = ''):
         """
-        Print help messages.
+        Print help messages and exit.
         """
         # Print errors
         if err:
@@ -309,11 +285,12 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
         print _('Options:')
         for (opt, des) in opts:
             print '  %-28s%s' % (opt, des)
+        sys.exit(0)
 
     @staticmethod
     def version():
         """
-        Print version information.
+        Print version information and exit.
         """
         print "yaner %s" % VERSION
         print 'Copyright (C) 2010 Iven Day (Xu Lijian)'
@@ -322,6 +299,7 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
         print _("This is free software:"),
         print _("you are free to change and redistribute it.")
         print _("There is NO WARRANTY, to the extent permitted by law.")
+        sys.exit(0)
 
 if __name__ == '__main__':
     YanerApp()

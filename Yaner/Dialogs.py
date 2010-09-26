@@ -28,6 +28,8 @@ import os
 import gtk
 import uuid
 
+import dbus.service
+
 from Yaner.Server import Server
 from Yaner.Category import Category
 from Yaner.Constants import *
@@ -73,7 +75,6 @@ class TaskDialogMixin:
             options['bt-prioritize-piece'] = 'head,tail'
         else:
             options['bt-prioritize-piece'] = ''
-        return options
 
     def update_widgets(self):
         """
@@ -91,12 +92,15 @@ class TaskDialogMixin:
         if options['bt-prioritize-piece'] == 'head,tail':
             self.get_prefs()['bt-prioritize-piece'].set_active(True)
 
-class TaskNewDialog(TaskDialogMixin):
+class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
     """
     This class contains widgets and methods related to new task dialog.
     """
+
     def __init__(self, main_app):
         TaskDialogMixin.__init__(self, TASK_NEW_UI_FILE)
+        dbus.service.Object.__init__(self,
+                main_app.bus, TASK_NEW_DIALOG_OBJECT)
         self.__init_filefilters()
 
         self.main_app = main_app
@@ -241,7 +245,9 @@ class TaskNewDialog(TaskDialogMixin):
         else:
             return ""
 
-    def run_dialog(self, task_type, options = None, uris = None):
+    @dbus.service.method(APP_INTERFACE,
+            in_signature = 'ia{ss}', out_signature = '')
+    def run_dialog(self, task_type, options = None):
         """
         Popup new task dialog.
         """
@@ -250,9 +256,9 @@ class TaskNewDialog(TaskDialogMixin):
         widgets['nb'].set_current_page(task_type)
         # init widgets status
         self.current_options = dict(self.main_app.conf.task)
-        if uris:
+        if options:
+            self.__set_uris(task_type, options.pop('uris').split('|'))
             self.current_options.update(options)
-            self.__set_uris(task_type, uris)
         self.update_widgets()
         # init the server cb
         widgets['server_ls'].clear()

@@ -56,6 +56,7 @@ U_SERVER_CONFIG_DIR = _join(U_CONFIG_DIR, "servers")
 #
 APP_BUS_NAME = 'com.kissuki.yaner'
 APP_INTERFACE = 'com.kissuki.yaner'
+TASK_NEW_DIALOG_OBJECT = '/task_new_dialog'
 
 # Task types
 #
