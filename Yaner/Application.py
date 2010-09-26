@@ -29,7 +29,6 @@ import gtk, glib
 import os, sys
 import glob
 import shutil
-import getopt
 from twisted.internet import reactor
 
 import dbus.service
@@ -83,7 +82,7 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
         Init args.
         """
         ret = self.process_args(sys.argv[1:])
-        if ret not in ('', '@NoArg'):
+        if ret not in ('', '@NoUris'):
             if ret == '@Version':
                 self.version()
             elif ret == '@Help':
@@ -146,30 +145,33 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
         """
         Start new task from @args, @args should be sys.argv[1:].
         """
-        try:
-            opt_list, args = getopt.getopt(args, 'r:n:c:hv',
-                    ['referer=', 'rename=', 'cookie=', 'help', 'version'])
-        except getopt.GetoptError, err:
-            return str(err)
-        # Convert getopt options to dict
         options = {}
-        for opt, value in opt_list:
-            if opt in ('-c', '--cookie'):
-                options['header'] = 'Cookie: %s' % value
-            elif opt in ('-n', '--rename'):
-                options['out'] = value
-            elif opt in ('-r', '--referer'):
-                options['referer'] = value
-            elif opt in ('-v', '--version'):
-                return '@Version'
-            elif opt in ('-h', '--help'):
-                return '@Help'
-        if not args:
-            return '@NoArg'
+        uris = []
+        i = 0
+        while(i < len(args)):
+            if args[i].startswith('-'):
+                if args[i] in ('-h', '--help'):
+                    return '@Help'
+                elif args[i] in ('-v', '--version'):
+                    return '@Version'
+                elif i + 1 < len(args) and not args[i + 1].startswith('-'):
+                    # Avoid something like '-r -c' to parse as {'-r': '-c'}
+                    if args[i] in ('-r', '--referer'):
+                        options['referer'] = args[i + 1]
+                    elif args[i] in ('-c', '--cookie'):
+                        options['header'] = 'Cookie: %s' % args[i + 1]
+                    elif args[i] in ('-n', '--rename'):
+                        options['out'] = args[i + 1]
+                    i += 1
+            else:
+                uris.append(args[i])
+            i += 1
+        if not uris:
+            return '@NoUris'
         # Run task new dialog
         # FIXME: Use D-Bus to prevent run_dialog() from running twice
         glib.idle_add(self.get_task_new_dialog().run_dialog,
-                TASK_NORMAL, options, args)
+                TASK_NORMAL, options, uris)
         return ''
 
     def on_instance_exists(self):
@@ -184,7 +186,7 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
                     self.usage()
                 elif ret == '@Version':
                     self.version()
-                elif ret == '@NoArg':
+                elif ret == '@NoUris':
                     print _('Error: No URI provided in the arguments.')
                 else:
                     self.usage(ret)
@@ -297,9 +299,9 @@ class YanerApp(SingleInstanceAppMixin, dbus.service.Object):
             print _('Error: %s') % err
             print
         # Print usage and options
-        opts = (('-n, --rename=FILENAME', _('output filename of the task')),
-            ('-r, --referer=URI', _('referer page of the link')),
-            ('-c, --referer=COOKIE',_('cookie in the header')),
+        opts = (('-n FILE, --rename FILE', _('output filename of the task')),
+            ('-r URI, --referer URI', _('referer page of the link')),
+            ('-c COOKIE, --referer COOKIE',_('cookie in the header')),
             ('-h, --help', _('display this help and exit')),
             ('-v, --version', _('output version information and exit')))
         print _('Usage: yaner [OPTION]... [URI | MAGNET]...')

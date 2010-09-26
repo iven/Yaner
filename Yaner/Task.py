@@ -196,6 +196,7 @@ class TaskMixin:
         else:
             percent = int(comp_length) / int(total_length) * 100 \
                     if total_length != '0' else 0
+            # FIXME: None UTF-8 task names may fail.
             self.server.models[ITER_QUEUING].set(self.iter,
                     0, self.conf.info.gid,
                     2, self.conf.info.name,
