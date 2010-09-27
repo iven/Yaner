@@ -1,0 +1,29 @@
+0.0.8   <2010-09-28>
+======
+ * Use D-Bus to provide single instance support.
+ * Command line options support.
+ * Start a new task from command line when an instance exists.
+
+0.0.7   <2010-09-09>
+======
+ * Task control buttons works now.
+ * More friendly task name displaying.
+ * More friendly error displaying.
+ * Add task profile dialog to change default task settings.
+
+0.0.6   <2010-08-21>
+======
+ * Add i18n support.
+ * Rewrite setup.py
+
+0.0.5   <2010-08-14>
+======
+ * Rewrite config files structure, use uuid to name them.
+ * Local aria2 server could start automatically.
+ * Many UI improvements.
+
+0.0.2   <2010-05-19>
+======
+ * Basic GUI, including main window and new task dialog
+ * Basic Configuration files
+ * Could add task, no pausing, removing, nor resuming
