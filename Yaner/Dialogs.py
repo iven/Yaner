@@ -258,7 +258,8 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         self.current_options = dict(self.main_app.conf.task)
         if options:
             self.__set_uris(task_type, options.pop('uris').split('|'))
-            self.current_options.update(options)
+            for key, value in options.iteritems():
+                self.current_options[str(key)] = str(value)
         self.update_widgets()
         # init the server cb
         widgets['server_ls'].clear()
