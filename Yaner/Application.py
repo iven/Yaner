@@ -45,6 +45,8 @@ class YanerApp(SingleInstanceAppMixin):
 
     def __init__(self):
         SingleInstanceAppMixin.__init__(self, APP_BUS_NAME)
+        # Init arguments
+        self.__init_args()
         # Init paths
         self.__init_paths()
         # Init Config
@@ -71,8 +73,6 @@ class YanerApp(SingleInstanceAppMixin):
         self.task_profile_dialog = None
         # Show the window
         self.main_window.show()
-        # Init arguments
-        self.__init_args()
 
     def __init_args(self, is_first_instance = True):
         """
@@ -275,9 +275,9 @@ class YanerApp(SingleInstanceAppMixin):
             print _('Error: %s') % err
             print
         # Print usage and options
-        opts = (('-n FILE, --rename FILE', _('output filename of the task')),
+        opts = (('-n FILE, --rename FILE', _('filename to save')),
             ('-r URI, --referer URI', _('referer page of the link')),
-            ('-c COOKIE, --referer COOKIE',_('cookie in the header')),
+            ('-c COOKIE, --referer COOKIE',_('cookies of the website')),
             ('-h, --help', _('display this help and exit')),
             ('-v, --version', _('output version information and exit')))
         print _('Usage: yaner [OPTION]... [URI | MAGNET]...')
