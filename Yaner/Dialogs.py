@@ -266,6 +266,8 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         for server in self.main_app.server_group.get_servers():
             widgets['server_ls'].append([server.get_name(), server.uuid])
         widgets['server_cb'].set_active(0)
+        # Show main window
+        self.main_app.main_window.present()
         # run the dialog
         widgets['dialog'].run()
         
