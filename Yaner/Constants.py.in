@@ -84,6 +84,6 @@ VERSION = "@version@"
 import locale as _locale
 import gettext as _gettext
 _locale.setlocale(_locale.LC_ALL, "")
-_gettext.bindtextdomain("yaner", _DATA_DIR + "/locale")
+_gettext.bindtextdomain("yaner", "@prefix@/share/locale")
 _gettext.textdomain("yaner")
 _ = _gettext.gettext

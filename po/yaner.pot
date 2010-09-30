@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-09 22:30+0800\n"
+"POT-Creation-Date: 2010-09-28 01:54+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,55 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: ../Yaner/Application.py:275
+#, python-format
+msgid "Error: %s"
+msgstr ""
+
+#: ../Yaner/Application.py:278
+msgid "filename to save"
+msgstr ""
+
+#: ../Yaner/Application.py:279
+msgid "referer page of the link"
+msgstr ""
+
+#: ../Yaner/Application.py:280
+msgid "cookies of the website"
+msgstr ""
+
+#: ../Yaner/Application.py:281
+msgid "display this help and exit"
+msgstr ""
+
+#: ../Yaner/Application.py:282
+msgid "output version information and exit"
+msgstr ""
+
+#: ../Yaner/Application.py:283
+msgid "Usage: yaner [OPTION]... [URI | MAGNET]..."
+msgstr ""
+
+#: ../Yaner/Application.py:285
+msgid "Options:"
+msgstr ""
+
+#: ../Yaner/Application.py:297
+msgid "License GPLv3+: GNU GPL version 3 or later"
+msgstr ""
+
+#: ../Yaner/Application.py:299
+msgid "This is free software:"
+msgstr ""
+
+#: ../Yaner/Application.py:300
+msgid "you are free to change and redistribute it."
+msgstr ""
+
+#: ../Yaner/Application.py:301
+msgid "There is NO WARRANTY, to the extent permitted by law."
+msgstr ""
 
 #: ../Yaner/Server.py:65
 msgid "Queuing"
@@ -29,7 +78,7 @@ msgstr ""
 msgid "Recycled"
 msgstr ""
 
-#: ../Yaner/Server.py:177 ../Yaner/Task.py:221
+#: ../Yaner/Server.py:177 ../Yaner/Task.py:222
 msgid "Network Error"
 msgstr ""
 

@@ -6,9 +6,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: yaner 0.0.7\n"
+"Project-Id-Version: yaner 0.0.8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-09 22:30+0800\n"
+"POT-Creation-Date: 2010-09-28 01:54+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -16,6 +16,55 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: ../Yaner/Application.py:275
+#, python-format
+msgid "Error: %s"
+msgstr "错误：%s"
+
+#: ../Yaner/Application.py:278
+msgid "filename to save"
+msgstr "保存的文件名"
+
+#: ../Yaner/Application.py:279
+msgid "referer page of the link"
+msgstr "链接的引用页"
+
+#: ../Yaner/Application.py:280
+msgid "cookies of the website"
+msgstr "网站的 Cookies"
+
+#: ../Yaner/Application.py:281
+msgid "display this help and exit"
+msgstr "显示此帮助并退出"
+
+#: ../Yaner/Application.py:282
+msgid "output version information and exit"
+msgstr "输出版本信息并退出"
+
+#: ../Yaner/Application.py:283
+msgid "Usage: yaner [OPTION]... [URI | MAGNET]..."
+msgstr "用法：yaner [选项]... [URI | MAGNET]..."
+
+#: ../Yaner/Application.py:285
+msgid "Options:"
+msgstr "选项："
+
+#: ../Yaner/Application.py:297
+msgid "License GPLv3+: GNU GPL version 3 or later"
+msgstr "GPLv3+ 许可： GNU 通用公共许可证第 3 版本或更新"
+
+#: ../Yaner/Application.py:299
+msgid "This is free software:"
+msgstr "本软件是自由软件："
+
+#: ../Yaner/Application.py:300
+msgid "you are free to change and redistribute it."
+msgstr "您可以自由修改和重新发布它。"
+
+#: ../Yaner/Application.py:301
+msgid "There is NO WARRANTY, to the extent permitted by law."
+msgstr "在法律范围内没有其他保证。"
 
 #: ../Yaner/Server.py:65
 msgid "Queuing"
@@ -29,7 +78,7 @@ msgstr "已完成"
 msgid "Recycled"
 msgstr "回收站"
 
-#: ../Yaner/Server.py:177 ../Yaner/Task.py:221
+#: ../Yaner/Server.py:177 ../Yaner/Task.py:222
 msgid "Network Error"
 msgstr "网络错误"
 
@@ -260,4 +309,3 @@ msgstr "! 跟踪 Metalink"
 #: ../glade/task_profile.ui:736
 msgid "<i>! Do NOT change this option.</i>"
 msgstr "<i>! 不要修改此选项。</i>"
-
