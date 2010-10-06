@@ -9,6 +9,9 @@ To install it to /usr/local (or any other prefix) use:
     python setup.py install --prefix=/usr/local
 (specify --prefix _after_ install or it won't work)
 
+If you use Debian / Ubuntu, you should install like this:
+    python setup.py install --prefix=/usr/local --install-layout=deb
+
 To uninstall, use:
     python setup.py uninstall (also as root, or with root rights using sudo)
 
