@@ -1,8 +1,9 @@
-0.0.8   <2010-09-28>
+0.0.8   <2010-10-07>
 ======
  * Use D-Bus to provide single instance support.
  * Command line options support.
  * Start a new task from command line when an instance exists.
+ * Firefox support using FlashGot
 
 0.0.7   <2010-09-09>
 ======

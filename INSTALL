@@ -1,7 +1,11 @@
+Dependences
+======
 This software depends on Python and PyGTK >= 2.12
 sexy-python (libsexy bindings) is also used but optionnal.
 Of course librsvg-common is needed for a proper svg support in gtk/gdk.
 
+Install
+======
 Run the setup.py script to install, e.g.:
     python setup.py install (as root, or with root rights using sudo)
 
@@ -12,7 +16,17 @@ To install it to /usr/local (or any other prefix) use:
 If you use Debian / Ubuntu, you should install like this:
     python setup.py install --prefix=/usr/local --install-layout=deb
 
+Uninstall
+======
 To uninstall, use:
     python setup.py uninstall (also as root, or with root rights using sudo)
 
 Don't remove the file "installed_files", it's used for uninstallation.
+
+Browser support
+======
+For Firefox, install FlashGot, add a new DM in the preferences dialog:
+Executable path: /usr/bin/yaner (Or /usr/local/bin/yaner, etc.)
+Command line:    [URL] --referer [REFERER] --rename [FNAME] --cookie [COOKIE]
+
+Other browers are currently not supported.
