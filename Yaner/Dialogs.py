@@ -318,6 +318,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         info['percent'] = 0
         info['size'] = 0
         info['gid'] = ''
+        info['status'] = 'paused'
 
         if task_type == TASK_METALINK and metadata_file:
             info['metalink'] = metadata_file

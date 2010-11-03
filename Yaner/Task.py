@@ -62,7 +62,7 @@ class TaskMixin:
         """
         Being called when task is unpaused.
         """
-        self.set_status_icon('unpaused')
+        self.set_status_icon('running')
 
     def pause(self):
         """
@@ -105,17 +105,25 @@ class TaskMixin:
         """
         return dict(self.conf.options)
 
-    def set_status_icon(self, status):
+    def set_status_icon(self, status = None):
         """
         Set the status icon of the iter.
         """
         status_dict = {
                 'running': 'gtk-media-play',
                 'paused': 'gtk-media-pause',
-                'unpaused': 'gtk-media-play',
                 'completed': 'gtk-apply',
                 'error': 'gtk-stop',
                 }
+        if status == None:
+            # Just update the icon from the conf file
+            status = self.conf.info.status
+            if status == 'running':
+                status = 'paused'
+        else:
+            # Update the status in conf file
+            self.conf.info['status'] = status
+
         self.server.models[ITER_QUEUING].set(self.iter,
                 1, status_dict[status])
 
@@ -139,6 +147,7 @@ class TaskMixin:
             0,
             self.uuid,
             ])
+        self.set_status_icon()
 
     def on_started(self, gid):
         """
