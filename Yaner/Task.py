@@ -135,7 +135,7 @@ class TaskMixin:
         queuing_model = server.models[ITER_QUEUING]
         percent = float(self.conf.info.percent)
         size = int(self.conf.info.size)
-        self.iter = queuing_model.append(None, [
+        self.iter = queuing_model.prepend(None, [
             self.conf.info.gid,
             "gtk-media-pause",
             self.conf.info.name,
