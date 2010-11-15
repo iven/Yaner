@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-28 01:54+0800\n"
+"POT-Creation-Date: 2010-11-15 12:41+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,6 +66,18 @@ msgstr ""
 msgid "There is NO WARRANTY, to the extent permitted by law."
 msgstr ""
 
+#: ../Yaner/Dialogs.py:280
+msgid "Select download directory"
+msgstr ""
+
+#: ../Yaner/Dialogs.py:283
+msgid "_Cancel"
+msgstr ""
+
+#: ../Yaner/Dialogs.py:284
+msgid "_Select"
+msgstr ""
+
 #: ../Yaner/Server.py:65
 msgid "Queuing"
 msgstr ""
@@ -78,7 +90,7 @@ msgstr ""
 msgid "Recycled"
 msgstr ""
 
-#: ../Yaner/Server.py:177 ../Yaner/Task.py:222
+#: ../Yaner/Server.py:177 ../Yaner/Task.py:231
 msgid "Network Error"
 msgstr ""
 
@@ -114,123 +126,123 @@ msgstr ""
 msgid "Copyright © 2010 Iven Day(Xu Lijian)"
 msgstr ""
 
-#: ../glade/task_new.ui:68
+#: ../glade/task_new.ui:67
 msgid "<b>URI(s)</b>"
 msgstr ""
 
-#: ../glade/task_new.ui:100
+#: ../glade/task_new.ui:99
 msgid "Referer"
 msgstr ""
 
-#: ../glade/task_new.ui:111
+#: ../glade/task_new.ui:110
 msgid "Rename"
 msgstr ""
 
-#: ../glade/task_new.ui:149 ../glade/task_profile.ui:249
+#: ../glade/task_new.ui:148 ../glade/task_profile.ui:249
 msgid "Connections"
 msgstr ""
 
-#: ../glade/task_new.ui:183 ../glade/task_new.ui:604 ../glade/task_new.ui:835
+#: ../glade/task_new.ui:182 ../glade/task_new.ui:603 ../glade/task_new.ui:834
 msgid "<b>Settings</b> - Optional"
 msgstr ""
 
-#: ../glade/task_new.ui:216 ../glade/task_new.ui:297
+#: ../glade/task_new.ui:215 ../glade/task_new.ui:296
 msgid "User"
 msgstr ""
 
-#: ../glade/task_new.ui:241 ../glade/task_new.ui:271
+#: ../glade/task_new.ui:240 ../glade/task_new.ui:270
 msgid "Password"
 msgstr ""
 
-#: ../glade/task_new.ui:325
+#: ../glade/task_new.ui:324
 msgid "<b>HTTP</b>"
 msgstr ""
 
-#: ../glade/task_new.ui:335
+#: ../glade/task_new.ui:334
 msgid "<b>FTP</b>"
 msgstr ""
 
-#: ../glade/task_new.ui:351
+#: ../glade/task_new.ui:350
 msgid "<b>Authorization</b> - Optional"
 msgstr ""
 
-#: ../glade/task_new.ui:366
+#: ../glade/task_new.ui:365
 msgid "Normal / BT Magnet"
 msgstr ""
 
-#: ../glade/task_new.ui:401
+#: ../glade/task_new.ui:400
 msgid "<b>Torrent File</b>"
 msgstr ""
 
-#: ../glade/task_new.ui:444
+#: ../glade/task_new.ui:443
 msgid "<b>URI(s)</b> - Optional"
 msgstr ""
 
-#: ../glade/task_new.ui:476 ../glade/task_profile.ui:352
+#: ../glade/task_new.ui:475 ../glade/task_profile.ui:352
 msgid "Max open files"
 msgstr ""
 
-#: ../glade/task_new.ui:487 ../glade/task_profile.ui:499
+#: ../glade/task_new.ui:486 ../glade/task_profile.ui:499
 msgid "Seed time(min)"
 msgstr ""
 
-#: ../glade/task_new.ui:500 ../glade/task_profile.ui:512
+#: ../glade/task_new.ui:499 ../glade/task_profile.ui:512
 msgid "Seed ratio"
 msgstr ""
 
-#: ../glade/task_new.ui:559
+#: ../glade/task_new.ui:558
 msgid "Max peers"
 msgstr ""
 
-#: ../glade/task_new.ui:585
+#: ../glade/task_new.ui:584
 msgid "Preview mode - Try to download first and last pieces first"
 msgstr ""
 
-#: ../glade/task_new.ui:622
+#: ../glade/task_new.ui:621
 msgid "BitTorrent"
 msgstr ""
 
-#: ../glade/task_new.ui:658
+#: ../glade/task_new.ui:657
 msgid "<b>Metalink File</b>"
 msgstr ""
 
-#: ../glade/task_new.ui:691 ../glade/task_profile.ui:591
+#: ../glade/task_new.ui:690 ../glade/task_profile.ui:591
 msgid "Download servers"
 msgstr ""
 
-#: ../glade/task_new.ui:702 ../glade/task_profile.ui:601
+#: ../glade/task_new.ui:701 ../glade/task_profile.ui:601
 msgid "Prefered locations"
 msgstr ""
 
-#: ../glade/task_new.ui:731 ../glade/task_profile.ui:614
+#: ../glade/task_new.ui:730 ../glade/task_profile.ui:614
 msgid "Language"
 msgstr ""
 
-#: ../glade/task_new.ui:806
+#: ../glade/task_new.ui:805
 msgid "OS"
 msgstr ""
 
-#: ../glade/task_new.ui:819 ../glade/task_profile.ui:627
+#: ../glade/task_new.ui:818 ../glade/task_profile.ui:627
 msgid "Version"
 msgstr ""
 
-#: ../glade/task_new.ui:853 ../glade/task_profile.ui:720
+#: ../glade/task_new.ui:852 ../glade/task_profile.ui:720
 msgid "Metalink"
 msgstr ""
 
-#: ../glade/task_new.ui:906
+#: ../glade/task_new.ui:887
 msgid "Category"
 msgstr ""
 
-#: ../glade/task_new.ui:934
+#: ../glade/task_new.ui:898
 msgid "Directory"
 msgstr ""
 
-#: ../glade/task_new.ui:947
-msgid "Select download directory"
+#: ../glade/task_new.ui:959
+msgid "_Browse..."
 msgstr ""
 
-#: ../glade/task_new.ui:978
+#: ../glade/task_new.ui:986
 msgid "<b>Server and Category</b>"
 msgstr ""
 

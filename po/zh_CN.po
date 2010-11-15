@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: yaner 0.0.8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-28 01:54+0800\n"
+"POT-Creation-Date: 2010-11-15 12:41+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -66,6 +66,18 @@ msgstr "您可以自由修改和重新发布它。"
 msgid "There is NO WARRANTY, to the extent permitted by law."
 msgstr "在法律范围内没有其他保证。"
 
+#: ../Yaner/Dialogs.py:280
+msgid "Select download directory"
+msgstr "选择下载目录"
+
+#: ../Yaner/Dialogs.py:283
+msgid "_Cancel"
+msgstr "取消(_C)"
+
+#: ../Yaner/Dialogs.py:284
+msgid "_Select"
+msgstr "选择(_S)"
+
 #: ../Yaner/Server.py:65
 msgid "Queuing"
 msgstr "排队中"
@@ -78,7 +90,7 @@ msgstr "已完成"
 msgid "Recycled"
 msgstr "回收站"
 
-#: ../Yaner/Server.py:177 ../Yaner/Task.py:222
+#: ../Yaner/Server.py:177 ../Yaner/Task.py:231
 msgid "Network Error"
 msgstr "网络错误"
 
@@ -114,123 +126,123 @@ msgstr "关于掩耳"
 msgid "Copyright © 2010 Iven Day(Xu Lijian)"
 msgstr "Copyright © 2010 Iven Day(许立剑)"
 
-#: ../glade/task_new.ui:68
+#: ../glade/task_new.ui:67
 msgid "<b>URI(s)</b>"
 msgstr "<b>下载地址</b>"
 
-#: ../glade/task_new.ui:100
+#: ../glade/task_new.ui:99
 msgid "Referer"
 msgstr "引用页"
 
-#: ../glade/task_new.ui:111
+#: ../glade/task_new.ui:110
 msgid "Rename"
 msgstr "重命名"
 
-#: ../glade/task_new.ui:149 ../glade/task_profile.ui:249
+#: ../glade/task_new.ui:148 ../glade/task_profile.ui:249
 msgid "Connections"
 msgstr "连接数"
 
-#: ../glade/task_new.ui:183 ../glade/task_new.ui:604 ../glade/task_new.ui:835
+#: ../glade/task_new.ui:182 ../glade/task_new.ui:603 ../glade/task_new.ui:834
 msgid "<b>Settings</b> - Optional"
 msgstr "<b>设置</b> - 可选"
 
-#: ../glade/task_new.ui:216 ../glade/task_new.ui:297
+#: ../glade/task_new.ui:215 ../glade/task_new.ui:296
 msgid "User"
 msgstr "用户名"
 
-#: ../glade/task_new.ui:241 ../glade/task_new.ui:271
+#: ../glade/task_new.ui:240 ../glade/task_new.ui:270
 msgid "Password"
 msgstr "密码"
 
-#: ../glade/task_new.ui:325
+#: ../glade/task_new.ui:324
 msgid "<b>HTTP</b>"
 msgstr ""
 
-#: ../glade/task_new.ui:335
+#: ../glade/task_new.ui:334
 msgid "<b>FTP</b>"
 msgstr ""
 
-#: ../glade/task_new.ui:351
+#: ../glade/task_new.ui:350
 msgid "<b>Authorization</b> - Optional"
 msgstr "<b>验证</b> - 可选"
 
-#: ../glade/task_new.ui:366
+#: ../glade/task_new.ui:365
 msgid "Normal / BT Magnet"
 msgstr "普通 / BT 磁力链接"
 
-#: ../glade/task_new.ui:401
+#: ../glade/task_new.ui:400
 msgid "<b>Torrent File</b>"
 msgstr "<b>种子文件</b>"
 
-#: ../glade/task_new.ui:444
+#: ../glade/task_new.ui:443
 msgid "<b>URI(s)</b> - Optional"
 msgstr "<b>下载地址</b> - 可选"
 
-#: ../glade/task_new.ui:476 ../glade/task_profile.ui:352
+#: ../glade/task_new.ui:475 ../glade/task_profile.ui:352
 msgid "Max open files"
 msgstr "最大打开文件数"
 
-#: ../glade/task_new.ui:487 ../glade/task_profile.ui:499
+#: ../glade/task_new.ui:486 ../glade/task_profile.ui:499
 msgid "Seed time(min)"
 msgstr "做种时间（分）"
 
-#: ../glade/task_new.ui:500 ../glade/task_profile.ui:512
+#: ../glade/task_new.ui:499 ../glade/task_profile.ui:512
 msgid "Seed ratio"
 msgstr "做种比例"
 
-#: ../glade/task_new.ui:559
+#: ../glade/task_new.ui:558
 msgid "Max peers"
 msgstr "最大节点数"
 
-#: ../glade/task_new.ui:585
+#: ../glade/task_new.ui:584
 msgid "Preview mode - Try to download first and last pieces first"
 msgstr "预览模式 - 试着优先下载文件首尾部分"
 
-#: ../glade/task_new.ui:622
+#: ../glade/task_new.ui:621
 msgid "BitTorrent"
 msgstr ""
 
-#: ../glade/task_new.ui:658
+#: ../glade/task_new.ui:657
 msgid "<b>Metalink File</b>"
 msgstr "<b>Metalink 文件</b>"
 
-#: ../glade/task_new.ui:691 ../glade/task_profile.ui:591
+#: ../glade/task_new.ui:690 ../glade/task_profile.ui:591
 msgid "Download servers"
 msgstr "下载服务器"
 
-#: ../glade/task_new.ui:702 ../glade/task_profile.ui:601
+#: ../glade/task_new.ui:701 ../glade/task_profile.ui:601
 msgid "Prefered locations"
 msgstr "优先地理位置"
 
-#: ../glade/task_new.ui:731 ../glade/task_profile.ui:614
+#: ../glade/task_new.ui:730 ../glade/task_profile.ui:614
 msgid "Language"
 msgstr "语言"
 
-#: ../glade/task_new.ui:806
+#: ../glade/task_new.ui:805
 msgid "OS"
 msgstr "操作系统"
 
-#: ../glade/task_new.ui:819 ../glade/task_profile.ui:627
+#: ../glade/task_new.ui:818 ../glade/task_profile.ui:627
 msgid "Version"
 msgstr "版本号"
 
-#: ../glade/task_new.ui:853 ../glade/task_profile.ui:720
+#: ../glade/task_new.ui:852 ../glade/task_profile.ui:720
 msgid "Metalink"
 msgstr ""
 
-#: ../glade/task_new.ui:906
+#: ../glade/task_new.ui:887
 msgid "Category"
 msgstr "分类"
 
-#: ../glade/task_new.ui:934
+#: ../glade/task_new.ui:898
 msgid "Directory"
 msgstr "目录"
 
-#: ../glade/task_new.ui:947
-msgid "Select download directory"
-msgstr "选择下载目录"
+#: ../glade/task_new.ui:959
+msgid "_Browse..."
+msgstr "浏览(_B)..."
 
-#: ../glade/task_new.ui:978
+#: ../glade/task_new.ui:986
 msgid "<b>Server and Category</b>"
 msgstr "<b>服务端和分类</b>"
 
