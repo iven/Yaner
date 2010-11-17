@@ -425,7 +425,7 @@ class TaskProfileDialog(TaskDialogMixin):
         self.update_widgets()
         # run the dialog
         widgets['dialog'].run()
-        
+
     def on_dialog_response(self, dialog, response):
         """
         Save the options to the config file.
