@@ -4,7 +4,6 @@
 
 - CPU gets 100% when subprocess quits.
 + Convert percent-encoded string to utf8.
-+ Minimize to tray.
 + Menus.
 + Double click to start/pause.
 + Move completed tasks to right place.
