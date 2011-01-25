@@ -36,7 +36,7 @@
     <property name="height_request">500</property>
     <property name="title" translatable="yes">Yaner - Faster than a flash of lightning</property>
     <property name="icon_name">emblem-downloads</property>
-    <signal name="destroy" handler="on_quit_action_activate"/>
+    <signal name="delete_event" handler="on_main_window_delete_event"/>
     <child>
       <object class="GtkVBox" id="main_vbox">
         <property name="visible">True</property>
@@ -54,7 +54,7 @@
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkImageMenuItem" id="task_new_item">
-                        <property name="label">gtk-new</property>
+                        <property name="label">gtk-add</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
@@ -65,22 +65,22 @@
                             <child>
                               <object class="GtkMenuItem" id="task_new_normal_item">
                                 <property name="visible">True</property>
-                                <property name="use_action_appearance">True</property>
                                 <property name="related_action">task_new_normal_action</property>
+                                <property name="use_action_appearance">True</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkMenuItem" id="task_new_bt_item">
                                 <property name="visible">True</property>
-                                <property name="use_action_appearance">True</property>
                                 <property name="related_action">task_new_bt_action</property>
+                                <property name="use_action_appearance">True</property>
                               </object>
                             </child>
                             <child>
                               <object class="GtkMenuItem" id="task_new_metalink_item">
                                 <property name="visible">True</property>
-                                <property name="use_action_appearance">True</property>
                                 <property name="related_action">task_new_metalink_action</property>
+                                <property name="use_action_appearance">True</property>
                               </object>
                             </child>
                           </object>
@@ -116,8 +116,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="task_start_item">
                         <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
                         <property name="related_action">task_start_action</property>
+                        <property name="use_action_appearance">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -125,8 +125,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="task_pause_item">
                         <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
                         <property name="related_action">task_pause_action</property>
+                        <property name="use_action_appearance">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -134,8 +134,8 @@
                     <child>
                       <object class="GtkImageMenuItem" id="task_remove_item">
                         <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
                         <property name="related_action">task_remove_action</property>
+                        <property name="use_action_appearance">True</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -155,8 +155,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="task_profile_item">
                         <property name="visible">True</property>
-                        <property name="use_action_appearance">True</property>
                         <property name="related_action">task_profile_action</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -196,11 +197,10 @@
             <child>
               <object class="GtkMenuToolButton" id="task_new_tool_item">
                 <property name="visible">True</property>
-                <property name="related_action">task_new_normal_action</property>
-                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Add new task</property>
                 <property name="stock_id">gtk-add</property>
                 <property name="menu">task_new_menu</property>
+                <signal name="clicked" handler="on_task_new_action_activate"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -209,8 +209,8 @@
             <child>
               <object class="GtkToolButton" id="task_remove_toolbutton">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">task_remove_action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -229,8 +229,8 @@
             <child>
               <object class="GtkToolButton" id="task_start_toolbutton">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">task_start_action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -241,8 +241,8 @@
             <child>
               <object class="GtkToolButton" id="task_pause_toolbutton">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">task_pause_action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -261,8 +261,8 @@
             <child>
               <object class="GtkToolButton" id="about_toolbutton">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">about_action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -273,8 +273,8 @@
             <child>
               <object class="GtkToolButton" id="quit_toolbutton">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">quit_action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -507,7 +507,6 @@
     <property name="destroy_with_parent">True</property>
     <property name="icon_name">emblem-downloads</property>
     <property name="type_hint">normal</property>
-    <property name="has_separator">False</property>
     <property name="program_name">Yaner</property>
     <property name="copyright" translatable="yes">Copyright &#xA9; 2010 Iven Day(Xu Lijian)</property>
     <property name="website">http://www.kissuki.com/</property>
@@ -537,18 +536,19 @@
   </object>
   <object class="GtkStatusIcon" id="statusicon">
     <property name="icon_name">emblem-downloads</property>
+    <signal name="button_press_event" handler="on_statusicon_button_press_event"/>
   </object>
   <object class="GtkAction" id="task_new_normal_action">
     <property name="label">HTTP/FTP/BT Magnet</property>
-    <signal name="activate" handler="on_task_new_action_activate" object="task_new_normal_action"/>
+    <signal name="activate" handler="on_task_new_action_activate"/>
   </object>
   <object class="GtkAction" id="task_new_bt_action">
     <property name="label">BitTorrent</property>
-    <signal name="activate" handler="on_task_new_action_activate" object="task_new_bt_action"/>
+    <signal name="activate" handler="on_task_new_action_activate"/>
   </object>
   <object class="GtkAction" id="task_new_metalink_action">
     <property name="label">Metalink</property>
-    <signal name="activate" handler="on_task_new_action_activate" object="task_new_metalink_action"/>
+    <signal name="activate" handler="on_task_new_action_activate"/>
   </object>
   <object class="GtkAction" id="task_remove_action">
     <property name="label">Remove</property>
@@ -569,5 +569,57 @@
     <property name="label">Default task profile</property>
     <property name="stock_id">gtk-properties</property>
     <signal name="activate" handler="on_task_profile_action_activate"/>
+  </object>
+  <object class="GtkMenu" id="status_menu">
+    <property name="visible">True</property>
+    <child>
+      <object class="GtkImageMenuItem" id="task_new_menu1">
+        <property name="label">gtk-add</property>
+        <property name="visible">True</property>
+        <property name="use_stock">True</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="menu1">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkImageMenuItem" id="task_new_normal_item1">
+                <property name="visible">True</property>
+                <property name="related_action">task_new_normal_action</property>
+                <property name="use_action_appearance">True</property>
+                <property name="use_stock">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="task_new_bt_item1">
+                <property name="visible">True</property>
+                <property name="related_action">task_new_bt_action</property>
+                <property name="use_action_appearance">True</property>
+                <property name="use_stock">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkImageMenuItem" id="task_new_metalink_item1">
+                <property name="visible">True</property>
+                <property name="related_action">task_new_metalink_action</property>
+                <property name="use_action_appearance">True</property>
+                <property name="use_stock">True</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="separator_item">
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="quit_item1">
+        <property name="visible">True</property>
+        <property name="related_action">quit_action</property>
+        <property name="use_action_appearance">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
   </object>
 </interface>

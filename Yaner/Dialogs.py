@@ -33,6 +33,7 @@ import dbus.service
 from Yaner.Server import Server
 from Yaner.Category import Category
 from Yaner.Constants import *
+from Yaner.Constants import _
 
 class TaskDialogMixin:
     """
@@ -271,12 +272,20 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         # run the dialog
         widgets['dialog'].run()
         
-    def on_dir_chooser_changed(self, dir_chooser):
+    def on_dir_chooser_button_clicked(self, button):
         """
-        When directory chooser selection changed, update the directory entry.
+        When directory chooser button clicked, popup the dialog, and update
+        the directory entry.
         """
-        directory = dir_chooser.get_filename()
-        self.prefs['dir'].set_text(directory)
+        dialog = gtk.FileChooserDialog(_('Select download directory'),
+                self.__get_widgets()['dialog'],
+                gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                (_('_Cancel'), gtk.RESPONSE_CANCEL,
+                    _('_Select'), gtk.RESPONSE_OK))
+        if dialog.run() == gtk.RESPONSE_OK:
+            directory = dialog.get_filename()
+            self.prefs['dir'].set_text(directory)
+        dialog.destroy()
 
     def on_cate_cb_changed(self, cate_cb):
         """
@@ -318,6 +327,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         info['percent'] = 0
         info['size'] = 0
         info['gid'] = ''
+        info['status'] = 'paused'
 
         if task_type == TASK_METALINK and metadata_file:
             info['metalink'] = metadata_file
@@ -415,7 +425,7 @@ class TaskProfileDialog(TaskDialogMixin):
         self.update_widgets()
         # run the dialog
         widgets['dialog'].run()
-        
+
     def on_dialog_response(self, dialog, response):
         """
         Save the options to the config file.
