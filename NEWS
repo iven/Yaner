@@ -1,3 +1,9 @@
+0.0.9   <2011-01-25>
+======
+ * Replace confusing GtkFileChooserButton with GtkButton.
+ * Close window defaults to minimize to tray.
+ * Add tray popup menu.
+
 0.0.8   <2010-10-07>
 ======
  * Use D-Bus to provide single instance support.
