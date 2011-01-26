@@ -1,10 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python2
+# vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
 
 # Yaner - GTK+ interface for aria2 download mananger
-# Copyright (C) 2010  Iven Day <ivenvd#gmail.com>
+# Copyright (C) 2010-2011  Iven <ivenvd#gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #
 
 """
-    This is the entry to the main application of Yaner, and should be
+    This is the entry to the main application of yaner, and should be
 placed under a directory in $PATH.
     We just do some requirement checking here, and then load the main
 window of the application.
@@ -40,7 +40,6 @@ except ImportError:
             Check if it is installed properly.')
 else:
     gtk2reactor.install()
-    from twisted.internet import reactor
 
 try:
     import pynotify
@@ -50,11 +49,7 @@ except ImportError:
 else:
     pynotify.init('yaner')
 
-#try:
-    from Yaner.Application import YanerApp
-#except ImportError:
-#    raise SystemExit(' * Error: the "yaner" module is missing. \
-#            Check if it is installed properly.')
+from yaner.Application import Application
 
-YanerApp()
-reactor.run()
+main_app = Application()
+main_app.run()

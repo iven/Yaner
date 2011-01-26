@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 import sys, os
 from glob import glob
@@ -7,6 +7,7 @@ from stat import *
 from distutils.core import setup
 from distutils.command.install import install
 from distutils.command.install_data import install_data
+from yaner import __version__ as version
 
 INSTALLED_FILES = "installed_files"
 
@@ -84,16 +85,13 @@ if not prefix or not len(prefix):
 if sys.argv[1] in ("install", "uninstall") and len(prefix):
     sys.argv += ["--prefix", prefix]
 
-with open("VERSION") as version_file:
-    version = version_file.read().strip()
-
-with open(join("Yaner/Constants.py.in")) as f:
+with open(join("yaner/Constants.py.in")) as f:
     data = f.read()
 
 data = data.replace("@prefix@", prefix)
 data = data.replace("@version@", version)
 
-with open(join("Yaner/Constants.py"), "w") as f:
+with open(join("yaner/Constants.py"), "w") as f:
     f.write(data)
 
 data_files = []
@@ -119,11 +117,11 @@ setup (
         url              = "http://www.kissuki.com/",
         license          = "GPL",
         data_files       = data_files,
-        packages         = ["Yaner"],
-        scripts          = ["yaner"],
+        packages         = ["yaner", "yaner.ui"],
+        scripts          = ["scripts/yaner"],
         cmdclass         = {"uninstall" : Uninstall,
                             "install" : Install,
                             "install_data" : InstallData}
      )
 
-os.remove ("Yaner/Constants.py")
+os.remove ("yaner/Constants.py")
