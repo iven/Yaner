@@ -3,7 +3,7 @@
 # The list of objects to document.  Objects can be named using
 # dotted names, module filenames, or package directory names.
 # Alases for this option include "objects" and "values".
-modules: Yaner
+modules: yaner
 
 # The type of output that should be generated.  Should be one
 # of: html, text, latex, dvi, ps, pdf.
@@ -15,7 +15,7 @@ target: html/
 # An integer indicating how verbose epydoc should be.  The default
 # value is 0; negative values will supress warnings and errors;
 # positive values will give more verbose output.
-verbosity: 4
+verbosity: 2
 
 # A boolean value indicating that Epydoc should show a tracaback
 # in case of unexpected error. By default don't show tracebacks
