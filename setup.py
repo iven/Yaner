@@ -117,7 +117,7 @@ setup (
         url              = "http://www.kissuki.com/",
         license          = "GPL",
         data_files       = data_files,
-        packages         = ["yaner", "yaner.ui"],
+        packages         = ["yaner", "yaner.ui", "yaner.utils"],
         scripts          = ["scripts/yaner"],
         cmdclass         = {"uninstall" : Uninstall,
                             "install" : Install,

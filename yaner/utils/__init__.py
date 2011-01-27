@@ -21,12 +21,12 @@
 #
 
 """
-This module contains classes and constants of Yaner download manager.
-Currently it could not be used by other programs.
+This module contains misc classes used by Yaner download manager.
+Normally these modules could be reused in other programs.
 
 Package Organization
 ====================
-The L{yaner} package contains the following subpackages and modules:
+The yaner.utils package contains the following subpackages and modules:
 
 G{packagetree}
 
@@ -36,20 +36,16 @@ G{packagetree}
 @license:GPLv3
 @see:U{The Yaner webpage<https://github.com/iven/Yaner>}, U{The
 author's blog<http://www.kissuki.com/>}(In Chinese)
-@requires:PyGtk 2.12.0, twisted, pynotify
+@requires:PyGtk 2.12.0, dbus-python
 """
 
-__package__ = "yaner"
+__package__ = "yaner.utils"
 """The module level attribute.
 @see: U{PEP-366<http://www.python.org/dev/peps/pep-0366/>}."""
 
-__version__ = "0.1.1"
-"""The version of L{yaner}.
-This is also used by the setup script."""
-
 __author__    = "Iven <ivenvd@gmail.com>"
-"""The primary author of L{yaner}."""
+"""The primary author of L{yaner.utils}."""
 
 __license__   = "GPLv3"
-"""The license governing the use and distribution of L{yaner}."""
+"""The license governing the use and distribution of L{yaner.utils}."""
 
