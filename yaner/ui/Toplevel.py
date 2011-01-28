@@ -56,7 +56,7 @@ class Toplevel(gtk.Window):
         self.add(vbox)
 
         self._action_group = gtk.ActionGroup("ToplevelActions")
-        self._action_group.add_actions(self._action_entries)
+        self._action_group.add_actions(self._action_entries, self)
         self._ui_manager = self._init_ui_manager()
         menubar = self._ui_manager.get_widget('/menubar')
         vbox.pack_start(menubar, False, False, 0)
