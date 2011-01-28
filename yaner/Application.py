@@ -26,13 +26,20 @@ This module contains the main application class of L{yaner}.
 
 from twisted.internet import reactor
 
+from Constants import PREFIX
 from ui.Toplevel import Toplevel
 from utils.UniqueApplication import UniqueApplication
+from utils.I18nApplication import I18nApplication
 
-class Application(UniqueApplication):
+class Application(UniqueApplication, I18nApplication):
     """Main application of L{yaner}."""
 
-    BUS_NAME = 'com.kissuki.yaner'
+    _NAME = __package__
+    """
+    The name of the application, used by L{_BUS_NAME}, etc.
+    """
+
+    _BUS_NAME = 'com.kissuki.yaner'
     """
     The unique bus name of the application, which identifies the
     application when using DBus to implement the L{UniqueApplication}
@@ -46,7 +53,9 @@ class Application(UniqueApplication):
         It handles command line options, creates L{toplevel window
         <Toplevel>}, and implements L{UniqueApplication} interface.
         """
-        UniqueApplication.__init__(self, BUS_NAME)
+        UniqueApplication.__init__(self, self._BUS_NAME)
+        I18nApplication.__init__(self, self._NAME, PREFIX)
+
         self._toplevel = Toplevel()
         self._toplevel.show()
         self._toplevel.connect("destroy", self.on_toplevel_destroy)
