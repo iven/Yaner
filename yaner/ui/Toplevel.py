@@ -47,19 +47,52 @@ class Toplevel(gtk.Window):
     """The actions used by L{action_group}."""
 
     def __init__(self):
-        """Create toplevel window of L{yaner}."""
+        """
+        Create toplevel window of L{yaner}. The window structure is
+        like this:
+            - vbox
+                - menubar
+                - hpaned
+                    - scrolled_window
+                        - _pool_view
+                    - task_vbox
+        """
         gtk.Window.__init__(self)
 
         self.set_default_size(800, 600)
 
+        # The toplevel vbox
         vbox = gtk.VBox(False, 0)
         self.add(vbox)
 
+        # UIManager: Toolbar and menus
         self._action_group = gtk.ActionGroup("ToplevelActions")
         self._action_group.add_actions(self._action_entries, self)
-        self._ui_manager = self._init_ui_manager()
+
+        self._ui_manager = gtk.UIManager()
+        self._ui_manager.insert_action_group(self.action_group)
+        self._ui_manager.add_ui_from_file(self._ui_file)
+
         menubar = self._ui_manager.get_widget('/menubar')
         vbox.pack_start(menubar, False, False, 0)
+
+        # HPaned: PoolView as left, TaskVBox as right
+        hpaned = gtk.HPaned()
+        vbox.pack_start(hpaned, True, True, 0)
+
+        # Left pane
+        scrolled_window = gtk.ScrolledWindow()
+        scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
+        scrolled_window.set_shadow_type(gtk.SHADOW_IN)
+        hpaned.add1(scrolled_window)
+
+        self._pool_view = gtk.TreeView()
+        self._pool_view.set_size_request(200, -1)
+        scrolled_window.add(self._pool_view)
+
+        # Right pane
+        task_vbox = gtk.VBox(False, 12)
+        hpaned.add2(task_vbox)
 
     @property
     def ui_manager(self):
@@ -70,11 +103,4 @@ class Toplevel(gtk.Window):
     def action_group(self):
         """Get the action group of L{yaner}."""
         return self._action_group
-
-    def _init_ui_manager(self):
-        """Initialize L{ui_manager}."""
-        ui = gtk.UIManager()
-        ui.insert_action_group(self.action_group)
-        ui.add_ui_from_file(self._ui_file)
-        return ui
 
