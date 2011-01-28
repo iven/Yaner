@@ -40,12 +40,16 @@ author's blog<http://www.kissuki.com/>}(In Chinese)
 """
 
 __package__ = "yaner"
-"""The module level attribute.
-@see: U{PEP-366<http://www.python.org/dev/peps/pep-0366/>}."""
+"""
+The module level attribute.
+@see:U{PEP-366<http://www.python.org/dev/peps/pep-0366/>}.
+"""
 
 __version__ = "0.1.1"
-"""The version of L{yaner}.
-This is also used by the setup script."""
+"""
+The version of L{yaner}.
+This is also used by the setup script.
+"""
 
 __author__    = "Iven <ivenvd@gmail.com>"
 """The primary author of L{yaner}."""

@@ -39,7 +39,7 @@ class Application(UniqueApplication, I18nApplication):
     The name of the application, used by L{_BUS_NAME}, etc.
     """
 
-    _BUS_NAME = 'com.kissuki.yaner'
+    _BUS_NAME = 'com.kissuki.{0}'.format(_NAME)
     """
     The unique bus name of the application, which identifies the
     application when using DBus to implement the L{UniqueApplication}
