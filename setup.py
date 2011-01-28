@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 import sys, os
+import shutil
 from glob import glob
 from os.path import basename, splitext, join, isdir
 from stat import *
@@ -85,13 +86,15 @@ if not prefix or not len(prefix):
 if sys.argv[1] in ("install", "uninstall") and len(prefix):
     sys.argv += ["--prefix", prefix]
 
-with open(join("yaner/Constants.py.in")) as f:
+shutil.move("yaner/Constants.py", "yaner/Constants.py.in")
+
+with open("yaner/Constants.py.in") as f:
     data = f.read()
 
 data = data.replace("@prefix@", prefix)
 data = data.replace("@version@", version)
 
-with open(join("yaner/Constants.py"), "w") as f:
+with open("yaner/Constants.py", 'w') as f:
     f.write(data)
 
 data_files = []
@@ -124,4 +127,4 @@ setup (
                             "install_data" : InstallData}
      )
 
-os.remove ("yaner/Constants.py")
+shutil.move("yaner/Constants.py.in", "yaner/Constants.py")
