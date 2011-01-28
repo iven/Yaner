@@ -57,8 +57,8 @@ class Application(UniqueApplication, I18nApplication):
         I18nApplication.__init__(self, self._NAME, PREFIX)
 
         self._toplevel = Toplevel()
-        self._toplevel.show()
-        self._toplevel.connect("destroy", self.on_toplevel_destroy)
+        self._toplevel.show_all()
+        self._toplevel.connect("destroy", self.quit)
 
     @property
     def toplevel(self):
@@ -66,14 +66,16 @@ class Application(UniqueApplication, I18nApplication):
         return self._toplevel
 
     @staticmethod
-    def on_toplevel_destroy(data):
+    def quit(data):
         """
         The callback function of the I{destory} signal of L{toplevel}.
+        Just quit the application.
         @arg data:B{NOT} used.
         """
         reactor.stop()
 
-    def run(self):
+    @staticmethod
+    def run():
         """Run the main loop of the application."""
         reactor.run()
 
