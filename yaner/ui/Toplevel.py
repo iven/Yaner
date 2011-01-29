@@ -29,8 +29,9 @@ from gettext import gettext as _
 from os.path import join as _join
 
 from Constants import UI_DIR
+from ..utils.Logging import LoggingMixin
 
-class Toplevel(gtk.Window):
+class Toplevel(gtk.Window, LoggingMixin):
     """Toplevel window of L{yaner}."""
 
     _ui_file = _join(UI_DIR, "ui.xml")
@@ -58,6 +59,9 @@ class Toplevel(gtk.Window):
                     - task_vbox
         """
         gtk.Window.__init__(self)
+        LoggingMixin.__init__(self)
+
+        self.logger.info(_('Initializing toplevel window.'))
 
         self.set_default_size(800, 600)
 
@@ -93,6 +97,8 @@ class Toplevel(gtk.Window):
         # Right pane
         task_vbox = gtk.VBox(False, 12)
         hpaned.add2(task_vbox)
+
+        self.logger.info(_('Toplevel window initialized.'))
 
     @property
     def ui_manager(self):

@@ -24,14 +24,18 @@
 This module contains the main application class of L{yaner}.
 """
 
+import logging
+from os.path import join
+from gettext import gettext as _
 from twisted.internet import reactor
 
-from Constants import PREFIX
+from Constants import PREFIX, U_CONFIG_DIR
 from ui.Toplevel import Toplevel
 from utils.UniqueApplication import UniqueApplicationMixin
 from utils.I18nApplication import I18nApplicationMixin
+from utils.Logging import LoggingMixin
 
-class Application(UniqueApplicationMixin, I18nApplicationMixin):
+class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     """Main application of L{yaner}."""
 
     _NAME = __package__
@@ -46,17 +50,23 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin):
     L{UniqueApplicationMixin} class.
     """
 
+    _LOG_FILE = join(U_CONFIG_DIR, '{0}.log'.format(_NAME))
+    """The logging file of the application."""
+
     def __init__(self):
         """
         The init methed of L{Application} class.
 
         It handles command line options, creates L{toplevel window
-        <Toplevel>}, and implements L{UniqueApplicationMixin}
-        interface.
+        <Toplevel>}, and initialize logging configuration.
         """
         UniqueApplicationMixin.__init__(self, self._BUS_NAME)
         I18nApplicationMixin.__init__(self, self._NAME, PREFIX)
+        LoggingMixin.__init__(self)
 
+        self._init_logging()
+
+        # Set up toplevel window
         self._toplevel = Toplevel()
         self._toplevel.show_all()
         self._toplevel.connect("destroy", self.quit)
@@ -75,13 +85,30 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin):
         import sys
         sys.exit(0)
 
-    @staticmethod
-    def quit(data):
+    def _init_logging(self):
+        """Set up basic config for logging."""
+        formatstr = ' '.join((
+            '%(levelname)-8s',
+            '%(name)s.%(funcName)s,',
+            'L%(lineno)-3d:',
+            '%(message)s'
+            ))
+        logging.basicConfig(
+            filename = self._LOG_FILE,
+            filemode = 'w',
+            format = formatstr,
+            level = logging.DEBUG
+            )
+        self.logger.info(_('Logging system initialized, start logging...'))
+
+    def quit(self, data):
         """
         The callback function of the I{destory} signal of L{toplevel}.
         Just quit the application.
         @arg data:B{NOT} used.
         """
+        self.logger.info(_('Application quit normally.'))
+        logging.shutdown()
         reactor.stop()
 
     @staticmethod
