@@ -25,6 +25,10 @@ This module contains the toplevel window class of L{yaner}.
 """
 
 import gtk
+import glib
+import gobject
+import sys
+import logging
 from gettext import gettext as _
 from os.path import join as _join
 
@@ -36,16 +40,6 @@ class Toplevel(gtk.Window, LoggingMixin):
 
     _ui_file = _join(UI_DIR, "ui.xml")
     """The menu and toolbar interfaces, used by L{ui_manager}."""
-
-    _action_entries = (
-            ("file", None, _("File")),
-            ("task_new", "gtk-add"),
-            ("task_new_normal", None, _("HTTP/FTP/BT Magnet")),
-            ("task_new_bt", None, _("BitTorrent")),
-            ("task_new_ml", None, _("Metalink")),
-            ("quit", "gtk-quit"),
-    )
-    """The actions used by L{action_group}."""
 
     def __init__(self):
         """
@@ -70,15 +64,16 @@ class Toplevel(gtk.Window, LoggingMixin):
         self.add(vbox)
 
         # UIManager: Toolbar and menus
-        self._action_group = gtk.ActionGroup("ToplevelActions")
-        self._action_group.add_actions(self._action_entries, self)
-
-        self._ui_manager = gtk.UIManager()
-        self._ui_manager.insert_action_group(self.action_group)
-        self._ui_manager.add_ui_from_file(self._ui_file)
+        self._action_group = self._init_action_group()
+        self._ui_manager = self._init_ui_manager()
+        if self._ui_manager is None:
+            return
 
         menubar = self._ui_manager.get_widget('/menubar')
         vbox.pack_start(menubar, False, False, 0)
+
+        toolbar = self._ui_manager.get_widget('/toolbar')
+        vbox.pack_start(toolbar, False, False, 0)
 
         # HPaned: PoolView as left, TaskVBox as right
         hpaned = gtk.HPaned()
@@ -109,4 +104,49 @@ class Toplevel(gtk.Window, LoggingMixin):
     def action_group(self):
         """Get the action group of L{yaner}."""
         return self._action_group
+
+    def _init_action_group(self):
+        """Initialize the action group."""
+        # The actions used by L{action_group}. The members are:
+        # name, stock-id, label, accelerator, tooltip, callback
+        action_entries = (
+                ("file", None, _("File")),
+                ("task_new", "gtk-add"),
+                ("task_new_normal", None, _("HTTP/FTP/BT Magnet")),
+                ("task_new_bt", None, _("BitTorrent")),
+                ("task_new_ml", None, _("Metalink")),
+                ("quit", "gtk-quit", None, None, None, self.destroy),
+        )
+
+        action_group = gtk.ActionGroup("ToplevelActions")
+        action_group.add_actions(action_entries, self)
+
+        # Hack for the MenuToolButton
+        gobject.type_register(MenuToolAction)
+        MenuToolAction.set_tool_item_type(gtk.MenuToolButton)
+        menu_tool_action = MenuToolAction(
+                "task_new_tool_menu", None, None, 'gtk-add')
+        action_group.add_action(menu_tool_action)
+
+        return action_group
+
+    def _init_ui_manager(self):
+        """Initialize the UIManager, including menus and toolbar."""
+        ui_manager = gtk.UIManager()
+        ui_manager.insert_action_group(self.action_group)
+        try:
+            ui_manager.add_ui_from_file(self._ui_file)
+        except glib.GError as e:
+            self.logger.exception(_("Failed to add ui file to UIManager."))
+            logging.shutdown()
+            sys.exit(1)
+        else:
+            return ui_manager
+
+    def destroy(self, *args, **kwargs):
+        """Destroy toplevel window and quit the application."""
+        self.emit("destroy")
+
+class MenuToolAction(gtk.Action):
+    __gtype_name__ = "MenuToolAction"
 

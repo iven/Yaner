@@ -101,7 +101,7 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
             )
         self.logger.info(_('Logging system initialized, start logging...'))
 
-    def quit(self, data):
+    def quit(self, *arg, **kwargs):
         """
         The callback function of the I{destory} signal of L{toplevel}.
         Just quit the application.
