@@ -29,7 +29,7 @@ import dbus
 import dbus.service
 import dbus.mainloop.glib
 
-class UniqueApplication(object):
+class UniqueApplicationMixin(object):
     """
     This class uses DBus to ensure there is only one instance of
     this class.
@@ -39,8 +39,8 @@ class UniqueApplication(object):
         """
         This firstly creates and binds a C{dbus.service.BusName}.
         When the second instances constructing, it fails and fallback
-        to L{on_instance_exists}, which is overwrote by the subclasses
-        of L{UniqueApplication}.
+        to C{on_instance_exists}, which should be implemented in
+        the subclass of L{UniqueApplicationMixin}.
 
         @arg bus_name:Unique name identifies the application. Such as
         'I{com.kissuki.yaner}'.
@@ -54,13 +54,4 @@ class UniqueApplication(object):
                     self.bus, False, True, True)
         except dbus.exceptions.NameExistsException:
             self.on_instance_exists()
-
-    def on_instance_exists(self):
-        """
-        This method is called when an instance of the application
-        already exists. It may be overwritten by subclasses.
-        """
-        print "Another instance is already running."
-        import sys
-        sys.exit(0)
 

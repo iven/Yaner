@@ -28,10 +28,10 @@ from twisted.internet import reactor
 
 from Constants import PREFIX
 from ui.Toplevel import Toplevel
-from utils.UniqueApplication import UniqueApplication
-from utils.I18nApplication import I18nApplication
+from utils.UniqueApplication import UniqueApplicationMixin
+from utils.I18nApplication import I18nApplicationMixin
 
-class Application(UniqueApplication, I18nApplication):
+class Application(UniqueApplicationMixin, I18nApplicationMixin):
     """Main application of L{yaner}."""
 
     _NAME = __package__
@@ -41,9 +41,9 @@ class Application(UniqueApplication, I18nApplication):
 
     _BUS_NAME = 'com.kissuki.{0}'.format(_NAME)
     """
-    The unique bus name of the application, which identifies the
-    application when using DBus to implement the L{UniqueApplication}
-    class.
+    The unique bus name of the application, which identifies
+    the application when using DBus to implement the
+    L{UniqueApplicationMixin} class.
     """
 
     def __init__(self):
@@ -51,10 +51,11 @@ class Application(UniqueApplication, I18nApplication):
         The init methed of L{Application} class.
 
         It handles command line options, creates L{toplevel window
-        <Toplevel>}, and implements L{UniqueApplication} interface.
+        <Toplevel>}, and implements L{UniqueApplicationMixin}
+        interface.
         """
-        UniqueApplication.__init__(self, self._BUS_NAME)
-        I18nApplication.__init__(self, self._NAME, PREFIX)
+        UniqueApplicationMixin.__init__(self, self._BUS_NAME)
+        I18nApplicationMixin.__init__(self, self._NAME, PREFIX)
 
         self._toplevel = Toplevel()
         self._toplevel.show_all()
@@ -64,6 +65,15 @@ class Application(UniqueApplication, I18nApplication):
     def toplevel(self):
         """Get the toplevel window of L{yaner}."""
         return self._toplevel
+
+    def on_instance_exists(self):
+        """
+        This method is called when an instance of the application
+        already exists, which is required by L{UniqueApplicationMixin}.
+        """
+        print "Another instance is already running."
+        import sys
+        sys.exit(0)
 
     @staticmethod
     def quit(data):

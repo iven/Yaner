@@ -28,7 +28,7 @@ import locale
 import gettext
 from os.path import join
 
-class I18nApplication(object):
+class I18nApplicationMixin(object):
     """
     This class uses gettext to bind i18n domains.
     """
