@@ -26,6 +26,7 @@ This module contains the main application class of L{yaner}.
 
 import logging
 from os.path import join
+from gettext import gettext as _
 from twisted.internet import reactor
 
 from Constants import PREFIX, U_CONFIG_DIR
@@ -63,13 +64,7 @@ class Application(UniqueApplication, I18nApplication, LoggingMixin):
         I18nApplication.__init__(self, self._NAME, PREFIX)
         LoggingMixin.__init__(self)
 
-        # Set up basic config for logging
-        logging.basicConfig(
-            filename = self._LOG_FILE,
-            filemode = 'w',
-            format = '%(name)s - %(levelname)-8s - %(message)s',
-            level = logging.DEBUG
-            )
+        self._init_logging()
 
         # Set up toplevel window
         self._toplevel = Toplevel()
@@ -81,13 +76,29 @@ class Application(UniqueApplication, I18nApplication, LoggingMixin):
         """Get the toplevel window of L{yaner}."""
         return self._toplevel
 
-    @staticmethod
-    def quit(data):
+    def _init_logging(self):
+        """Set up basic config for logging."""
+        formatstr = ' '.join((
+            '%(levelname)-8s',
+            '%(name)s.%(funcName)s,',
+            'L%(lineno)-3d:',
+            '%(message)s'
+            ))
+        logging.basicConfig(
+            filename = self._LOG_FILE,
+            filemode = 'w',
+            format = formatstr,
+            level = logging.DEBUG
+            )
+        self.logger.info(_('Logging system initialized, start logging...'))
+
+    def quit(self, data):
         """
         The callback function of the I{destory} signal of L{toplevel}.
         Just quit the application.
         @arg data:B{NOT} used.
         """
+        self.logger.info(_('Application quit normally.'))
         logging.shutdown()
         reactor.stop()
 
