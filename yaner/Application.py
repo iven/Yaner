@@ -24,14 +24,17 @@
 This module contains the main application class of L{yaner}.
 """
 
+import logging
+from os.path import join
 from twisted.internet import reactor
 
-from Constants import PREFIX
+from Constants import PREFIX, U_CONFIG_DIR
 from ui.Toplevel import Toplevel
 from utils.UniqueApplication import UniqueApplication
 from utils.I18nApplication import I18nApplication
+from utils.Logging import LoggingMixin
 
-class Application(UniqueApplication, I18nApplication):
+class Application(UniqueApplication, I18nApplication, LoggingMixin):
     """Main application of L{yaner}."""
 
     _NAME = __package__
@@ -46,16 +49,29 @@ class Application(UniqueApplication, I18nApplication):
     class.
     """
 
+    _LOG_FILE = join(U_CONFIG_DIR, '{0}.log'.format(_NAME))
+    """The logging file of the application."""
+
     def __init__(self):
         """
         The init methed of L{Application} class.
 
         It handles command line options, creates L{toplevel window
-        <Toplevel>}, and implements L{UniqueApplication} interface.
+        <Toplevel>}, and initialize logging configuration.
         """
         UniqueApplication.__init__(self, self._BUS_NAME)
         I18nApplication.__init__(self, self._NAME, PREFIX)
+        LoggingMixin.__init__(self)
 
+        # Set up basic config for logging
+        logging.basicConfig(
+            filename = self._LOG_FILE,
+            filemode = 'w',
+            format = '%(name)s - %(levelname)-8s - %(message)s',
+            level = logging.DEBUG
+            )
+
+        # Set up toplevel window
         self._toplevel = Toplevel()
         self._toplevel.show_all()
         self._toplevel.connect("destroy", self.quit)
@@ -72,6 +88,7 @@ class Application(UniqueApplication, I18nApplication):
         Just quit the application.
         @arg data:B{NOT} used.
         """
+        logging.shutdown()
         reactor.stop()
 
     @staticmethod
