@@ -105,7 +105,6 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         """
         The callback function of the I{destory} signal of L{toplevel}.
         Just quit the application.
-        @arg data:B{NOT} used.
         """
         self.logger.info(_('Application quit normally.'))
         logging.shutdown()
