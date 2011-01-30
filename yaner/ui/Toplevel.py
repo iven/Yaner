@@ -138,7 +138,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         ui_manager.insert_action_group(self.action_group)
         try:
             ui_manager.add_ui_from_file(self._ui_file)
-        except glib.GError as e:
+        except glib.GError:
             self.logger.exception(_("Failed to add ui file to UIManager."))
             logging.shutdown()
             sys.exit(1)
@@ -150,5 +150,8 @@ class Toplevel(gtk.Window, LoggingMixin):
         self.emit("destroy")
 
 class MenuToolAction(gtk.Action):
+    """
+    C{gtk.Action} used by C{gtk.MenuToolButton}.
+    """
     __gtype_name__ = "MenuToolAction"
 

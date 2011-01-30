@@ -36,7 +36,12 @@ class PoolModel(gtk.TreeStore):
     """
 
     def __init__(self, pools):
-        """L{PoolModel} initializing."""
+        """
+        L{PoolModel} initializing.
+        @arg pools:Aria2 servers providing data to L{PoolModel}.
+        @type pools:yaner.Pool
+        @TODO:Update the type of L{pools}.
+        """
         gtk.TreeStore.__init__(self,
                 gobject.TYPE_STRING,    # stock-id
                 gobject.TYPE_STRING,    # name

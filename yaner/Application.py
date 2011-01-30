@@ -76,7 +76,8 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         """Get the toplevel window of L{yaner}."""
         return self._toplevel
 
-    def on_instance_exists(self):
+    @staticmethod
+    def on_instance_exists():
         """
         This method is called when an instance of the application
         already exists, which is required by L{UniqueApplicationMixin}.
