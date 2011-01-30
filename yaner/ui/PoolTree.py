@@ -29,6 +29,9 @@ A B{Pool} means a aria2 server, to avoid conflect with download servers.
 
 import gtk
 import gobject
+import pango
+
+from ..utils.Enum import Enum
 
 class PoolModel(gtk.TreeStore):
     """
@@ -43,17 +46,32 @@ class PoolModel(gtk.TreeStore):
         @TODO:Update the type of L{pools}.
         """
         gtk.TreeStore.__init__(self,
-                gobject.TYPE_STRING,    # stock-id
+                gobject.TYPE_STRING,    # stock-id of the icon
                 gobject.TYPE_STRING,    # name
                 gobject.TYPE_STRING,    # description
                 )
 
         self._pools = pools
+        self._columns = Enum((
+            'ICON',
+            'NAME',
+            'DESCRIPTION',
+            ))
+        self.append(None, ('gtk-apply', 'test', 'Test iter'))
 
     @property
     def pools(self):
         """Get the pools of the tree model."""
         return self._pools
+
+    @property
+    def columns(self):
+        """
+        Get the column names of the tree model, which is a
+        L{Enum<yaner.utils.Enum}. C{columns.NAME} will return the column
+        number of C{NAME}.
+        """
+        return self._columns
 
 class PoolView(gtk.TreeView):
     """
@@ -76,8 +94,11 @@ class PoolView(gtk.TreeView):
 
         renderer = gtk.CellRendererPixbuf()
         column.pack_start(renderer, False)
+        column.set_cell_data_func(renderer, self._pixbuf_data_func)
+
         renderer = gtk.CellRendererText()
         column.pack_start(renderer, True)
+        column.set_cell_data_func(renderer, self._markup_data_func)
 
         # TreeView properties
         self.set_headers_visible(False)
@@ -89,4 +110,29 @@ class PoolView(gtk.TreeView):
     def model(self):
         """Get the L{model<PoolModel>} of the tree view."""
         return self._model
+
+    def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
+        """Method for set the icon and its size in the column."""
+        stock_id = model.get_value(iter_, self.model.columns.ICON)
+        renderer.set_properties(
+                stock_id = stock_id,
+                stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
+                )
+
+    def _markup_data_func(self, cell_layout, renderer, model, iter_):
+        """
+        Method for format the text in the column.
+        @TODO:Text color.
+        """
+        (name, description) = model.get(
+                iter_,
+                self.model.columns.NAME,
+                self.model.columns.DESCRIPTION,
+                )
+        markup = "<small><b>{0}</b>\n<span fgcolor='{1}'>{2}</span></small>"
+        renderer.set_properties(
+                markup = markup.format(name, 'gray', description),
+                ellipsize_set = True,
+                ellipsize = pango.ELLIPSIZE_MIDDLE,
+                )
 
