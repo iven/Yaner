@@ -145,7 +145,7 @@ class Toplevel(gtk.Window, LoggingMixin):
 
     def destroy(self, *args, **kwargs):
         """Destroy toplevel window and quit the application."""
-        self.emit("destroy")
+        gtk.Window.destroy(self)
 
 class MenuToolAction(gtk.Action):
     __gtype_name__ = "MenuToolAction"
