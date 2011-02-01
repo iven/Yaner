@@ -76,7 +76,8 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         """Get the toplevel window of L{yaner}."""
         return self._toplevel
 
-    def on_instance_exists(self):
+    @staticmethod
+    def on_instance_exists():
         """
         This method is called when an instance of the application
         already exists, which is required by L{UniqueApplicationMixin}.
@@ -105,7 +106,6 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         """
         The callback function of the I{destory} signal of L{toplevel}.
         Just quit the application.
-        @arg data:B{NOT} used.
         """
         self.logger.info(_('Application quit normally.'))
         logging.shutdown()
