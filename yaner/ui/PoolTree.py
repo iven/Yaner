@@ -107,6 +107,8 @@ class PoolView(gtk.TreeView):
         self.set_level_indentation(16)
         self.expand_all()
 
+        self.selection.set_mode(gtk.SELECTION_SINGLE)
+
     @property
     def model(self):
         """Get the L{model<PoolModel>} of the tree view."""
