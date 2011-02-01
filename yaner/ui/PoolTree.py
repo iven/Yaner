@@ -31,6 +31,7 @@ import gtk
 import gobject
 import pango
 
+from Misc import get_mix_color
 from ..utils.Enum import Enum
 
 class PoolModel(gtk.TreeStore):
@@ -68,7 +69,7 @@ class PoolModel(gtk.TreeStore):
     def columns(self):
         """
         Get the column names of the tree model, which is a
-        L{Enum<yaner.utils.Enum}. C{columns.NAME} will return the column
+        L{Enum<yaner.utils.Enum>}. C{columns.NAME} will return the column
         number of C{NAME}.
         """
         return self._columns
@@ -111,6 +112,11 @@ class PoolView(gtk.TreeView):
         """Get the L{model<PoolModel>} of the tree view."""
         return self._model
 
+    @property
+    def selection(self):
+        """Get the C{gtk.TreeSelection} of the tree view."""
+        return self.get_selection()
+
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
         stock_id = model.get_value(iter_, self.model.columns.ICON)
@@ -129,9 +135,25 @@ class PoolView(gtk.TreeView):
                 self.model.columns.NAME,
                 self.model.columns.DESCRIPTION,
                 )
-        markup = "<small><b>{0}</b>\n<span fgcolor='{1}'>{2}</span></small>"
+        # Get current state of the iter
+        if self.selection.iter_is_selected(iter_):
+            if self.has_focus():
+                state = gtk.STATE_SELECTED
+            else:
+                state = gtk.STATE_ACTIVE
+        else:
+            state = gtk.STATE_NORMAL
+        # Get the color for the description
+        color = get_mix_color(self, state)
+
+        markup = '<small>' \
+                     '<b>{name}</b>\n' \
+                     '<span fgcolor="{color}">{description}</span>' \
+                 '</small>' \
+                 .format(**locals())
+
         renderer.set_properties(
-                markup = markup.format(name, 'gray', description),
+                markup = markup,
                 ellipsize_set = True,
                 ellipsize = pango.ELLIPSIZE_MIDDLE,
                 )
