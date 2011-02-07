@@ -33,40 +33,58 @@ from Logging import LoggingMixin
 class ConfigParser(LoggingMixin, SafeConfigParser):
     """A configuration file parser."""
 
-    def __init__(self, dir_, file_, sections = ()):
+    def __init__(self, dir_, file_ = None, sections = (), dir_out = None):
         """
-        This firstly check the filename. If the file doesn't exist, create an
-        empty file, and initialize it with the sections provided.
-
-        The method also create a L{_ConfigSection} for each section in the
+        The method create a L{_ConfigSection} for each section in the
         configuration file.
 
-        @arg dir_:The base directory of the file.
-        @type dir_:str
-        @arg file_:The filename of the file.
-        @type file_:str
+        Usage:
+            1. Create a new file I{/dir/B{UUID}} with sections:
+
+            >>> ConfigParser('/dir', sections = ('section1', 'section2'))
+
+            2. Read existing file I{/dir/file}:
+
+            >>> ConfigParser('/dir', 'file')
+
+            3. Create a new file I{/dir1/B{UUID}} based on existing file
+            I{/dir/file}:
+
+            >>> ConfigParser('/dir', 'file', dir_out = '/dir1')
+
+        @arg dir_:The base directory of the input file.
+        @type dir_:C{str}
+        @arg file_:The filename of the input file.
+        @type file_:C{str}
         @arg sections:The sections of the file, which should not be added nor
         deleted after creation.
         @type sections:C{tuple} or C{list}
+        @arg dir_out:The base directory of the output file.
+        @type dir_out:C{str}
         """
 
         SafeConfigParser.__init__(self)
         LoggingMixin.__init__(self)
 
-        # Initialize filename
+        # Initialize file path
         if file_ is None:
-            # Generate a new file name
-            file_ = uuid.uuid4()
-
-        self._filename = os.path.join(dir_, file_)
-        if not os.path.exists(self._filename):
-            # Create an empty file
-            with open(self._filename, 'w'):
-                pass
-            self.logger.info("Created config file {}.".format(self._filename))
+            # Generate new filename for outputing
+            file_ = str(uuid.uuid4())
+        # Join the input path for reading
+        path_in = os.path.join(dir_, file_)
+        if dir_out is None:
+            # Output to the input file
+            self._path_out = path_in
+        else:
+            if not os.path.exists(dir_out):
+                os.makedirs(dir_out)
+                self.logger.info("Created directory {}.".format(dir_out))
+            # Output to target directory
+            self._path_out = os.path.join(dir_out, str(uuid.uuid4()))
 
         # Read the config file
-        self.read(self.filename)
+        self.read(path_in)
+        self.save()
 
         # Initialize sections
         if not self.sections():
@@ -80,9 +98,9 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
             self._sections_[section] = _ConfigSection(self, section)
 
     @property
-    def filename(self):
-        """Get the filename."""
-        return self._filename
+    def path_out(self):
+        """Get the file path. This is the output file."""
+        return self._path_out
 
     @property
     def sections_(self):
@@ -117,7 +135,7 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
 
     def save(self):
         """Write changes to the file."""
-        with open(self.filename, 'w') as config_file:
+        with open(self.path_out, 'w') as config_file:
             self.write(config_file)
 
 class _ConfigSection(object):
