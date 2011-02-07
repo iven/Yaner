@@ -33,7 +33,8 @@ from Logging import LoggingMixin
 class ConfigParser(LoggingMixin, SafeConfigParser):
     """A configuration file parser."""
 
-    def __init__(self, dir_, file_ = None, sections = (), dir_out = None):
+    def __init__(self, dir_, file_ = None, sections = (),
+            dir_out = None, file_out = None):
         """
         The method create a L{_ConfigSection} for each section in the
         configuration file.
@@ -53,14 +54,17 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
             >>> ConfigParser('/dir', 'file', dir_out = '/dir1')
 
         @arg dir_:The base directory of the input file.
-        @type dir_:C{str}
         @arg file_:The filename of the input file.
-        @type file_:C{str}
         @arg sections:The sections of the file, which should not be added nor
         deleted after creation.
-        @type sections:C{tuple} or C{list}
         @arg dir_out:The base directory of the output file.
+        @arg file_out:The filename of the output file.
+
+        @type dir_:C{str}
+        @type file_:C{str}
+        @type sections:C{tuple} or C{list}
         @type dir_out:C{str}
+        @type file_out:C{str}
         """
 
         SafeConfigParser.__init__(self)
@@ -79,8 +83,10 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
             if not os.path.exists(dir_out):
                 os.makedirs(dir_out)
                 self.logger.info("Created directory {}.".format(dir_out))
+            if file_out is None:
+                file_out = str(uuid.uuid4())
             # Output to target directory
-            self._path_out = os.path.join(dir_out, str(uuid.uuid4()))
+            self._path_out = os.path.join(dir_out, file_out)
 
         # Read the config file
         self.read(path_in)
