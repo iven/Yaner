@@ -68,8 +68,3 @@ The global data directory of L{yaner}, which contains default
 configurations, ui related files, icons, etc.
 """
 
-U_CONFIG_DIR = _join(_config_home, __package__)
-"""
-User config directory where saves configuration files and log files.
-"""
-

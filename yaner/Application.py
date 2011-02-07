@@ -24,10 +24,11 @@
 This module contains the main application class of L{yaner}.
 """
 
+import os
 import logging
-from os.path import join
 from gettext import gettext as _
 from twisted.internet import reactor
+from xdg.BaseDirectory import xdg_config_home
 
 from Constants import PREFIX, U_CONFIG_DIR
 from ui.Toplevel import Toplevel
@@ -43,15 +44,23 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     The name of the application, used by L{_BUS_NAME}, etc.
     """
 
-    _BUS_NAME = 'com.kissuki.{0}'.format(_NAME)
+    _BUS_NAME = 'com.kissuki.{}'.format(_NAME)
     """
     The unique bus name of the application, which identifies
     the application when using DBus to implement the
     L{UniqueApplicationMixin} class.
     """
 
-    _LOG_FILE = join(U_CONFIG_DIR, '{0}.log'.format(_NAME))
+    _CONFIG_DIR = _join(xdg_config_home, _NAME)
+    """
+    User config directory where saves configuration files and log files.
+    """
+
+    _LOG_FILE = os.path.join(_CONFIG_DIR, '{}.log'.format(_NAME))
     """The logging file of the application."""
+
+    _CONFIG_FILE = os.path.join(_CONFIG_DIR, '{}.conf'.format(_NAME))
+    """The global configuration file of the application."""
 
     def __init__(self):
         """
