@@ -24,7 +24,7 @@
 This module contains the tree view classes of the C{gtk.TreeView} on the
 left of the toplevel window.
 
-A B{Pool} means a aria2 server, to avoid conflect with download servers.
+A B{Pool} means a aria2 server, to avoid conflict with download servers.
 """
 
 import gtk
