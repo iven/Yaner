@@ -118,6 +118,11 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         self.logger.info(_('Logging system initialized, start logging...'))
 
     def _init_config(self):
+        """
+        Open global configuration file as L{self.config}.
+        If the file doesn't exist, read from the default configuration.
+        If the user configuration directory doesn't exist, create it.
+        """
         if not os.path.exists(self._CONFIG_DIR):
             config = ConfigParser(
                     dir_     = CONFIG_DIR,
