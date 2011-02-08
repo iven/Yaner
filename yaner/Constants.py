@@ -70,5 +70,11 @@ configurations, ui related files, icons, etc.
 
 CONFIG_DIR = _join(DATA_DIR, 'config')
 """
-The directory containing global configurations.
+The directory containing default configurations.
 """
+
+U_CONFIG_DIR = _join(_config_home, __package__)
+"""
+The directory containing user configurations.
+"""
+

@@ -28,13 +28,13 @@ import os
 import logging
 from gettext import gettext as _
 from twisted.internet import reactor
-from xdg.BaseDirectory import xdg_config_home
 
-from Constants import PREFIX, CONFIG_DIR
+from Constants import PREFIX, CONFIG_DIR, U_CONFIG_DIR
 from ui.Toplevel import Toplevel
 from utils.UniqueApplication import UniqueApplicationMixin
 from utils.I18nApplication import I18nApplicationMixin
 from utils.Logging import LoggingMixin
+from utils.Configuration import ConfigParser
 
 class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     """Main application of L{yaner}."""
@@ -51,9 +51,9 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     L{UniqueApplicationMixin} class.
     """
 
-    _CONFIG_DIR = os.path.join(xdg_config_home, _NAME)
+    _CONFIG_DIR = U_CONFIG_DIR
     """
-    User config directory where saves configuration files and log files.
+    User config directory containing configuration files and log files.
     """
 
     _LOG_FILE = '{}.log'.format(_NAME)
@@ -73,6 +73,7 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         I18nApplicationMixin.__init__(self, self._NAME, PREFIX)
         LoggingMixin.__init__(self)
 
+        self._config = self._init_config()
         self._init_logging()
 
         # Set up toplevel window
@@ -84,6 +85,11 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     def toplevel(self):
         """Get the toplevel window of L{yaner}."""
         return self._toplevel
+
+    @property
+    def config(self):
+        """Get the global configuration of the application."""
+        return self._config
 
     @staticmethod
     def on_instance_exists():
@@ -110,6 +116,21 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
             level = logging.DEBUG
             )
         self.logger.info(_('Logging system initialized, start logging...'))
+
+    def _init_config(self):
+        if not os.path.exists(self._CONFIG_DIR):
+            config = ConfigParser(
+                    dir_     = CONFIG_DIR,
+                    file_    = self._CONFIG_FILE,
+                    dir_out  = self._CONFIG_DIR,
+                    file_out = self._CONFIG_FILE
+                    )
+        else:
+            config = ConfigParser(
+                    dir_  = self._CONFIG_DIR,
+                    file_ = self._CONFIG_FILE
+                    )
+        return config
 
     def quit(self, *arg, **kwargs):
         """
