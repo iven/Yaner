@@ -127,13 +127,13 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         """
         if os.path.exists(os.path.join(self._CONFIG_DIR, self._CONFIG_FILE)):
             config = ConfigParser(
-                    dir_  = self._CONFIG_DIR,
-                    file_ = self._CONFIG_FILE
+                    dir_in  = self._CONFIG_DIR,
+                    file_in = self._CONFIG_FILE
                     )
         else:
             config = ConfigParser(
-                    dir_     = CONFIG_DIR,
-                    file_    = self._CONFIG_FILE,
+                    dir_in   = CONFIG_DIR,
+                    file_in  = self._CONFIG_FILE,
                     dir_out  = self._CONFIG_DIR,
                     file_out = self._CONFIG_FILE
                     )
