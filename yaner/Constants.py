@@ -68,3 +68,7 @@ The global data directory of L{yaner}, which contains default
 configurations, ui related files, icons, etc.
 """
 
+CONFIG_DIR = _join(DATA_DIR, 'config')
+"""
+The directory containing global configurations.
+"""

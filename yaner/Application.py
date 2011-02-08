@@ -30,7 +30,7 @@ from gettext import gettext as _
 from twisted.internet import reactor
 from xdg.BaseDirectory import xdg_config_home
 
-from Constants import PREFIX, U_CONFIG_DIR
+from Constants import PREFIX, CONFIG_DIR
 from ui.Toplevel import Toplevel
 from utils.UniqueApplication import UniqueApplicationMixin
 from utils.I18nApplication import I18nApplicationMixin
@@ -51,15 +51,15 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     L{UniqueApplicationMixin} class.
     """
 
-    _CONFIG_DIR = _join(xdg_config_home, _NAME)
+    _CONFIG_DIR = os.path.join(xdg_config_home, _NAME)
     """
     User config directory where saves configuration files and log files.
     """
 
-    _LOG_FILE = os.path.join(_CONFIG_DIR, '{}.log'.format(_NAME))
+    _LOG_FILE = '{}.log'.format(_NAME)
     """The logging file of the application."""
 
-    _CONFIG_FILE = os.path.join(_CONFIG_DIR, '{}.conf'.format(_NAME))
+    _CONFIG_FILE = '{}.conf'.format(_NAME)
     """The global configuration file of the application."""
 
     def __init__(self):
@@ -104,7 +104,7 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
             '%(message)s'
             ))
         logging.basicConfig(
-            filename = self._LOG_FILE,
+            filename = os.path.join(self._CONFIG_DIR, self._LOG_FILE),
             filemode = 'w',
             format = formatstr,
             level = logging.DEBUG
