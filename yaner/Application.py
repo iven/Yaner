@@ -73,8 +73,8 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         I18nApplicationMixin.__init__(self, self._NAME, PREFIX)
         LoggingMixin.__init__(self)
 
-        self._config = self._init_config()
         self._init_logging()
+        self._config = self._init_config()
 
         # Set up toplevel window
         self._toplevel = Toplevel()
@@ -103,6 +103,8 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
 
     def _init_logging(self):
         """Set up basic config for logging."""
+        if not os.path.exists(self._CONFIG_DIR):
+            os.makedirs(self._CONFIG_DIR)
         formatstr = ' '.join((
             '%(levelname)-8s',
             '%(name)s.%(funcName)s,',
@@ -123,17 +125,17 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         If the file doesn't exist, read from the default configuration.
         If the user configuration directory doesn't exist, create it.
         """
-        if not os.path.exists(self._CONFIG_DIR):
+        if os.path.exists(os.path.join(self._CONFIG_DIR, self._CONFIG_FILE)):
+            config = ConfigParser(
+                    dir_  = self._CONFIG_DIR,
+                    file_ = self._CONFIG_FILE
+                    )
+        else:
             config = ConfigParser(
                     dir_     = CONFIG_DIR,
                     file_    = self._CONFIG_FILE,
                     dir_out  = self._CONFIG_DIR,
                     file_out = self._CONFIG_FILE
-                    )
-        else:
-            config = ConfigParser(
-                    dir_  = self._CONFIG_DIR,
-                    file_ = self._CONFIG_FILE
                     )
         return config
 
