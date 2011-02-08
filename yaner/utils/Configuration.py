@@ -149,7 +149,7 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
 
     def save(self):
         """Write changes to the file."""
-        with open(os.path.join(self.dir_, self.file_), 'w') as config_file:
+        with open(os.path.join(self.dir, self.file), 'w') as config_file:
             self.write(config_file)
 
 class _ConfigSection(object):
