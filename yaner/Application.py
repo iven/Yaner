@@ -77,7 +77,7 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         self._config = self._init_config()
 
         # Set up toplevel window
-        self._toplevel = Toplevel()
+        self._toplevel = Toplevel(self._config)
         self._toplevel.show_all()
         self._toplevel.connect("destroy", self.quit)
 

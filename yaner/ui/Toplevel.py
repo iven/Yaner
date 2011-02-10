@@ -34,6 +34,7 @@ from os.path import join as _join
 
 from Constants import UI_DIR
 from PoolTree import PoolModel, PoolView
+from ..Pool import Pool
 from ..utils.Logging import LoggingMixin
 
 class Toplevel(gtk.Window, LoggingMixin):
@@ -42,7 +43,7 @@ class Toplevel(gtk.Window, LoggingMixin):
     _ui_file = _join(UI_DIR, "ui.xml")
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
-    def __init__(self):
+    def __init__(self, config):
         """
         Create toplevel window of L{yaner}. The window structure is
         like this:
@@ -57,6 +58,9 @@ class Toplevel(gtk.Window, LoggingMixin):
         LoggingMixin.__init__(self)
 
         self.logger.info(_('Initializing toplevel window.'))
+
+        self._config = config
+        self._pools = self._init_pools()
 
         self.set_default_size(800, 600)
 
@@ -86,7 +90,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         scrolled_window.set_shadow_type(gtk.SHADOW_IN)
         hpaned.add1(scrolled_window)
 
-        self._pool_model = PoolModel(None)
+        self._pool_model = PoolModel(self._pools)
         self._pool_view = PoolView(self._pool_model)
         self._pool_view.set_size_request(200, -1)
         scrolled_window.add(self._pool_view)
@@ -106,6 +110,11 @@ class Toplevel(gtk.Window, LoggingMixin):
     def action_group(self):
         """Get the action group of L{yaner}."""
         return self._action_group
+
+    @property
+    def config(self):
+        """Get the global configuration of the application."""
+        return self._config
 
     def _init_action_group(self):
         """Initialize the action group."""
@@ -144,6 +153,22 @@ class Toplevel(gtk.Window, LoggingMixin):
             sys.exit(1)
         else:
             return ui_manager
+
+    def _init_pools(self):
+        """
+        Initialize pools for the application.
+        A pool is an alias for an aria2 server.
+        """
+        pools = []
+        pool_uuids = self.config['info']['pools']
+        if pool_uuids == '':
+            self.logger.info(_('No pool yet, creating...'))
+            pools.append(Pool())
+        else:
+            self.logger.debug(_('Got pools: {:s}.').format(pool_uuids))
+            for pool_uuid in pool_uuids:
+                pools.append(Pool(pool_uuid))
+        return pools
 
     def destroy(self, *args, **kwargs):
         """Destroy toplevel window and quit the application."""
