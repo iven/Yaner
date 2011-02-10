@@ -33,90 +33,69 @@ from Logging import LoggingMixin
 class ConfigParser(LoggingMixin, SafeConfigParser):
     """A configuration file parser."""
 
-    def __init__(self, dir_in, file_in = None, sections = (),
-            dir_out = None, file_out = None):
+    def __init__(self, dir_, file_ = None, content = None):
         """
         The method create a L{_ConfigSection} for each section in the
         configuration file.
 
+        If C{content} is provided, all of the old configuration will be 
+        overwriten using the C{content}.
+
         Usage:
-            1. Create a new file I{/dir/B{UUID}} with sections:
-
-            >>> ConfigParser('/dir', sections = ('section1', 'section2'))
-
-            2. Read existing file I{/dir/file}:
+            1. Read existing file I{/dir/file}:
 
             >>> ConfigParser('/dir', 'file')
 
-            3. Create a new file I{/dir1/B{UUID}} based on existing file
-            I{/dir/file}:
+            2. Create a new file I{/dir1/B{UUID}}:
 
-            >>> ConfigParser('/dir', 'file', dir_out = '/dir1')
+            >>> ConfigParser('/dir')
 
-            4. Create a new file I{/d1/f1} based on existing file I{/dir/file}:
+            3. Create a new file I{/dir1/B{UUID}} based on given L{content}:
 
-            >>> ConfigParser('/dir', 'file', dir_out = '/d1', file_out = 'f1')
+            >>> ConfigParser('/dir', content = {'sect': {'opt' : 'val'}})
 
-        @arg dir_in:The base directory of the input file.
-        @arg file_in:The filename of the input file.
-        @arg sections:The sections of the file, which should not be added nor
-        deleted after creation.
-        @arg dir_out:The base directory of the output file.
-        @arg file_out:The filename of the output file.
+        @arg dir_:The base directory of the file.
+        @arg file_:The filename of the file.
+        @arg content:The sections and options of the file.
 
-        @type dir_in:C{str}
-        @type file_in:C{str}
-        @type sections:C{tuple} or C{list}
-        @type dir_out:C{str}
-        @type file_out:C{str}
+        @type dir_:C{str}
+        @type file_:C{str} or C{None}
+        @type content:C{dict} or C{None}
         """
 
         SafeConfigParser.__init__(self)
         LoggingMixin.__init__(self)
 
         # Initialize file path
-        if file_out is None:
-            if file_in is None:
-                self._file_out = str(uuid.uuid4())
-                file_in = self._file_out
-            else:
-                self._file_out = file_in
-        else:
-            self._file_out = file_out
-
-        if dir_out is None:
-            self._dir_out = dir_in
-        else:
-            self._dir_out = dir_out
-
-        if not os.path.exists(self._dir_out):
-            os.makedirs(self._dir_out)
-            self.logger.info("Created directory {}.".format(self._dir_out))
+        if not os.path.exists(dir_):
+            os.makedirs(dir_)
+            self.logger.info("Created directory {}.".format(dir_))
+        self._dir = dir_
+        self._file = str(uuid.uuid4()) if file_ is None else file_
 
         # Read the config file
-        self.read(os.path.join(dir_in, file_in))
-        self.save()
+        self.read(os.path.join(self._dir, self._file))
 
         # Initialize sections
-        if not self.sections():
-            # This is a new file
-            for section in sections:
-                self.add_section(section)
-            self.save()
         self._sections_ = {}
+        if not content is None:
+            for section in self.sections():
+                self.remove_section(section)
+            for (section, options) in content.items():
+                self[section] = options
         for section in self.sections():
             # Create ConfigSection for each section
             self._sections_[section] = _ConfigSection(self, section)
 
     @property
     def file(self):
-        """Get the filename of the output file."""
-        return self._file_out
+        """Get the filename of the file."""
+        return self._file
 
     @property
     def dir(self):
-        """Get the directory of the output file."""
-        return self._dir_out
+        """Get the directory of the file."""
+        return self._dir
 
     @property
     def sections_(self):
@@ -135,18 +114,22 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
 
     def __setitem__(self, section, option_dict):
         """
-        Set the contents of C{section}. The original contents will be removed.
+        Set the content of C{section}. The original content will be removed.
         Usage:
             >>> config['section'] = {'option1': 'value1', 'option2': 'value2'}
 
         @arg option_dict:Key is the option, value is the value of the option.
         @arg option_dict:C{dict}
         """
-        self.remove_section(section)
-        self.add_section(section)
+        if section in self.sections():
+            self.remove_section(section)
+            del self._sections_[section]
 
-        for (key, value) in option_dict.iteritems():
-            self[section][key] = value
+        self.add_section(section)
+        self._sections_[section] = _ConfigSection(self, section)
+
+        for (option, value) in option_dict.iteritems():
+            self[section][option] = value
         self.save()
 
     def save(self):
