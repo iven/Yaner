@@ -131,6 +131,7 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
                     file_in = self._CONFIG_FILE
                     )
         else:
+            self.logger.info(_('No main configuration file, creating...'))
             config = ConfigParser(
                     dir_in   = CONFIG_DIR,
                     file_in  = self._CONFIG_FILE,

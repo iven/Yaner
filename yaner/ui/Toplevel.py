@@ -118,6 +118,8 @@ class Toplevel(gtk.Window, LoggingMixin):
 
     def _init_action_group(self):
         """Initialize the action group."""
+        self.logger.info(_('Initializing action group.'))
+
         # The actions used by L{action_group}. The members are:
         # name, stock-id, label, accelerator, tooltip, callback
         action_entries = (
@@ -139,10 +141,14 @@ class Toplevel(gtk.Window, LoggingMixin):
                 "task_new_tool_menu", None, None, 'gtk-add')
         action_group.add_action(menu_tool_action)
 
+        self.logger.info(_('Action group initialized.'))
+
         return action_group
 
     def _init_ui_manager(self):
         """Initialize the UIManager, including menus and toolbar."""
+        self.logger.info(_('Initializing UI Manager.'))
+
         ui_manager = gtk.UIManager()
         ui_manager.insert_action_group(self.action_group)
         try:
@@ -152,6 +158,7 @@ class Toplevel(gtk.Window, LoggingMixin):
             logging.shutdown()
             sys.exit(1)
         else:
+            self.logger.info(_('UI Manager initialized.'))
             return ui_manager
 
     def _init_pools(self):
