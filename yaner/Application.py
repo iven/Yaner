@@ -30,11 +30,13 @@ from gettext import gettext as _
 from twisted.internet import reactor
 
 from Constants import PREFIX, CONFIG_DIR, U_CONFIG_DIR
+from Configurations import GLOBAL_CONFIG
+
 from ui.Toplevel import Toplevel
-from utils.UniqueApplication import UniqueApplicationMixin
-from utils.I18nApplication import I18nApplicationMixin
 from utils.Logging import LoggingMixin
 from utils.Configuration import ConfigParser
+from utils.I18nApplication import I18nApplicationMixin
+from utils.UniqueApplication import UniqueApplicationMixin
 
 class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     """Main application of L{yaner}."""
@@ -126,18 +128,11 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         If the user configuration directory doesn't exist, create it.
         """
         if os.path.exists(os.path.join(self._CONFIG_DIR, self._CONFIG_FILE)):
-            config = ConfigParser(
-                    dir_in  = self._CONFIG_DIR,
-                    file_in = self._CONFIG_FILE
-                    )
+            config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
         else:
             self.logger.info(_('No main configuration file, creating...'))
-            config = ConfigParser(
-                    dir_in   = CONFIG_DIR,
-                    file_in  = self._CONFIG_FILE,
-                    dir_out  = self._CONFIG_DIR,
-                    file_out = self._CONFIG_FILE
-                    )
+            config = ConfigParser(self._CONFIG_DIR,
+                    self._CONFIG_FILE, GLOBAL_CONFIG)
         return config
 
     def quit(self, *arg, **kwargs):
