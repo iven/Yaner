@@ -76,9 +76,11 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
 
         # Initialize file path
         if file_out is None:
-            self._file_out = str(uuid.uuid4())
             if file_in is None:
+                self._file_out = str(uuid.uuid4())
                 file_in = self._file_out
+            else:
+                self._file_out = file_in
         else:
             self._file_out = file_out
 
