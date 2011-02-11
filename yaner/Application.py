@@ -30,8 +30,6 @@ from gettext import gettext as _
 from twisted.internet import reactor
 
 from Constants import PREFIX, CONFIG_DIR, U_CONFIG_DIR
-from Configurations import GLOBAL_CONFIG
-
 from ui.Toplevel import Toplevel
 from utils.Logging import LoggingMixin
 from utils.Configuration import ConfigParser
@@ -131,6 +129,7 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
             config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
         else:
             self.logger.info(_('No main configuration file, creating...'))
+            from Configurations import GLOBAL_CONFIG
             config = ConfigParser(self._CONFIG_DIR,
                     self._CONFIG_FILE, GLOBAL_CONFIG)
         return config

@@ -27,10 +27,10 @@ This module contains the toplevel window class of L{yaner}.
 import gtk
 import glib
 import gobject
+import os
 import sys
 import logging
 from gettext import gettext as _
-from os.path import join as _join
 
 from Constants import UI_DIR
 from PoolTree import PoolModel, PoolView
@@ -40,7 +40,7 @@ from ..utils.Logging import LoggingMixin
 class Toplevel(gtk.Window, LoggingMixin):
     """Toplevel window of L{yaner}."""
 
-    _ui_file = _join(UI_DIR, "ui.xml")
+    _UI_FILE = os.path.join(UI_DIR, "ui.xml")
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
     def __init__(self, config):
@@ -152,7 +152,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         ui_manager = gtk.UIManager()
         ui_manager.insert_action_group(self.action_group)
         try:
-            ui_manager.add_ui_from_file(self._ui_file)
+            ui_manager.add_ui_from_file(self._UI_FILE)
         except glib.GError:
             self.logger.exception(_("Failed to add ui file to UIManager."))
             logging.shutdown()
@@ -172,7 +172,7 @@ class Toplevel(gtk.Window, LoggingMixin):
             self.logger.info(_('No pool yet, creating...'))
             pools.append(Pool())
         else:
-            self.logger.debug(_('Got pools: {:s}.').format(pool_uuids))
+            self.logger.debug(_('Got pool(s): {:s}.').format(pool_uuids))
             for pool_uuid in pool_uuids:
                 pools.append(Pool(pool_uuid))
         return pools
