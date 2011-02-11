@@ -33,13 +33,10 @@ from Logging import LoggingMixin
 class ConfigParser(LoggingMixin, SafeConfigParser):
     """A configuration file parser."""
 
-    def __init__(self, dir_, file_ = None, content = None):
+    def __init__(self, dir_, file_ = None):
         """
         The method create a L{_ConfigSection} for each section in the
         configuration file.
-
-        If C{content} is provided, all of the old configuration will be 
-        overwriten using the C{content}.
 
         Usage:
             1. Read existing file I{/dir/file}:
@@ -50,17 +47,10 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
 
             >>> ConfigParser('/dir')
 
-            3. Create a new file I{/dir1/B{UUID}} based on given L{content}:
-
-            >>> ConfigParser('/dir', content = {'sect': {'opt' : 'val'}})
-
         @arg dir_:The base directory of the file.
-        @arg file_:The filename of the file.
-        @arg content:The sections and options of the file.
-
         @type dir_:C{str}
+        @arg file_:The filename of the file.
         @type file_:C{str} or C{None}
-        @type content:C{dict} or C{None}
         """
 
         SafeConfigParser.__init__(self)
@@ -78,11 +68,6 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
 
         # Initialize sections
         self._sections_ = {}
-        if not content is None:
-            for section in self.sections():
-                self.remove_section(section)
-            for (section, options) in content.items():
-                self[section] = options
         for section in self.sections():
             # Create ConfigSection for each section
             self._sections_[section] = _ConfigSection(self, section)
@@ -131,6 +116,15 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
         for (option, value) in option_dict.iteritems():
             self[section][option] = value
         self.save()
+
+    def update(self, content):
+        """
+        Update the configuration file with the C{content} provided.
+        @arg content:The sections and options of the file.
+        @type content:C{dict}
+        """
+        for (section, options) in content.items():
+            self[section] = options
 
     def save(self):
         """Write changes to the file."""
