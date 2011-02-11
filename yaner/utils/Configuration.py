@@ -117,6 +117,12 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
             self[section][option] = value
         self.save()
 
+    def empty(self):
+        """
+        Check if the configuration file is empty.
+        """
+        return not bool(self.sections())
+
     def update(self, content):
         """
         Update the configuration file with the C{content} provided.
