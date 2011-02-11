@@ -24,14 +24,30 @@
 This module contains the L{Pool} class of L{yaner}.
 """
 
-class Pool(object):
+import os
+from gettext import gettext as _
+
+from Constants import U_CONFIG_DIR
+from utils.Logging import LoggingMixin
+from utils.Configuration import ConfigParser
+
+class Pool(LoggingMixin):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 
     A Pool is just a aria2 server, to avoid conflict with download server.
     """
+
+    _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'pool')
+    """
+    User config directory containing pool configuration files.
+    """
+
     def __init__(self, uuid_ = None):
+        LoggingMixin.__init__(self)
+
         self._uuid_ = uuid_
+        self._config = self._init_config()
 
     @property
     def uuid(self):
@@ -49,17 +65,10 @@ class Pool(object):
         If the file doesn't exist, read from the default configuration.
         If the pool configuration directory doesn't exist, create it.
         """
-        if self.uuid is None:
-            self._config = ConfigParser(
-                    dir_in   = CONFIG_DIR,
-                    file_in  = self._CONFIG_FILE,
-                    dir_out  = self._CONFIG_DIR,
-                    file_out = self._CONFIG_FILE
-                    )
-            self.uuid = self._config.file
-        else:
-            self._config = ConfigParser(
-                    dir_in  = self._CONFIG_DIR,
-                    file_in = self._CONFIG_FILE
-                    )
+        config = ConfigParser(self._CONFIG_DIR, self.uuid)
+        if config.empty():
+            self.logger.info(_('No pool configuration file, creating...'))
+            from Configurations import POOL_CONFIG
+            config.update(POOL_CONFIG)
+        return config
 

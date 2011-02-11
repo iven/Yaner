@@ -168,13 +168,9 @@ class Toplevel(gtk.Window, LoggingMixin):
         """
         pools = []
         pool_uuids = self.config['info']['pools']
-        if pool_uuids == '':
-            self.logger.info(_('No pool yet, creating...'))
-            pools.append(Pool())
-        else:
-            self.logger.debug(_('Got pool(s): {:s}.').format(pool_uuids))
-            for pool_uuid in pool_uuids:
-                pools.append(Pool(pool_uuid))
+        self.logger.debug(_('Got pool(s): {}.').format(pool_uuids))
+        for pool_uuid in eval(pool_uuids):
+            pools.append(Pool(pool_uuid))
         return pools
 
     def destroy(self, *args, **kwargs):

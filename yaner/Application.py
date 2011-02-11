@@ -29,7 +29,7 @@ import logging
 from gettext import gettext as _
 from twisted.internet import reactor
 
-from Constants import PREFIX, CONFIG_DIR, U_CONFIG_DIR
+from Constants import PREFIX, U_CONFIG_DIR
 from ui.Toplevel import Toplevel
 from utils.Logging import LoggingMixin
 from utils.Configuration import ConfigParser
@@ -125,13 +125,11 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         If the file doesn't exist, read from the default configuration.
         If the user configuration directory doesn't exist, create it.
         """
-        if os.path.exists(os.path.join(self._CONFIG_DIR, self._CONFIG_FILE)):
-            config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
-        else:
+        config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
+        if config.empty():
             self.logger.info(_('No main configuration file, creating...'))
             from Configurations import GLOBAL_CONFIG
-            config = ConfigParser(self._CONFIG_DIR,
-                    self._CONFIG_FILE, GLOBAL_CONFIG)
+            config.update(GLOBAL_CONFIG)
         return config
 
     def quit(self, *arg, **kwargs):

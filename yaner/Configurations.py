@@ -24,9 +24,12 @@
 This module contains the default configuration dicts of L{yaner}.
 """
 
+import os
+from gettext import gettext as _
+
 GLOBAL_CONFIG = {
         'info': {
-            'pools': '',
+            'pools': ['ea1ab4a7-6973-4b7b-8cb0-09e11ab42a14'],
             },
         'global': {
             'max-overall-download-limit': 0,
@@ -72,4 +75,27 @@ GLOBAL_CONFIG = {
             'metalink-version': '',
             }
         }
+"""The global configuration dict of the application."""
+
+POOL_CONFIG = {
+        'info': {
+            'name': _("My Computer"),
+            'host': 'localhost',
+            'port': 6800,
+            'user': '',
+            'passwd': '',
+            'session': '',
+            'cates': ['120864b0-5f64-47d2-8efd-c70c20b8a3ab'],
+            },
+        }
+"""The pool configuration dict of the application."""
+
+CATE_CONFIG = {
+        'info': {
+            'name': _("Default"),
+            'dir': os.path.expanduser('~'),
+            'tasks': [],
+            },
+        }
+"""The pool configuration dict of the application."""
 
