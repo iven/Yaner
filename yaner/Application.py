@@ -24,16 +24,17 @@
 This module contains the main application class of L{yaner}.
 """
 
+import os
 import logging
-from os.path import join
 from gettext import gettext as _
 from twisted.internet import reactor
 
 from Constants import PREFIX, U_CONFIG_DIR
 from ui.Toplevel import Toplevel
-from utils.UniqueApplication import UniqueApplicationMixin
-from utils.I18nApplication import I18nApplicationMixin
 from utils.Logging import LoggingMixin
+from utils.Configuration import ConfigParser
+from utils.I18nApplication import I18nApplicationMixin
+from utils.UniqueApplication import UniqueApplicationMixin
 
 class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     """Main application of L{yaner}."""
@@ -43,15 +44,23 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     The name of the application, used by L{_BUS_NAME}, etc.
     """
 
-    _BUS_NAME = 'com.kissuki.{0}'.format(_NAME)
+    _BUS_NAME = 'com.kissuki.{}'.format(_NAME)
     """
     The unique bus name of the application, which identifies
     the application when using DBus to implement the
     L{UniqueApplicationMixin} class.
     """
 
-    _LOG_FILE = join(U_CONFIG_DIR, '{0}.log'.format(_NAME))
+    _CONFIG_DIR = U_CONFIG_DIR
+    """
+    User config directory containing configuration files and log files.
+    """
+
+    _LOG_FILE = '{}.log'.format(_NAME)
     """The logging file of the application."""
+
+    _CONFIG_FILE = '{}.conf'.format(_NAME)
+    """The global configuration file of the application."""
 
     def __init__(self):
         """
@@ -65,9 +74,10 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         LoggingMixin.__init__(self)
 
         self._init_logging()
+        self._config = self._init_config()
 
         # Set up toplevel window
-        self._toplevel = Toplevel()
+        self._toplevel = Toplevel(self._config)
         self._toplevel.show_all()
         self._toplevel.connect("destroy", self.quit)
 
@@ -75,6 +85,11 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
     def toplevel(self):
         """Get the toplevel window of L{yaner}."""
         return self._toplevel
+
+    @property
+    def config(self):
+        """Get the global configuration of the application."""
+        return self._config
 
     @staticmethod
     def on_instance_exists():
@@ -88,6 +103,8 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
 
     def _init_logging(self):
         """Set up basic config for logging."""
+        if not os.path.exists(self._CONFIG_DIR):
+            os.makedirs(self._CONFIG_DIR)
         formatstr = ' '.join((
             '%(levelname)-8s',
             '%(name)s.%(funcName)s,',
@@ -95,12 +112,25 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
             '%(message)s'
             ))
         logging.basicConfig(
-            filename = self._LOG_FILE,
+            filename = os.path.join(self._CONFIG_DIR, self._LOG_FILE),
             filemode = 'w',
             format = formatstr,
             level = logging.DEBUG
             )
         self.logger.info(_('Logging system initialized, start logging...'))
+
+    def _init_config(self):
+        """
+        Open global configuration file as L{self.config}.
+        If the file doesn't exist, read from the default configuration.
+        If the user configuration directory doesn't exist, create it.
+        """
+        config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
+        if config.empty():
+            self.logger.info(_('No main configuration file, creating...'))
+            from Configurations import GLOBAL_CONFIG
+            config.update(GLOBAL_CONFIG)
+        return config
 
     def quit(self, *arg, **kwargs):
         """

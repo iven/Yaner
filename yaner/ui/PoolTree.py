@@ -130,7 +130,6 @@ class PoolView(gtk.TreeView):
     def _markup_data_func(self, cell_layout, renderer, model, iter_):
         """
         Method for format the text in the column.
-        @TODO:Text color.
         """
         (name, description) = model.get(
                 iter_,

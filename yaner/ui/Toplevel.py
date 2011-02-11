@@ -27,22 +27,23 @@ This module contains the toplevel window class of L{yaner}.
 import gtk
 import glib
 import gobject
+import os
 import sys
 import logging
 from gettext import gettext as _
-from os.path import join as _join
 
 from Constants import UI_DIR
 from PoolTree import PoolModel, PoolView
+from ..Pool import Pool
 from ..utils.Logging import LoggingMixin
 
 class Toplevel(gtk.Window, LoggingMixin):
     """Toplevel window of L{yaner}."""
 
-    _ui_file = _join(UI_DIR, "ui.xml")
+    _UI_FILE = os.path.join(UI_DIR, "ui.xml")
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
-    def __init__(self):
+    def __init__(self, config):
         """
         Create toplevel window of L{yaner}. The window structure is
         like this:
@@ -57,6 +58,9 @@ class Toplevel(gtk.Window, LoggingMixin):
         LoggingMixin.__init__(self)
 
         self.logger.info(_('Initializing toplevel window.'))
+
+        self._config = config
+        self._pools = self._init_pools()
 
         self.set_default_size(800, 600)
 
@@ -86,7 +90,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         scrolled_window.set_shadow_type(gtk.SHADOW_IN)
         hpaned.add1(scrolled_window)
 
-        self._pool_model = PoolModel(None)
+        self._pool_model = PoolModel(self._pools)
         self._pool_view = PoolView(self._pool_model)
         self._pool_view.set_size_request(200, -1)
         scrolled_window.add(self._pool_view)
@@ -107,8 +111,15 @@ class Toplevel(gtk.Window, LoggingMixin):
         """Get the action group of L{yaner}."""
         return self._action_group
 
+    @property
+    def config(self):
+        """Get the global configuration of the application."""
+        return self._config
+
     def _init_action_group(self):
         """Initialize the action group."""
+        self.logger.info(_('Initializing action group.'))
+
         # The actions used by L{action_group}. The members are:
         # name, stock-id, label, accelerator, tooltip, callback
         action_entries = (
@@ -130,20 +141,37 @@ class Toplevel(gtk.Window, LoggingMixin):
                 "task_new_tool_menu", None, None, 'gtk-add')
         action_group.add_action(menu_tool_action)
 
+        self.logger.info(_('Action group initialized.'))
+
         return action_group
 
     def _init_ui_manager(self):
         """Initialize the UIManager, including menus and toolbar."""
+        self.logger.info(_('Initializing UI Manager.'))
+
         ui_manager = gtk.UIManager()
         ui_manager.insert_action_group(self.action_group)
         try:
-            ui_manager.add_ui_from_file(self._ui_file)
+            ui_manager.add_ui_from_file(self._UI_FILE)
         except glib.GError:
             self.logger.exception(_("Failed to add ui file to UIManager."))
             logging.shutdown()
             sys.exit(1)
         else:
+            self.logger.info(_('UI Manager initialized.'))
             return ui_manager
+
+    def _init_pools(self):
+        """
+        Initialize pools for the application.
+        A pool is an alias for an aria2 server.
+        """
+        pools = []
+        pool_uuids = self.config['info']['pools']
+        self.logger.debug(_('Got pool(s): {}.').format(pool_uuids))
+        for pool_uuid in eval(pool_uuids):
+            pools.append(Pool(pool_uuid))
+        return pools
 
     def destroy(self, *args, **kwargs):
         """Destroy toplevel window and quit the application."""

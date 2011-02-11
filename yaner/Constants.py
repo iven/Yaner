@@ -70,6 +70,6 @@ configurations, ui related files, icons, etc.
 
 U_CONFIG_DIR = _join(_config_home, __package__)
 """
-User config directory where saves configuration files and log files.
+The directory containing user configurations.
 """
 
