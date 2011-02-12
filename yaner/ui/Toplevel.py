@@ -57,7 +57,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         gtk.Window.__init__(self)
         LoggingMixin.__init__(self)
 
-        self.logger.info(_('Initializing toplevel window.'))
+        self.logger.info(_('Initializing toplevel window...'))
 
         self._config = config
         self._pools = self._init_pools()
@@ -118,7 +118,7 @@ class Toplevel(gtk.Window, LoggingMixin):
 
     def _init_action_group(self):
         """Initialize the action group."""
-        self.logger.info(_('Initializing action group.'))
+        self.logger.info(_('Initializing action group...'))
 
         # The actions used by L{action_group}. The members are:
         # name, stock-id, label, accelerator, tooltip, callback
@@ -147,7 +147,7 @@ class Toplevel(gtk.Window, LoggingMixin):
 
     def _init_ui_manager(self):
         """Initialize the UIManager, including menus and toolbar."""
-        self.logger.info(_('Initializing UI Manager.'))
+        self.logger.info(_('Initializing UI Manager...'))
 
         ui_manager = gtk.UIManager()
         ui_manager.insert_action_group(self.action_group)
