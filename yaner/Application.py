@@ -125,9 +125,10 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         If the file doesn't exist, read from the default configuration.
         If the user configuration directory doesn't exist, create it.
         """
+        self.logger.info(_('Reading global configuration file...'))
         config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
         if config.empty():
-            self.logger.info(_('No main configuration file, creating...'))
+            self.logger.info(_('No global configuration file, creating...'))
             from Configurations import GLOBAL_CONFIG
             config.update(GLOBAL_CONFIG)
         return config

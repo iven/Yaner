@@ -26,6 +26,7 @@ This module contains miscellaneous functions used by other modules.
 
 import gtk
 import logging
+from gettext import gettext as _
 
 _module = '{}.Misc'.format(__package__)
 _logger = logging.getLogger(_module)
@@ -43,7 +44,7 @@ def get_mix_color(widget, state):
         if not isinstance(widget, gtk.Widget):
             raise TypeError
     except TypeError:
-        _logger.exception("@widget is not a gtk.Widget.")
+        _logger.exception(_("@widget is not a gtk.Widget."))
         return 'gray'
 
     color = {}
@@ -54,7 +55,7 @@ def get_mix_color(widget, state):
                 getattr(style.base[state], component) * 0.3
                 )
     color = '#{red:02X}{green:02X}{blue:02X}'.format(**color)
-    _logger.debug("Got mix color: {}.".format(color))
+    _logger.debug(_("Got mix color: {}.").format(color))
 
     return color
 
