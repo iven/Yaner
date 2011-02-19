@@ -1,12 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 import sys, os
+import shutil
 from glob import glob
 from os.path import basename, splitext, join, isdir
 from stat import *
 from distutils.core import setup
 from distutils.command.install import install
 from distutils.command.install_data import install_data
+from yaner import __version__ as version
 
 INSTALLED_FILES = "installed_files"
 
@@ -84,16 +86,15 @@ if not prefix or not len(prefix):
 if sys.argv[1] in ("install", "uninstall") and len(prefix):
     sys.argv += ["--prefix", prefix]
 
-with open("VERSION") as version_file:
-    version = version_file.read().strip()
+shutil.move("yaner/Constants.py", "yaner/Constants.py.in")
 
-with open(join("Yaner/Constants.py.in")) as f:
+with open("yaner/Constants.py.in") as f:
     data = f.read()
 
 data = data.replace("@prefix@", prefix)
 data = data.replace("@version@", version)
 
-with open(join("Yaner/Constants.py"), "w") as f:
+with open("yaner/Constants.py", 'w') as f:
     f.write(data)
 
 data_files = []
@@ -106,7 +107,7 @@ for po_file in glob('po/*.po'):
         os.system(po_buildcmd % (po_name, po_name))
     data_files.append(("share/locale/%s/LC_MESSAGES" % po_name,
         glob('build/locale/%s/yaner.mo' % po_name)))
-data_files.append(("share/yaner/glade/", glob('glade/*')))
+data_files.append(("share/yaner/ui/", glob('ui/*')))
 data_files.append(("share/yaner/config/", glob('config/*')))
 data_files.append(('share/applications/', ['yaner.desktop']))
 
@@ -119,11 +120,11 @@ setup (
         url              = "http://www.kissuki.com/",
         license          = "GPL",
         data_files       = data_files,
-        packages         = ["Yaner"],
-        scripts          = ["yaner"],
+        packages         = ["yaner", "yaner.ui", "yaner.utils"],
+        scripts          = ["scripts/yaner"],
         cmdclass         = {"uninstall" : Uninstall,
                             "install" : Install,
                             "install_data" : InstallData}
      )
 
-os.remove ("Yaner/Constants.py")
+shutil.move("yaner/Constants.py.in", "yaner/Constants.py")

@@ -1,0 +1,23 @@
+<ui>
+    <menubar>
+        <menu action='file'>
+            <menu action='task_new'>
+                <menuitem action='task_new_normal' />
+                <menuitem action='task_new_bt' />
+                <menuitem action='task_new_ml' />
+            </menu>
+            <separator />
+            <menuitem action='quit' />
+        </menu>
+    </menubar>
+    <toolbar>
+        <toolitem action='task_new_tool_menu'>
+            <menu action='task_new'>
+                <menuitem action='task_new_normal' />
+                <menuitem action='task_new_bt' />
+                <menuitem action='task_new_ml' />
+            </menu>
+        </toolitem>
+    </toolbar>
+</ui>
+
