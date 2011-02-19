@@ -1,3 +1,11 @@
 # + New Features
 # - Bugs
 # * Modification
+
+- CPU gets 100% when subprocess quits.
++ Convert percent-encoded string to utf8.
++ Menus.
++ Double click to start/pause.
++ Move completed tasks to right place.
++ GUI for servers and categories.
++ Proxy.

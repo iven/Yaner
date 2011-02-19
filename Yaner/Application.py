@@ -71,6 +71,8 @@ class YanerApp(SingleInstanceAppMixin):
         # Dialogs
         self.task_new_dialog = TaskNewDialog(self)
         self.task_profile_dialog = None
+        # Popup Menu
+        self.status_menu = builder.get_object("status_menu")
         # Show the window
         self.main_window.show()
 
@@ -195,7 +197,10 @@ class YanerApp(SingleInstanceAppMixin):
                 "task_new_bt_action",
                 "task_new_metalink_action",
                 )
-        task_type = actions.index(action.get_property('name'))
+        try:
+            task_type = actions.index(action.get_property('name'))
+        except ValueError:
+            task_type = 0
         self.get_task_new_dialog().run_dialog(task_type)
 
     def on_task_profile_action_activate(self, action):
@@ -264,6 +269,31 @@ class YanerApp(SingleInstanceAppMixin):
         Server.instances[LOCAL_SERVER_UUID].server_process.terminate()
         gtk.widget_pop_colormap()
         reactor.stop()
+
+    @staticmethod
+    def on_main_window_delete_event(window, event):
+        """
+        When close button is pressed, minimize the window.
+        """
+        window.hide()
+        return True
+
+    def on_statusicon_button_press_event(self, status_icon, event):
+        """
+        Button press event handler of the status icon.
+        If user double clicks the icon, just show/hide the window.
+        """
+        if event.type == gtk.gdk._2BUTTON_PRESS:
+            window = self.main_window
+            if window.get_property('visible'):
+                window.hide()
+            else:
+                window.present_with_time(event.time)
+        elif event.button == 3:
+            self.status_menu.popup(None, None,
+                    gtk.status_icon_position_menu,
+                    event.button, event.time, status_icon)
+        return False
 
     @staticmethod
     def usage(err = ''):
