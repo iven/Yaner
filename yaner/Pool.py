@@ -25,17 +25,25 @@ This module contains the L{Pool} class of L{yaner}.
 """
 
 import os
+import gobject
 from gettext import gettext as _
 
 from Constants import U_CONFIG_DIR
 from utils.Logging import LoggingMixin
 from utils.Configuration import ConfigParser
 
-class Pool(LoggingMixin):
+class Pool(LoggingMixin, gobject.GObject):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 
     A Pool is just a aria2 server, to avoid conflict with download server.
+    """
+
+    __gsignals__ = {
+            'disconnected': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+            }
+    """
+    GObject signals of this class.
     """
 
     _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'pool')
@@ -45,6 +53,7 @@ class Pool(LoggingMixin):
 
     def __init__(self, uuid_ = None):
         LoggingMixin.__init__(self)
+        gobject.GObject.__init__(self)
 
         self._uuid_ = uuid_
         self._config = self._init_config()

@@ -170,7 +170,10 @@ class Toplevel(gtk.Window, LoggingMixin):
         pool_uuids = self.config['info']['pools']
         self.logger.debug(_('Got pool(s): {}.').format(pool_uuids))
         for pool_uuid in eval(pool_uuids):
-            pools.append(Pool(pool_uuid))
+            pool = Pool(pool_uuid)
+            pool.connect('disconnected', lambda(x): self.logger.debug('xxxxxx'))
+            pools.append(pool)
+        pools[0].emit('disconnected')
         return pools
 
     def destroy(self, *args, **kwargs):
