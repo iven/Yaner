@@ -65,6 +65,14 @@ class PoolModel(gtk.TreeStore):
         """Get the pools of the tree model."""
         return self._pools
 
+    @pools.setter
+    def pools(self, new_pools):
+        """
+        Set the pools of the tree model, and update it.
+        @TODO: Update the tree model.
+        """
+        self._pools = new_pools
+
     @property
     def columns(self):
         """

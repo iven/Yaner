@@ -36,11 +36,17 @@ class Pool(LoggingMixin, gobject.GObject):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 
-    A Pool is just a aria2 server, to avoid conflict with download server.
+    A Pool is just a connection to the aria2 server, to avoid name conflict
+    with download server.
     """
 
     __gsignals__ = {
-            'disconnected': (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ()),
+            'disconnected': (gobject.SIGNAL_RUN_LAST,
+                gobject.TYPE_NONE, ()),
+            'presentable-added': (gobject.SIGNAL_RUN_LAST,
+                gobject.TYPE_NONE, ()),
+            'presentable-removed': (gobject.SIGNAL_RUN_LAST,
+                gobject.TYPE_NONE, ()),
             }
     """
     GObject signals of this class.
