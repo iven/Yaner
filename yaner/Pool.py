@@ -47,6 +47,8 @@ class Pool(LoggingMixin, gobject.GObject):
                 gobject.TYPE_NONE, ()),
             'presentable-removed': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, ()),
+            'presentable-changed': (gobject.SIGNAL_RUN_LAST,
+                gobject.TYPE_NONE, ()),
             }
     """
     GObject signals of this class.
