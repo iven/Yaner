@@ -91,6 +91,7 @@ class PoolModel(gtk.TreeStore):
     def on_presentable_added(self, pool, presentable):
         """
         When new presentable appears in one of the pools, add it to the model.
+        @TODO: Test this.
         """
         self.add_presentable(presentable)
 
@@ -98,6 +99,7 @@ class PoolModel(gtk.TreeStore):
         """
         When a presentable removed from one of the pools, remove it from
         the model.
+        @TODO: Test this.
         """
         iter_ = self.get_iter_for_presentable(presentable)
         if iter_ != None:
@@ -106,6 +108,7 @@ class PoolModel(gtk.TreeStore):
     def on_presentable_changed(self, pool, presentable):
         """
         When a presentable changed, update the iter of the model.
+        @TODO: Test this.
         """
         if presentable in pool.presentables:
             iter_ = self.get_iter_for_presentable(presentable)
@@ -114,6 +117,7 @@ class PoolModel(gtk.TreeStore):
     def add_presentable(self, presentable):
         """
         Add a presentable to the model.
+        @TODO: Test this.
         """
         self.logger.debug(_('Adding presentable {}...').format(presentable.uuid))
         parent = presentable.parent
@@ -129,6 +133,7 @@ class PoolModel(gtk.TreeStore):
     def set_data_for_presentable(self, iter_, presentable):
         """
         Update the iter data for presentable.
+        @TODO: Test this.
         """
         self.set(iter_,
                 self.columns.ICON, presentable.icon,
@@ -140,6 +145,7 @@ class PoolModel(gtk.TreeStore):
     def get_iter_for_presentable(self, presentable):
         """
         Get the TreeIter according to the presentable.
+        @TODO: Test this.
         """
         iter_ = self.get_iter_first()
         while not iter_ is None:
