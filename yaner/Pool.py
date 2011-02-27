@@ -25,9 +25,11 @@ This module contains the L{Pool} class of L{yaner}.
 """
 
 import os
+import uuid
 import gobject
 from gettext import gettext as _
 
+from Presentable import Presentable
 from Constants import U_CONFIG_DIR
 from utils.Logging import LoggingMixin
 from utils.Configuration import ConfigParser
@@ -87,5 +89,6 @@ class Pool(LoggingMixin, gobject.GObject):
             self.logger.info(_('No pool configuration file, creating...'))
             from Configurations import POOL_CONFIG
             config.update(POOL_CONFIG)
+            config['info']['cates'] = [str(uuid.uuid4())]
         return config
 
