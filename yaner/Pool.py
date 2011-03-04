@@ -67,6 +67,7 @@ class Pool(LoggingMixin, gobject.GObject):
 
         self._uuid_ = uuid_
         self._config = self._init_config()
+        self._presentables = self._init_presentables()
 
     @property
     def uuid(self):
@@ -77,6 +78,11 @@ class Pool(LoggingMixin, gobject.GObject):
     def config(self):
         """Get the configuration of the pool."""
         return self._config
+
+    @property
+    def presentables(self):
+        """Get the presentables of the pool."""
+        return self._presentables
 
     def _init_config(self):
         """
@@ -89,6 +95,29 @@ class Pool(LoggingMixin, gobject.GObject):
             self.logger.info(_('No pool configuration file, creating...'))
             from Configurations import POOL_CONFIG
             config.update(POOL_CONFIG)
-            config['info']['cates'] = [str(uuid.uuid4())]
         return config
+
+    def _init_presentables(self):
+        """
+        Initialize presentables for the pool.
+        """
+        self.logger.info(_('Initializing presentables...'))
+        presentables = []
+        info = self.config['info']
+        if info['cates'] == '[]':
+            self.logger.warning(_('No presentable exists, creating...'))
+            info['queuing'] = self.uuid
+            info['cates'] = [str(uuid.uuid4())]
+            info['recycled'] = str(uuid.uuid4())
+
+        presentables.append(Queuing(info['queuing']))
+        self.logger.debug(_('Created queuing: {}.').format(info['queuing']))
+
+        for cate_uuid in eval(info['cates']):
+            presentables.append(Category(cate_uuid))
+            self.logger.debug(_('Created category: {}.').format(cate_uuid))
+
+        presentables.append(Recycled(info['recycled']))
+        self.logger.debug(_('Created recycled: {}.').format(info['recycled']))
+        return presentables
 

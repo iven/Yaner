@@ -85,7 +85,9 @@ POOL_CONFIG = {
             'user': '',
             'passwd': '',
             'session': '',
+            'queuing': '',
             'cates': [],
+            'recycled': '',
             },
         }
 """The pool configuration dict of the application."""
