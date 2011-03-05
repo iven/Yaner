@@ -65,14 +65,14 @@ class Pool(LoggingMixin, gobject.GObject):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
-        self._uuid_ = uuid_
+        self._uuid = uuid_
         self._config = self._init_config()
         self._presentables = self._init_presentables()
 
     @property
     def uuid(self):
         """Get the uuid of the pool."""
-        return self._uuid_
+        return self._uuid
 
     @property
     def config(self):

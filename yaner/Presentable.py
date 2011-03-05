@@ -53,13 +53,13 @@ class Presentable(LoggingMixin, gobject.GObject):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
-        self._uuid_ = uuid_
+        self._uuid = uuid_
         self._config = self._init_config()
 
     @property
     def uuid(self):
         """Get the uuid of the presentable."""
-        return self._uuid_
+        return self._uuid
 
     @property
     def config(self):
@@ -78,6 +78,7 @@ class Presentable(LoggingMixin, gobject.GObject):
                     _('No presentable configuration file, creating...'))
             from Configurations import CATE_CONFIG
             config.update(CATE_CONFIG)
+            self._uuid = config.file
         return config
 
 
