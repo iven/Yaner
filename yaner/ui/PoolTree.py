@@ -30,11 +30,14 @@ A B{Pool} means a aria2 server, to avoid conflict with download servers.
 import gtk
 import gobject
 import pango
+from gettext import gettext as _
 
 from Misc import get_mix_color
+from ..Presentable import Presentable
+from ..utils.Logging import LoggingMixin
 from ..utils.Enum import Enum
 
-class PoolModel(gtk.TreeStore):
+class PoolModel(gtk.TreeStore, LoggingMixin):
     """
     The tree interface used by L{PoolView}.
     """
@@ -49,16 +52,17 @@ class PoolModel(gtk.TreeStore):
                 gobject.TYPE_STRING,    # stock-id of the icon
                 gobject.TYPE_STRING,    # name
                 gobject.TYPE_STRING,    # description
+                Presentable,            # presentable
                 )
+        LoggingMixin.__init__(self)
 
-        self._pools = pools
         self._columns = Enum((
             'ICON',
             'NAME',
             'DESCRIPTION',
             'PRESENTABLE',
             ))
-        self.append(None, ('gtk-apply', 'test', 'Test iter'))
+        self.pools = pools
 
     @property
     def pools(self):
@@ -121,6 +125,7 @@ class PoolModel(gtk.TreeStore):
         """
         self.logger.debug(_('Adding presentable {}...').format(presentable.uuid))
         parent = presentable.parent
+        parent_iter = None
         if not parent is None:
             parent_iter = self.get_iter_for_presentable(parent)
             if parent_iter is None:
