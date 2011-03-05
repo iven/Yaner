@@ -138,7 +138,6 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
     def set_data_for_presentable(self, iter_, presentable):
         """
         Update the iter data for presentable.
-        @TODO: Test this.
         """
         self.set(iter_,
                 self.columns.ICON, presentable.icon,
