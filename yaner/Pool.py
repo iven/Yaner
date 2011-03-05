@@ -46,11 +46,11 @@ class Pool(LoggingMixin, gobject.GObject):
             'disconnected': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, ()),
             'presentable-added': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Presentable)),
+                gobject.TYPE_NONE, (Presentable,)),
             'presentable-removed': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Presentable)),
+                gobject.TYPE_NONE, (Presentable,)),
             'presentable-changed': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Presentable)),
+                gobject.TYPE_NONE, (Presentable,)),
             }
     """
     GObject signals of this class.
