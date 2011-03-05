@@ -86,7 +86,7 @@ POOL_CONFIG = {
             'passwd': '',
             'session': '',
             'queuing': '',
-            'cates': [],
+            'cates': [''],
             'recycled': '',
             },
         }

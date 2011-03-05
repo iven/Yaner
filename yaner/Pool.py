@@ -29,6 +29,7 @@ import uuid
 import gobject
 from gettext import gettext as _
 
+from Queuing import Queuing
 from Presentable import Presentable
 from Constants import U_CONFIG_DIR
 from utils.Logging import LoggingMixin
@@ -104,20 +105,29 @@ class Pool(LoggingMixin, gobject.GObject):
         self.logger.info(_('Initializing presentables...'))
         presentables = []
         info = self.config['info']
-        if info['cates'] == '[]':
-            self.logger.warning(_('No presentable exists, creating...'))
-            info['queuing'] = self.uuid
-            info['cates'] = [str(uuid.uuid4())]
-            info['recycled'] = str(uuid.uuid4())
 
-        presentables.append(Queuing(info['queuing']))
-        self.logger.debug(_('Created queuing: {}.').format(info['queuing']))
-
+        queuing = Queuing(self, info['queuing'])
+        presentables.append(queuing)
+        self.logger.debug(_('Created queuing: {}.').format(queuing.uuid))
+        """
+        cates = []
         for cate_uuid in eval(info['cates']):
-            presentables.append(Category(cate_uuid))
-            self.logger.debug(_('Created category: {}.').format(cate_uuid))
+            cate = Category(self, cate_uuid)
+            cates.append(cate)
+            presentables.append(cate)
+            self.logger.debug(_('Created category: {}.').format(cate.uuid))
 
-        presentables.append(Recycled(info['recycled']))
-        self.logger.debug(_('Created recycled: {}.').format(info['recycled']))
+        recycled = Recycled(self, info['recycled'])
+        presentables.append(recycled)
+        self.logger.debug(_('Created recycled: {}.').format(recycled.uuid))
+        """
+
+        if info['queuing'] == '':
+            info['queuing'] = queuing.uuid
+            """
+            info['cates'] = [cate.uuid for cate in cates]
+            info['recycled'] = recycled.uuid
+            """
+
         return presentables
 
