@@ -59,7 +59,7 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
         # Initialize file path
         if not os.path.exists(dir_):
             os.makedirs(dir_)
-            self.logger.info("Created directory {}.".format(dir_))
+            self.logger.info(_("Created directory {}.").format(dir_))
         self._dir = dir_
         self._file = str(uuid.uuid4()) if file_ in ('', None) else file_
 

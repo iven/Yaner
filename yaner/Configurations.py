@@ -25,7 +25,6 @@ This module contains the default configuration dicts of L{yaner}.
 """
 
 import os
-from gettext import gettext as _
 
 GLOBAL_CONFIG = {
         'info': {

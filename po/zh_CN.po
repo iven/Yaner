@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: yaner 0.0.8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-02-12 13:29+0800\n"
+"POT-Creation-Date: 2011-03-08 21:12+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -17,86 +17,110 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: scripts/../yaner/Application.py:120
+#: scripts/../yaner/Application.py:122
 msgid "Logging system initialized, start logging..."
 msgstr "日志系统初始化完毕，开始记录……"
 
-#: scripts/../yaner/Application.py:128
+#: scripts/../yaner/Application.py:130
 msgid "Reading global configuration file..."
 msgstr "全局配置文件读取中……"
 
-#: scripts/../yaner/Application.py:131
+#: scripts/../yaner/Application.py:133
 msgid "No global configuration file, creating..."
 msgstr "无全局配置文件，创建中……"
 
-#: scripts/../yaner/Application.py:141
+#: scripts/../yaner/Application.py:143
 msgid "Application quit normally."
 msgstr "程序正常退出。"
 
-#: scripts/../yaner/Configurations.py:82
+#: scripts/../yaner/Configurations.py:85
 msgid "My Computer"
 msgstr "我的电脑"
 
-#: scripts/../yaner/Configurations.py:95
+#: scripts/../yaner/Configurations.py:107
 msgid "Default"
 msgstr "默认"
 
-#: scripts/../yaner/Pool.py:70
+#: scripts/../yaner/Pool.py:95
 msgid "No pool configuration file, creating..."
 msgstr "无池配置文件，创建中……"
 
-#: scripts/../yaner/ui/Misc.py:47
-msgid "@widget is not a gtk.Widget."
-msgstr ""
+#: scripts/../yaner/Pool.py:104
+msgid "Initializing presentables..."
+msgstr "初始化呈现器中……"
 
-#: scripts/../yaner/ui/Misc.py:58
+#: scripts/../yaner/Pool.py:110
+msgid "Created queuing presentable: {}."
+msgstr "已创建队列中呈现器：{}"
+
+#: scripts/../yaner/Presentable.py:84
+msgid "No presentable configuration file, creating..."
+msgstr "无呈现器配置文件，创建中……"
+
+#: scripts/../yaner/ui/Misc.py:46
+msgid "@widget is not a gtk.Widget."
+msgstr "@widget 并非 gtk.Widget。"
+
+#: scripts/../yaner/ui/Misc.py:57
 msgid "Got mix color: {}."
 msgstr "得到混合颜色：{}。"
 
-#: scripts/../yaner/ui/Toplevel.py:60
+#: scripts/../yaner/ui/PoolTree.py:125
+msgid "Adding presentable {}..."
+msgstr "添加呈现器 {} 中……"
+
+#: scripts/../yaner/ui/PoolTree.py:132
+msgid "No parent presentable for {}."
+msgstr "{} 无父呈现器。"
+
+#: scripts/../yaner/ui/Toplevel.py:59
 msgid "Initializing toplevel window..."
 msgstr "初始化主窗口中……"
 
-#: scripts/../yaner/ui/Toplevel.py:102
+#: scripts/../yaner/ui/Toplevel.py:101
 msgid "Toplevel window initialized."
 msgstr "主窗口初始化完毕。"
 
-#: scripts/../yaner/ui/Toplevel.py:121
+#: scripts/../yaner/ui/Toplevel.py:120
 msgid "Initializing action group..."
 msgstr "初始化动作组中……"
 
-#: scripts/../yaner/ui/Toplevel.py:126
+#: scripts/../yaner/ui/Toplevel.py:125
 msgid "File"
 msgstr "文件"
 
-#: scripts/../yaner/ui/Toplevel.py:128
+#: scripts/../yaner/ui/Toplevel.py:127
 msgid "HTTP/FTP/BT Magnet"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:129
+#: scripts/../yaner/ui/Toplevel.py:128
 msgid "BitTorrent"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:130
+#: scripts/../yaner/ui/Toplevel.py:129
 msgid "Metalink"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:144
+#: scripts/../yaner/ui/Toplevel.py:143
 msgid "Action group initialized."
 msgstr "动作组初始化完毕。"
 
-#: scripts/../yaner/ui/Toplevel.py:150
+#: scripts/../yaner/ui/Toplevel.py:149
 msgid "Initializing UI Manager..."
 msgstr "初始化 UI 管理器中……"
 
-#: scripts/../yaner/ui/Toplevel.py:157
+#: scripts/../yaner/ui/Toplevel.py:156
 msgid "Failed to add ui file to UIManager."
 msgstr "添加 ui 文件到 UI 管理器失败。"
 
-#: scripts/../yaner/ui/Toplevel.py:161
+#: scripts/../yaner/ui/Toplevel.py:160
 msgid "UI Manager initialized."
 msgstr "UI 管理器初始化完毕。"
 
-#: scripts/../yaner/ui/Toplevel.py:171
+#: scripts/../yaner/ui/Toplevel.py:170
 msgid "Got pool(s): {}."
 msgstr "得到池：{}。"
+
+#: scripts/../yaner/utils/Configuration.py:62
+msgid "Created directory {}."
+msgstr "已创建目录：{}"

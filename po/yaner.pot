@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-02-12 13:29+0800\n"
+"POT-Creation-Date: 2011-03-08 21:12+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,86 +17,110 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: scripts/../yaner/Application.py:120
+#: scripts/../yaner/Application.py:122
 msgid "Logging system initialized, start logging..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:128
+#: scripts/../yaner/Application.py:130
 msgid "Reading global configuration file..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:131
+#: scripts/../yaner/Application.py:133
 msgid "No global configuration file, creating..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:141
+#: scripts/../yaner/Application.py:143
 msgid "Application quit normally."
 msgstr ""
 
-#: scripts/../yaner/Configurations.py:82
+#: scripts/../yaner/Configurations.py:85
 msgid "My Computer"
 msgstr ""
 
-#: scripts/../yaner/Configurations.py:95
+#: scripts/../yaner/Configurations.py:107
 msgid "Default"
 msgstr ""
 
-#: scripts/../yaner/Pool.py:70
+#: scripts/../yaner/Pool.py:95
 msgid "No pool configuration file, creating..."
 msgstr ""
 
-#: scripts/../yaner/ui/Misc.py:47
+#: scripts/../yaner/Pool.py:104
+msgid "Initializing presentables..."
+msgstr ""
+
+#: scripts/../yaner/Pool.py:110
+msgid "Created queuing presentable: {}."
+msgstr ""
+
+#: scripts/../yaner/Presentable.py:84
+msgid "No presentable configuration file, creating..."
+msgstr ""
+
+#: scripts/../yaner/ui/Misc.py:46
 msgid "@widget is not a gtk.Widget."
 msgstr ""
 
-#: scripts/../yaner/ui/Misc.py:58
+#: scripts/../yaner/ui/Misc.py:57
 msgid "Got mix color: {}."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:60
+#: scripts/../yaner/ui/PoolTree.py:125
+msgid "Adding presentable {}..."
+msgstr ""
+
+#: scripts/../yaner/ui/PoolTree.py:132
+msgid "No parent presentable for {}."
+msgstr ""
+
+#: scripts/../yaner/ui/Toplevel.py:59
 msgid "Initializing toplevel window..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:102
+#: scripts/../yaner/ui/Toplevel.py:101
 msgid "Toplevel window initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:121
+#: scripts/../yaner/ui/Toplevel.py:120
 msgid "Initializing action group..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:126
+#: scripts/../yaner/ui/Toplevel.py:125
 msgid "File"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:128
+#: scripts/../yaner/ui/Toplevel.py:127
 msgid "HTTP/FTP/BT Magnet"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:129
+#: scripts/../yaner/ui/Toplevel.py:128
 msgid "BitTorrent"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:130
+#: scripts/../yaner/ui/Toplevel.py:129
 msgid "Metalink"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:144
+#: scripts/../yaner/ui/Toplevel.py:143
 msgid "Action group initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:150
+#: scripts/../yaner/ui/Toplevel.py:149
 msgid "Initializing UI Manager..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:157
+#: scripts/../yaner/ui/Toplevel.py:156
 msgid "Failed to add ui file to UIManager."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:161
+#: scripts/../yaner/ui/Toplevel.py:160
 msgid "UI Manager initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:171
+#: scripts/../yaner/ui/Toplevel.py:170
 msgid "Got pool(s): {}."
+msgstr ""
+
+#: scripts/../yaner/utils/Configuration.py:62
+msgid "Created directory {}."
 msgstr ""

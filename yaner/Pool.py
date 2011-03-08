@@ -27,7 +27,6 @@ This module contains the L{Pool} class of L{yaner}.
 import os
 import uuid
 import gobject
-from gettext import gettext as _
 
 from Queuing import Queuing
 from Presentable import Presentable
@@ -108,18 +107,21 @@ class Pool(LoggingMixin, gobject.GObject):
 
         queuing = Queuing(self, info['queuing'])
         presentables.append(queuing)
-        self.logger.debug(_('Created queuing: {}.').format(queuing.uuid))
+        self.logger.debug(_('Created queuing presentable: {}.').format(
+            queuing.uuid))
         """
         cates = []
         for cate_uuid in eval(info['cates']):
             cate = Category(self, cate_uuid)
             cates.append(cate)
             presentables.append(cate)
-            self.logger.debug(_('Created category: {}.').format(cate.uuid))
+            self.logger.debug(_('Created category presentable: {}.').format(
+                cate.uuid))
 
         recycled = Recycled(self, info['recycled'])
         presentables.append(recycled)
-        self.logger.debug(_('Created recycled: {}.').format(recycled.uuid))
+        self.logger.debug(_('Created recycled presentable: {}.').format(
+            recycled.uuid))
         """
 
         if info['queuing'] == '':

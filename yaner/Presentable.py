@@ -26,7 +26,6 @@ This module contains the L{Presentable} class of L{yaner}.
 
 import os
 import gobject
-from gettext import gettext as _
 
 from Constants import U_CONFIG_DIR
 from utils.Logging import LoggingMixin

@@ -30,7 +30,6 @@ A B{Pool} means a aria2 server, to avoid conflict with download servers.
 import gtk
 import gobject
 import pango
-from gettext import gettext as _
 
 from Misc import get_mix_color
 from ..Presentable import Presentable
@@ -123,13 +122,15 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         Add a presentable to the model.
         @TODO: Test this.
         """
-        self.logger.debug(_('Adding presentable {}...').format(presentable.uuid))
+        self.logger.debug(_('Adding presentable {}...').format(
+            presentable.uuid))
         parent = presentable.parent
         parent_iter = None
         if not parent is None:
             parent_iter = self.get_iter_for_presentable(parent)
             if parent_iter is None:
-                self.logger.warning(_('No parent for {}.').format(presentable.uuid))
+                self.logger.warning(_('No parent presentable for {}.').format(
+                    presentable.uuid))
                 self.add_presentable(parent)
                 parent_iter = self.get_iter_for_presentable(parent)
         iter_ = self.append(parent_iter)

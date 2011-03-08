@@ -30,7 +30,6 @@ import gobject
 import os
 import sys
 import logging
-from gettext import gettext as _
 
 from Constants import UI_DIR
 from PoolTree import PoolModel, PoolView

@@ -26,17 +26,15 @@ This module contains the main application class of L{yaner}.
 
 import os
 import logging
-from gettext import gettext as _
 from twisted.internet import reactor
 
 from Constants import PREFIX, U_CONFIG_DIR
 from ui.Toplevel import Toplevel
 from utils.Logging import LoggingMixin
 from utils.Configuration import ConfigParser
-from utils.I18nApplication import I18nApplicationMixin
 from utils.UniqueApplication import UniqueApplicationMixin
 
-class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
+class Application(UniqueApplicationMixin, LoggingMixin):
     """Main application of L{yaner}."""
 
     _NAME = __package__
@@ -70,7 +68,6 @@ class Application(UniqueApplicationMixin, I18nApplicationMixin, LoggingMixin):
         <Toplevel>}, and initialize logging configuration.
         """
         UniqueApplicationMixin.__init__(self, self._BUS_NAME)
-        I18nApplicationMixin.__init__(self, self._NAME, PREFIX)
         LoggingMixin.__init__(self)
 
         self._init_logging()
