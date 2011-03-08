@@ -25,14 +25,16 @@ This module contains the L{Queuing} presentable of L{yaner}.
 """
 
 from Presentable import Presentable
+from Configurations import QUEUING_CONFIG
 
 class Queuing(Presentable):
     """
     Queuing presentable of the L{Pool}s.
     """
     def __init__(self, pool, uuid_):
-        Presentable.__init__(self, uuid_)
+        Presentable.__init__(self, uuid_, QUEUING_CONFIG)
         self.parent = None
         self.name = "My Computer"
         self.description = "This is a test."
         self.icon = "gtk-apply"
+

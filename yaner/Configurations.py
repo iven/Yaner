@@ -92,6 +92,13 @@ POOL_CONFIG = {
         }
 """The pool configuration dict of the application."""
 
+QUEUING_CONFIG = {
+        'info': {
+            'tasks': [],
+            },
+        }
+"""The queuing configuration dict of the application."""
+
 CATE_CONFIG = {
         'info': {
             'name': _("Default"),

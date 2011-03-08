@@ -50,12 +50,12 @@ class Presentable(LoggingMixin, gobject.GObject):
     User config directory containing category configuration files.
     """
 
-    def __init__(self, uuid_ = None):
+    def __init__(self, uuid_, default_config):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
         self._uuid = uuid_
-        self._config = self._init_config()
+        self._config = self._init_config(default_config)
 
     @property
     def uuid(self):
@@ -67,7 +67,7 @@ class Presentable(LoggingMixin, gobject.GObject):
         """Get the configuration of the presentable."""
         return self._config
 
-    def _init_config(self):
+    def _init_config(self, default_config):
         """
         Open presentable configuration file as L{self.config}.
         If the file doesn't exist, read from the default configuration.
@@ -77,9 +77,7 @@ class Presentable(LoggingMixin, gobject.GObject):
         if config.empty():
             self.logger.info(
                     _('No presentable configuration file, creating...'))
-            from Configurations import CATE_CONFIG
-            config.update(CATE_CONFIG)
+            config.update(default_config)
             self._uuid = config.file
         return config
-
 
