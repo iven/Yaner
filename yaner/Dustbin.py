@@ -34,11 +34,15 @@ class Dustbin(Presentable):
     def __init__(self, uuid_, queuing):
         Presentable.__init__(self, uuid_, DUSTBIN_CONFIG)
         self.parent = queuing
-        self.description = "This is a dustbin."
         self.icon = "gtk-delete"
 
     @property
     def name(self):
         """Get the name of the presentable."""
         return _('Dustbin')
+
+    @property
+    def description(self):
+        """Get the description of the presentable."""
+        return "This is a dustbin."
 

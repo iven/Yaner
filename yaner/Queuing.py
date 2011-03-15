@@ -36,7 +36,6 @@ class Queuing(Presentable):
         Presentable.__init__(self, uuid_, QUEUING_CONFIG)
         self.parent = None
         self._name = name
-        self.description = "This is a test."
         self.icon = "gtk-connect"
 
     @property
@@ -49,4 +48,9 @@ class Queuing(Presentable):
         """Set the name of the presentable."""
         self._name = new_name
         self.emit("changed")
+
+    @property
+    def description(self):
+        """Get the description of the presentable."""
+        return "This is a pool."
 

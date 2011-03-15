@@ -34,7 +34,6 @@ class Category(Presentable):
     def __init__(self, uuid_, queuing):
         Presentable.__init__(self, uuid_, CATEGORY_CONFIG)
         self.parent = queuing
-        self.description = "This is a category."
         self.icon = "gtk-directory"
 
     @property
@@ -47,4 +46,9 @@ class Category(Presentable):
         """Set the name of the presentable."""
         self.config['info']['name'] = new_name
         self.emit('changed')
+
+    @property
+    def description(self):
+        """Get the description of the presentable."""
+        return "This is a category."
 
