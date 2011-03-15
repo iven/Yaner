@@ -21,32 +21,24 @@
 #
 
 """
-This module contains the L{Queuing} presentable of L{yaner}.
+This module contains the L{Dustbin} presentable of L{yaner}.
 """
 
 from Presentable import Presentable
-from Configurations import QUEUING_CONFIG
+from Configurations import DUSTBIN_CONFIG
 
-class Queuing(Presentable):
+class Dustbin(Presentable):
     """
-    Queuing presentable of the L{Pool}s.
+    Dustbin presentable of the L{Pool}s.
     """
-
-    def __init__(self, uuid_, name):
-        Presentable.__init__(self, uuid_, QUEUING_CONFIG)
-        self.parent = None
-        self._name = name
-        self.description = "This is a test."
-        self.icon = "gtk-connect"
+    def __init__(self, uuid_, queuing):
+        Presentable.__init__(self, uuid_, DUSTBIN_CONFIG)
+        self.parent = queuing
+        self.description = "This is a dustbin."
+        self.icon = "gtk-delete"
 
     @property
     def name(self):
         """Get the name of the presentable."""
-        return self._name
-
-    @name.setter
-    def name(self, new_name):
-        """Set the name of the presentable."""
-        self._name = new_name
-        self.emit("changed")
+        return _('Dustbin')
 

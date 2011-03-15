@@ -29,6 +29,8 @@ import uuid
 import gobject
 
 from Queuing import Queuing
+from Category import Category
+from Dustbin import Dustbin
 from Presentable import Presentable
 from Constants import U_CONFIG_DIR
 from utils.Logging import LoggingMixin
@@ -105,31 +107,36 @@ class Pool(LoggingMixin, gobject.GObject):
         presentables = []
         info = self.config['info']
 
-        queuing = Queuing(self, info['queuing'])
+        queuing = Queuing(info['queuing'], info['name'])
+        queuing.connect("changed", self.queuing_changed)
         presentables.append(queuing)
         self.logger.debug(_('Created queuing presentable: {}.').format(
             queuing.uuid))
-        """
-        cates = []
-        for cate_uuid in eval(info['cates']):
-            cate = Category(self, cate_uuid)
-            cates.append(cate)
-            presentables.append(cate)
-            self.logger.debug(_('Created category presentable: {}.').format(
-                cate.uuid))
 
-        recycled = Recycled(self, info['recycled'])
-        presentables.append(recycled)
-        self.logger.debug(_('Created recycled presentable: {}.').format(
-            recycled.uuid))
-        """
+        categories = []
+        for category_uuid in eval(info['categories']):
+            category = Category(category_uuid, queuing)
+            categories.append(category)
+            presentables.append(category)
+            self.logger.debug(_('Created category presentable: {}.').format(
+                category.uuid))
+
+        dustbin = Dustbin(info['dustbin'], queuing)
+        presentables.append(dustbin)
+        self.logger.debug(_('Created dustbin presentable: {}.').format(
+            dustbin.uuid))
 
         if info['queuing'] == '':
             info['queuing'] = queuing.uuid
-            """
-            info['cates'] = [cate.uuid for cate in cates]
-            info['recycled'] = recycled.uuid
-            """
+            info['categories'] = [category.uuid for category in categories]
+            info['dustbin'] = dustbin.uuid
 
         return presentables
+
+    def queuing_changed(self, queuing):
+        """
+        If the name of queuing presentable changed, update the config.
+        """
+        if queuing.name != self.config['info']['name']:
+            self.config['info']['name'] = queuing.name
 

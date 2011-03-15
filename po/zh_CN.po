@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: yaner 0.0.8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-08 21:12+0800\n"
+"POT-Creation-Date: 2011-03-16 01:46+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -17,43 +17,55 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: scripts/../yaner/Application.py:122
+#: scripts/../yaner/Application.py:117
 msgid "Logging system initialized, start logging..."
 msgstr "日志系统初始化完毕，开始记录……"
 
-#: scripts/../yaner/Application.py:130
+#: scripts/../yaner/Application.py:125
 msgid "Reading global configuration file..."
 msgstr "全局配置文件读取中……"
 
-#: scripts/../yaner/Application.py:133
+#: scripts/../yaner/Application.py:128
 msgid "No global configuration file, creating..."
 msgstr "无全局配置文件，创建中……"
 
-#: scripts/../yaner/Application.py:143
+#: scripts/../yaner/Application.py:138
 msgid "Application quit normally."
 msgstr "程序正常退出。"
 
-#: scripts/../yaner/Configurations.py:85
+#: scripts/../yaner/Configurations.py:81
 msgid "My Computer"
 msgstr "我的电脑"
 
-#: scripts/../yaner/Configurations.py:107
-msgid "Default"
-msgstr "默认"
+#: scripts/../yaner/Configurations.py:103
+msgid "Default Category"
+msgstr "默认分类"
 
-#: scripts/../yaner/Pool.py:95
+#: scripts/../yaner/Dustbin.py:43
+msgid "Dustbin"
+msgstr "回收站"
+
+#: scripts/../yaner/Pool.py:97
 msgid "No pool configuration file, creating..."
 msgstr "无池配置文件，创建中……"
 
-#: scripts/../yaner/Pool.py:104
+#: scripts/../yaner/Pool.py:106
 msgid "Initializing presentables..."
 msgstr "初始化呈现器中……"
 
-#: scripts/../yaner/Pool.py:110
+#: scripts/../yaner/Pool.py:113
 msgid "Created queuing presentable: {}."
 msgstr "已创建队列中呈现器：{}"
 
-#: scripts/../yaner/Presentable.py:84
+#: scripts/../yaner/Pool.py:121
+msgid "Created category presentable: {}."
+msgstr "已创建分类呈现器：{}"
+
+#: scripts/../yaner/Pool.py:126
+msgid "Created dustbin presentable: {}."
+msgstr "已创建回收站呈现器：{}"
+
+#: scripts/../yaner/Presentable.py:78
 msgid "No presentable configuration file, creating..."
 msgstr "无呈现器配置文件，创建中……"
 

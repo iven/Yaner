@@ -44,7 +44,7 @@ class Presentable(LoggingMixin, gobject.GObject):
     GObject signals of this class.
     """
 
-    _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'cate')
+    _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'presentables')
     """
     User config directory containing category configuration files.
     """

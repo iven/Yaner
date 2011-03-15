@@ -21,32 +21,30 @@
 #
 
 """
-This module contains the L{Queuing} presentable of L{yaner}.
+This module contains the L{Category} presentable of L{yaner}.
 """
 
 from Presentable import Presentable
-from Configurations import QUEUING_CONFIG
+from Configurations import CATEGORY_CONFIG
 
-class Queuing(Presentable):
+class Category(Presentable):
     """
-    Queuing presentable of the L{Pool}s.
+    Category presentable of the L{Pool}s.
     """
-
-    def __init__(self, uuid_, name):
-        Presentable.__init__(self, uuid_, QUEUING_CONFIG)
-        self.parent = None
-        self._name = name
-        self.description = "This is a test."
-        self.icon = "gtk-connect"
+    def __init__(self, uuid_, queuing):
+        Presentable.__init__(self, uuid_, CATEGORY_CONFIG)
+        self.parent = queuing
+        self.description = "This is a category."
+        self.icon = "gtk-directory"
 
     @property
     def name(self):
         """Get the name of the presentable."""
-        return self._name
+        return self.config['info']['name']
 
     @name.setter
-    def name(self, new_name):
+    def name(self):
         """Set the name of the presentable."""
-        self._name = new_name
-        self.emit("changed")
+        self.config['info']['name'] = new_name
+        self.emit('changed')
 

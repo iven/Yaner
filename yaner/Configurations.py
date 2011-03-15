@@ -85,8 +85,8 @@ POOL_CONFIG = {
             'passwd': '',
             'session': '',
             'queuing': '',
-            'cates': [''],
-            'recycled': '',
+            'categories': [''],
+            'dustbin': '',
             },
         }
 """The pool configuration dict of the application."""
@@ -98,12 +98,19 @@ QUEUING_CONFIG = {
         }
 """The queuing configuration dict of the application."""
 
-CATE_CONFIG = {
+CATEGORY_CONFIG = {
         'info': {
-            'name': _("Default"),
+            'name': _("Default Category"),
             'dir': os.path.expanduser('~'),
             'tasks': [],
             },
         }
-"""The pool configuration dict of the application."""
+"""The category configuration dict of the application."""
+
+DUSTBIN_CONFIG = {
+        'info': {
+            'tasks': [],
+            },
+        }
+"""The dustbin configuration dict of the application."""
 
