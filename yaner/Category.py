@@ -21,26 +21,34 @@
 #
 
 """
-This module contains the super class of i18n applications, using gettext.
+This module contains the L{Category} presentable of L{yaner}.
 """
 
-import locale
-import gettext
-from os.path import join
+from Presentable import Presentable
+from Configurations import CATEGORY_CONFIG
 
-class I18nApplicationMixin(object):
+class Category(Presentable):
     """
-    This class uses gettext to bind i18n domains.
+    Category presentable of the L{Pool}s.
     """
+    def __init__(self, uuid_, queuing):
+        Presentable.__init__(self, uuid_, CATEGORY_CONFIG)
+        self.parent = queuing
+        self.icon = "gtk-directory"
 
-    def __init__(self, domain_name, prefix = '/usr'):
-        """
-        @arg domain_name:I18n domain name of the application.
-        @type domain_name:str
-        """
-        object.__init__(self)
+    @property
+    def name(self):
+        """Get the name of the presentable."""
+        return self.config['info']['name']
 
-        locale.setlocale(locale.LC_ALL, "")
-        gettext.bindtextdomain(domain_name, join(prefix, "share/locale"))
-        gettext.textdomain(domain_name)
+    @name.setter
+    def name(self):
+        """Set the name of the presentable."""
+        self.config['info']['name'] = new_name
+        self.emit('changed')
+
+    @property
+    def description(self):
+        """Get the description of the presentable."""
+        return "This is a category."
 

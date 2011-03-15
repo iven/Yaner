@@ -30,7 +30,6 @@ import gobject
 import os
 import sys
 import logging
-from gettext import gettext as _
 
 from Constants import UI_DIR
 from PoolTree import PoolModel, PoolView
@@ -170,8 +169,24 @@ class Toplevel(gtk.Window, LoggingMixin):
         pool_uuids = self.config['info']['pools']
         self.logger.debug(_('Got pool(s): {}.').format(pool_uuids))
         for pool_uuid in eval(pool_uuids):
-            pools.append(Pool(pool_uuid))
+            pool = Pool(pool_uuid)
+            pool.connect('presentable-added', self.update)
+            pool.connect('presentable-removed', self.update)
+            pool.connect('disconnected', self.on_pool_disconnected)
+            pools.append(pool)
         return pools
+
+    def on_pool_disconnected(self, pool):
+        """
+        Pool disconnected signal callback. Remove the pool and update
+        L{PoolModel}.
+        @TODO: Remove the pool, or fold it?
+        """
+        self._pool_model.pools = self.pools
+
+    def update(self):
+        """Update the window."""
+        pass
 
     def destroy(self, *args, **kwargs):
         """Destroy toplevel window and quit the application."""

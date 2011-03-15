@@ -25,7 +25,6 @@ This module contains the default configuration dicts of L{yaner}.
 """
 
 import os
-from gettext import gettext as _
 
 GLOBAL_CONFIG = {
         'info': {
@@ -85,17 +84,33 @@ POOL_CONFIG = {
             'user': '',
             'passwd': '',
             'session': '',
-            'cates': ['120864b0-5f64-47d2-8efd-c70c20b8a3ab'],
+            'queuing': '',
+            'categories': [''],
+            'dustbin': '',
             },
         }
 """The pool configuration dict of the application."""
 
-CATE_CONFIG = {
+QUEUING_CONFIG = {
         'info': {
-            'name': _("Default"),
+            'tasks': [],
+            },
+        }
+"""The queuing configuration dict of the application."""
+
+CATEGORY_CONFIG = {
+        'info': {
+            'name': _("Default Category"),
             'dir': os.path.expanduser('~'),
             'tasks': [],
             },
         }
-"""The pool configuration dict of the application."""
+"""The category configuration dict of the application."""
+
+DUSTBIN_CONFIG = {
+        'info': {
+            'tasks': [],
+            },
+        }
+"""The dustbin configuration dict of the application."""
 

@@ -49,7 +49,12 @@ except ImportError:
 else:
     pynotify.init('yaner')
 
-from yaner.Application import Application
+# Translation setup
+import os
+import gettext
+from yaner.Constants import PREFIX
+gettext.translation('yaner', os.path.join(PREFIX, 'share/locale')).install()
 
+from yaner.Application import Application
 main_app = Application()
 main_app.run()

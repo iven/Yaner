@@ -32,9 +32,11 @@ import gobject
 import pango
 
 from Misc import get_mix_color
+from ..Presentable import Presentable
+from ..utils.Logging import LoggingMixin
 from ..utils.Enum import Enum
 
-class PoolModel(gtk.TreeStore):
+class PoolModel(gtk.TreeStore, LoggingMixin):
     """
     The tree interface used by L{PoolView}.
     """
@@ -43,27 +45,42 @@ class PoolModel(gtk.TreeStore):
         """
         L{PoolModel} initializing.
         @arg pools:Aria2 servers providing data to L{PoolModel}.
-        @type pools:yaner.Pool
-        @TODO:Update the type of L{pools}.
+        @type pools:L{yaner.Pool}
         """
         gtk.TreeStore.__init__(self,
                 gobject.TYPE_STRING,    # stock-id of the icon
                 gobject.TYPE_STRING,    # name
                 gobject.TYPE_STRING,    # description
+                Presentable,            # presentable
                 )
+        LoggingMixin.__init__(self)
 
-        self._pools = pools
         self._columns = Enum((
             'ICON',
             'NAME',
             'DESCRIPTION',
+            'PRESENTABLE',
             ))
-        self.append(None, ('gtk-apply', 'test', 'Test iter'))
+        self.pools = pools
 
     @property
     def pools(self):
         """Get the pools of the tree model."""
         return self._pools
+
+    @pools.setter
+    def pools(self, new_pools):
+        """
+        Set the pools of the tree model, and update it.
+        """
+        self.clear()
+        for pool in new_pools:
+            pool.connect('presentable-added', self.on_presentable_added)
+            pool.connect('presentable-removed', self.on_presentable_removed)
+            pool.connect('presentable-changed', self.on_presentable_changed)
+            for presentable in pool.presentables:
+                self.add_presentable(presentable)
+        self._pools = new_pools
 
     @property
     def columns(self):
@@ -73,6 +90,74 @@ class PoolModel(gtk.TreeStore):
         number of C{NAME}.
         """
         return self._columns
+
+    def on_presentable_added(self, pool, presentable):
+        """
+        When new presentable appears in one of the pools, add it to the model.
+        @TODO: Test this.
+        """
+        self.add_presentable(presentable)
+
+    def on_presentable_removed(self, pool, presentable):
+        """
+        When a presentable removed from one of the pools, remove it from
+        the model.
+        @TODO: Test this.
+        """
+        iter_ = self.get_iter_for_presentable(presentable)
+        if iter_ != None:
+            self.remove(_iter)
+
+    def on_presentable_changed(self, pool, presentable):
+        """
+        When a presentable changed, update the iter of the model.
+        @TODO: Test this.
+        """
+        if presentable in pool.presentables:
+            iter_ = self.get_iter_for_presentable(presentable)
+            self.set_data_for_presentable(iter_, presentable)
+
+    def add_presentable(self, presentable):
+        """
+        Add a presentable to the model.
+        @TODO: Test this.
+        """
+        self.logger.debug(_('Adding presentable {}...').format(
+            presentable.uuid))
+        parent = presentable.parent
+        parent_iter = None
+        if not parent is None:
+            parent_iter = self.get_iter_for_presentable(parent)
+            if parent_iter is None:
+                self.logger.warning(_('No parent presentable for {}.').format(
+                    presentable.uuid))
+                self.add_presentable(parent)
+                parent_iter = self.get_iter_for_presentable(parent)
+        iter_ = self.append(parent_iter)
+        self.set_data_for_presentable(iter_, presentable)
+
+    def set_data_for_presentable(self, iter_, presentable):
+        """
+        Update the iter data for presentable.
+        """
+        self.set(iter_,
+                self.columns.ICON, presentable.icon,
+                self.columns.DESCRIPTION, presentable.description,
+                self.columns.NAME, presentable.name,
+                self.columns.PRESENTABLE, presentable,
+                )
+
+    def get_iter_for_presentable(self, presentable):
+        """
+        Get the TreeIter according to the presentable.
+        @TODO: Test this.
+        """
+        iter_ = self.get_iter_first()
+        while not iter_ is None:
+            if presentable is self.get_value(iter_, self.columns.PRESENTABLE):
+                return iter_
+            iter_ = self.iter_next(iter_)
+        return None
 
 class PoolView(gtk.TreeView):
     """

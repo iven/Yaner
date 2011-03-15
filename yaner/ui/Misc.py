@@ -26,7 +26,6 @@ This module contains miscellaneous functions used by other modules.
 
 import gtk
 import logging
-from gettext import gettext as _
 
 _module = '{}.Misc'.format(__package__)
 _logger = logging.getLogger(_module)
