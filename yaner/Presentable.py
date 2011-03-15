@@ -49,23 +49,17 @@ class Presentable(LoggingMixin, gobject.GObject):
     User config directory containing category configuration files.
     """
 
-    def __init__(self, uuid_, pool, default_config):
+    def __init__(self, uuid_, default_config):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
         self._uuid = uuid_
-        self._pool = pool
         self._config = self._init_config(default_config)
 
     @property
     def uuid(self):
         """Get the uuid of the presentable."""
         return self._uuid
-
-    @property
-    def pool(self):
-        """Get the pool of the presentable."""
-        return self._pool
 
     @property
     def config(self):
