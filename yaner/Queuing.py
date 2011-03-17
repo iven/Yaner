@@ -24,8 +24,8 @@
 This module contains the L{Queuing} presentable of L{yaner}.
 """
 
-from Presentable import Presentable
-from Configurations import QUEUING_CONFIG
+from yaner.Presentable import Presentable
+from yaner.Configurations import QUEUING_CONFIG
 
 class Queuing(Presentable):
     """

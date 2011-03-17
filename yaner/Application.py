@@ -28,11 +28,11 @@ import os
 import logging
 from twisted.internet import reactor
 
-from Constants import PREFIX, U_CONFIG_DIR
-from ui.Toplevel import Toplevel
-from utils.Logging import LoggingMixin
-from utils.Configuration import ConfigParser
-from utils.UniqueApplication import UniqueApplicationMixin
+from yaner.Constants import PREFIX, U_CONFIG_DIR
+from yaner.ui.Toplevel import Toplevel
+from yaner.utils.Logging import LoggingMixin
+from yaner.utils.Configuration import ConfigParser
+from yaner.utils.UniqueApplication import UniqueApplicationMixin
 
 class Application(UniqueApplicationMixin, LoggingMixin):
     """Main application of L{yaner}."""
@@ -126,7 +126,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
         if config.empty():
             self.logger.info(_('No global configuration file, creating...'))
-            from Configurations import GLOBAL_CONFIG
+            from yaner.Configurations import GLOBAL_CONFIG
             config.update(GLOBAL_CONFIG)
         return config
 

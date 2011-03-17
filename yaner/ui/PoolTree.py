@@ -31,10 +31,10 @@ import gtk
 import gobject
 import pango
 
-from Misc import get_mix_color
-from ..Presentable import Presentable
-from ..utils.Logging import LoggingMixin
-from ..utils.Enum import Enum
+from yaner.Presentable import Presentable
+from yaner.ui.Misc import get_mix_color
+from yaner.utils.Logging import LoggingMixin
+from yaner.utils.Enum import Enum
 
 class PoolModel(gtk.TreeStore, LoggingMixin):
     """

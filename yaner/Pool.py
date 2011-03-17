@@ -28,13 +28,13 @@ import os
 import uuid
 import gobject
 
-from Queuing import Queuing
-from Category import Category
-from Dustbin import Dustbin
-from Presentable import Presentable
-from Constants import U_CONFIG_DIR
-from utils.Logging import LoggingMixin
-from utils.Configuration import ConfigParser
+from yaner.Queuing import Queuing
+from yaner.Category import Category
+from yaner.Dustbin import Dustbin
+from yaner.Presentable import Presentable
+from yaner.Constants import U_CONFIG_DIR
+from yaner.utils.Logging import LoggingMixin
+from yaner.utils.Configuration import ConfigParser
 
 class Pool(LoggingMixin, gobject.GObject):
     """
@@ -95,7 +95,7 @@ class Pool(LoggingMixin, gobject.GObject):
         config = ConfigParser(self._CONFIG_DIR, self.uuid)
         if config.empty():
             self.logger.info(_('No pool configuration file, creating...'))
-            from Configurations import POOL_CONFIG
+            from yaner.Configurations import POOL_CONFIG
             config.update(POOL_CONFIG)
         return config
 

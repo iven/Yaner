@@ -24,8 +24,8 @@
 This module contains the L{Dustbin} presentable of L{yaner}.
 """
 
-from Presentable import Presentable
-from Configurations import DUSTBIN_CONFIG
+from yaner.Presentable import Presentable
+from yaner.Configurations import DUSTBIN_CONFIG
 
 class Dustbin(Presentable):
     """

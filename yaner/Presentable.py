@@ -27,9 +27,9 @@ This module contains the L{Presentable} class of L{yaner}.
 import os
 import gobject
 
-from Constants import U_CONFIG_DIR
-from utils.Logging import LoggingMixin
-from utils.Configuration import ConfigParser
+from yaner.Constants import U_CONFIG_DIR
+from yaner.utils.Logging import LoggingMixin
+from yaner.utils.Configuration import ConfigParser
 
 class Presentable(LoggingMixin, gobject.GObject):
     """

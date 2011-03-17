@@ -31,10 +31,10 @@ import os
 import sys
 import logging
 
-from Constants import UI_DIR
-from PoolTree import PoolModel, PoolView
-from ..Pool import Pool
-from ..utils.Logging import LoggingMixin
+from yaner.Pool import Pool
+from yaner.ui.Constants import UI_DIR
+from yaner.ui.PoolTree import PoolModel, PoolView
+from yaner.utils.Logging import LoggingMixin
 
 class Toplevel(gtk.Window, LoggingMixin):
     """Toplevel window of L{yaner}."""

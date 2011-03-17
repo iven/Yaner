@@ -28,7 +28,7 @@ import os
 import uuid
 from ConfigParser import SafeConfigParser
 
-from Logging import LoggingMixin
+from yaner.utils.Logging import LoggingMixin
 
 class ConfigParser(LoggingMixin, SafeConfigParser):
     """A configuration file parser."""

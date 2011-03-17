@@ -24,8 +24,8 @@
 This module contains the L{Category} presentable of L{yaner}.
 """
 
-from Presentable import Presentable
-from Configurations import CATEGORY_CONFIG
+from yaner.Presentable import Presentable
+from yaner.Configurations import CATEGORY_CONFIG
 
 class Category(Presentable):
     """
