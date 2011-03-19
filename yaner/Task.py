@@ -21,19 +21,12 @@
 #
 
 """
-This module contains the L{Presentable} class of L{yaner}.
+This module contains the L{Task} class of L{yaner}.
 """
 
-import os
-import gobject
-
-from yaner.Constants import U_CONFIG_DIR
-from yaner.utils.Logging import LoggingMixin
-from yaner.utils.Configuration import ConfigParser
-
-class Presentable(LoggingMixin, gobject.GObject):
+Class Task(LoggingMixin, gobject.GObject):
     """
-    The Presentable class of L{yaner}, which provides data for L{PoolModel}.
+    Task class is just downloading tasks, which provides data to L{TaskModel}.
     """
 
     __gsignals__ = {
@@ -44,38 +37,38 @@ class Presentable(LoggingMixin, gobject.GObject):
     GObject signals of this class.
     """
 
-    _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'presentables')
+    _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'tasks')
     """
-    User config directory containing presentable configuration files.
+    User config directory containing task configuration files.
     """
 
-    def __init__(self, uuid_, default_config):
+    def __init__(self, uuid_, config):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
         self._uuid = uuid_
-        self._config = self._init_config(default_config)
+        self._config = self._init_config(config)
 
     @property
     def uuid(self):
-        """Get the uuid of the presentable."""
+        """Get the uuid of the task."""
         return self._uuid
 
     @property
     def config(self):
-        """Get the configuration of the presentable."""
+        """Get the configuration of the task."""
         return self._config
 
     def _init_config(self, default_config):
         """
-        Open presentable configuration file as L{self.config}.
+        Open task configuration file as L{self.config}.
         If the file doesn't exist, read from the default configuration.
-        If the presentable configuration directory doesn't exist, create it.
+        If the task configuration directory doesn't exist, create it.
         """
         config = ConfigParser(self._CONFIG_DIR, self.uuid)
         if config.empty():
             self.logger.info(
-                    _('No presentable configuration file, creating...'))
+                    _('No task configuration file, creating...'))
             config.update(default_config)
             self._uuid = config.file
         return config
