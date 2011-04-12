@@ -45,7 +45,7 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         """
         L{PoolModel} initializing.
         @arg pools:Aria2 servers providing data to L{PoolModel}.
-        @type pools:L{yaner.Pool}
+        @type pools:list of L{yaner.Pool}
         """
         gtk.TreeStore.__init__(self,
                 gobject.TYPE_STRING,    # stock-id of the icon

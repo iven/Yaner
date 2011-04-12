@@ -24,7 +24,14 @@
 This module contains the L{Task} class of L{yaner}.
 """
 
-Class Task(LoggingMixin, gobject.GObject):
+import os
+import gobject
+
+from yaner.utils.Logging import LoggingMixin
+from yaner.Constants import U_CONFIG_DIR
+from yaner.utils.Configuration import ConfigParser
+
+class Task(LoggingMixin, gobject.GObject):
     """
     Task class is just downloading tasks, which provides data to L{TaskModel}.
     """
