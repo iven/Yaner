@@ -40,7 +40,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
     The tree interface used by task list treeviews.
     """
 
-    def __init__(self, presentable):
+    def __init__(self, presentable = None):
         """
         L{TaskListModel} initializing.
         @arg tasks:Tasks providing data to L{TaskListModel}.

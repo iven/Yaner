@@ -34,6 +34,7 @@ import logging
 from yaner.Pool import Pool
 from yaner.ui.Constants import UI_DIR
 from yaner.ui.PoolTree import PoolModel, PoolView
+from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.utils.Logging import LoggingMixin
 
 class Toplevel(gtk.Window, LoggingMixin):
@@ -97,6 +98,10 @@ class Toplevel(gtk.Window, LoggingMixin):
         # Right pane
         task_vbox = gtk.VBox(False, 12)
         hpaned.add2(task_vbox)
+
+        self._task_list_model = TaskListModel()
+        self._task_list_view = TaskListView(self._task_list_model)
+        task_vbox.pack_start(self._task_list_view, True, True, 0)
 
         self.logger.info(_('Toplevel window initialized.'))
 

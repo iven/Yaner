@@ -33,7 +33,7 @@ from yaner.utils.Configuration import ConfigParser
 
 class Task(LoggingMixin, gobject.GObject):
     """
-    Task class is just downloading tasks, which provides data to L{TaskModel}.
+    Task class is just downloading tasks, which provides data to L{TaskListModel}.
     """
 
     __gsignals__ = {
