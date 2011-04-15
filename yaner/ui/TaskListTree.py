@@ -133,8 +133,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         Add a task to the model.
         @TODO: Test this.
         """
-        self.logger.debug(_('Adding task {}...').format(
-            task.uuid))
+        self.logger.debug(_('Adding task {}...').format(task.uuid))
         iter_ = self.append()
         self.set_data_for_task(iter_, task)
 
