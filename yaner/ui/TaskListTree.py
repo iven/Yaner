@@ -21,66 +21,78 @@
 #
 
 """
-This module contains the tree view classes of the C{gtk.TreeView} on the
-left of the toplevel window.
-
-A B{Pool} means a aria2 server, to avoid conflict with download servers.
+This module contains the classes of the task list tree view on the
+topright of the toplevel window.
 """
 
 import gtk
 import gobject
 import pango
 
+from yaner.Task import Task
 from yaner.Presentable import Presentable
 from yaner.ui.Misc import get_mix_color
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 
-class PoolModel(gtk.TreeStore, LoggingMixin):
+class TaskListModel(gtk.TreeStore, LoggingMixin):
     """
-    The tree interface used by L{PoolView}.
+    The tree interface used by task list treeviews.
     """
 
-    def __init__(self, pools):
+    def __init__(self, presentable = None):
         """
-        L{PoolModel} initializing.
-        @arg pools:Aria2 servers providing data to L{PoolModel}.
-        @type pools:list of L{yaner.Pool}
+        L{TaskListModel} initializing.
+        @arg tasks:Tasks providing data to L{TaskListModel}.
+        @type tasks:L{yaner.Task}
         """
         gtk.TreeStore.__init__(self,
-                gobject.TYPE_STRING,    # stock-id of the icon
+                gobject.TYPE_STRING,    # gid
+                gobject.TYPE_STRING,    # status
                 gobject.TYPE_STRING,    # name
-                gobject.TYPE_STRING,    # description
-                Presentable,            # presentable
+                gobject.TYPE_FLOAT,     # progress value
+                gobject.TYPE_STRING,    # progress text
+                gobject.TYPE_STRING,    # size
+                gobject.TYPE_STRING,    # download speed
+                gobject.TYPE_STRING,    # upload speed
+                gobject.TYPE_INT,       # connections
+                gobject.TYPE_STRING,    # uuid
+                Task,                   # task
                 )
         LoggingMixin.__init__(self)
 
         self._columns = Enum((
-            'ICON',
+            'GID',
+            'STATUS',
             'NAME',
-            'DESCRIPTION',
-            'PRESENTABLE',
+            'PRGRESS_VALUE',
+            'PRGRESS_TEXT',
+            'SIZE',
+            'DOWNLOAD_SPEED',
+            'UPLOAD_SPEED',
+            'CONNECTIONS',
+            'UUID',
+            'TASK',
             ))
-        self.pools = pools
+        self._presentable = presentable
 
     @property
-    def pools(self):
-        """Get the pools of the tree model."""
-        return self._pools
+    def presentable(self):
+        """Get the presentable of the tree model."""
+        return self._presentable
 
-    @pools.setter
-    def pools(self, new_pools):
+    @presentable.setter
+    def presentable(self, new_presentable):
         """
-        Set the pools of the tree model, and update it.
+        Set the presentable of the tree model, and update it.
         """
         self.clear()
-        for pool in new_pools:
-            pool.connect('presentable-added', self.on_presentable_added)
-            pool.connect('presentable-removed', self.on_presentable_removed)
-            pool.connect('presentable-changed', self.on_presentable_changed)
-            for presentable in pool.presentables:
-                self.add_presentable(presentable)
-        self._pools = new_pools
+        new_presentable.connect('task-added', self.on_task_added)
+        new_presentable.connect('task-removed', self.on_task_removed)
+        new_presentable.connect('task-changed', self.on_task_changed)
+        for task in new_presentable.tasks:
+            self.add_task(task)
+        self._presentable = new_presentable
 
     @property
     def columns(self):
@@ -91,84 +103,80 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         """
         return self._columns
 
-    def on_presentable_added(self, pool, presentable):
+    def on_task_added(self, presentable, task):
         """
-        When new presentable appears in one of the pools, add it to the model.
-        @TODO: Test this.
+        When new task added in the presentable, add it to the model.
         """
-        self.add_presentable(presentable)
+        self.add_task(task)
 
-    def on_presentable_removed(self, pool, presentable):
+    def on_task_removed(self, presentable, task):
         """
-        When a presentable removed from one of the pools, remove it from
+        When a task removed from the presentable, remove it from
         the model.
         @TODO: Test this.
         """
-        iter_ = self.get_iter_for_presentable(presentable)
+        iter_ = self.get_iter_for_task(task)
         if iter_ != None:
             self.remove(_iter)
 
-    def on_presentable_changed(self, pool, presentable):
+    def on_task_changed(self, presentable, task):
         """
-        When a presentable changed, update the iter of the model.
+        When a task changed, update the iter of the model.
         @TODO: Test this.
         """
-        if presentable in pool.presentables:
-            iter_ = self.get_iter_for_presentable(presentable)
-            self.set_data_for_presentable(iter_, presentable)
+        if task in presentable.tasks:
+            iter_ = self.get_iter_for_task(task)
+            self.set_data_for_task(iter_, task)
 
-    def add_presentable(self, presentable):
+    def add_task(self, task):
         """
-        Add a presentable to the model.
+        Add a task to the model.
         @TODO: Test this.
         """
-        self.logger.debug(_('Adding presentable {}...').format(
-            presentable.uuid))
-        parent = presentable.parent
-        parent_iter = None
-        if not parent is None:
-            parent_iter = self.get_iter_for_presentable(parent)
-            if parent_iter is None:
-                self.logger.warning(_('No parent presentable for {}.').format(
-                    presentable.uuid))
-                self.add_presentable(parent)
-                parent_iter = self.get_iter_for_presentable(parent)
-        iter_ = self.append(parent_iter)
-        self.set_data_for_presentable(iter_, presentable)
+        self.logger.debug(_('Adding task {}...').format(task.uuid))
+        iter_ = self.append()
+        self.set_data_for_task(iter_, task)
 
-    def set_data_for_presentable(self, iter_, presentable):
+    def set_data_for_task(self, iter_, task):
         """
-        Update the iter data for presentable.
+        Update the iter data for task.
         """
         self.set(iter_,
-                self.columns.ICON, presentable.icon,
-                self.columns.DESCRIPTION, presentable.description,
-                self.columns.NAME, presentable.name,
-                self.columns.PRESENTABLE, presentable,
+                self.columns.GID, task.gid,
+                self.columns.STATUS, task.status,
+                self.columns.NAME, task.name,
+                self.columns.PRGRESS_VALUE, task.progress_value,
+                self.columns.PRGRESS_TEXT, task.progress_text,
+                self.columns.SIZE, task.size,
+                self.columns.DOWNLOAD_SPEED, task.download_speed,
+                self.columns.UPLOAD_SPEED, task.upload_speed,
+                self.columns.CONNECTIONS, task.connections,
+                self.columns.UUID, task.uuid,
+                self.columns.TASK, task,
                 )
 
-    def get_iter_for_presentable(self, presentable):
+    def get_iter_for_task(self, task):
         """
-        Get the TreeIter according to the presentable.
+        Get the TreeIter according to the task.
         @TODO: Test this.
         """
         iter_ = self.get_iter_first()
         while not iter_ is None:
-            if presentable is self.get_value(iter_, self.columns.PRESENTABLE):
+            if task is self.get_value(iter_, self.columns.TASK):
                 return iter_
             iter_ = self.iter_next(iter_)
         return None
 
-class PoolView(gtk.TreeView):
+class TaskListView(gtk.TreeView):
     """
-    The C{gtk.TreeView} displaying L{PoolModel}.
+    The C{gtk.TreeView} displaying L{TaskListModel}.
     """
 
     def __init__(self, model):
         """
-        L{PoolView} initializing.
+        L{TaskListView} initializing.
         @arg model:The interface of the tree view.
-        @type model:L{PoolModel}
+        @type model:L{TaskListModel}
         """
         gtk.TreeView.__init__(self, model)
 
@@ -196,7 +204,7 @@ class PoolView(gtk.TreeView):
 
     @property
     def model(self):
-        """Get the L{model<PoolModel>} of the tree view."""
+        """Get the L{model<TaskListModel>} of the tree view."""
         return self._model
 
     @property
@@ -206,7 +214,7 @@ class PoolView(gtk.TreeView):
 
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
-        stock_id = model.get_value(iter_, self.model.columns.ICON)
+        stock_id = model.get_value(iter_, self.model.columns.STATUS)
         renderer.set_properties(
                 stock_id = stock_id,
                 stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
@@ -219,7 +227,7 @@ class PoolView(gtk.TreeView):
         (name, description) = model.get(
                 iter_,
                 self.model.columns.NAME,
-                self.model.columns.DESCRIPTION,
+                self.model.columns.DOWNLOAD_SPEED,
                 )
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
