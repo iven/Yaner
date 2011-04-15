@@ -87,10 +87,10 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         Set the presentable of the tree model, and update it.
         """
         self.clear()
-        presentable.connect('task-added', self.on_task_added)
-        presentable.connect('task-removed', self.on_task_removed)
-        presentable.connect('task-changed', self.on_task_changed)
-        for task in presentable.tasks:
+        new_presentable.connect('task-added', self.on_task_added)
+        new_presentable.connect('task-removed', self.on_task_removed)
+        new_presentable.connect('task-changed', self.on_task_changed)
+        for task in new_presentable.tasks:
             self.add_task(task)
         self._presentable = new_presentable
 

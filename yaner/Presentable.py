@@ -27,6 +27,7 @@ This module contains the L{Presentable} class of L{yaner}.
 import os
 import gobject
 
+from yaner.Task import Task
 from yaner.Constants import U_CONFIG_DIR
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
@@ -39,6 +40,11 @@ class Presentable(LoggingMixin, gobject.GObject):
     __gsignals__ = {
             'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
             'removed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
+            'task-added': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (Task,)),
+            'task-removed': (gobject.SIGNAL_RUN_LAST,
+                gobject.TYPE_NONE, (Task,)),
+            'task-changed': (gobject.SIGNAL_RUN_LAST,
+                gobject.TYPE_NONE, (Task,)),
             }
     """
     GObject signals of this class.
@@ -55,6 +61,7 @@ class Presentable(LoggingMixin, gobject.GObject):
 
         self._uuid = uuid_
         self._config = self._init_config(default_config)
+        self._tasks = []
 
     @property
     def uuid(self):
@@ -65,6 +72,11 @@ class Presentable(LoggingMixin, gobject.GObject):
     def config(self):
         """Get the configuration of the presentable."""
         return self._config
+
+    @property
+    def tasks(self):
+        """Get the tasks of the presentable."""
+        return self._tasks
 
     def _init_config(self, default_config):
         """
