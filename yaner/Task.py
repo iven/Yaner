@@ -54,7 +54,7 @@ class Task(LoggingMixin, gobject.GObject):
         gobject.GObject.__init__(self)
 
         self._uuid = uuid_
-        self._config = self._init_config(config)
+        self._config = None
 
     @property
     def uuid(self):
@@ -63,20 +63,18 @@ class Task(LoggingMixin, gobject.GObject):
 
     @property
     def config(self):
-        """Get the configuration of the task."""
-        return self._config
-
-    def _init_config(self, default_config):
         """
-        Open task configuration file as L{self.config}.
+        Get the configuration of the task.
         If the file doesn't exist, read from the default configuration.
         If the task configuration directory doesn't exist, create it.
         """
-        config = ConfigParser(self._CONFIG_DIR, self.uuid)
-        if config.empty():
-            self.logger.info(
-                    _('No task configuration file, creating...'))
-            config.update(default_config)
-            self._uuid = config.file
-        return config
+        if self._config is None:
+            config = ConfigParser(self._CONFIG_DIR, self.uuid)
+            if config.empty():
+                self.logger.info(
+                        _('No task configuration file, creating...'))
+                config.update(default_config)
+                self._uuid = config.file
+            self._config = config
+        return self._config
 

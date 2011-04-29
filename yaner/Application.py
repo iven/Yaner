@@ -70,22 +70,35 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         UniqueApplicationMixin.__init__(self, self._BUS_NAME)
         LoggingMixin.__init__(self)
 
-        self._init_logging()
-        self._config = self._init_config()
+        self._toplevel = None
+        self._config = None
 
-        # Set up toplevel window
-        self._toplevel = Toplevel(self._config)
-        self._toplevel.show_all()
-        self._toplevel.connect("destroy", self.quit)
+        # Set up and show toplevel window
+        self.toplevel.show_all()
 
     @property
     def toplevel(self):
         """Get the toplevel window of L{yaner}."""
+        if self._toplevel is None:
+            self._toplevel = Toplevel(self.config)
+            self._toplevel.connect("destroy", self.quit)
         return self._toplevel
 
     @property
     def config(self):
-        """Get the global configuration of the application."""
+        """
+        Get the global configuration of the application.
+        If the file doesn't exist, read from the default configuration.
+        If the user configuration directory doesn't exist, create it.
+        """
+        if self._config is None:
+            self.logger.info(_('Reading global configuration file...'))
+            config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
+            if config.empty():
+                self.logger.info(_('No global configuration file, creating...'))
+                from yaner.Configurations import GLOBAL_CONFIG
+                config.update(GLOBAL_CONFIG)
+            self._config = config
         return self._config
 
     @staticmethod
@@ -115,20 +128,6 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             level = logging.DEBUG
             )
         self.logger.info(_('Logging system initialized, start logging...'))
-
-    def _init_config(self):
-        """
-        Open global configuration file as L{self.config}.
-        If the file doesn't exist, read from the default configuration.
-        If the user configuration directory doesn't exist, create it.
-        """
-        self.logger.info(_('Reading global configuration file...'))
-        config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
-        if config.empty():
-            self.logger.info(_('No global configuration file, creating...'))
-            from yaner.Configurations import GLOBAL_CONFIG
-            config.update(GLOBAL_CONFIG)
-        return config
 
     def quit(self, *arg, **kwargs):
         """

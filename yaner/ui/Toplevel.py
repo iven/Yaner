@@ -69,15 +69,13 @@ class Toplevel(gtk.Window, LoggingMixin):
         self.add(vbox)
 
         # UIManager: Toolbar and menus
-        self._action_group = self._init_action_group()
-        self._ui_manager = self._init_ui_manager()
-        if self._ui_manager is None:
-            return
+        self._action_group = None
+        self._ui_manager = None
 
-        menubar = self._ui_manager.get_widget('/menubar')
+        menubar = self.ui_manager.get_widget('/menubar')
         vbox.pack_start(menubar, False, False, 0)
 
-        toolbar = self._ui_manager.get_widget('/toolbar')
+        toolbar = self.ui_manager.get_widget('/toolbar')
         vbox.pack_start(toolbar, False, False, 0)
 
         # HPaned: PoolView as left, TaskVBox as right
@@ -111,11 +109,15 @@ class Toplevel(gtk.Window, LoggingMixin):
     @property
     def ui_manager(self):
         """Get the UI Manager of L{yaner}."""
+        if self._ui_manager is None:
+            self._ui_manager = self._init_ui_manager()
         return self._ui_manager
 
     @property
     def action_group(self):
         """Get the action group of L{yaner}."""
+        if self._action_group is None:
+            self._action_group = self._init_action_group()
         return self._action_group
 
     @property

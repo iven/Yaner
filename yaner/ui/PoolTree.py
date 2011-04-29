@@ -55,12 +55,14 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
                 )
         LoggingMixin.__init__(self)
 
+        self._pools = None
         self._columns = Enum((
             'ICON',
             'NAME',
             'DESCRIPTION',
             'PRESENTABLE',
             ))
+
         self.pools = pools
 
     @property
