@@ -175,7 +175,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         """
         pools = []
         pool_uuids = self.config['info']['pools']
-        self.logger.debug(_('Got pool(s): {}.').format(pool_uuids))
+        self.logger.debug(_('Got pool(s): {0}.').format(pool_uuids))
         for pool_uuid in eval(pool_uuids):
             pool = Pool(pool_uuid)
             pool.connect('presentable-added', self.update)

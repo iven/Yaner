@@ -110,7 +110,7 @@ class Pool(LoggingMixin, gobject.GObject):
         queuing = Queuing(info['queuing'], info['name'])
         queuing.connect("changed", self.queuing_changed)
         presentables.append(queuing)
-        self.logger.debug(_('Created queuing presentable: {}.').format(
+        self.logger.debug(_('Created queuing presentable: {0}.').format(
             queuing.uuid))
 
         categories = []
@@ -118,12 +118,12 @@ class Pool(LoggingMixin, gobject.GObject):
             category = Category(category_uuid, queuing)
             categories.append(category)
             presentables.append(category)
-            self.logger.debug(_('Created category presentable: {}.').format(
+            self.logger.debug(_('Created category presentable: {0}.').format(
                 category.uuid))
 
         dustbin = Dustbin(info['dustbin'], queuing)
         presentables.append(dustbin)
-        self.logger.debug(_('Created dustbin presentable: {}.').format(
+        self.logger.debug(_('Created dustbin presentable: {0}.').format(
             dustbin.uuid))
 
         if info['queuing'] == '':

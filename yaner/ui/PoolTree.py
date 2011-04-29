@@ -122,14 +122,14 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         Add a presentable to the model.
         @TODO: Test this.
         """
-        self.logger.debug(_('Adding presentable {}...').format(
+        self.logger.debug(_('Adding presentable {0}...').format(
             presentable.uuid))
         parent = presentable.parent
         parent_iter = None
         if not parent is None:
             parent_iter = self.get_iter_for_presentable(parent)
             if parent_iter is None:
-                self.logger.warning(_('No parent presentable for {}.').format(
+                self.logger.warning(_('No parent presentable for {0}.').format(
                     presentable.uuid))
                 self.add_presentable(parent)
                 parent_iter = self.get_iter_for_presentable(parent)

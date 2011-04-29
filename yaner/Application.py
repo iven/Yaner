@@ -42,7 +42,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
     The name of the application, used by L{_BUS_NAME}, etc.
     """
 
-    _BUS_NAME = 'com.kissuki.{}'.format(_NAME)
+    _BUS_NAME = 'com.kissuki.{0}'.format(_NAME)
     """
     The unique bus name of the application, which identifies
     the application when using DBus to implement the
@@ -54,10 +54,10 @@ class Application(UniqueApplicationMixin, LoggingMixin):
     User config directory containing configuration files and log files.
     """
 
-    _LOG_FILE = '{}.log'.format(_NAME)
+    _LOG_FILE = '{0}.log'.format(_NAME)
     """The logging file of the application."""
 
-    _CONFIG_FILE = '{}.conf'.format(_NAME)
+    _CONFIG_FILE = '{0}.conf'.format(_NAME)
     """The global configuration file of the application."""
 
     def __init__(self):
