@@ -116,7 +116,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         @TODO: Test this.
         """
         iter_ = self.get_iter_for_task(task)
-        if iter_ != None:
+        if iter_ is not None:
             self.remove(_iter)
 
     def on_task_changed(self, presentable, task):

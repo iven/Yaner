@@ -105,7 +105,7 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         @TODO: Test this.
         """
         iter_ = self.get_iter_for_presentable(presentable)
-        if iter_ != None:
+        if iter_ is not None:
             self.remove(_iter)
 
     def on_presentable_changed(self, pool, presentable):
