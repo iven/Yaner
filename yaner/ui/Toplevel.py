@@ -33,6 +33,7 @@ import logging
 
 from yaner.Pool import Pool
 from yaner.ui.Constants import UI_DIR
+from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.utils.Logging import LoggingMixin
@@ -43,7 +44,7 @@ class Toplevel(gtk.Window, LoggingMixin):
     _UI_FILE = os.path.join(UI_DIR, "ui.xml")
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
-    def __init__(self, config):
+    def __init__(self, bus, config):
         """
         Create toplevel window of L{yaner}. The window structure is
         like this:
@@ -103,6 +104,9 @@ class Toplevel(gtk.Window, LoggingMixin):
         self._task_list_model = TaskListModel()
         self._task_list_view = TaskListView(self._task_list_model)
         task_vbox.pack_start(self._task_list_view, True, True, 0)
+
+        # Dialogs
+        self._task_new_dialog = TaskNewDialog(bus, self._pool_model)
 
         self.logger.info(_('Toplevel window initialized.'))
 

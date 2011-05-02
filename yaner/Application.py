@@ -28,7 +28,7 @@ import os
 import logging
 from twisted.internet import reactor
 
-from yaner.Constants import PREFIX, U_CONFIG_DIR
+from yaner.Constants import PREFIX, U_CONFIG_DIR, BUS_NAME
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
@@ -39,14 +39,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
 
     _NAME = __package__
     """
-    The name of the application, used by L{_BUS_NAME}, etc.
-    """
-
-    _BUS_NAME = 'com.kissuki.{0}'.format(_NAME)
-    """
-    The unique bus name of the application, which identifies
-    the application when using DBus to implement the
-    L{UniqueApplicationMixin} class.
+    The name of the application, used by L{_LOG_FILE}, etc.
     """
 
     _CONFIG_DIR = U_CONFIG_DIR
@@ -67,7 +60,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         It handles command line options, creates L{toplevel window
         <Toplevel>}, and initialize logging configuration.
         """
-        UniqueApplicationMixin.__init__(self, self._BUS_NAME)
+        UniqueApplicationMixin.__init__(self, BUS_NAME)
         LoggingMixin.__init__(self)
 
         self._toplevel = None
@@ -80,7 +73,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
     def toplevel(self):
         """Get the toplevel window of L{yaner}."""
         if self._toplevel is None:
-            self._toplevel = Toplevel(self.config)
+            self._toplevel = Toplevel(self.bus, self.config)
             self._toplevel.connect("destroy", self.quit)
         return self._toplevel
 
