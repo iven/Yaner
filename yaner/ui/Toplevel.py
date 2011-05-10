@@ -30,8 +30,10 @@ import gobject
 import os
 import sys
 import logging
+from functools import partial
 
 from yaner.Pool import Pool
+from yaner.Task import Task
 from yaner.ui.Constants import UI_DIR
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.PoolTree import PoolModel, PoolView
@@ -125,6 +127,11 @@ class Toplevel(gtk.Window, LoggingMixin):
         return self._action_group
 
     @property
+    def task_new_dialog(self):
+        """Get the new task dialog of the window."""
+        return self._task_new_dialog
+
+    @property
     def config(self):
         """Get the global configuration of the application."""
         return self._config
@@ -138,9 +145,12 @@ class Toplevel(gtk.Window, LoggingMixin):
         action_entries = (
                 ("file", None, _("File")),
                 ("task_new", "gtk-add"),
-                ("task_new_normal", None, _("HTTP/FTP/BT Magnet")),
-                ("task_new_bt", None, _("BitTorrent")),
-                ("task_new_ml", None, _("Metalink")),
+                ("task_new_normal", None, _("HTTP/FTP/BT Magnet"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.NORMAL)),
+                ("task_new_bt", None, _("BitTorrent"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.BT)),
+                ("task_new_ml", None, _("Metalink"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.ML)),
                 ("quit", "gtk-quit", None, None, None, self.destroy),
         )
 
@@ -206,6 +216,9 @@ class Toplevel(gtk.Window, LoggingMixin):
         (model, iter_) = selection.get_selected()
         presentable = model.get_value(iter_, model.columns.PRESENTABLE)
         self._task_list_model.presentable = presentable
+
+    def on_task_new(self, action, user_data, task_type):
+        self.task_new_dialog.run_dialog(task_type)
 
     def update(self):
         """Update the window."""

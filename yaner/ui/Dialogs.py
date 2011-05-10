@@ -92,7 +92,7 @@ class TaskDialogMixin(LoggingMixin):
         """Map task option names to widgets."""
         if self._option_widgets == {}:
             for (option, widget_name) in self._option_widget_names.iteritems():
-                self._option_widgets[option] = self.widgets[name]
+                self._option_widgets[option] = self.widgets[widget_name]
         return self._option_widgets
 
     @property
@@ -126,12 +126,12 @@ class TaskDialogMixin(LoggingMixin):
         Reset options and widgets to default. If new_options is provided,
         current options will be updated with it.
         """
-        self._options = self.config.options.copy()
+        self._options = self.config['options'].copy()
         options = self._options
-        if options:
-            self.__set_uris(task_type, options.pop('uris').split('|'))
-            for key, value in options.iteritems():
-                self._options[str(key)] = str(value)
+        if new_options:
+            self.uris = new_options.pop('uris').split('|')
+            for key, value in new_options.iteritems():
+                options[str(key)] = str(value)
         self.update_widgets()
 
     def update_widgets(self):
@@ -318,13 +318,13 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         the directory entry.
         """
         dialog = gtk.FileChooserDialog(_('Select download directory'),
-                self.__get_widgets()['dialog'],
+                self.widgets['dialog'],
                 gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                 (_('_Cancel'), gtk.RESPONSE_CANCEL,
                     _('_Select'), gtk.RESPONSE_OK))
         if dialog.run() == gtk.RESPONSE_OK:
             directory = dialog.get_filename()
-            self.prefs['dir'].set_text(directory)
+            self.widgets['dir_entry'].set_text(directory)
         dialog.destroy()
 
     def on_cate_cb_changed(self, cate_cb):
