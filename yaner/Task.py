@@ -30,6 +30,7 @@ import gobject
 from yaner.utils.Logging import LoggingMixin
 from yaner.Constants import U_CONFIG_DIR
 from yaner.utils.Configuration import ConfigParser
+from yaner.utils.Enum import Enum
 
 class Task(LoggingMixin, gobject.GObject):
     """
@@ -47,6 +48,16 @@ class Task(LoggingMixin, gobject.GObject):
     _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'tasks')
     """
     User config directory containing task configuration files.
+    """
+
+    TYPES = Enum((
+        'NORMAL',
+        'BT',
+        'ML',
+        ))
+    """
+    The types of the task, which is a L{Enum<yaner.utils.Enum>}.
+    C{TASKS.NAME} will return the type number of C{NAME}.
     """
 
     def __init__(self, uuid_, config):
