@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-03-16 01:46+0800\n"
+"POT-Creation-Date: 2011-05-12 02:18+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,19 +17,19 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: scripts/../yaner/Application.py:117
-msgid "Logging system initialized, start logging..."
-msgstr ""
-
-#: scripts/../yaner/Application.py:125
+#: scripts/../yaner/Application.py:88
 msgid "Reading global configuration file..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:128
+#: scripts/../yaner/Application.py:91
 msgid "No global configuration file, creating..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:138
+#: scripts/../yaner/Application.py:123
+msgid "Logging system initialized, start logging..."
+msgstr ""
+
+#: scripts/../yaner/Application.py:130
 msgid "Application quit normally."
 msgstr ""
 
@@ -41,32 +41,52 @@ msgstr ""
 msgid "Default Category"
 msgstr ""
 
-#: scripts/../yaner/Dustbin.py:43
+#: scripts/../yaner/Dustbin.py:42
 msgid "Dustbin"
 msgstr ""
 
-#: scripts/../yaner/Pool.py:97
+#: scripts/../yaner/Pool.py:94
 msgid "No pool configuration file, creating..."
 msgstr ""
 
-#: scripts/../yaner/Pool.py:106
+#: scripts/../yaner/Pool.py:107 scripts/../yaner/Pool.py:146
+msgid "Created queuing presentable: {0}."
+msgstr ""
+
+#: scripts/../yaner/Pool.py:121 scripts/../yaner/Pool.py:154
+msgid "Created category presentable: {0}."
+msgstr ""
+
+#: scripts/../yaner/Pool.py:131 scripts/../yaner/Pool.py:159
+msgid "Created dustbin presentable: {0}."
+msgstr ""
+
+#: scripts/../yaner/Pool.py:139
 msgid "Initializing presentables..."
 msgstr ""
 
-#: scripts/../yaner/Pool.py:113
-msgid "Created queuing presentable: {}."
-msgstr ""
-
-#: scripts/../yaner/Pool.py:121
-msgid "Created category presentable: {}."
-msgstr ""
-
-#: scripts/../yaner/Pool.py:126
-msgid "Created dustbin presentable: {}."
-msgstr ""
-
-#: scripts/../yaner/Presentable.py:78
+#: scripts/../yaner/Presentable.py:83
 msgid "No presentable configuration file, creating..."
+msgstr ""
+
+#: scripts/../yaner/Task.py:86
+msgid "No task configuration file, creating..."
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:73
+msgid "No task options config file, creating..."
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:332
+msgid "Select download directory"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:335
+msgid "_Cancel"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:336
+msgid "_Select"
 msgstr ""
 
 #: scripts/../yaner/ui/Misc.py:46
@@ -74,65 +94,69 @@ msgid "@widget is not a gtk.Widget."
 msgstr ""
 
 #: scripts/../yaner/ui/Misc.py:57
-msgid "Got mix color: {}."
+msgid "Got mix color: {0}."
 msgstr ""
 
-#: scripts/../yaner/ui/PoolTree.py:125
-msgid "Adding presentable {}..."
+#: scripts/../yaner/ui/PoolTree.py:122
+msgid "Adding presentable {0}..."
 msgstr ""
 
-#: scripts/../yaner/ui/PoolTree.py:132
-msgid "No parent presentable for {}."
+#: scripts/../yaner/ui/PoolTree.py:129
+msgid "No parent presentable for {0}."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:59
+#: scripts/../yaner/ui/TaskListTree.py:139
+msgid "Adding task {}..."
+msgstr ""
+
+#: scripts/../yaner/ui/Toplevel.py:63
 msgid "Initializing toplevel window..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:101
+#: scripts/../yaner/ui/Toplevel.py:113
 msgid "Toplevel window initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:120
+#: scripts/../yaner/ui/Toplevel.py:141
 msgid "Initializing action group..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:125
+#: scripts/../yaner/ui/Toplevel.py:146
 msgid "File"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:127
+#: scripts/../yaner/ui/Toplevel.py:148
 msgid "HTTP/FTP/BT Magnet"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:128
+#: scripts/../yaner/ui/Toplevel.py:150
 msgid "BitTorrent"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:129
+#: scripts/../yaner/ui/Toplevel.py:152
 msgid "Metalink"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:143
+#: scripts/../yaner/ui/Toplevel.py:167
 msgid "Action group initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:149
+#: scripts/../yaner/ui/Toplevel.py:173
 msgid "Initializing UI Manager..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:156
+#: scripts/../yaner/ui/Toplevel.py:180
 msgid "Failed to add ui file to UIManager."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:160
+#: scripts/../yaner/ui/Toplevel.py:184
 msgid "UI Manager initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:170
-msgid "Got pool(s): {}."
+#: scripts/../yaner/ui/Toplevel.py:194
+msgid "Got pool(s): {0}."
 msgstr ""
 
 #: scripts/../yaner/utils/Configuration.py:62
-msgid "Created directory {}."
+msgid "Created directory {0}."
 msgstr ""
