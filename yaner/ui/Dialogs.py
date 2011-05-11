@@ -25,10 +25,12 @@ This module contains the dialog classes of L{yaner}.
 """
 
 import gtk
+import gobject
 import os
 import dbus.service
 
 from yaner.Pool import Pool
+from yaner.Category import Category
 from yaner.Constants import U_CONFIG_DIR
 from yaner.Constants import BUS_NAME as INTERFACE_NAME
 from yaner.ui.Constants import UI_DIR
@@ -140,13 +142,13 @@ class TaskDialogMixin(LoggingMixin):
         current options.
         """
         options = self._options
-        for (pref, widget) in self.option_widgets.iteritems():
+        for (option, widget) in self.option_widgets.iteritems():
             if hasattr(widget, 'set_value'):
-                widget.set_value(float(options[pref]))
+                widget.set_value(float(options[option]))
             elif hasattr(widget, 'set_text'):
-                widget.set_text(options[pref])
+                widget.set_text(options[option])
             elif hasattr(widget, 'set_active'):
-                widget.set_active(options[pref] == 'true')
+                widget.set_active(options[option] == 'true')
         if options['bt-prioritize-piece'] == 'head,tail':
             self.option_widgets['bt-prioritize-piece'].set_active(True)
 
@@ -162,13 +164,13 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
     """The Glade UI file of this dialog."""
 
     _WIDGET_NAMES = (
-            'dialog', 'server_cb', 'prioritize_checkbutton',
-            'cate_ls', 'normal_uri_textview', 'bt_uri_textview',
+            'dialog', 'pool_cb', 'prioritize_checkbutton',
+            'normal_uri_textview', 'bt_uri_textview',
             'http_pass_entry', 'ftp_user_entry', 'ftp_pass_entry',
             'torrent_filefilter', 'metalink_filefilter', 'dir_entry',
             'rename_entry', 'language_entry', 'http_user_entry', 'nb',
-            'max_peers_adjustment', 'seed_time_adjustment', 'cate_cb',
-            'seed_ratio_adjustment', 'version_adjustment', 'server_ls',
+            'max_peers_adjustment', 'seed_time_adjustment', 'category_cb',
+            'seed_ratio_adjustment', 'version_adjustment',
             'bt_file_chooser', 'metalink_file_chooser', 'os_adjustment',
             'split_adjustment', 'max_files_adjustment', 'referer_entry',
             'servers_adjustment', 'location_entry'
@@ -207,79 +209,84 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         self._init_filefilters()
 
     @property
+    def pools(self):
+        """Get the global pools."""
+        return self._pool_model.pools
+
+    @property
     def widgets(self):
         """Get a dict of widget of new task dialog."""
         if self._widgets == {}:
             get_object = self.builder.get_object
             for name in self._WIDGET_NAMES:
                 self._widgets[name] = get_object(name)
+
+            self._init_liststores(self._widgets)
         return self._widgets
 
-    def _init_filefilters(self):
-        """
-        Init Filefilters.
-        """
-        torrent_filefilter = self.widgets['torrent_filefilter']
-        metalink_filefilter = self.widgets['metalink_filefilter']
-        torrent_filefilter.add_mime_type("application/x-bittorrent")
-        metalink_filefilter.add_mime_type("application/xml")
+    @property
+    def task_type(self):
+        """Get the current task type of the dialog."""
+        return self.widgets['nb'].get_current_page()
 
-    def __get_active_server(self):
-        """
-        Get current selected Server.
-        """
-        active_iter = self.widgets['server_cb'].get_active_iter()
+    @task_type.setter
+    def task_type(self, new_type):
+        """Set the current task type of the dialog."""
+        self.widgets['nb'].set_current_page(new_type)
+
+    @property
+    def active_pool(self):
+        """Get current selected pool."""
+        active_iter = self.widgets['pool_cb'].get_active_iter()
         if active_iter is not None:
-            server_uuid = self.widgets['server_ls'].get(active_iter, 1)[0]
-            return Server.instances[server_uuid]
+            return self.widgets['pool_ls'].get_value(active_iter, 1)
         else:
             return None
 
-    def __get_active_cate(self):
-        """
-        Get current selected Category.
-        """
-        active_iter = self.widgets['cate_cb'].get_active_iter()
+    @property
+    def active_category(self):
+        """Get current selected Category."""
+        active_iter = self.widgets['category_cb'].get_active_iter()
         if active_iter is not None:
-            cate_uuid = self.widgets['cate_ls'].get(active_iter, 1)[0]
-            return Category.instances[cate_uuid]
+            return self.widgets['category_ls'].get_value(active_iter, 1)
         else:
             return None
 
-    def __get_uris(self, task_type):
-        """
-        Get URIs from textviews, returning a tuple of URIs.
-        """
-        if task_type == TASK_NORMAL:
+    @property
+    def uris(self):
+        """Get URIs from textviews, returning a tuple of URIs."""
+        if self.task_type == TASK_NORMAL:
             textview = self.widgets['normal_uri_textview']
-        elif task_type == TASK_BT:
+        elif self.task_type == TASK_BT:
             textview = self.widgets['bt_uri_textview']
         else:
-            return ""
+            return []
         tbuffer = textview.get_buffer()
         uris = tbuffer.get_text(
                 tbuffer.get_start_iter(),
                 tbuffer.get_end_iter()
                 )
-        return [uri.strip() for uri in uris.split("\n") if uri.strip()]
+        return uris.split()
 
-    def __set_uris(self, task_type, uris):
+    @uris.setter
+    def uris(self, new_uris):
         """
-        Set URIs of textviews, @uris is a tuple of URIs.
+        Set URIs of textviews.
+        @type new_uris: C{tuple} or C{list}
         """
-        if task_type == TASK_NORMAL:
+        if self.task_type == TASK_NORMAL:
             textview = self.widgets['normal_uri_textview']
-        elif task_type == TASK_BT:
+        elif self.task_type == TASK_BT:
             textview = self.widgets['bt_uri_textview']
         else:
             return
         tbuffer = textview.get_buffer()
         uris = tbuffer.set_text('\n'.join(uris))
 
-    def __get_metadata_file(self, task_type):
-        """
-        Get metadata file for BT and Metalink tasks.
-        """
+    @property
+    def metadata_file(self):
+        """Get metadata file for BT and Metalink tasks."""
+        task_type = self.task_type
         if task_type == TASK_METALINK:
             metadata_file = self.widgets['metalink_file_chooser'].get_filename()
         elif task_type == TASK_BT:
@@ -292,6 +299,27 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         else:
             return ""
 
+    def _init_filefilters(self):
+        """Init Filefilters."""
+        torrent_filefilter = self.widgets['torrent_filefilter']
+        metalink_filefilter = self.widgets['metalink_filefilter']
+        torrent_filefilter.add_mime_type("application/x-bittorrent")
+        metalink_filefilter.add_mime_type("application/xml")
+
+    def _init_liststores(self, widgets):
+        """Init ListStores."""
+        widgets['pool_ls'] = gtk.ListStore(
+                gobject.TYPE_STRING,
+                Pool,
+                )
+        widgets['pool_cb'].set_model(widgets['pool_ls'])
+
+        widgets['category_ls'] = gtk.ListStore(
+                gobject.TYPE_STRING,
+                Category,
+                )
+        widgets['category_cb'].set_model(widgets['category_ls'])
+
     @dbus.service.method(INTERFACE_NAME,
             in_signature = 'ia{ss}', out_signature = '')
     def run_dialog(self, task_type, options = {}):
@@ -300,14 +328,14 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         """
         widgets = self.widgets
         # set current page of the notebook
-        widgets['nb'].set_current_page(task_type)
+        self.task_type = task_type
         # init widgets status
         self.init_options(options)
         # init the server cb
-        widgets['server_ls'].clear()
-        #for pool in self._pools:
-        #    widgets['server_ls'].append([pool.name, pool])
-        #widgets['server_cb'].set_active(0)
+        widgets['pool_ls'].clear()
+        for pool in self.pools:
+            widgets['pool_ls'].append([pool.name, pool])
+        widgets['pool_cb'].set_active(0)
         # TODO: Show main window
         # run the dialog
         widgets['dialog'].run()
@@ -327,24 +355,22 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
             self.widgets['dir_entry'].set_text(directory)
         dialog.destroy()
 
-    def on_cate_cb_changed(self, cate_cb):
+    def on_category_cb_changed(self, category_cb):
         """
         When category combobox selection changed, update the directory entry.
         """
-        active_cate = self.__get_active_cate()
-        if active_cate is not None:
-            self.prefs['dir'].set_text(active_cate.get_dir())
+        if self.active_category is not None:
+            self.widgets['dir_entry'].set_text(self.active_category.dir)
 
-    def on_server_cb_changed(self, server_cb):
+    def on_pool_cb_changed(self, pool_cb):
         """
         When server combobox selection changed, update the category combobox.
         """
-        active_server = self.__get_active_server()
-        if active_server is not None:
-            self.widgets['cate_ls'].clear()
-            for cate in active_server.get_cates():
-                self.widgets['cate_ls'].append([cate.get_name(), cate.uuid])
-            self.widgets['cate_cb'].set_active(0)
+        if self.active_pool is not None:
+            self.widgets['category_ls'].clear()
+            for category in self.active_pool.categories:
+                self.widgets['category_ls'].append([category.name, category])
+            self.widgets['category_cb'].set_active(0)
 
     def on_dialog_response(self, dialog, response):
         """
@@ -354,15 +380,14 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
             dialog.hide()
             return
 
-        task_type = self.widgets['nb'].get_current_page()
-        uris = self.__get_uris(task_type)
-        metadata_file = self.__get_metadata_file(task_type)
-        self.update_options()
-        options = self._options
-        cate = self.__get_active_cate()
+        task_type = self.task_type
+        uris = self.uris
+        metadata_file = self.metadata_file
+        options = self.options
+        category = self.active_category
         info = {}
-        info['server'] = self.__get_active_server().uuid
-        info['cate'] = cate.uuid
+        info['pool'] = self.active_pool.uuid
+        info['category'] = self.active_category.uuid
         info['uuid'] = str(uuid.uuid4())
         info['percent'] = 0
         info['size'] = 0
@@ -387,7 +412,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
             info['name'] = os.path.basename(metadata_file)
         else:
             return
-        cate.add_task(info, options)
+        category.add_task(info, options)
         dialog.hide()
 
 class TaskProfileDialog(TaskDialogMixin):

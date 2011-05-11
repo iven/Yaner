@@ -38,13 +38,24 @@ class Category(Presentable):
 
     @property
     def name(self):
-        """Get the name of the presentable."""
+        """Get the name of the category."""
         return self.config['info']['name']
 
     @name.setter
-    def name(self):
-        """Set the name of the presentable."""
+    def name(self, new_name):
+        """Set the name of the category."""
         self.config['info']['name'] = new_name
+        self.emit('changed')
+
+    @property
+    def dir(self):
+        """Get the directory of the category."""
+        return self.config['info']['dir']
+
+    @dir.setter
+    def dir(self, new_dir):
+        """Set the directory of the category."""
+        self.config['info']['dir'] = new_dir
         self.emit('changed')
 
     @property
