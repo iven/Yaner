@@ -27,7 +27,6 @@ This module contains the dialog classes of L{yaner}.
 import gtk
 import gobject
 import os
-import uuid
 import dbus.service
 
 from yaner.Pool import Pool
@@ -388,28 +387,22 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         options = self.options
         category = self.active_category
         info = {}
-        info['pool'] = self.active_pool.uuid
-        info['category'] = self.active_category.uuid
-        info['uuid'] = str(uuid.uuid4())
         info['percent'] = 0
         info['size'] = 0
-        info['gid'] = ''
-        info['status'] = 'paused'
         info['type'] = task_type
 
-        print info
         if task_type == Task.TYPES.ML and metadata_file:
             info['metalink'] = metadata_file
             info['name'] = os.path.basename(metadata_file)
         elif task_type == Task.TYPES.NORMAL and uris:
-            info['uris'] = '|'.join(uris)
+            info['uris'] = uris
             if options.has_key('out'):
                 info['name'] = options['out']
             else:
                 info['name'] = os.path.basename(uris[0])
         elif task_type == Task.TYPES.BT and metadata_file:
             info['torrent'] = metadata_file
-            info['uris'] = '|'.join(uris)
+            info['uris'] = uris
             info['name'] = os.path.basename(metadata_file)
         else:
             return
