@@ -27,9 +27,11 @@ This module contains the dialog classes of L{yaner}.
 import gtk
 import gobject
 import os
+import uuid
 import dbus.service
 
 from yaner.Pool import Pool
+from yaner.Task import Task
 from yaner.Category import Category
 from yaner.Constants import U_CONFIG_DIR
 from yaner.Constants import BUS_NAME as INTERFACE_NAME
@@ -104,19 +106,19 @@ class TaskDialogMixin(LoggingMixin):
         """
         options = self._options
         for (option, widget) in self.option_widgets.iteritems():
-            if pref == 'seed-ratio':
-                options[pref] = str(widget.get_value())
+            if option == 'seed-ratio':
+                options[option] = str(widget.get_value())
             elif hasattr(widget, 'get_value'):
-                options[pref] = str(int(widget.get_value()))
+                options[option] = str(int(widget.get_value()))
             elif hasattr(widget, 'get_text'):
                 text = widget.get_text()
                 if text != '':
-                    options[pref] = text
+                    options[option] = text
             elif hasattr(widget, 'get_active'):
                 if widget.get_active():
-                    options[pref] = 'true'
+                    options[option] = 'true'
                 else:
-                    options[pref] = 'false'
+                    options[option] = 'false'
         if self.option_widgets['bt-prioritize-piece'].get_active():
             options['bt-prioritize-piece'] = 'head,tail'
         else:
@@ -255,9 +257,9 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
     @property
     def uris(self):
         """Get URIs from textviews, returning a tuple of URIs."""
-        if self.task_type == TASK_NORMAL:
+        if self.task_type == Task.TYPES.NORMAL:
             textview = self.widgets['normal_uri_textview']
-        elif self.task_type == TASK_BT:
+        elif self.task_type == Task.TYPES.BT:
             textview = self.widgets['bt_uri_textview']
         else:
             return []
@@ -274,9 +276,9 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         Set URIs of textviews.
         @type new_uris: C{tuple} or C{list}
         """
-        if self.task_type == TASK_NORMAL:
+        if self.task_type == Task.TYPES.NORMAL:
             textview = self.widgets['normal_uri_textview']
-        elif self.task_type == TASK_BT:
+        elif self.task_type == Task.TYPES.BT:
             textview = self.widgets['bt_uri_textview']
         else:
             return
@@ -287,14 +289,14 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
     def metadata_file(self):
         """Get metadata file for BT and Metalink tasks."""
         task_type = self.task_type
-        if task_type == TASK_METALINK:
+        if task_type == Task.TYPES.ML:
             metadata_file = self.widgets['metalink_file_chooser'].get_filename()
-        elif task_type == TASK_BT:
+        elif task_type == Task.TYPES.BT:
             metadata_file = self.widgets['bt_file_chooser'].get_filename()
         else:
             return ""
 
-        if os.path.exists(metadata_file):
+        if (not metadata_file is None) and os.path.exists(metadata_file):
             return metadata_file
         else:
             return ""
@@ -393,26 +395,25 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         info['size'] = 0
         info['gid'] = ''
         info['status'] = 'paused'
+        info['type'] = task_type
 
-        if task_type == TASK_METALINK and metadata_file:
+        print info
+        if task_type == Task.TYPES.ML and metadata_file:
             info['metalink'] = metadata_file
-            info['type'] = TASK_METALINK
             info['name'] = os.path.basename(metadata_file)
-        elif task_type == TASK_NORMAL and uris:
+        elif task_type == Task.TYPES.NORMAL and uris:
             info['uris'] = '|'.join(uris)
-            info['type'] = TASK_NORMAL
             if options.has_key('out'):
                 info['name'] = options['out']
             else:
                 info['name'] = os.path.basename(uris[0])
-        elif task_type == TASK_BT and metadata_file:
+        elif task_type == Task.TYPES.BT and metadata_file:
             info['torrent'] = metadata_file
             info['uris'] = '|'.join(uris)
-            info['type'] = TASK_BT
             info['name'] = os.path.basename(metadata_file)
         else:
             return
-        category.add_task(info, options)
+        #category.add_task(info, options)
         dialog.hide()
 
 class TaskProfileDialog(TaskDialogMixin):
