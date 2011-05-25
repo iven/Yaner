@@ -214,7 +214,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         Update the task list model.
         """
         (model, iter_) = selection.get_selected()
-        presentable = model.get_value(iter_, model.columns.PRESENTABLE)
+        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
         self._task_list_model.presentable = presentable
 
     def on_task_new(self, action, user_data, task_type):
