@@ -132,7 +132,6 @@ class TaskDialogMixin(LoggingMixin):
         self._options = self.config['options'].copy()
         options = self._options
         if new_options:
-            self.uris = new_options.pop('uris').split('|')
             for key, value in new_options.iteritems():
                 options[str(key)] = str(value)
         self.update_widgets()
