@@ -41,6 +41,17 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
     The tree interface used by L{PoolView}.
     """
 
+    COLUMNS = Enum((
+        'ICON',
+        'NAME',
+        'DESCRIPTION',
+        'PRESENTABLE',
+        ))
+    """
+    The column names of the tree model, which is a L{Enum<yaner.utils.Enum>}.
+    C{COLUMNS.NAME} will return the column number of C{NAME}.
+    """
+
     def __init__(self, pools):
         """
         L{PoolModel} initializing.
@@ -55,12 +66,7 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
                 )
         LoggingMixin.__init__(self)
 
-        self._columns = Enum((
-            'ICON',
-            'NAME',
-            'DESCRIPTION',
-            'PRESENTABLE',
-            ))
+        self._pools = None
         self.pools = pools
 
     @property
@@ -82,15 +88,6 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
                 self.add_presentable(presentable)
         self._pools = new_pools
 
-    @property
-    def columns(self):
-        """
-        Get the column names of the tree model, which is a
-        L{Enum<yaner.utils.Enum>}. C{columns.NAME} will return the column
-        number of C{NAME}.
-        """
-        return self._columns
-
     def on_presentable_added(self, pool, presentable):
         """
         When new presentable appears in one of the pools, add it to the model.
@@ -105,7 +102,7 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         @TODO: Test this.
         """
         iter_ = self.get_iter_for_presentable(presentable)
-        if iter_ != None:
+        if iter_ is not None:
             self.remove(_iter)
 
     def on_presentable_changed(self, pool, presentable):
@@ -122,14 +119,14 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         Add a presentable to the model.
         @TODO: Test this.
         """
-        self.logger.debug(_('Adding presentable {}...').format(
+        self.logger.debug(_('Adding presentable {0}...').format(
             presentable.uuid))
         parent = presentable.parent
         parent_iter = None
         if not parent is None:
             parent_iter = self.get_iter_for_presentable(parent)
             if parent_iter is None:
-                self.logger.warning(_('No parent presentable for {}.').format(
+                self.logger.warning(_('No parent presentable for {0}.').format(
                     presentable.uuid))
                 self.add_presentable(parent)
                 parent_iter = self.get_iter_for_presentable(parent)
@@ -141,10 +138,10 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         Update the iter data for presentable.
         """
         self.set(iter_,
-                self.columns.ICON, presentable.icon,
-                self.columns.DESCRIPTION, presentable.description,
-                self.columns.NAME, presentable.name,
-                self.columns.PRESENTABLE, presentable,
+                self.COLUMNS.ICON, presentable.icon,
+                self.COLUMNS.DESCRIPTION, presentable.description,
+                self.COLUMNS.NAME, presentable.name,
+                self.COLUMNS.PRESENTABLE, presentable,
                 )
 
     def get_iter_for_presentable(self, presentable):
@@ -154,7 +151,7 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         """
         iter_ = self.get_iter_first()
         while not iter_ is None:
-            if presentable is self.get_value(iter_, self.columns.PRESENTABLE):
+            if presentable is self.get_value(iter_, self.COLUMNS.PRESENTABLE):
                 return iter_
             iter_ = self.iter_next(iter_)
         return None
@@ -206,7 +203,7 @@ class PoolView(gtk.TreeView):
 
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
-        stock_id = model.get_value(iter_, self.model.columns.ICON)
+        stock_id = model.get_value(iter_, PoolModel.COLUMNS.ICON)
         renderer.set_properties(
                 stock_id = stock_id,
                 stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
@@ -218,8 +215,8 @@ class PoolView(gtk.TreeView):
         """
         (name, description) = model.get(
                 iter_,
-                self.model.columns.NAME,
-                self.model.columns.DESCRIPTION,
+                PoolModel.COLUMNS.NAME,
+                PoolModel.COLUMNS.DESCRIPTION,
                 )
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):

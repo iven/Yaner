@@ -67,71 +67,85 @@ class Pool(LoggingMixin, gobject.GObject):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
+        self._queuing = None
+        self._categories = []
+        self._dustbin = None
+
         self._uuid = uuid_
-        self._config = self._init_config()
-        self._presentables = self._init_presentables()
+        self._config = None
 
     @property
     def uuid(self):
         """Get the uuid of the pool."""
-        return self._uuid
+        return self.config.file
+
+    @property
+    def name(self):
+        """Get the name of the pool."""
+        return self.config['info']['name']
 
     @property
     def config(self):
-        """Get the configuration of the pool."""
+        """
+        Get the configuration of the pool.
+        If the file doesn't exist, read from the default configuration.
+        If the pool configuration directory doesn't exist, create it.
+        """
+        if self._config is None:
+            config = ConfigParser(self._CONFIG_DIR, self._uuid)
+            if config.empty():
+                self.logger.info(_('No pool configuration file, creating...'))
+                from yaner.Configurations import POOL_CONFIG
+                config.update(POOL_CONFIG)
+
+                # Initialize all presentables here
+                info = config['info']
+                info['queuing'] = self.queuing.uuid
+                info['categories'] = [category.uuid for category in self.categories]
+                info['dustbin'] = self.dustbin.uuid
+            self._config = config
         return self._config
+
+    @property
+    def queuing(self):
+        """Get the queuing presentable of the pool."""
+        if self._queuing is None:
+            info = self.config['info']
+            queuing = Queuing(info['queuing'], info['name'])
+            queuing.connect("changed", self.queuing_changed)
+            self.logger.debug(_('Created queuing presentable: {0}.').format(
+                queuing.uuid))
+            self._queuing = queuing
+        return self._queuing
+
+    @property
+    def categories(self):
+        """Get the categories presentable of the pool."""
+        if self._categories == []:
+            categories = self._categories
+            info = self.config['info']
+            for category_uuid in eval(info['categories']):
+                category = Category(category_uuid, self.queuing)
+                categories.append(category)
+                self.logger.debug(_('Created category presentable: {0}.').format(
+                    category.uuid))
+        return self._categories
+
+    @property
+    def dustbin(self):
+        """Get the dustbin presentable of the pool."""
+        if self._dustbin is None:
+            info = self.config['info']
+            dustbin = Dustbin(info['dustbin'], self.queuing)
+            self.logger.debug(_('Created dustbin presentable: {0}.').format(
+                dustbin.uuid))
+            self._dustbin = dustbin
+        return self._dustbin
 
     @property
     def presentables(self):
         """Get the presentables of the pool."""
-        return self._presentables
-
-    def _init_config(self):
-        """
-        Open pool configuration file as L{self.config}.
-        If the file doesn't exist, read from the default configuration.
-        If the pool configuration directory doesn't exist, create it.
-        """
-        config = ConfigParser(self._CONFIG_DIR, self.uuid)
-        if config.empty():
-            self.logger.info(_('No pool configuration file, creating...'))
-            from yaner.Configurations import POOL_CONFIG
-            config.update(POOL_CONFIG)
-        return config
-
-    def _init_presentables(self):
-        """
-        Initialize presentables for the pool.
-        """
-        self.logger.info(_('Initializing presentables...'))
-        presentables = []
-        info = self.config['info']
-
-        queuing = Queuing(info['queuing'], info['name'])
-        queuing.connect("changed", self.queuing_changed)
-        presentables.append(queuing)
-        self.logger.debug(_('Created queuing presentable: {}.').format(
-            queuing.uuid))
-
-        categories = []
-        for category_uuid in eval(info['categories']):
-            category = Category(category_uuid, queuing)
-            categories.append(category)
-            presentables.append(category)
-            self.logger.debug(_('Created category presentable: {}.').format(
-                category.uuid))
-
-        dustbin = Dustbin(info['dustbin'], queuing)
-        presentables.append(dustbin)
-        self.logger.debug(_('Created dustbin presentable: {}.').format(
-            dustbin.uuid))
-
-        if info['queuing'] == '':
-            info['queuing'] = queuing.uuid
-            info['categories'] = [category.uuid for category in categories]
-            info['dustbin'] = dustbin.uuid
-
-        return presentables
+        return [self.queuing, self.dustbin] + self.categories
 
     def queuing_changed(self, queuing):
         """

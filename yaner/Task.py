@@ -30,6 +30,7 @@ import gobject
 from yaner.utils.Logging import LoggingMixin
 from yaner.Constants import U_CONFIG_DIR
 from yaner.utils.Configuration import ConfigParser
+from yaner.utils.Enum import Enum
 
 class Task(LoggingMixin, gobject.GObject):
     """
@@ -49,12 +50,22 @@ class Task(LoggingMixin, gobject.GObject):
     User config directory containing task configuration files.
     """
 
+    TYPES = Enum((
+        'NORMAL',
+        'BT',
+        'ML',
+        ))
+    """
+    The types of the task, which is a L{Enum<yaner.utils.Enum>}.
+    C{TASKS.NAME} will return the type number of C{NAME}.
+    """
+
     def __init__(self, uuid_, config):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
         self._uuid = uuid_
-        self._config = self._init_config(config)
+        self._config = None
 
     @property
     def uuid(self):
@@ -63,20 +74,18 @@ class Task(LoggingMixin, gobject.GObject):
 
     @property
     def config(self):
-        """Get the configuration of the task."""
-        return self._config
-
-    def _init_config(self, default_config):
         """
-        Open task configuration file as L{self.config}.
+        Get the configuration of the task.
         If the file doesn't exist, read from the default configuration.
         If the task configuration directory doesn't exist, create it.
         """
-        config = ConfigParser(self._CONFIG_DIR, self.uuid)
-        if config.empty():
-            self.logger.info(
-                    _('No task configuration file, creating...'))
-            config.update(default_config)
-            self._uuid = config.file
-        return config
+        if self._config is None:
+            config = ConfigParser(self._CONFIG_DIR, self.uuid)
+            if config.empty():
+                self.logger.info(
+                        _('No task configuration file, creating...'))
+                config.update(default_config)
+                self._uuid = config.file
+            self._config = config
+        return self._config
 

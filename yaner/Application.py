@@ -28,7 +28,7 @@ import os
 import logging
 from twisted.internet import reactor
 
-from yaner.Constants import PREFIX, U_CONFIG_DIR
+from yaner.Constants import PREFIX, U_CONFIG_DIR, BUS_NAME
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
@@ -39,14 +39,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
 
     _NAME = __package__
     """
-    The name of the application, used by L{_BUS_NAME}, etc.
-    """
-
-    _BUS_NAME = 'com.kissuki.{}'.format(_NAME)
-    """
-    The unique bus name of the application, which identifies
-    the application when using DBus to implement the
-    L{UniqueApplicationMixin} class.
+    The name of the application, used by L{_LOG_FILE}, etc.
     """
 
     _CONFIG_DIR = U_CONFIG_DIR
@@ -54,10 +47,10 @@ class Application(UniqueApplicationMixin, LoggingMixin):
     User config directory containing configuration files and log files.
     """
 
-    _LOG_FILE = '{}.log'.format(_NAME)
+    _LOG_FILE = '{0}.log'.format(_NAME)
     """The logging file of the application."""
 
-    _CONFIG_FILE = '{}.conf'.format(_NAME)
+    _CONFIG_FILE = '{0}.conf'.format(_NAME)
     """The global configuration file of the application."""
 
     def __init__(self):
@@ -67,25 +60,38 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         It handles command line options, creates L{toplevel window
         <Toplevel>}, and initialize logging configuration.
         """
-        UniqueApplicationMixin.__init__(self, self._BUS_NAME)
+        UniqueApplicationMixin.__init__(self, BUS_NAME)
         LoggingMixin.__init__(self)
 
-        self._init_logging()
-        self._config = self._init_config()
+        self._toplevel = None
+        self._config = None
 
-        # Set up toplevel window
-        self._toplevel = Toplevel(self._config)
-        self._toplevel.show_all()
-        self._toplevel.connect("destroy", self.quit)
+        # Set up and show toplevel window
+        self.toplevel.show_all()
 
     @property
     def toplevel(self):
         """Get the toplevel window of L{yaner}."""
+        if self._toplevel is None:
+            self._toplevel = Toplevel(self.bus, self.config)
+            self._toplevel.connect("destroy", self.quit)
         return self._toplevel
 
     @property
     def config(self):
-        """Get the global configuration of the application."""
+        """
+        Get the global configuration of the application.
+        If the file doesn't exist, read from the default configuration.
+        If the user configuration directory doesn't exist, create it.
+        """
+        if self._config is None:
+            self.logger.info(_('Reading global configuration file...'))
+            config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
+            if config.empty():
+                self.logger.info(_('No global configuration file, creating...'))
+                from yaner.Configurations import GLOBAL_CONFIG
+                config.update(GLOBAL_CONFIG)
+            self._config = config
         return self._config
 
     @staticmethod
@@ -115,20 +121,6 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             level = logging.DEBUG
             )
         self.logger.info(_('Logging system initialized, start logging...'))
-
-    def _init_config(self):
-        """
-        Open global configuration file as L{self.config}.
-        If the file doesn't exist, read from the default configuration.
-        If the user configuration directory doesn't exist, create it.
-        """
-        self.logger.info(_('Reading global configuration file...'))
-        config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
-        if config.empty():
-            self.logger.info(_('No global configuration file, creating...'))
-            from yaner.Configurations import GLOBAL_CONFIG
-            config.update(GLOBAL_CONFIG)
-        return config
 
     def quit(self, *arg, **kwargs):
         """

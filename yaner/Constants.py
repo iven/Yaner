@@ -41,3 +41,12 @@ U_CONFIG_DIR = _join(_config_home, __package__)
 The directory containing user configurations.
 """
 
+BUS_NAME = 'com.kissuki.{0}'.format(__package__)
+"""
+The unique bus name of the application, which identifies
+the application when using DBus to implement the
+L{UniqueApplicationMixin} class.
+
+This is also used as the DBus interface.
+"""
+

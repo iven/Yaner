@@ -61,6 +61,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
                 )
         LoggingMixin.__init__(self)
 
+        self._presentable = None
         self._columns = Enum((
             'GID',
             'STATUS',
@@ -74,7 +75,9 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
             'UUID',
             'TASK',
             ))
-        self._presentable = presentable
+
+        # FIXME: Presentable is None
+        # self.presentable = presentable
 
     @property
     def presentable(self):
@@ -116,7 +119,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         @TODO: Test this.
         """
         iter_ = self.get_iter_for_task(task)
-        if iter_ != None:
+        if iter_ is not None:
             self.remove(_iter)
 
     def on_task_changed(self, presentable, task):

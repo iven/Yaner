@@ -59,36 +59,34 @@ class Presentable(LoggingMixin, gobject.GObject):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
+        self._default_config = default_config
         self._uuid = uuid_
-        self._config = self._init_config(default_config)
+        self._config = None
         self._tasks = []
 
     @property
     def uuid(self):
         """Get the uuid of the presentable."""
-        return self._uuid
+        return self.config.file
 
     @property
     def config(self):
-        """Get the configuration of the presentable."""
+        """
+        Get the configuration of the presentable.
+        If the file doesn't exist, read from the default configuration.
+        If the presentable configuration directory doesn't exist, create it.
+        """
+        if self._config is None:
+            config = ConfigParser(self._CONFIG_DIR, self._uuid)
+            if config.empty():
+                self.logger.info(
+                        _('No presentable configuration file, creating...'))
+                config.update(self._default_config)
+            self._config = config
         return self._config
 
     @property
     def tasks(self):
         """Get the tasks of the presentable."""
         return self._tasks
-
-    def _init_config(self, default_config):
-        """
-        Open presentable configuration file as L{self.config}.
-        If the file doesn't exist, read from the default configuration.
-        If the presentable configuration directory doesn't exist, create it.
-        """
-        config = ConfigParser(self._CONFIG_DIR, self.uuid)
-        if config.empty():
-            self.logger.info(
-                    _('No presentable configuration file, creating...'))
-            config.update(default_config)
-            self._uuid = config.file
-        return config
 

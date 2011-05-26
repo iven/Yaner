@@ -59,7 +59,7 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
         # Initialize file path
         if not os.path.exists(dir_):
             os.makedirs(dir_)
-            self.logger.info(_("Created directory {}.").format(dir_))
+            self.logger.info(_("Created directory {0}.").format(dir_))
         self._dir = dir_
         self._file = str(uuid.uuid4()) if file_ in ('', None) else file_
 
@@ -154,6 +154,11 @@ class _ConfigSection(object):
         """Get the section name."""
         return self._name
 
+    @property
+    def options(self):
+        """Get all option names of the section."""
+        return self.parser.options(self.name)
+
     def __getitem__(self, option):
         """
         Get the value of the C{option} in this section. Usage:
@@ -176,4 +181,11 @@ class _ConfigSection(object):
         """
         self.parser.remove_option(self.name, option)
         self.parser.save()
+
+    def copy(self):
+        """Get a copy like a dict."""
+        copy = {}
+        for option in self.options:
+            copy[option] = self[option]
+        return copy
 

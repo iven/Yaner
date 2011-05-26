@@ -30,9 +30,12 @@ import gobject
 import os
 import sys
 import logging
+from functools import partial
 
 from yaner.Pool import Pool
+from yaner.Task import Task
 from yaner.ui.Constants import UI_DIR
+from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.utils.Logging import LoggingMixin
@@ -43,7 +46,7 @@ class Toplevel(gtk.Window, LoggingMixin):
     _UI_FILE = os.path.join(UI_DIR, "ui.xml")
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
-    def __init__(self, config):
+    def __init__(self, bus, config):
         """
         Create toplevel window of L{yaner}. The window structure is
         like this:
@@ -69,15 +72,13 @@ class Toplevel(gtk.Window, LoggingMixin):
         self.add(vbox)
 
         # UIManager: Toolbar and menus
-        self._action_group = self._init_action_group()
-        self._ui_manager = self._init_ui_manager()
-        if self._ui_manager is None:
-            return
+        self._action_group = None
+        self._ui_manager = None
 
-        menubar = self._ui_manager.get_widget('/menubar')
+        menubar = self.ui_manager.get_widget('/menubar')
         vbox.pack_start(menubar, False, False, 0)
 
-        toolbar = self._ui_manager.get_widget('/toolbar')
+        toolbar = self.ui_manager.get_widget('/toolbar')
         vbox.pack_start(toolbar, False, False, 0)
 
         # HPaned: PoolView as left, TaskVBox as right
@@ -106,17 +107,29 @@ class Toplevel(gtk.Window, LoggingMixin):
         self._task_list_view = TaskListView(self._task_list_model)
         task_vbox.pack_start(self._task_list_view, True, True, 0)
 
+        # Dialogs
+        self._task_new_dialog = TaskNewDialog(bus, self._pool_model)
+
         self.logger.info(_('Toplevel window initialized.'))
 
     @property
     def ui_manager(self):
         """Get the UI Manager of L{yaner}."""
+        if self._ui_manager is None:
+            self._ui_manager = self._init_ui_manager()
         return self._ui_manager
 
     @property
     def action_group(self):
         """Get the action group of L{yaner}."""
+        if self._action_group is None:
+            self._action_group = self._init_action_group()
         return self._action_group
+
+    @property
+    def task_new_dialog(self):
+        """Get the new task dialog of the window."""
+        return self._task_new_dialog
 
     @property
     def config(self):
@@ -132,9 +145,12 @@ class Toplevel(gtk.Window, LoggingMixin):
         action_entries = (
                 ("file", None, _("File")),
                 ("task_new", "gtk-add"),
-                ("task_new_normal", None, _("HTTP/FTP/BT Magnet")),
-                ("task_new_bt", None, _("BitTorrent")),
-                ("task_new_ml", None, _("Metalink")),
+                ("task_new_normal", None, _("HTTP/FTP/BT Magnet"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.NORMAL)),
+                ("task_new_bt", None, _("BitTorrent"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.BT)),
+                ("task_new_ml", None, _("Metalink"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.ML)),
                 ("quit", "gtk-quit", None, None, None, self.destroy),
         )
 
@@ -175,7 +191,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         """
         pools = []
         pool_uuids = self.config['info']['pools']
-        self.logger.debug(_('Got pool(s): {}.').format(pool_uuids))
+        self.logger.debug(_('Got pool(s): {0}.').format(pool_uuids))
         for pool_uuid in eval(pool_uuids):
             pool = Pool(pool_uuid)
             pool.connect('presentable-added', self.update)
@@ -198,8 +214,11 @@ class Toplevel(gtk.Window, LoggingMixin):
         Update the task list model.
         """
         (model, iter_) = selection.get_selected()
-        presentable = model.get_value(iter_, model.columns.PRESENTABLE)
+        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
         self._task_list_model.presentable = presentable
+
+    def on_task_new(self, action, user_data, task_type):
+        self.task_new_dialog.run_dialog(task_type)
 
     def update(self):
         """Update the window."""
