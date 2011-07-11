@@ -85,6 +85,26 @@ class Pool(LoggingMixin, gobject.GObject):
         return self.config['info']['name']
 
     @property
+    def user(self):
+        """Get the user name of the pool."""
+        return self.config['info']['user']
+
+    @property
+    def passwd(self):
+        """Get the password of the pool."""
+        return self.config['info']['passwd']
+
+    @property
+    def host(self):
+        """Get the host of the pool."""
+        return self.config['info']['host']
+
+    @property
+    def port(self):
+        """Get the port of the pool."""
+        return self.config['info']['port']
+
+    @property
     def config(self):
         """
         Get the configuration of the pool.
