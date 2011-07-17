@@ -165,7 +165,7 @@ class Pool(LoggingMixin, gobject.GObject):
     @property
     def presentables(self):
         """Get the presentables of the pool."""
-        return [self.queuing, self.dustbin] + self.categories
+        return [self.queuing] + self.categories + [self.dustbin]
 
     def queuing_changed(self, queuing):
         """
