@@ -66,6 +66,9 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         self._toplevel = None
         self._config = None
 
+        # Set up logger
+        self._init_logging()
+
         # Set up and show toplevel window
         self.toplevel.show_all()
 
