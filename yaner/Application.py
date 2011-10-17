@@ -25,27 +25,39 @@ This module contains the main application class of L{yaner}.
 """
 
 import os
+import sys
 import logging
+import argparse
 from twisted.internet import reactor
 
+from yaner import __version__
 from yaner.Constants import PREFIX, U_CONFIG_DIR, BUS_NAME
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
 from yaner.utils.UniqueApplication import UniqueApplicationMixin
 
+class _VERSION(argparse.Action):
+    """Show version information of the application."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        print '{0} {1}'.format(__package__, __version__)
+        print 'Copyright (C) 2010-2011 Iven (Xu Lijian)'
+        print _('License GPLv3+: GNU GPL version 3 or later')
+        print '<http://gnu.org/licenses/gpl.html>.'
+        print _('This is free software:')
+        print _('You are free to change and redistribute it.')
+        print _('There is NO WARRANTY, to the extent permitted by law.')
+        sys.exit(0)
+
 class Application(UniqueApplicationMixin, LoggingMixin):
     """Main application of L{yaner}."""
 
     _NAME = __package__
-    """
-    The name of the application, used by L{_LOG_FILE}, etc.
-    """
+    """The name of the application, used by L{_LOG_FILE}, etc."""
 
     _CONFIG_DIR = U_CONFIG_DIR
-    """
-    User config directory containing configuration files and log files.
-    """
+    """User config directory containing configuration files and log files."""
 
     _LOG_FILE = '{0}.log'.format(_NAME)
     """The logging file of the application."""
@@ -68,6 +80,9 @@ class Application(UniqueApplicationMixin, LoggingMixin):
 
         # Set up logger
         self._init_logging()
+
+        # Process arguments
+        self._init_args()
 
         # Set up and show toplevel window
         self.toplevel.show_all()
@@ -106,6 +121,22 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         print "Another instance is already running."
         import sys
         sys.exit(0)
+
+    def _init_args(self):
+        """Process command line arguments."""
+        parser = argparse.ArgumentParser(
+                description=_('{0} download mananger.').format(self._NAME))
+        parser.add_argument('-n', '--rename', metavar='FILENAME',
+                help=_('filename to save'))
+        parser.add_argument('-r', '--referer', nargs='?', const='',
+                help=_('referer page of the link'))
+        parser.add_argument('-c', '--cookie', nargs='?', const='',
+                help=_('cookies of the website'))
+        parser.add_argument('uri', nargs='+', metavar='URI | MAGNET',
+                help=_('the download addresses'))
+        parser.add_argument('-v', '--version', action=_VERSION, nargs=0,
+                help=_('output version information and exit'))
+        parser.parse_args()
 
     def _init_logging(self):
         """Set up basic config for logging."""
