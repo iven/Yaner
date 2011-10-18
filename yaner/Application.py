@@ -25,27 +25,42 @@ This module contains the main application class of L{yaner}.
 """
 
 import os
+import sys
 import logging
+import argparse
+import subprocess
 from twisted.internet import reactor
 
+from yaner import __version__
+from yaner.Task import Task
 from yaner.Constants import PREFIX, U_CONFIG_DIR, BUS_NAME
+from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
 from yaner.utils.UniqueApplication import UniqueApplicationMixin
 
+class _VERSION(argparse.Action):
+    """Show version information of the application."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        print '{0} {1}'.format(__package__, __version__)
+        print 'Copyright (C) 2010-2011 Iven (Xu Lijian)'
+        print _('License GPLv3+: GNU GPL version 3 or later')
+        print '<http://gnu.org/licenses/gpl.html>.'
+        print _('This is free software:')
+        print _('You are free to change and redistribute it.')
+        print _('There is NO WARRANTY, to the extent permitted by law.')
+        sys.exit(0)
+
 class Application(UniqueApplicationMixin, LoggingMixin):
     """Main application of L{yaner}."""
 
     _NAME = __package__
-    """
-    The name of the application, used by L{_LOG_FILE}, etc.
-    """
+    """The name of the application, used by L{_LOG_FILE}, etc."""
 
     _CONFIG_DIR = U_CONFIG_DIR
-    """
-    User config directory containing configuration files and log files.
-    """
+    """User config directory containing configuration files and log files."""
 
     _LOG_FILE = '{0}.log'.format(_NAME)
     """The logging file of the application."""
@@ -68,6 +83,9 @@ class Application(UniqueApplicationMixin, LoggingMixin):
 
         # Set up logger
         self._init_logging()
+
+        # Process arguments
+        self._init_args()
 
         # Set up and show toplevel window
         self.toplevel.show_all()
@@ -97,15 +115,46 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             self._config = config
         return self._config
 
-    @staticmethod
-    def on_instance_exists():
+    def on_instance_exists(self):
         """
         This method is called when an instance of the application
         already exists, which is required by L{UniqueApplicationMixin}.
         """
-        print "Another instance is already running."
-        import sys
+        if len(sys.argv) > 1:
+            self._init_args(is_first_instance=False)
+        else:
+            print "Another instance is already running."
         sys.exit(0)
+
+    def _init_args(self, is_first_instance=True):
+        """Process command line arguments."""
+        parser = argparse.ArgumentParser(
+                description=_('{0} download mananger.').format(self._NAME))
+        parser.add_argument('-n', '--rename', metavar='FILENAME',
+                help=_('filename to save'))
+        parser.add_argument('-r', '--referer', nargs='?', const='',
+                default='', help=_('referer page of the link'))
+        parser.add_argument('-c', '--cookie', nargs='?', const='',
+                default='', help=_('cookies of the website'))
+        parser.add_argument('uris', nargs='+', metavar='URI | MAGNET',
+                help=_('the download addresses'))
+        parser.add_argument('-v', '--version', action=_VERSION, nargs=0,
+                help=_('output version information and exit'))
+        args = parser.parse_args()
+
+        if is_first_instance:
+            subprocess.Popen(sys.argv)
+        else:
+            options = {'referer': args.referer,
+                    'header': args.cookie,
+                    'uris': str(args.uris),
+                    }
+            if args.rename is not None:
+                options['out'] = args.rename
+
+            task_new_dialog = self.bus.get_object(
+                    BUS_NAME, TaskNewDialog.OBJECT_NAME)
+            task_new_dialog.run_dialog(Task.TYPES.NORMAL, options)
 
     def _init_logging(self):
         """Set up basic config for logging."""
