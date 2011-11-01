@@ -157,7 +157,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
     This class contains widgets and methods related to new task dialog.
     """
 
-    _OBJECT_NAME = '/task_new_dialog'
+    OBJECT_NAME = '/task_new_dialog'
     """DBus object name of the dialog."""
 
     _UI_FILE = os.path.join(UI_DIR, "task_new.ui")
@@ -201,7 +201,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
 
     def __init__(self, bus, pool_model):
         TaskDialogMixin.__init__(self, self._UI_FILE, self._OPTION_DICT)
-        dbus.service.Object.__init__(self, bus, self._OBJECT_NAME)
+        dbus.service.Object.__init__(self, bus, self.OBJECT_NAME)
 
         self._widgets = {}
         self._pool_model = pool_model
@@ -281,7 +281,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         else:
             return
         tbuffer = textview.get_buffer()
-        uris = tbuffer.set_text('\n'.join(uris))
+        tbuffer.set_text('\n'.join(new_uris))
 
     @property
     def metadata_file(self):
@@ -329,6 +329,8 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         widgets = self.widgets
         # set current page of the notebook
         self.task_type = task_type
+        # set uri textview
+        self.uris = eval(options.pop('uris', '()'))
         # init widgets status
         self.init_options(options)
         # init the server cb
