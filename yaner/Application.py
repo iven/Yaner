@@ -82,7 +82,8 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         self._config = None
 
         self._init_logging()
-        self._init_args()
+        if len(sys.argv) > 1:
+            self._init_args()
 
         # Set up and show toplevel window
         self.toplevel.show_all()
