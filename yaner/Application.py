@@ -133,7 +133,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
                 default='', help=_('referer page of the link'))
         parser.add_argument('-c', '--cookie', nargs='?', const='',
                 default='', help=_('cookies of the website'))
-        parser.add_argument('uris', nargs='+', metavar='URI | MAGNET',
+        parser.add_argument('uris', nargs='*', metavar='URI | MAGNET',
                 help=_('the download addresses'))
         parser.add_argument('-v', '--version', action=_VERSION, nargs=0,
                 help=_('output version information and exit'))

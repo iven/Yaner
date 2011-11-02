@@ -53,7 +53,7 @@ else:
 import os
 import gettext
 from yaner.Constants import PREFIX
-gettext.translation('yaner', os.path.join(PREFIX, 'share/locale')).install()
+gettext.install('yaner', unicode=True)
 
 from yaner.Application import Application
 main_app = Application()
