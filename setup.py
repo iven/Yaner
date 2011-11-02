@@ -8,6 +8,8 @@ from stat import *
 from distutils.core import setup
 from distutils.command.install import install
 from distutils.command.install_data import install_data
+
+sys.path.insert(0, '.')
 from yaner import __version__ as version
 
 INSTALLED_FILES = "installed_files"
@@ -115,9 +117,9 @@ setup (
         name             = "yaner",
         version          = version,
         description      = "GTK+ interface for aria2 download mananger",
-        author           = "Iven Day (Xu Lijian)",
+        author           = "Iven (Xu Lijian)",
         author_email     = "ivenvd@gmail.com",
-        url              = "http://www.kissuki.com/",
+        url              = "https://github.com/iven/Yaner",
         license          = "GPL",
         data_files       = data_files,
         packages         = ["yaner", "yaner.ui", "yaner.utils"],
