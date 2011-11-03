@@ -75,8 +75,8 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         It handles command line options, creates L{toplevel window
         <Toplevel>}, and initialize logging configuration.
         """
-        UniqueApplicationMixin.__init__(self, BUS_NAME)
         LoggingMixin.__init__(self)
+        UniqueApplicationMixin.__init__(self, BUS_NAME)
 
         self._toplevel = None
         self._config = None
@@ -126,6 +126,9 @@ class Application(UniqueApplicationMixin, LoggingMixin):
 
     def _init_args(self, is_first_instance=True):
         """Process command line arguments."""
+        self.logger.info(_('Parsing command line arguments...'))
+        self.logger.debug(_('Command line arguments: {0}').format(sys.argv))
+
         parser = argparse.ArgumentParser(
                 description=_('{0} download mananger.').format(self._NAME))
         parser.add_argument('-n', '--rename', metavar='FILENAME',
@@ -139,6 +142,8 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         parser.add_argument('-v', '--version', action=_VERSION, nargs=0,
                 help=_('output version information and exit'))
         args = parser.parse_args()
+
+        self.logger.info(_('Command line arguments parsed.'))
 
         if is_first_instance:
             subprocess.Popen(sys.argv)
