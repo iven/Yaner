@@ -24,12 +24,16 @@
 This module contains the L{Pool} class of L{yaner}.
 """
 
+import glib
 import gobject
 import sqlobject
+
+from twisted.web import xmlrpc
 
 from yaner.Misc import GObjectSQLObjectMeta
 from yaner.Presentable import Presentable, Queuing, Dustbin
 from yaner.utils.Logging import LoggingMixin
+from yaner.utils.Notification import Notification
 
 class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     """
@@ -75,6 +79,14 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         self._dustbin = None
 
     @property
+    def proxy(self):
+        """Get the xmlrpc proxy of the pool."""
+        if self._proxy is None:
+            connstr = 'http://{0.user}:{0.passwd}@{0.host}:{0.port}/rpc'
+            self._proxy = xmlrpc.Proxy(connstr.format(self))
+        return self._proxy
+
+    @property
     def queuing(self):
         """Get the queuing presentable of the pool."""
         if self._queuing is None:
@@ -92,4 +104,42 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def presentables(self):
         """Get the presentables of the pool."""
         return [self.queuing] + self.categories + [self.dustbin]
+
+    def queuing_changed(self, queuing):
+        """
+        If the name of queuing presentable changed, update the config.
+        """
+        if queuing.name != self.config['info']['name']:
+            self.config['info']['name'] = queuing.name
+
+    def _check_session_info(self):
+        """Check if it is a new aria2 session, by get session info from aria2
+        server. A new session means either it's first start of L{yaner}, or
+        the aria2 server is restarted, so we should call L{_got_session_info}
+        to do some work.
+
+        This also checks if the server is working well.
+
+        """
+        deferred = self.proxy.callRemote('aria2.getSessionInfo')
+        deferred.addCallbacks(self._on_got_session_info, self._on_twisted_error)
+        glib.timeout_add_seconds(20, self._check_session_info)
+        return False
+
+    def _on_got_session_info(self, session_info):
+        """When got session info, compare it with the saved session id.
+        If it's a new session, we should add tasks which need to be started
+        to the server.
+
+        Also we should mark the server as connected.
+
+        """
+        pass
+
+    def _on_twisted_error(self, failure):
+        """When we meet a twisted error, it may be caused by network error,
+        mark the server as disconnected.
+
+        """
+        pass
 
