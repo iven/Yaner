@@ -59,6 +59,9 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     GObject signals of this class.
     """
 
+    _SESSION_CHECK_INTERVAL = 20
+    """Interval for checking if it's a new session, in second(s)."""
+
     name = sqlobject.UnicodeCol()
     user = sqlobject.StringCol(default='')
     passwd = sqlobject.StringCol(default='')
@@ -123,7 +126,8 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         """
         deferred = self.proxy.callRemote('aria2.getSessionInfo')
         deferred.addCallbacks(self._on_got_session_info, self._on_twisted_error)
-        glib.timeout_add_seconds(20, self._check_session_info)
+        glib.timeout_add_seconds(self._SESSION_CHECK_INTERVAL,
+                self._check_session_info)
         return False
 
     def _on_got_session_info(self, session_info):
