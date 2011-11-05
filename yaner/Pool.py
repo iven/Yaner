@@ -46,7 +46,9 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     __metaclass__ = GObjectSQLObjectMeta
 
     __gsignals__ = {
-            'disconnected': (gobject.SIGNAL_RUN_LAST,
+            'status-changed': (gobject.SIGNAL_RUN_LAST,
+                gobject.TYPE_NONE, ()),
+            'session-changed': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, ()),
             'presentable-added': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, (Presentable,)),
@@ -81,6 +83,19 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         self._categories = []
         self._dustbin = None
 
+        self._connected = False
+        self._proxy = None
+
+        self._check_session_info()
+
+        self.connect('session-changed', self._on_session_changed)
+
+    def _set_session_id(self, new_session_id):
+        """Set the saved session id of the pool."""
+        self._SO_set_session_id(new_name)
+        if hash(self):
+            self.emit('session-changed')
+
     @property
     def proxy(self):
         """Get the xmlrpc proxy of the pool."""
@@ -108,12 +123,16 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         """Get the presentables of the pool."""
         return [self.queuing] + self.categories + [self.dustbin]
 
-    def queuing_changed(self, queuing):
-        """
-        If the name of queuing presentable changed, update the config.
-        """
-        if queuing.name != self.config['info']['name']:
-            self.config['info']['name'] = queuing.name
+    @property
+    def connected(self):
+        """Get the connection status of the pool."""
+        return self._connected
+
+    @connected.setter
+    def connected(self, new_status):
+        if new_status != self.connected:
+            self._connected = new_status
+            self.emit('status-changed')
 
     def _check_session_info(self):
         """Check if it is a new aria2 session, by get session info from aria2
@@ -130,6 +149,9 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
                 self._check_session_info)
         return False
 
+    def _on_session_changed(self, pool):
+        print pool.session_id
+
     def _on_got_session_info(self, session_info):
         """When got session info, compare it with the saved session id.
         If it's a new session, we should add tasks which need to be started
@@ -138,12 +160,13 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         Also we should mark the server as connected.
 
         """
-        pass
+        self.connected = True
+        self.session_id = session_info['sessionId']
 
     def _on_twisted_error(self, failure):
         """When we meet a twisted error, it may be caused by network error,
         mark the server as disconnected.
 
         """
-        pass
+        self.connected = False
 

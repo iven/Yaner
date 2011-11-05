@@ -83,7 +83,7 @@ POOL_CONFIG = {
             'port': 6800,
             'user': '',
             'passwd': '',
-            'session': '',
+            'session_id': '',
             'queuing': '',
             'categories': [''],
             'dustbin': '',
