@@ -28,6 +28,7 @@ import os
 import sys
 import logging
 import argparse
+import sqlobject
 import subprocess
 from twisted.internet import reactor
 
@@ -68,6 +69,9 @@ class Application(UniqueApplicationMixin, LoggingMixin):
     _CONFIG_FILE = '{0}.conf'.format(_NAME)
     """The global configuration file of the application."""
 
+    _DATA_FILE = '{}.db'.format(_NAME)
+    """The global database file of the application."""
+
     def __init__(self):
         """
         The init methed of L{Application} class.
@@ -80,10 +84,14 @@ class Application(UniqueApplicationMixin, LoggingMixin):
 
         self._toplevel = None
         self._config = None
+        self._data_conn = None
 
         self._init_logging()
         if len(sys.argv) > 1:
             self._init_args()
+
+        # Set the database as default sqlobject connection
+        sqlobject.processConnection = self.data_conn
 
         # Set up and show toplevel window
         self.toplevel.show_all()
@@ -112,6 +120,17 @@ class Application(UniqueApplicationMixin, LoggingMixin):
                 config.update(GLOBAL_CONFIG)
             self._config = config
         return self._config
+
+    @property
+    def data_conn(self):
+        """Get the global database, which contains pool, category and
+        task informations."""
+        if self._data_conn is None:
+            self.logger.info(_('Connecting to global database file...'))
+            database = os.path.join(self._CONFIG_DIR, self._DATA_FILE)
+            conn_uri = 'sqlite://{}'.format(database)
+            self._data_conn = sqlobject.connectionForURI(conn_uri)
+        return self._data_conn
 
     def on_instance_exists(self):
         """
@@ -183,6 +202,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         Just quit the application.
         """
         self.logger.info(_('Application quit normally.'))
+        self.data_conn.close()
         logging.shutdown()
         reactor.stop()
 
