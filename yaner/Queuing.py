@@ -25,29 +25,22 @@ This module contains the L{Queuing} presentable of L{yaner}.
 """
 
 from yaner.Presentable import Presentable
-from yaner.Configurations import QUEUING_CONFIG
 
 class Queuing(Presentable):
     """
     Queuing presentable of the L{Pool}s.
     """
 
-    def __init__(self, uuid_, name):
-        Presentable.__init__(self, uuid_, QUEUING_CONFIG)
-        self.parent = None
+    def __init__(self, name):
+        Presentable.__init__(self)
         self._name = name
+        self.parent = None
         self.icon = "gtk-connect"
 
     @property
     def name(self):
         """Get the name of the presentable."""
         return self._name
-
-    @name.setter
-    def name(self, new_name):
-        """Set the name of the presentable."""
-        self._name = new_name
-        self.emit("changed")
 
     @property
     def description(self):

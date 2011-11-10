@@ -25,14 +25,13 @@ This module contains the L{Dustbin} presentable of L{yaner}.
 """
 
 from yaner.Presentable import Presentable
-from yaner.Configurations import DUSTBIN_CONFIG
 
 class Dustbin(Presentable):
     """
     Dustbin presentable of the L{Pool}s.
     """
-    def __init__(self, uuid_, queuing):
-        Presentable.__init__(self, uuid_, DUSTBIN_CONFIG)
+    def __init__(self, queuing):
+        Presentable.__init__(self)
         self.parent = queuing
         self.icon = "gtk-delete"
 
