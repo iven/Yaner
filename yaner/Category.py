@@ -24,39 +24,27 @@
 This module contains the L{Category} presentable of L{yaner}.
 """
 
-from yaner.Presentable import Presentable
-from yaner.Configurations import CATEGORY_CONFIG
+import sqlobject
 
-class Category(Presentable):
+from yaner.Presentable import Presentable
+
+class Category(Presentable, sqlobject.SQLObject):
     """
     Category presentable of the L{Pool}s.
     """
-    def __init__(self, uuid_, queuing):
-        Presentable.__init__(self, uuid_, CATEGORY_CONFIG)
-        self.parent = queuing
+
+    name = sqlobject.UnicodeCol()
+    directory = sqlobject.UnicodeCol()
+
+    pool = sqlobject.ForeignKey('Pool')
+    tasks = sqlobject.MultipleJoin('Task')
+
+    def _init(self, *args, **kwargs):
+        Presentable.__init__(self)
+        sqlobject.SQLObject._init(self, *args, **kwargs)
+
+        self.parent = kwargs['queuing']
         self.icon = "gtk-directory"
-
-    @property
-    def name(self):
-        """Get the name of the category."""
-        return self.config['info']['name']
-
-    @name.setter
-    def name(self, new_name):
-        """Set the name of the category."""
-        self.config['info']['name'] = new_name
-        self.emit('changed')
-
-    @property
-    def dir(self):
-        """Get the directory of the category."""
-        return self.config['info']['dir']
-
-    @dir.setter
-    def dir(self, new_dir):
-        """Set the directory of the category."""
-        self.config['info']['dir'] = new_dir
-        self.emit('changed')
 
     @property
     def description(self):
