@@ -31,7 +31,7 @@ from yaner.Misc import GObjectSQLObjectMeta
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 
-class Task(LoggingMixin, gobject.GObject, sqlobject.SQLObject):
+class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     """
     Task class is just downloading tasks, which provides data to L{TaskListModel}.
     """

@@ -31,7 +31,7 @@ from yaner.Misc import GObjectSQLObjectMeta
 from yaner.Presentable import Presentable, Queuing, Category, Dustbin
 from yaner.utils.Logging import LoggingMixin
 
-class Pool(LoggingMixin, gobject.GObject, sqlobject.SQLObject):
+class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 

@@ -49,7 +49,7 @@ class Presentable(LoggingMixin, gobject.GObject):
     GObject signals of this class.
     """
 
-    def _init(self, *args, **kwargs):
+    def __init__(self):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
@@ -82,7 +82,7 @@ class Queuing(Presentable):
         self._name = new_name
         self.emit('changed')
 
-class Category(Presentable, sqlobject.SQLObject):
+class Category(sqlobject.SQLObject, Presentable):
     """
     Category presentable of the L{Pool}s.
     """
@@ -99,13 +99,16 @@ class Category(Presentable, sqlobject.SQLObject):
         Presentable.__init__(self)
         sqlobject.SQLObject._init(self, *args, **kwargs)
 
-        self.parent = kwargs['queuing']
+        self.parent = self.pool.queuing
         self.icon = "gtk-directory"
 
     def _set_name(self, new_name):
         """Set the name of the category."""
         self._SO_set_name(new_name)
-        self.emit('changed')
+        # When creating a new Pool, Presentable.__init__ isn't called,
+        # hash(self) equals zero, and signals can't be emitted
+        if hash(self):
+            self.emit('changed')
 
 class Dustbin(Presentable):
     """
