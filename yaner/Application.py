@@ -33,7 +33,9 @@ import subprocess
 from twisted.internet import reactor
 
 from yaner import __version__
+from yaner.Pool import Pool
 from yaner.Task import Task
+from yaner.Presentable import Category
 from yaner.Constants import PREFIX, U_CONFIG_DIR, BUS_NAME
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.Toplevel import Toplevel
@@ -127,9 +129,17 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         task informations."""
         if self._data_conn is None:
             self.logger.info(_('Connecting to global database file...'))
-            database = os.path.join(self._CONFIG_DIR, self._DATA_FILE)
-            conn_uri = 'sqlite://{}'.format(database)
-            self._data_conn = sqlobject.connectionForURI(conn_uri)
+
+            # Connect to the database and set as default connection
+            data_file = os.path.join(self._CONFIG_DIR, self._DATA_FILE)
+            data_conn = sqlobject.connectionForURI('sqlite://' + data_file)
+            self._data_conn = sqlobject.sqlhub.processConnection = data_conn
+
+            if not os.path.exists(data_file):
+                self._init_database()
+
+            self.logger.info(_('Global database file connected...'))
+
         return self._data_conn
 
     def on_instance_exists(self):
@@ -195,6 +205,21 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             level = logging.DEBUG
             )
         self.logger.info(_('Logging system initialized, start logging...'))
+
+    def _init_database(self):
+        """Set up database when the application first starts."""
+        self.logger.info(_('Initializing database for first start...'))
+
+        Pool.createTable()
+        Category.createTable()
+        Task.createTable()
+
+        down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
+
+        Pool(name=_('My Computer'), host='localhost')
+        Category(name=_('Default Category'), directory=down_dir, pool=pool)
+
+        self.logger.info(_('Database initialized.'))
 
     def quit(self, *arg, **kwargs):
         """
