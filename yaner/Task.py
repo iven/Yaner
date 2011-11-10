@@ -27,6 +27,7 @@ This module contains the L{Task} class of L{yaner}.
 import gobject
 import sqlobject
 
+from yaner.Misc import GObjectSQLObjectMeta
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 
@@ -34,6 +35,8 @@ class Task(LoggingMixin, gobject.GObject, sqlobject.SQLObject):
     """
     Task class is just downloading tasks, which provides data to L{TaskListModel}.
     """
+
+    __metaclass__ = GObjectSQLObjectMeta
 
     __gsignals__ = {
             'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),

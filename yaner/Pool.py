@@ -27,10 +27,8 @@ This module contains the L{Pool} class of L{yaner}.
 import gobject
 import sqlobject
 
-from yaner.Queuing import Queuing
-from yaner.Category import Category
-from yaner.Dustbin import Dustbin
-from yaner.Presentable import Presentable
+from yaner.Misc import GObjectSQLObjectMeta
+from yaner.Presentable import Presentable, Queuing, Category, Dustbin
 from yaner.utils.Logging import LoggingMixin
 
 class Pool(LoggingMixin, gobject.GObject, sqlobject.SQLObject):
@@ -40,6 +38,8 @@ class Pool(LoggingMixin, gobject.GObject, sqlobject.SQLObject):
     A Pool is just a connection to the aria2 server, to avoid name conflict
     with download server.
     """
+
+    __metaclass__ = GObjectSQLObjectMeta
 
     __gsignals__ = {
             'disconnected': (gobject.SIGNAL_RUN_LAST,
