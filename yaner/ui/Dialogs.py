@@ -31,7 +31,7 @@ import dbus.service
 
 from yaner.Pool import Pool
 from yaner.Task import Task
-from yaner.Category import Category
+from yaner.Presentable import Category
 from yaner.Constants import U_CONFIG_DIR
 from yaner.Constants import BUS_NAME as INTERFACE_NAME
 from yaner.ui.Constants import UI_DIR
