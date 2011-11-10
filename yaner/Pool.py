@@ -24,19 +24,16 @@
 This module contains the L{Pool} class of L{yaner}.
 """
 
-import os
-import uuid
 import gobject
+import sqlobject
 
 from yaner.Queuing import Queuing
 from yaner.Category import Category
 from yaner.Dustbin import Dustbin
 from yaner.Presentable import Presentable
-from yaner.Constants import U_CONFIG_DIR
 from yaner.utils.Logging import LoggingMixin
-from yaner.utils.Configuration import ConfigParser
 
-class Pool(LoggingMixin, gobject.GObject):
+class Pool(LoggingMixin, gobject.GObject, sqlobject.SQLObject):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 
@@ -58,119 +55,41 @@ class Pool(LoggingMixin, gobject.GObject):
     GObject signals of this class.
     """
 
-    _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'pool')
-    """
-    User config directory containing pool configuration files.
-    """
+    name = sqlobject.UnicodeCol()
+    user = sqlobject.StringCol(default='')
+    passwd = sqlobject.StringCol(default='')
+    host = sqlobject.StringCol()
+    port = sqlobject.IntCol(default=6800)
+    session_id = sqlobject.StringCol(default='')
 
-    def __init__(self, uuid_ = None):
+    categories = sqlobject.MultipleJoin('Category')
+    tasks = sqlobject.MultipleJoin('Task')
+
+    def _init(self, *args, **kwargs):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
+        sqlobject.SQLObject._init(self, *args, **kwargs)
 
         self._queuing = None
         self._categories = []
         self._dustbin = None
 
-        self._uuid = uuid_
-        self._config = None
-
-    @property
-    def uuid(self):
-        """Get the uuid of the pool."""
-        return self.config.file
-
-    @property
-    def name(self):
-        """Get the name of the pool."""
-        return self.config['info']['name']
-
-    @property
-    def user(self):
-        """Get the user name of the pool."""
-        return self.config['info']['user']
-
-    @property
-    def passwd(self):
-        """Get the password of the pool."""
-        return self.config['info']['passwd']
-
-    @property
-    def host(self):
-        """Get the host of the pool."""
-        return self.config['info']['host']
-
-    @property
-    def port(self):
-        """Get the port of the pool."""
-        return self.config['info']['port']
-
-    @property
-    def config(self):
-        """
-        Get the configuration of the pool.
-        If the file doesn't exist, read from the default configuration.
-        If the pool configuration directory doesn't exist, create it.
-        """
-        if self._config is None:
-            config = ConfigParser(self._CONFIG_DIR, self._uuid)
-            if config.empty():
-                self.logger.info(_('No pool configuration file, creating...'))
-                from yaner.Configurations import POOL_CONFIG
-                config.update(POOL_CONFIG)
-
-                # Initialize all presentables here
-                info = config['info']
-                info['queuing'] = self.queuing.uuid
-                info['categories'] = [category.uuid for category in self.categories]
-                info['dustbin'] = self.dustbin.uuid
-            self._config = config
-        return self._config
-
     @property
     def queuing(self):
         """Get the queuing presentable of the pool."""
         if self._queuing is None:
-            info = self.config['info']
-            queuing = Queuing(info['queuing'], info['name'])
-            queuing.connect("changed", self.queuing_changed)
-            self.logger.debug(_('Created queuing presentable: {0}.').format(
-                queuing.uuid))
-            self._queuing = queuing
+            self._queuing = Queuing(self.name)
         return self._queuing
-
-    @property
-    def categories(self):
-        """Get the categories presentable of the pool."""
-        if self._categories == []:
-            categories = self._categories
-            info = self.config['info']
-            for category_uuid in eval(info['categories']):
-                category = Category(category_uuid, self.queuing)
-                categories.append(category)
-                self.logger.debug(_('Created category presentable: {0}.').format(
-                    category.uuid))
-        return self._categories
 
     @property
     def dustbin(self):
         """Get the dustbin presentable of the pool."""
         if self._dustbin is None:
-            info = self.config['info']
-            dustbin = Dustbin(info['dustbin'], self.queuing)
-            self.logger.debug(_('Created dustbin presentable: {0}.').format(
-                dustbin.uuid))
-            self._dustbin = dustbin
+            self._dustbin = Dustbin(self.queuing)
         return self._dustbin
 
     @property
     def presentables(self):
         """Get the presentables of the pool."""
         return [self.queuing] + self.categories + [self.dustbin]
-
-    def queuing_changed(self, queuing):
-        """
-        If the name of queuing presentable changed, update the config.
-        """
-        if queuing.name != self.config['info']['name']:
-            self.config['info']['name'] = queuing.name
 
