@@ -24,13 +24,10 @@
 This module contains the L{Presentable} class of L{yaner}.
 """
 
-import os
 import gobject
 
 from yaner.Task import Task
-from yaner.Constants import U_CONFIG_DIR
 from yaner.utils.Logging import LoggingMixin
-from yaner.utils.Configuration import ConfigParser
 
 class Presentable(LoggingMixin, gobject.GObject):
     """
@@ -50,43 +47,7 @@ class Presentable(LoggingMixin, gobject.GObject):
     GObject signals of this class.
     """
 
-    _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'presentables')
-    """
-    User config directory containing presentable configuration files.
-    """
-
-    def __init__(self, uuid_, default_config):
+    def _init(self, *args, **kwargs):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
-
-        self._default_config = default_config
-        self._uuid = uuid_
-        self._config = None
-        self._tasks = []
-
-    @property
-    def uuid(self):
-        """Get the uuid of the presentable."""
-        return self.config.file
-
-    @property
-    def config(self):
-        """
-        Get the configuration of the presentable.
-        If the file doesn't exist, read from the default configuration.
-        If the presentable configuration directory doesn't exist, create it.
-        """
-        if self._config is None:
-            config = ConfigParser(self._CONFIG_DIR, self._uuid)
-            if config.empty():
-                self.logger.info(
-                        _('No presentable configuration file, creating...'))
-                config.update(self._default_config)
-            self._config = config
-        return self._config
-
-    @property
-    def tasks(self):
-        """Get the tasks of the presentable."""
-        return self._tasks
 
