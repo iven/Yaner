@@ -134,7 +134,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         @TODO: Test this.
         """
         self.logger.debug(_('Adding task {}...').format(task.name))
-        iter_ = self.append()
+        iter_ = self.append(None)
         self.set_data_for_task(iter_, task)
 
     def set_data_for_task(self, iter_, task):

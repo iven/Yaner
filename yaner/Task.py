@@ -68,10 +68,10 @@ class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     """
 
     name = sqlobject.UnicodeCol()
-    status = sqlobject.IntCol()
+    status = sqlobject.IntCol(default=STATUSES.PAUSED)
     deleted = sqlobject.BoolCol(default=False)
     type = sqlobject.IntCol()
-    uris = sqlobject.PickleCol()
+    uris = sqlobject.PickleCol(default=[])
     percent = sqlobject.IntCol(default=0)
     size = sqlobject.IntCol(default=0)
     gid = sqlobject.StringCol(default='')
@@ -85,4 +85,9 @@ class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
         sqlobject.SQLObject._init(self, *args, **kwargs)
+        self.progress_value = .96
+        self.progress_text = '50MB/100MB'
+        self.upload_speed = '20k/s'
+        self.download_speed = '10k/s'
+        self.connections = 2
 

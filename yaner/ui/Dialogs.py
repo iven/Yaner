@@ -380,28 +380,16 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         uris = self.uris
         metadata_file = self.metadata_file
         options = self.options
-        category = self.active_category
-        info = {}
-        info['percent'] = 0
-        info['size'] = 0
-        info['type'] = task_type
 
-        if task_type == Task.TYPES.ML and metadata_file:
-            info['metalink'] = metadata_file
-            info['name'] = os.path.basename(metadata_file)
-        elif task_type == Task.TYPES.NORMAL and uris:
-            info['uris'] = uris
-            if options.has_key('out'):
-                info['name'] = options['out']
-            else:
-                info['name'] = os.path.basename(uris[0])
-        elif task_type == Task.TYPES.BT and metadata_file:
-            info['torrent'] = metadata_file
-            info['uris'] = uris
-            info['name'] = os.path.basename(metadata_file)
+        if task_type == Task.TYPES.NORMAL and uris:
+            name = options.get('out', os.path.basename(uris[0]))
+        elif task_type != Task.TYPES.NORMAL and metadata_file:
+            name = os.path.basename(metadata_file)
         else:
             return
-        #category.add_task(info, options)
+        Task(name=name, type=task_type, metadata=metadata_file, uris=uris,
+                options=options, category=self.active_category,
+                pool=self.active_pool)
         dialog.hide()
 
 class TaskProfileDialog(TaskDialogMixin):
