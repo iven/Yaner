@@ -28,11 +28,14 @@ import os
 import sys
 import logging
 import argparse
+import sqlobject
 import subprocess
 from twisted.internet import reactor
 
 from yaner import __version__
+from yaner.Pool import Pool
 from yaner.Task import Task
+from yaner.Presentable import Category
 from yaner.Constants import PREFIX, U_CONFIG_DIR, BUS_NAME
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.Toplevel import Toplevel
@@ -68,6 +71,9 @@ class Application(UniqueApplicationMixin, LoggingMixin):
     _CONFIG_FILE = '{0}.conf'.format(_NAME)
     """The global configuration file of the application."""
 
+    _DATA_FILE = '{}.db'.format(_NAME)
+    """The global database file of the application."""
+
     def __init__(self):
         """
         The init methed of L{Application} class.
@@ -80,10 +86,14 @@ class Application(UniqueApplicationMixin, LoggingMixin):
 
         self._toplevel = None
         self._config = None
+        self._data_conn = None
 
         self._init_logging()
         if len(sys.argv) > 1:
             self._init_args()
+
+        # Set the database as default sqlobject connection
+        sqlobject.processConnection = self.data_conn
 
         # Set up and show toplevel window
         self.toplevel.show_all()
@@ -112,6 +122,25 @@ class Application(UniqueApplicationMixin, LoggingMixin):
                 config.update(GLOBAL_CONFIG)
             self._config = config
         return self._config
+
+    @property
+    def data_conn(self):
+        """Get the global database, which contains pool, category and
+        task informations."""
+        if self._data_conn is None:
+            self.logger.info(_('Connecting to global database file...'))
+
+            # Connect to the database and set as default connection
+            data_file = os.path.join(self._CONFIG_DIR, self._DATA_FILE)
+            data_conn = sqlobject.connectionForURI('sqlite://' + data_file)
+            self._data_conn = sqlobject.sqlhub.processConnection = data_conn
+
+            if not os.path.exists(data_file):
+                self._init_database()
+
+            self.logger.info(_('Global database file connected.'))
+
+        return self._data_conn
 
     def on_instance_exists(self):
         """
@@ -177,12 +206,28 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             )
         self.logger.info(_('Logging system initialized, start logging...'))
 
+    def _init_database(self):
+        """Set up database when the application first starts."""
+        self.logger.info(_('Initializing database for first start...'))
+
+        Pool.createTable()
+        Category.createTable()
+        Task.createTable()
+
+        down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
+
+        pool = Pool(name=_('My Computer'), host='localhost')
+        category = Category(name=_('Default Category'), directory=down_dir, pool=pool)
+
+        self.logger.info(_('Database initialized.'))
+
     def quit(self, *arg, **kwargs):
         """
         The callback function of the I{destory} signal of L{toplevel}.
         Just quit the application.
         """
         self.logger.info(_('Application quit normally.'))
+        self.data_conn.close()
         logging.shutdown()
         reactor.stop()
 

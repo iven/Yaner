@@ -24,13 +24,12 @@
 This module contains the L{Presentable} class of L{yaner}.
 """
 
-import os
 import gobject
+import sqlobject
 
 from yaner.Task import Task
-from yaner.Constants import U_CONFIG_DIR
+from yaner.Misc import GObjectSQLObjectMeta
 from yaner.utils.Logging import LoggingMixin
-from yaner.utils.Configuration import ConfigParser
 
 class Presentable(LoggingMixin, gobject.GObject):
     """
@@ -50,43 +49,94 @@ class Presentable(LoggingMixin, gobject.GObject):
     GObject signals of this class.
     """
 
-    _CONFIG_DIR = os.path.join(U_CONFIG_DIR, 'presentables')
-    """
-    User config directory containing presentable configuration files.
-    """
-
-    def __init__(self, uuid_, default_config):
+    def __init__(self):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
-        self._default_config = default_config
-        self._uuid = uuid_
-        self._config = None
-        self._tasks = []
+        self._description = ''
 
     @property
-    def uuid(self):
-        """Get the uuid of the presentable."""
-        return self.config.file
+    def description(self):
+        """Get the description of the presentable."""
+        return self._description
+
+class Queuing(Presentable):
+    """
+    Queuing presentable of the L{Pool}s.
+    """
+
+    def __init__(self, pool):
+        Presentable.__init__(self)
+        self._name = pool.name
+        self._pool = pool
+        self.parent = None
+        self.icon = "gtk-connect"
 
     @property
-    def config(self):
-        """
-        Get the configuration of the presentable.
-        If the file doesn't exist, read from the default configuration.
-        If the presentable configuration directory doesn't exist, create it.
-        """
-        if self._config is None:
-            config = ConfigParser(self._CONFIG_DIR, self._uuid)
-            if config.empty():
-                self.logger.info(
-                        _('No presentable configuration file, creating...'))
-                config.update(self._default_config)
-            self._config = config
-        return self._config
+    def name(self):
+        """Get the name of the presentable."""
+        return self._name
+
+    @name.setter
+    def name(self, new_name):
+        """Set the name of the presentable."""
+        self._name = new_name
+        self.emit('changed')
 
     @property
     def tasks(self):
-        """Get the tasks of the presentable."""
-        return self._tasks
+        """Get the running tasks of the pool."""
+        return []
+
+class Category(sqlobject.SQLObject, Presentable):
+    """
+    Category presentable of the L{Pool}s.
+    """
+
+    __metaclass__ = GObjectSQLObjectMeta
+
+    name = sqlobject.UnicodeCol()
+    directory = sqlobject.UnicodeCol()
+
+    pool = sqlobject.ForeignKey('Pool')
+    tasks = sqlobject.MultipleJoin('Task')
+
+    def _init(self, *args, **kwargs):
+        Presentable.__init__(self)
+        sqlobject.SQLObject._init(self, *args, **kwargs)
+
+        self.parent = self.pool.queuing
+        self.icon = "gtk-directory"
+
+    def _set_name(self, new_name):
+        """Set the name of the category."""
+        self._SO_set_name(new_name)
+        # When creating a new Pool, Presentable.__init__ isn't called,
+        # hash(self) equals zero, and signals can't be emitted
+        if hash(self):
+            self.emit('changed')
+
+    def _get_tasks(self):
+        """Get the comleted tasks of the category."""
+        return []
+
+class Dustbin(Presentable):
+    """
+    Dustbin presentable of the L{Pool}s.
+    """
+    def __init__(self, pool):
+        Presentable.__init__(self)
+        self._pool = pool
+        self.parent = pool.queuing
+        self.icon = "gtk-delete"
+
+    @property
+    def name(self):
+        """Get the name of the presentable."""
+        return _('Dustbin')
+
+    @property
+    def tasks(self):
+        """Get the deleted tasks of the pool."""
+        return []
 

@@ -21,36 +21,12 @@
 #
 
 """
-This module contains the L{Queuing} presentable of L{yaner}.
+This module contains miscellaneous functions used by other modules.
 """
 
-from yaner.Presentable import Presentable
-from yaner.Configurations import QUEUING_CONFIG
+from gobject import GObjectMeta
+from sqlobject.declarative import DeclarativeMeta
 
-class Queuing(Presentable):
-    """
-    Queuing presentable of the L{Pool}s.
-    """
-
-    def __init__(self, uuid_, name):
-        Presentable.__init__(self, uuid_, QUEUING_CONFIG)
-        self.parent = None
-        self._name = name
-        self.icon = "gtk-connect"
-
-    @property
-    def name(self):
-        """Get the name of the presentable."""
-        return self._name
-
-    @name.setter
-    def name(self, new_name):
-        """Set the name of the presentable."""
-        self._name = new_name
-        self.emit("changed")
-
-    @property
-    def description(self):
-        """Get the description of the presentable."""
-        return "This is a pool."
+class GObjectSQLObjectMeta(GObjectMeta, DeclarativeMeta):
+    pass
 

@@ -63,7 +63,6 @@ class Toplevel(gtk.Window, LoggingMixin):
         self.logger.info(_('Initializing toplevel window...'))
 
         self._config = config
-        self._pools = self._init_pools()
 
         self.set_default_size(800, 600)
 
@@ -91,7 +90,12 @@ class Toplevel(gtk.Window, LoggingMixin):
         scrolled_window.set_shadow_type(gtk.SHADOW_IN)
         hpaned.add1(scrolled_window)
 
-        self._pool_model = PoolModel(self._pools)
+        self._pool_model = PoolModel()
+
+        # Add Pools to the PoolModel
+        for pool in Pool.select():
+            self._add_pool(pool)
+
         self._pool_view = PoolView(self._pool_model)
         self._pool_view.set_size_request(200, -1)
         scrolled_window.add(self._pool_view)
@@ -108,7 +112,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         task_vbox.pack_start(self._task_list_view, True, True, 0)
 
         # Dialogs
-        self._task_new_dialog = TaskNewDialog(bus, self._pool_model)
+        self._task_new_dialog = TaskNewDialog(bus)
 
         self.logger.info(_('Toplevel window initialized.'))
 
@@ -184,21 +188,16 @@ class Toplevel(gtk.Window, LoggingMixin):
             self.logger.info(_('UI Manager initialized.'))
             return ui_manager
 
-    def _init_pools(self):
+    def _add_pool(self, pool):
         """
         Initialize pools for the application.
         A pool is an alias for an aria2 server.
         """
-        pools = []
-        pool_uuids = self.config['info']['pools']
-        self.logger.debug(_('Got pool(s): {0}.').format(pool_uuids))
-        for pool_uuid in eval(pool_uuids):
-            pool = Pool(pool_uuid)
-            pool.connect('presentable-added', self.update)
-            pool.connect('presentable-removed', self.update)
-            pool.connect('disconnected', self.on_pool_disconnected)
-            pools.append(pool)
-        return pools
+        self.logger.debug(_('Adding pool {0}...').format(pool.name))
+        pool.connect('presentable-added', self.update)
+        pool.connect('presentable-removed', self.update)
+        pool.connect('disconnected', self.on_pool_disconnected)
+        self._pool_model.add_pool(pool)
 
     def on_pool_disconnected(self, pool):
         """
