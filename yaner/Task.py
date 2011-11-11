@@ -27,11 +27,14 @@ This module contains the L{Task} class of L{yaner}.
 import gobject
 import sqlobject
 
+from sqlobject.inheritance import InheritableSQLObject
+
 from yaner.Misc import GObjectSQLObjectMeta
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
+from yaner.utils.Notification import Notification
 
-class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
+class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     """
     Task class is just downloading tasks, which provides data to L{TaskListModel}.
     """
@@ -84,7 +87,7 @@ class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def _init(self, *args, **kwargs):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
-        sqlobject.SQLObject._init(self, *args, **kwargs)
+        InheritableSQLObject._init(self, *args, **kwargs)
         self.upload_speed = '20k/s'
         self.download_speed = '10k/s'
         self.connections = 2
@@ -93,4 +96,42 @@ class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def progress_text(self):
         """Get the text to show on the progress bar."""
         return '{:.2%}'.format(self.percent)
+
+    def _on_started(self, gid):
+        """Task started callback, update task information."""
+        self.status = self.STATUSES.RUNNING
+        self.gid = gid[-1] if isinstance(gid, list) else gid
+
+    def _on_twisted_error(self, failure):
+        """Handle errors occured when calling some function via twisted."""
+        self.status = self.STATUSES.ERROR
+        self.gid = ''
+        Notification(_('Network Error'), failure.getErrorMessage())
+
+class NormalTask(Task):
+    """Normal Task."""
+
+    def start(self):
+        """Start the task."""
+        deferred = self.pool.proxy.callRemote('aria2.addUri',
+                self.uris, self.options)
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
+
+class BTTask(Task):
+    """BitTorrent Task."""
+
+    def start(self):
+        """Start the task."""
+        deferred = self.pool.proxy.callRemote('aria2.addTorrent',
+                self.metadata, self.uris, self.options)
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
+
+class MTTask(Task):
+    """Metalink Task."""
+
+    def start(self):
+        """Start the task."""
+        deferred = self.pool.proxy.callRemote('aria2.addMetalink',
+                self.metadata, self.options)
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
 

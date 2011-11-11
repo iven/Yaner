@@ -32,7 +32,7 @@ import dbus.service
 from twisted.web import xmlrpc
 
 from yaner.Pool import Pool
-from yaner.Task import Task
+from yaner.Task import Task, NormalTask, BTTask, MTTask
 from yaner.Presentable import Category
 from yaner.Constants import U_CONFIG_DIR
 from yaner.Constants import BUS_NAME as INTERFACE_NAME
@@ -385,14 +385,18 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
 
         if task_type == Task.TYPES.NORMAL and uris:
             name = options.get('out', os.path.basename(uris[0]))
+            metadata = None
         elif task_type != Task.TYPES.NORMAL and metadata_file:
             name = os.path.basename(metadata_file)
             with open(metadata_file) as m_file:
                 metadata = xmlrpc.Binary(m_file.read())
         else:
             return
-        Task(name=name, type=task_type, metadata=metadata, uris=uris,
-                options=options, category=self.active_category,
+
+        TaskClasses = (NormalTask, BTTask, MTTask)
+
+        TaskClasses[task_type](name=name, type=task_type, metadata=metadata,
+                uris=uris, options=options, category=self.active_category,
                 pool=self.active_pool).start()
         dialog.hide()
 

@@ -92,7 +92,7 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
 
     def _set_session_id(self, new_session_id):
         """Set the saved session id of the pool."""
-        self._SO_set_session_id(new_name)
+        self._SO_set_session_id(new_session_id)
         if hash(self):
             self.emit('session-changed')
 
