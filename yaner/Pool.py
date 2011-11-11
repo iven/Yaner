@@ -71,8 +71,8 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     port = sqlobject.IntCol(default=6800)
     session_id = sqlobject.StringCol(default='')
 
-    categories = sqlobject.MultipleJoin('Category')
-    tasks = sqlobject.MultipleJoin('Task')
+    categories = sqlobject.SQLMultipleJoin('Category')
+    tasks = sqlobject.SQLMultipleJoin('Task')
 
     def _init(self, *args, **kwargs):
         LoggingMixin.__init__(self)
@@ -121,7 +121,7 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     @property
     def presentables(self):
         """Get the presentables of the pool."""
-        return [self.queuing] + self.categories + [self.dustbin]
+        return [self.queuing] + list(self.categories) + [self.dustbin]
 
     @property
     def connected(self):

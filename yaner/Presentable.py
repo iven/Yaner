@@ -86,7 +86,8 @@ class Queuing(Presentable):
     @property
     def tasks(self):
         """Get the running tasks of the pool."""
-        return []
+        return self._pool.tasks.filter(Task.q.deleted == False).filter(
+                Task.q.status != Task.STATUSES.COMPLETED)
 
 class Category(sqlobject.SQLObject, Presentable):
     """
@@ -99,7 +100,7 @@ class Category(sqlobject.SQLObject, Presentable):
     directory = sqlobject.UnicodeCol()
 
     pool = sqlobject.ForeignKey('Pool')
-    tasks = sqlobject.MultipleJoin('Task')
+    tasks = sqlobject.SQLMultipleJoin('Task')
 
     def _init(self, *args, **kwargs):
         Presentable.__init__(self)
@@ -118,7 +119,9 @@ class Category(sqlobject.SQLObject, Presentable):
 
     def _get_tasks(self):
         """Get the comleted tasks of the category."""
-        return []
+        tasks = self._SO_get_tasks()
+        return tasks.filter(Task.q.deleted == False).filter(
+                Task.q.status == Task.STATUSES.COMPLETED)
 
 class Dustbin(Presentable):
     """
@@ -138,5 +141,5 @@ class Dustbin(Presentable):
     @property
     def tasks(self):
         """Get the deleted tasks of the pool."""
-        return []
+        return self._pool.tasks.filter(Task.q.deleted == True)
 
