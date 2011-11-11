@@ -84,6 +84,14 @@ class Toplevel(gtk.Window, LoggingMixin):
         hpaned = gtk.HPaned()
         vbox.pack_start(hpaned, True, True, 0)
 
+        # Right pane
+        task_vbox = gtk.VBox(False, 12)
+        hpaned.add2(task_vbox)
+
+        self._task_list_model = TaskListModel()
+        self._task_list_view = TaskListView(self._task_list_model)
+        task_vbox.pack_start(self._task_list_view, True, True, 0)
+
         # Left pane
         scrolled_window = gtk.ScrolledWindow()
         scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
@@ -98,18 +106,13 @@ class Toplevel(gtk.Window, LoggingMixin):
 
         self._pool_view = PoolView(self._pool_model)
         self._pool_view.set_size_request(200, -1)
+        self._pool_view.expand_all()
         scrolled_window.add(self._pool_view)
 
         self._pool_view.selection.connect("changed",
                 self.on_pool_view_selection_changed)
-
-        # Right pane
-        task_vbox = gtk.VBox(False, 12)
-        hpaned.add2(task_vbox)
-
-        self._task_list_model = TaskListModel()
-        self._task_list_view = TaskListView(self._task_list_model)
-        task_vbox.pack_start(self._task_list_view, True, True, 0)
+        self._pool_view.selection.select_iter(
+                self._pool_model.get_iter_first())
 
         # Dialogs
         self._task_new_dialog = TaskNewDialog(bus)

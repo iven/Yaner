@@ -171,7 +171,6 @@ class PoolView(gtk.TreeView):
         self.set_headers_visible(False)
         self.set_show_expanders(False)
         self.set_level_indentation(16)
-        self.expand_all()
 
         self.selection.set_mode(gtk.SELECTION_SINGLE)
 
