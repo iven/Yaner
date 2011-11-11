@@ -385,11 +385,13 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
             name = options.get('out', os.path.basename(uris[0]))
         elif task_type != Task.TYPES.NORMAL and metadata_file:
             name = os.path.basename(metadata_file)
+            with open(metadata_file) as m_file:
+                metadata = xmlrpc.Binary(m_file.read())
         else:
             return
-        Task(name=name, type=task_type, metadata=metadata_file, uris=uris,
+        Task(name=name, type=task_type, metadata=metadata, uris=uris,
                 options=options, category=self.active_category,
-                pool=self.active_pool)
+                pool=self.active_pool).start()
         dialog.hide()
 
 class TaskProfileDialog(TaskDialogMixin):
