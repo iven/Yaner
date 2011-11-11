@@ -64,7 +64,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
             'GID',
             'STATUS',
             'NAME',
-            'PRGRESS_VALUE',
+            'PERCENT',
             'PRGRESS_TEXT',
             'SIZE',
             'DOWNLOAD_SPEED',
@@ -72,9 +72,6 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
             'CONNECTIONS',
             'TASK',
             ))
-
-        # FIXME: Presentable is None
-        # self.presentable = presentable
 
     @property
     def presentable(self):
@@ -145,7 +142,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
                 self.columns.GID, task.gid,
                 self.columns.STATUS, task.status,
                 self.columns.NAME, task.name,
-                self.columns.PRGRESS_VALUE, task.progress_value,
+                self.columns.PERCENT, task.percent,
                 self.columns.PRGRESS_TEXT, task.progress_text,
                 self.columns.SIZE, task.size,
                 self.columns.DOWNLOAD_SPEED, task.download_speed,
@@ -213,9 +210,14 @@ class TaskListView(gtk.TreeView):
 
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
-        stock_id = model.get_value(iter_, self.model.columns.STATUS)
+        status = int(model.get_value(iter_, self.model.columns.STATUS))
+        stock_ids = ('gtk-media-play',  # RUNNING
+                'gtk-media-pause',      # PAUSED
+                'gtk-apply',            # COMPLETED
+                'gtk-stop',             # ERROR
+                )
         renderer.set_properties(
-                stock_id = stock_id,
+                stock_id = stock_ids[status],
                 stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
                 )
 

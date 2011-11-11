@@ -72,7 +72,7 @@ class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     deleted = sqlobject.BoolCol(default=False)
     type = sqlobject.IntCol()
     uris = sqlobject.PickleCol(default=[])
-    percent = sqlobject.IntCol(default=0)
+    percent = sqlobject.FloatCol(default=0)
     size = sqlobject.IntCol(default=0)
     gid = sqlobject.StringCol(default='')
     metadata = sqlobject.PickleCol(default=None)
@@ -85,9 +85,12 @@ class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
         sqlobject.SQLObject._init(self, *args, **kwargs)
-        self.progress_value = .96
-        self.progress_text = '50MB/100MB'
         self.upload_speed = '20k/s'
         self.download_speed = '10k/s'
         self.connections = 2
+
+    @property
+    def progress_text(self):
+        """Get the text to show on the progress bar."""
+        return '{:.2%}'.format(self.percent)
 
