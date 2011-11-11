@@ -124,7 +124,7 @@ class TaskDialogMixin(LoggingMixin):
             options['bt-prioritize-piece'] = ''
         return options
 
-    def init_options(self, new_options={}):
+    def init_options(self, new_options):
         """
         Reset options and widgets to default. If new_options is provided,
         current options will be updated with it.
@@ -335,7 +335,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         # TODO: Show main window
         # run the dialog
         widgets['dialog'].run()
-        
+
     def on_dir_chooser_button_clicked(self, button):
         """
         When directory chooser button clicked, popup the dialog, and update
@@ -411,7 +411,7 @@ class TaskProfileDialog(TaskDialogMixin):
     def __init__(self, main_app):
         TaskDialogMixin.__init__(self, TASK_PROFILE_UI_FILE)
         self.main_app = main_app
-    
+
     def __get_widgets(self):
         """
         Get a dict of widget of preferences dialog.

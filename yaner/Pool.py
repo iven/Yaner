@@ -28,7 +28,7 @@ import gobject
 import sqlobject
 
 from yaner.Misc import GObjectSQLObjectMeta
-from yaner.Presentable import Presentable, Queuing, Category, Dustbin
+from yaner.Presentable import Presentable, Queuing, Dustbin
 from yaner.utils.Logging import LoggingMixin
 
 class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):

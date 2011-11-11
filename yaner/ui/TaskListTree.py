@@ -30,7 +30,6 @@ import gobject
 import pango
 
 from yaner.Task import Task
-from yaner.Presentable import Presentable
 from yaner.ui.Misc import get_mix_color
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum

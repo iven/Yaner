@@ -28,5 +28,6 @@ from gobject import GObjectMeta
 from sqlobject.declarative import DeclarativeMeta
 
 class GObjectSQLObjectMeta(GObjectMeta, DeclarativeMeta):
+    """Metaclass for GObject and SQLObject subclasses."""
     pass
 

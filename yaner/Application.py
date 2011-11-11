@@ -36,7 +36,7 @@ from yaner import __version__
 from yaner.Pool import Pool
 from yaner.Task import Task
 from yaner.Presentable import Category
-from yaner.Constants import PREFIX, U_CONFIG_DIR, BUS_NAME
+from yaner.Constants import U_CONFIG_DIR, BUS_NAME
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
@@ -217,7 +217,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
 
         pool = Pool(name=_('My Computer'), host='localhost')
-        category = Category(name=_('Default Category'), directory=down_dir, pool=pool)
+        Category(name=_('Default Category'), directory=down_dir, pool=pool)
 
         self.logger.info(_('Database initialized.'))
 

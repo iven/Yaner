@@ -205,7 +205,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         L{PoolModel}.
         @TODO: Remove the pool, or fold it?
         """
-        self._pool_model.pools = self.pools
+        pass
 
     def on_pool_view_selection_changed(self, selection):
         """
@@ -217,6 +217,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         self._task_list_model.presentable = presentable
 
     def on_task_new(self, action, user_data, task_type):
+        """When task new action is activated, call the task new dialog."""
         self.task_new_dialog.run_dialog(task_type)
 
     def update(self):

@@ -63,6 +63,9 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         LoggingMixin.__init__(self)
 
     def add_pool(self, pool):
+        """When a pool is added to the model, connect signals, and add all
+        Presentables to the model.
+        """
         pool.connect('presentable-added', self.on_presentable_added)
         pool.connect('presentable-removed', self.on_presentable_removed)
         pool.connect('presentable-changed', self.on_presentable_changed)
