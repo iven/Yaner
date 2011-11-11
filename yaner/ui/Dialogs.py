@@ -29,6 +29,8 @@ import gobject
 import os
 import dbus.service
 
+from twisted.web import xmlrpc
+
 from yaner.Pool import Pool
 from yaner.Task import Task
 from yaner.Presentable import Category
@@ -398,8 +400,12 @@ class TaskProfileDialog(TaskDialogMixin):
     """
     This class contains widgets and methods related to default task profile dialog.
     """
+
+    _UI_FILE = os.path.join(UI_DIR, "task_profile.ui")
+    """The Glade UI file of this dialog."""
+
     def __init__(self, main_app):
-        TaskDialogMixin.__init__(self, TASK_PROFILE_UI_FILE)
+        TaskDialogMixin.__init__(self, self._UI_FILE)
         self.main_app = main_app
 
     def __get_widgets(self):
