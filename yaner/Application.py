@@ -138,7 +138,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             if not os.path.exists(data_file):
                 self._init_database()
 
-            self.logger.info(_('Global database file connected...'))
+            self.logger.info(_('Global database file connected.'))
 
         return self._data_conn
 
@@ -216,8 +216,8 @@ class Application(UniqueApplicationMixin, LoggingMixin):
 
         down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
 
-        Pool(name=_('My Computer'), host='localhost')
-        Category(name=_('Default Category'), directory=down_dir, pool=pool)
+        pool = Pool(name=_('My Computer'), host='localhost')
+        category = Category(name=_('Default Category'), directory=down_dir, pool=pool)
 
         self.logger.info(_('Database initialized.'))
 

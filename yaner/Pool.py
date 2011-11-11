@@ -78,14 +78,14 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def queuing(self):
         """Get the queuing presentable of the pool."""
         if self._queuing is None:
-            self._queuing = Queuing(self.name)
+            self._queuing = Queuing(self)
         return self._queuing
 
     @property
     def dustbin(self):
         """Get the dustbin presentable of the pool."""
         if self._dustbin is None:
-            self._dustbin = Dustbin(self.queuing)
+            self._dustbin = Dustbin(self)
         return self._dustbin
 
     @property

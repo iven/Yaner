@@ -52,12 +52,8 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
     C{COLUMNS.NAME} will return the column number of C{NAME}.
     """
 
-    def __init__(self, pools):
-        """
-        L{PoolModel} initializing.
-        @arg pools:Aria2 servers providing data to L{PoolModel}.
-        @type pools:list of L{yaner.Pool}
-        """
+    def __init__(self):
+        """L{PoolModel} initializing."""
         gtk.TreeStore.__init__(self,
                 gobject.TYPE_STRING,    # stock-id of the icon
                 gobject.TYPE_STRING,    # name
@@ -66,27 +62,12 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
                 )
         LoggingMixin.__init__(self)
 
-        self._pools = None
-        self.pools = pools
-
-    @property
-    def pools(self):
-        """Get the pools of the tree model."""
-        return self._pools
-
-    @pools.setter
-    def pools(self, new_pools):
-        """
-        Set the pools of the tree model, and update it.
-        """
-        self.clear()
-        for pool in new_pools:
-            pool.connect('presentable-added', self.on_presentable_added)
-            pool.connect('presentable-removed', self.on_presentable_removed)
-            pool.connect('presentable-changed', self.on_presentable_changed)
-            for presentable in pool.presentables:
-                self.add_presentable(presentable)
-        self._pools = new_pools
+    def add_pool(self, pool):
+        pool.connect('presentable-added', self.on_presentable_added)
+        pool.connect('presentable-removed', self.on_presentable_removed)
+        pool.connect('presentable-changed', self.on_presentable_changed)
+        for presentable in pool.presentables:
+            self.add_presentable(presentable)
 
     def on_presentable_added(self, pool, presentable):
         """
@@ -120,14 +101,14 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         @TODO: Test this.
         """
         self.logger.debug(_('Adding presentable {0}...').format(
-            presentable.uuid))
+            presentable.name))
         parent = presentable.parent
         parent_iter = None
         if not parent is None:
             parent_iter = self.get_iter_for_presentable(parent)
             if parent_iter is None:
                 self.logger.warning(_('No parent presentable for {0}.').format(
-                    presentable.uuid))
+                    presentable.name))
                 self.add_presentable(parent)
                 parent_iter = self.get_iter_for_presentable(parent)
         iter_ = self.append(parent_iter)
@@ -139,8 +120,8 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         """
         self.set(iter_,
                 self.COLUMNS.ICON, presentable.icon,
-                self.COLUMNS.DESCRIPTION, presentable.description,
                 self.COLUMNS.NAME, presentable.name,
+                self.COLUMNS.DESCRIPTION, presentable.description,
                 self.COLUMNS.PRESENTABLE, presentable,
                 )
 

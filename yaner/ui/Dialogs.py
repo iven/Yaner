@@ -199,19 +199,13 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
             }
     """Map task option names to widget names."""
 
-    def __init__(self, bus, pool_model):
+    def __init__(self, bus):
         TaskDialogMixin.__init__(self, self._UI_FILE, self._OPTION_DICT)
         dbus.service.Object.__init__(self, bus, self.OBJECT_NAME)
 
         self._widgets = {}
-        self._pool_model = pool_model
 
         self._init_filefilters()
-
-    @property
-    def pools(self):
-        """Get the global pools."""
-        return self._pool_model.pools
 
     @property
     def widgets(self):
@@ -335,7 +329,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         self.init_options(options)
         # init the server cb
         widgets['pool_ls'].clear()
-        for pool in self.pools:
+        for pool in Pool.select():
             widgets['pool_ls'].append([pool.name, pool])
         widgets['pool_cb'].set_active(0)
         # TODO: Show main window
@@ -362,7 +356,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         When category combobox selection changed, update the directory entry.
         """
         if self.active_category is not None:
-            self.widgets['dir_entry'].set_text(self.active_category.dir)
+            self.widgets['dir_entry'].set_text(self.active_category.directory)
 
     def on_pool_cb_changed(self, pool_cb):
         """

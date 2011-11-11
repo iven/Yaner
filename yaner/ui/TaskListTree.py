@@ -56,7 +56,6 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
                 gobject.TYPE_STRING,    # download speed
                 gobject.TYPE_STRING,    # upload speed
                 gobject.TYPE_INT,       # connections
-                gobject.TYPE_STRING,    # uuid
                 Task,                   # task
                 )
         LoggingMixin.__init__(self)
@@ -72,7 +71,6 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
             'DOWNLOAD_SPEED',
             'UPLOAD_SPEED',
             'CONNECTIONS',
-            'UUID',
             'TASK',
             ))
 
@@ -136,7 +134,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         Add a task to the model.
         @TODO: Test this.
         """
-        self.logger.debug(_('Adding task {}...').format(task.uuid))
+        self.logger.debug(_('Adding task {}...').format(task.name))
         iter_ = self.append()
         self.set_data_for_task(iter_, task)
 
@@ -154,7 +152,6 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
                 self.columns.DOWNLOAD_SPEED, task.download_speed,
                 self.columns.UPLOAD_SPEED, task.upload_speed,
                 self.columns.CONNECTIONS, task.connections,
-                self.columns.UUID, task.uuid,
                 self.columns.TASK, task,
                 )
 

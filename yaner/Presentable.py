@@ -65,9 +65,10 @@ class Queuing(Presentable):
     Queuing presentable of the L{Pool}s.
     """
 
-    def __init__(self, name):
+    def __init__(self, pool):
         Presentable.__init__(self)
-        self._name = name
+        self._name = pool.name
+        self._pool = pool
         self.parent = None
         self.icon = "gtk-connect"
 
@@ -81,6 +82,11 @@ class Queuing(Presentable):
         """Set the name of the presentable."""
         self._name = new_name
         self.emit('changed')
+
+    @property
+    def tasks(self):
+        """Get the running tasks of the pool."""
+        return []
 
 class Category(sqlobject.SQLObject, Presentable):
     """
@@ -110,17 +116,27 @@ class Category(sqlobject.SQLObject, Presentable):
         if hash(self):
             self.emit('changed')
 
+    def _get_tasks(self):
+        """Get the comleted tasks of the category."""
+        return []
+
 class Dustbin(Presentable):
     """
     Dustbin presentable of the L{Pool}s.
     """
-    def __init__(self, queuing):
+    def __init__(self, pool):
         Presentable.__init__(self)
-        self.parent = queuing
+        self._pool = pool
+        self.parent = pool.queuing
         self.icon = "gtk-delete"
 
     @property
     def name(self):
         """Get the name of the presentable."""
         return _('Dustbin')
+
+    @property
+    def tasks(self):
+        """Get the deleted tasks of the pool."""
+        return []
 
