@@ -68,7 +68,6 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         """
         pool.connect('presentable-added', self.on_presentable_added)
         pool.connect('presentable-removed', self.on_presentable_removed)
-        pool.connect('presentable-changed', self.on_presentable_changed)
         for presentable in pool.presentables:
             self.add_presentable(presentable)
 
@@ -89,13 +88,12 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         if iter_ is not None:
             self.remove(iter_)
 
-    def on_presentable_changed(self, pool, presentable):
+    def on_presentable_changed(self, presentable):
         """
         When a presentable changed, update the iter of the model.
-        @TODO: Test this.
         """
-        if presentable in pool.presentables:
-            iter_ = self.get_iter_for_presentable(presentable)
+        iter_ = self.get_iter_for_presentable(presentable)
+        if iter_:
             self.set_data_for_presentable(iter_, presentable)
 
     def add_presentable(self, presentable):
@@ -116,6 +114,8 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
                 parent_iter = self.get_iter_for_presentable(parent)
         iter_ = self.append(parent_iter)
         self.set_data_for_presentable(iter_, presentable)
+
+        presentable.connect('changed', self.on_presentable_changed)
 
     def set_data_for_presentable(self, iter_, presentable):
         """

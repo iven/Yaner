@@ -106,24 +106,22 @@ class TaskDialogMixin(LoggingMixin):
         Get the current options of the dialog.
         """
         options = self._options
+
         for (option, widget) in self.option_widgets.iteritems():
             if option == 'seed-ratio':
                 options[option] = str(widget.get_value())
             elif hasattr(widget, 'get_value'):
                 options[option] = str(int(widget.get_value()))
             elif hasattr(widget, 'get_text'):
-                text = widget.get_text()
-                if text != '':
-                    options[option] = text
+                options[option] = widget.get_text().strip()
             elif hasattr(widget, 'get_active'):
-                if widget.get_active():
-                    options[option] = 'true'
-                else:
-                    options[option] = 'false'
+                options[option] = 'true' if widget.get_active() else 'false'
+
         if self.option_widgets['bt-prioritize-piece'].get_active():
             options['bt-prioritize-piece'] = 'head,tail'
         else:
             options['bt-prioritize-piece'] = ''
+
         return options
 
     def init_options(self, new_options):
@@ -384,7 +382,8 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         options = self.options
 
         if task_type == Task.TYPES.NORMAL and uris:
-            name = options.get('out', os.path.basename(uris[0]))
+            name = options['out'] if options['out'] else \
+                    os.path.basename(uris[0])
             metadata = None
         elif task_type != Task.TYPES.NORMAL and metadata_file:
             name = os.path.basename(metadata_file)

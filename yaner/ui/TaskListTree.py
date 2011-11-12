@@ -51,7 +51,8 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
                 gobject.TYPE_STRING,    # name
                 gobject.TYPE_FLOAT,     # progress value
                 gobject.TYPE_STRING,    # progress text
-                gobject.TYPE_STRING,    # size
+                gobject.TYPE_INT,       # completed length
+                gobject.TYPE_INT,       # total length
                 gobject.TYPE_STRING,    # download speed
                 gobject.TYPE_STRING,    # upload speed
                 gobject.TYPE_INT,       # connections
@@ -66,7 +67,8 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
             'NAME',
             'PERCENT',
             'PRGRESS_TEXT',
-            'SIZE',
+            'COMPLETED_LENGTH',
+            'TOTAL_LENGTH',
             'DOWNLOAD_SPEED',
             'UPLOAD_SPEED',
             'CONNECTIONS',
@@ -86,7 +88,6 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         self.clear()
         new_presentable.connect('task-added', self.on_task_added)
         new_presentable.connect('task-removed', self.on_task_removed)
-        new_presentable.connect('task-changed', self.on_task_changed)
         for task in new_presentable.tasks:
             self.add_task(task)
         self._presentable = new_presentable
@@ -116,13 +117,12 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         if iter_ is not None:
             self.remove(iter_)
 
-    def on_task_changed(self, presentable, task):
+    def on_task_changed(self, task):
         """
         When a task changed, update the iter of the model.
-        @TODO: Test this.
         """
-        if task in presentable.tasks:
-            iter_ = self.get_iter_for_task(task)
+        iter_ = self.get_iter_for_task(task)
+        if iter_:
             self.set_data_for_task(iter_, task)
 
     def add_task(self, task):
@@ -134,6 +134,8 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         iter_ = self.insert(None, 0)
         self.set_data_for_task(iter_, task)
 
+        task.connect('changed', self.on_task_changed)
+
     def set_data_for_task(self, iter_, task):
         """
         Update the iter data for task.
@@ -144,7 +146,8 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
                 self.columns.NAME, task.name,
                 self.columns.PERCENT, task.percent,
                 self.columns.PRGRESS_TEXT, task.progress_text,
-                self.columns.SIZE, task.size,
+                self.columns.COMPLETED_LENGTH, task.completed_length,
+                self.columns.TOTAL_LENGTH, task.total_length,
                 self.columns.DOWNLOAD_SPEED, task.download_speed,
                 self.columns.UPLOAD_SPEED, task.upload_speed,
                 self.columns.CONNECTIONS, task.connections,

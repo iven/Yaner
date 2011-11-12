@@ -24,6 +24,7 @@
 This module contains the L{Task} class of L{yaner}.
 """
 
+import glib
 import gobject
 import sqlobject
 
@@ -43,7 +44,6 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     __gsignals__ = {
             'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
-            'removed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
             }
     """
     GObject signals of this class.
@@ -76,7 +76,8 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     type = sqlobject.IntCol()
     uris = sqlobject.PickleCol(default=[])
     percent = sqlobject.FloatCol(default=0)
-    size = sqlobject.IntCol(default=0)
+    completed_length = sqlobject.IntCol(default=0)
+    total_length = sqlobject.IntCol(default=0)
     gid = sqlobject.StringCol(default='')
     metadata = sqlobject.PickleCol(default=None)
     options = sqlobject.PickleCol()
@@ -88,9 +89,10 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
         InheritableSQLObject._init(self, *args, **kwargs)
-        self.upload_speed = '20k/s'
-        self.download_speed = '10k/s'
-        self.connections = 2
+
+        self.upload_speed = 0
+        self.download_speed = 0
+        self.connections = 0
 
     @property
     def progress_text(self):
@@ -101,11 +103,42 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """Task started callback, update task information."""
         self.status = self.STATUSES.RUNNING
         self.gid = gid[-1] if isinstance(gid, list) else gid
+        glib.timeout_add_seconds(1, self._call_tell_status)
+
+    def _call_tell_status(self):
+        """Call pool for the status of this task.
+
+        Return True to keep calling this when timeout else stop.
+
+        """
+        if self.status not in [self.STATUSES.COMPLETED, self.STATUSES.ERROR]:
+            deferred = self.pool.proxy.callRemote('aria2.tellStatus', self.gid)
+            deferred.addCallbacks(self._update_status, self._on_twisted_error)
+            return True
+        else:
+            return False
+
+    def _update_status(self, status):
+        """Update data fields of the task."""
+        self.total_length = int(status['totalLength'])
+        self.completed_length = int(status['completedLength'])
+        self.percent = 0 if (self.total_length == 0) else \
+                (float(self.completed_length) / self.total_length)
+
+        self.download_speed = int(status['downloadSpeed'])
+        self.upload_speed = int(status['uploadSpeed'])
+        self.connections = int(status['connections'])
+
+        if status['status'] == 'complete':
+            self.status = self.STATUSES.COMPLETED
+            self.pool.queuing.emit('task-removed', self)
+            self.category.emit('task-added', self)
+        else:
+            self.emit('changed')
 
     def _on_twisted_error(self, failure):
         """Handle errors occured when calling some function via twisted."""
         self.status = self.STATUSES.ERROR
-        self.gid = ''
         Notification(_('Network Error'), failure.getErrorMessage())
 
 class NormalTask(Task):

@@ -38,11 +38,8 @@ class Presentable(LoggingMixin, gobject.GObject):
 
     __gsignals__ = {
             'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
-            'removed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
             'task-added': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (Task,)),
             'task-removed': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Task,)),
-            'task-changed': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, (Task,)),
             }
     """
