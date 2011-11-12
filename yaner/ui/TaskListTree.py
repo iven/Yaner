@@ -55,22 +55,31 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
 
         self._presentable = None
 
+        self._presentable_handlers = {}
+        self._task_handlers = {}
+
     @property
     def presentable(self):
-        """Get the presentable of the tree model."""
+        """Get the current presentable of the tree model."""
         return self._presentable
 
     @presentable.setter
     def presentable(self, new_presentable):
         """
-        Set the presentable of the tree model, and update it.
+        Set the current presentable of the tree model, and update it.
         """
+        if self.presentable in self._presentable_handlers:
+            for handler in self._presentable_handlers.pop(self.presentable):
+                self.presentable.disconnect(handler)
+        self._presentable_handlers[new_presentable] = [
+                new_presentable.connect('task-added', self.on_task_added),
+                new_presentable.connect('task-removed', self.on_task_removed),
+                ]
+        self._presentable = new_presentable
+
         self.clear()
-        new_presentable.connect('task-added', self.on_task_added)
-        new_presentable.connect('task-removed', self.on_task_removed)
         for task in new_presentable.tasks:
             self.add_task(task)
-        self._presentable = new_presentable
 
     def on_task_added(self, presentable, task):
         """
@@ -87,6 +96,8 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         iter_ = self.get_iter_for_task(task)
         if iter_ is not None:
             self.remove(iter_)
+        if task in self._task_handlers:
+            task.disconnect(self._task_handlers.pop(task))
 
     def on_task_changed(self, task):
         """
@@ -105,7 +116,8 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         iter_ = self.insert(None, 0)
         self.set_data_for_task(iter_, task)
 
-        task.connect('changed', self.on_task_changed)
+        handler = task.connect('changed', self.on_task_changed)
+        self._task_handlers[task] = handler
 
     def set_data_for_task(self, iter_, task):
         """

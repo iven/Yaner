@@ -51,12 +51,17 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         gtk.TreeStore.__init__(self, Presentable)
         LoggingMixin.__init__(self)
 
+        self._pool_handlers = {}
+        self._presentable_handlers = {}
+
     def add_pool(self, pool):
         """When a pool is added to the model, connect signals, and add all
         Presentables to the model.
         """
-        pool.connect('presentable-added', self.on_presentable_added)
-        pool.connect('presentable-removed', self.on_presentable_removed)
+        self._pool_handlers[pool] = [
+                pool.connect('presentable-added', self.on_presentable_added),
+                pool.connect('presentable-removed', self.on_presentable_removed),
+                ]
         for presentable in pool.presentables:
             self.add_presentable(presentable)
 
@@ -76,6 +81,8 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         iter_ = self.get_iter_for_presentable(presentable)
         if iter_ is not None:
             self.remove(iter_)
+        if presentable in self._presentable_handlers:
+            presentable.disconnect(self._presentable_handlers.pop(presentable))
 
     def on_presentable_changed(self, presentable):
         """
@@ -104,7 +111,8 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         iter_ = self.append(parent_iter)
         self.set_data_for_presentable(iter_, presentable)
 
-        presentable.connect('changed', self.on_presentable_changed)
+        handler = presentable.connect('changed', self.on_presentable_changed)
+        self._presentable_handlers[presentable] = handler
 
     def set_data_for_presentable(self, iter_, presentable):
         """
