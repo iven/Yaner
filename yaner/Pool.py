@@ -54,8 +54,6 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
                 gobject.TYPE_NONE, (Presentable,)),
             'presentable-removed': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, (Presentable,)),
-            'presentable-changed': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Presentable,)),
             }
     """
     GObject signals of this class.
