@@ -29,6 +29,7 @@ import sqlobject
 
 from yaner.Task import Task
 from yaner.Misc import GObjectSQLObjectMeta
+from yaner.utils.Enum import Enum
 from yaner.utils.Logging import LoggingMixin
 
 class Presentable(LoggingMixin, gobject.GObject):
@@ -38,16 +39,20 @@ class Presentable(LoggingMixin, gobject.GObject):
 
     __gsignals__ = {
             'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
-            'removed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
             'task-added': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (Task,)),
             'task-removed': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Task,)),
-            'task-changed': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, (Task,)),
             }
     """
     GObject signals of this class.
     """
+
+    TYPES = Enum((
+        'QUEUING',
+        'CATEGORY',
+        'DUSTBIN',
+        ))
+    """Presentable types."""
 
     def __init__(self):
         LoggingMixin.__init__(self)
@@ -65,28 +70,35 @@ class Queuing(Presentable):
     Queuing presentable of the L{Pool}s.
     """
 
+    TYPE = Presentable.TYPES.QUEUING
+    """Presentable type."""
+
     def __init__(self, pool):
         Presentable.__init__(self)
-        self._name = pool.name
         self._pool = pool
         self.parent = None
-        self.icon = "gtk-connect"
 
     @property
     def name(self):
         """Get the name of the presentable."""
-        return self._name
+        return self.pool.name
 
     @name.setter
     def name(self, new_name):
         """Set the name of the presentable."""
-        self._name = new_name
+        self.pool.name = new_name
         self.emit('changed')
+
+    @property
+    def pool(self):
+        """Get the pool of the presentable."""
+        return self._pool
 
     @property
     def tasks(self):
         """Get the running tasks of the pool."""
-        return []
+        return self._pool.tasks.filter(Task.q.deleted == False).filter(
+                Task.q.status != Task.STATUSES.COMPLETED)
 
 class Category(sqlobject.SQLObject, Presentable):
     """
@@ -99,14 +111,16 @@ class Category(sqlobject.SQLObject, Presentable):
     directory = sqlobject.UnicodeCol()
 
     pool = sqlobject.ForeignKey('Pool')
-    tasks = sqlobject.MultipleJoin('Task')
+    tasks = sqlobject.SQLMultipleJoin('Task')
+
+    TYPE = Presentable.TYPES.CATEGORY
+    """Presentable type."""
 
     def _init(self, *args, **kwargs):
         Presentable.__init__(self)
         sqlobject.SQLObject._init(self, *args, **kwargs)
 
         self.parent = self.pool.queuing
-        self.icon = "gtk-directory"
 
     def _set_name(self, new_name):
         """Set the name of the category."""
@@ -118,17 +132,22 @@ class Category(sqlobject.SQLObject, Presentable):
 
     def _get_tasks(self):
         """Get the comleted tasks of the category."""
-        return []
+        tasks = self._SO_get_tasks()
+        return tasks.filter(Task.q.deleted == False).filter(
+                Task.q.status == Task.STATUSES.COMPLETED)
 
 class Dustbin(Presentable):
     """
     Dustbin presentable of the L{Pool}s.
     """
+
+    TYPE = Presentable.TYPES.DUSTBIN
+    """Presentable type."""
+
     def __init__(self, pool):
         Presentable.__init__(self)
         self._pool = pool
         self.parent = pool.queuing
-        self.icon = "gtk-delete"
 
     @property
     def name(self):
@@ -136,7 +155,12 @@ class Dustbin(Presentable):
         return _('Dustbin')
 
     @property
+    def pool(self):
+        """Get the pool of the presentable."""
+        return self._pool
+
+    @property
     def tasks(self):
         """Get the deleted tasks of the pool."""
-        return []
+        return self._pool.tasks.filter(Task.q.deleted == True)
 

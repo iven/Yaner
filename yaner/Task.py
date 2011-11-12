@@ -24,14 +24,18 @@
 This module contains the L{Task} class of L{yaner}.
 """
 
+import glib
 import gobject
 import sqlobject
+
+from sqlobject.inheritance import InheritableSQLObject
 
 from yaner.Misc import GObjectSQLObjectMeta
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
+from yaner.utils.Notification import Notification
 
-class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
+class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     """
     Task class is just downloading tasks, which provides data to L{TaskListModel}.
     """
@@ -40,7 +44,6 @@ class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
 
     __gsignals__ = {
             'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
-            'removed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
             }
     """
     GObject signals of this class.
@@ -68,12 +71,13 @@ class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     """
 
     name = sqlobject.UnicodeCol()
-    status = sqlobject.IntCol()
+    status = sqlobject.IntCol(default=STATUSES.PAUSED)
     deleted = sqlobject.BoolCol(default=False)
     type = sqlobject.IntCol()
-    uris = sqlobject.PickleCol()
-    percent = sqlobject.IntCol(default=0)
-    size = sqlobject.IntCol(default=0)
+    uris = sqlobject.PickleCol(default=[])
+    percent = sqlobject.FloatCol(default=0)
+    completed_length = sqlobject.IntCol(default=0)
+    total_length = sqlobject.IntCol(default=0)
     gid = sqlobject.StringCol(default='')
     metadata = sqlobject.PickleCol(default=None)
     options = sqlobject.PickleCol()
@@ -84,5 +88,85 @@ class Task(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def _init(self, *args, **kwargs):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
-        sqlobject.SQLObject._init(self, *args, **kwargs)
+        InheritableSQLObject._init(self, *args, **kwargs)
+
+        self.upload_speed = 0
+        self.download_speed = 0
+        self.connections = 0
+
+    def start(self, deferred):
+        """This shouldn't be called directly, used by subclasses."""
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
+
+    def _on_started(self, gid):
+        """Task started callback, update task information."""
+        self.status = self.STATUSES.RUNNING
+        self.gid = gid[-1] if isinstance(gid, list) else gid
+        glib.timeout_add_seconds(1, self._call_tell_status)
+
+    def _call_tell_status(self):
+        """Call pool for the status of this task.
+
+        Return True to keep calling this when timeout else stop.
+
+        """
+        if self.status not in [self.STATUSES.COMPLETED, self.STATUSES.ERROR]:
+            deferred = self.pool.proxy.callRemote('aria2.tellStatus', self.gid)
+            deferred.addCallbacks(self._update_status, self._on_twisted_error)
+            return True
+        else:
+            return False
+
+    def _update_status(self, status):
+        """Update data fields of the task."""
+        self.total_length = int(status['totalLength'])
+        self.completed_length = int(status['completedLength'])
+        self.percent = 0 if (self.total_length == 0) else \
+                (float(self.completed_length) / self.total_length)
+
+        self.download_speed = int(status['downloadSpeed'])
+        self.upload_speed = int(status['uploadSpeed'])
+        self.connections = int(status['connections'])
+
+        if status['status'] == 'complete':
+            self.status = self.STATUSES.COMPLETED
+            self.pool.queuing.emit('task-removed', self)
+            self.category.emit('task-added', self)
+        else:
+            self.emit('changed')
+
+        self.pool.connected = True
+
+    def _on_twisted_error(self, failure):
+        """Handle errors occured when calling some function via twisted."""
+        self.pool.connected = False
+        self.status = self.STATUSES.ERROR
+        Notification(_('Network Error'), failure.getErrorMessage())
+
+class NormalTask(Task):
+    """Normal Task."""
+
+    def start(self):
+        """Start the task."""
+        deferred = self.pool.proxy.callRemote('aria2.addUri',
+                self.uris, self.options)
+        Task.start(self, deferred)
+
+class BTTask(Task):
+    """BitTorrent Task."""
+
+    def start(self):
+        """Start the task."""
+        deferred = self.pool.proxy.callRemote('aria2.addTorrent',
+                self.metadata, self.uris, self.options)
+        Task.start(self, deferred)
+
+class MTTask(Task):
+    """Metalink Task."""
+
+    def start(self):
+        """Start the task."""
+        deferred = self.pool.proxy.callRemote('aria2.addMetalink',
+                self.metadata, self.options)
+        Task.start(self, deferred)
 

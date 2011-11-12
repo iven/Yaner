@@ -34,7 +34,7 @@ from twisted.internet import reactor
 
 from yaner import __version__
 from yaner.Pool import Pool
-from yaner.Task import Task
+from yaner.Task import Task, NormalTask, BTTask, MTTask
 from yaner.Presentable import Category
 from yaner.Constants import U_CONFIG_DIR, BUS_NAME
 from yaner.ui.Dialogs import TaskNewDialog
@@ -213,6 +213,9 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         Pool.createTable()
         Category.createTable()
         Task.createTable()
+        NormalTask.createTable()
+        BTTask.createTable()
+        MTTask.createTable()
 
         down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
 

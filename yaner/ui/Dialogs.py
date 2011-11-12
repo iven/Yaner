@@ -29,8 +29,10 @@ import gobject
 import os
 import dbus.service
 
+from twisted.web import xmlrpc
+
 from yaner.Pool import Pool
-from yaner.Task import Task
+from yaner.Task import Task, NormalTask, BTTask, MTTask
 from yaner.Presentable import Category
 from yaner.Constants import U_CONFIG_DIR
 from yaner.Constants import BUS_NAME as INTERFACE_NAME
@@ -104,24 +106,22 @@ class TaskDialogMixin(LoggingMixin):
         Get the current options of the dialog.
         """
         options = self._options
+
         for (option, widget) in self.option_widgets.iteritems():
             if option == 'seed-ratio':
                 options[option] = str(widget.get_value())
             elif hasattr(widget, 'get_value'):
                 options[option] = str(int(widget.get_value()))
             elif hasattr(widget, 'get_text'):
-                text = widget.get_text()
-                if text != '':
-                    options[option] = text
+                options[option] = widget.get_text().strip()
             elif hasattr(widget, 'get_active'):
-                if widget.get_active():
-                    options[option] = 'true'
-                else:
-                    options[option] = 'false'
+                options[option] = 'true' if widget.get_active() else 'false'
+
         if self.option_widgets['bt-prioritize-piece'].get_active():
             options['bt-prioritize-piece'] = 'head,tail'
         else:
             options['bt-prioritize-piece'] = ''
+
         return options
 
     def init_options(self, new_options):
@@ -380,36 +380,37 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         uris = self.uris
         metadata_file = self.metadata_file
         options = self.options
-        category = self.active_category
-        info = {}
-        info['percent'] = 0
-        info['size'] = 0
-        info['type'] = task_type
 
-        if task_type == Task.TYPES.ML and metadata_file:
-            info['metalink'] = metadata_file
-            info['name'] = os.path.basename(metadata_file)
-        elif task_type == Task.TYPES.NORMAL and uris:
-            info['uris'] = uris
-            if options.has_key('out'):
-                info['name'] = options['out']
-            else:
-                info['name'] = os.path.basename(uris[0])
-        elif task_type == Task.TYPES.BT and metadata_file:
-            info['torrent'] = metadata_file
-            info['uris'] = uris
-            info['name'] = os.path.basename(metadata_file)
+        if task_type == Task.TYPES.NORMAL and uris:
+            name = options['out'] if options['out'] else \
+                    os.path.basename(uris[0])
+            metadata = None
+        elif task_type != Task.TYPES.NORMAL and metadata_file:
+            name = os.path.basename(metadata_file)
+            with open(metadata_file) as m_file:
+                metadata = xmlrpc.Binary(m_file.read())
         else:
             return
-        #category.add_task(info, options)
+
+        TaskClasses = (NormalTask, BTTask, MTTask)
+
+        task = TaskClasses[task_type](name=name, type=task_type,
+                metadata=metadata, uris=uris, options=options,
+                category=self.active_category, pool=self.active_pool)
+        task.start()
+        task.pool.queuing.emit('task-added', task)
         dialog.hide()
 
 class TaskProfileDialog(TaskDialogMixin):
     """
     This class contains widgets and methods related to default task profile dialog.
     """
+
+    _UI_FILE = os.path.join(UI_DIR, "task_profile.ui")
+    """The Glade UI file of this dialog."""
+
     def __init__(self, main_app):
-        TaskDialogMixin.__init__(self, TASK_PROFILE_UI_FILE)
+        TaskDialogMixin.__init__(self, self._UI_FILE)
         self.main_app = main_app
 
     def __get_widgets(self):
