@@ -114,7 +114,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         """
         iter_ = self.get_iter_for_task(task)
         if iter_ is not None:
-            self.remove(_iter)
+            self.remove(iter_)
 
     def on_task_changed(self, presentable, task):
         """
@@ -131,7 +131,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         @TODO: Test this.
         """
         self.logger.debug(_('Adding task {}...').format(task.name))
-        iter_ = self.append(None)
+        iter_ = self.insert(None, 0)
         self.set_data_for_task(iter_, task)
 
     def set_data_for_task(self, iter_, task):

@@ -395,9 +395,11 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
 
         TaskClasses = (NormalTask, BTTask, MTTask)
 
-        TaskClasses[task_type](name=name, type=task_type, metadata=metadata,
-                uris=uris, options=options, category=self.active_category,
-                pool=self.active_pool).start()
+        task = TaskClasses[task_type](name=name, type=task_type,
+                metadata=metadata, uris=uris, options=options,
+                category=self.active_category, pool=self.active_pool)
+        task.start()
+        task.pool.queuing.emit('task-added', task)
         dialog.hide()
 
 class TaskProfileDialog(TaskDialogMixin):
