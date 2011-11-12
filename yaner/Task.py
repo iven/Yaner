@@ -94,11 +94,6 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.download_speed = 0
         self.connections = 0
 
-    @property
-    def progress_text(self):
-        """Get the text to show on the progress bar."""
-        return '{:.2%}'.format(self.percent)
-
     def start(self, deferred):
         """This shouldn't be called directly, used by subclasses."""
         deferred.addCallbacks(self._on_started, self._on_twisted_error)

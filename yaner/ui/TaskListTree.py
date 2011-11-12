@@ -26,7 +26,6 @@ topright of the toplevel window.
 """
 
 import gtk
-import gobject
 import pango
 
 from yaner.Task import Task
@@ -39,41 +38,22 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
     The tree interface used by task list treeviews.
     """
 
+    COLUMNS = Enum(('TASK', ))
+    """
+    The column names of the tree model, which is a L{Enum<yaner.utils.Enum>}.
+    C{COLUMNS.NAME} will return the column number of C{NAME}.
+    """
+
     def __init__(self, presentable = None):
         """
         L{TaskListModel} initializing.
         @arg tasks:Tasks providing data to L{TaskListModel}.
         @type tasks:L{yaner.Task}
         """
-        gtk.TreeStore.__init__(self,
-                gobject.TYPE_STRING,    # gid
-                gobject.TYPE_STRING,    # status
-                gobject.TYPE_STRING,    # name
-                gobject.TYPE_FLOAT,     # progress value
-                gobject.TYPE_STRING,    # progress text
-                gobject.TYPE_INT,       # completed length
-                gobject.TYPE_INT,       # total length
-                gobject.TYPE_STRING,    # download speed
-                gobject.TYPE_STRING,    # upload speed
-                gobject.TYPE_INT,       # connections
-                Task,                   # task
-                )
+        gtk.TreeStore.__init__(self, Task)
         LoggingMixin.__init__(self)
 
         self._presentable = None
-        self._columns = Enum((
-            'GID',
-            'STATUS',
-            'NAME',
-            'PERCENT',
-            'PRGRESS_TEXT',
-            'COMPLETED_LENGTH',
-            'TOTAL_LENGTH',
-            'DOWNLOAD_SPEED',
-            'UPLOAD_SPEED',
-            'CONNECTIONS',
-            'TASK',
-            ))
 
     @property
     def presentable(self):
@@ -91,15 +71,6 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         for task in new_presentable.tasks:
             self.add_task(task)
         self._presentable = new_presentable
-
-    @property
-    def columns(self):
-        """
-        Get the column names of the tree model, which is a
-        L{Enum<yaner.utils.Enum>}. C{columns.NAME} will return the column
-        number of C{NAME}.
-        """
-        return self._columns
 
     def on_task_added(self, presentable, task):
         """
@@ -140,19 +111,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         """
         Update the iter data for task.
         """
-        self.set(iter_,
-                self.columns.GID, task.gid,
-                self.columns.STATUS, task.status,
-                self.columns.NAME, task.name,
-                self.columns.PERCENT, task.percent,
-                self.columns.PRGRESS_TEXT, task.progress_text,
-                self.columns.COMPLETED_LENGTH, task.completed_length,
-                self.columns.TOTAL_LENGTH, task.total_length,
-                self.columns.DOWNLOAD_SPEED, task.download_speed,
-                self.columns.UPLOAD_SPEED, task.upload_speed,
-                self.columns.CONNECTIONS, task.connections,
-                self.columns.TASK, task,
-                )
+        self.set(iter_, self.COLUMNS.TASK, task)
 
     def get_iter_for_task(self, task):
         """
@@ -161,7 +120,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         """
         iter_ = self.get_iter_first()
         while not iter_ is None:
-            if task is self.get_value(iter_, self.columns.TASK):
+            if task is self.get_value(iter_, self.COLUMNS.TASK):
                 return iter_
             iter_ = self.iter_next(iter_)
         return None
@@ -213,14 +172,14 @@ class TaskListView(gtk.TreeView):
 
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
-        status = int(model.get_value(iter_, self.model.columns.STATUS))
+        task = model.get_value(iter_, self.model.COLUMNS.TASK)
         stock_ids = ('gtk-media-play',  # RUNNING
                 'gtk-media-pause',      # PAUSED
                 'gtk-apply',            # COMPLETED
                 'gtk-stop',             # ERROR
                 )
         renderer.set_properties(
-                stock_id = stock_ids[status],
+                stock_id = stock_ids[task.status],
                 stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
                 )
 
@@ -228,11 +187,7 @@ class TaskListView(gtk.TreeView):
         """
         Method for format the text in the column.
         """
-        (name, description) = model.get(
-                iter_,
-                self.model.columns.NAME,
-                self.model.columns.DOWNLOAD_SPEED,
-                )
+        task = model.get_value(iter_, self.model.COLUMNS.TASK)
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
             if self.has_focus():
@@ -245,10 +200,10 @@ class TaskListView(gtk.TreeView):
         color = get_mix_color(self, state)
 
         markup = '<small>' \
-                     '<b>{name}</b>\n' \
-                     '<span fgcolor="{color}">{description}</span>' \
+                     '<b>{0.name}</b>\n' \
+                     '<span fgcolor="{1}">{0.percent:.2%}</span>' \
                  '</small>' \
-                 .format(**locals())
+                 .format(task, color)
 
         renderer.set_properties(
                 markup = markup,

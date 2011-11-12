@@ -40,9 +40,7 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
     The tree interface used by L{PoolView}.
     """
 
-    COLUMNS = Enum((
-        'PRESENTABLE',
-        ))
+    COLUMNS = Enum(('PRESENTABLE', ))
     """
     The column names of the tree model, which is a L{Enum<yaner.utils.Enum>}.
     C{COLUMNS.NAME} will return the column number of C{NAME}.
