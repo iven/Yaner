@@ -29,6 +29,7 @@ import sqlobject
 
 from yaner.Task import Task
 from yaner.Misc import GObjectSQLObjectMeta
+from yaner.utils.Enum import Enum
 from yaner.utils.Logging import LoggingMixin
 
 class Presentable(LoggingMixin, gobject.GObject):
@@ -46,6 +47,13 @@ class Presentable(LoggingMixin, gobject.GObject):
     GObject signals of this class.
     """
 
+    TYPES = Enum((
+        'QUEUING',
+        'CATEGORY',
+        'DUSTBIN',
+        ))
+    """Presentable types."""
+
     def __init__(self):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
@@ -62,23 +70,29 @@ class Queuing(Presentable):
     Queuing presentable of the L{Pool}s.
     """
 
+    TYPE = Presentable.TYPES.QUEUING
+    """Presentable type."""
+
     def __init__(self, pool):
         Presentable.__init__(self)
-        self._name = pool.name
         self._pool = pool
         self.parent = None
-        self.icon = "gtk-connect"
 
     @property
     def name(self):
         """Get the name of the presentable."""
-        return self._name
+        return self.pool.name
 
     @name.setter
     def name(self, new_name):
         """Set the name of the presentable."""
-        self._name = new_name
+        self.pool.name = new_name
         self.emit('changed')
+
+    @property
+    def pool(self):
+        """Get the pool of the presentable."""
+        return self._pool
 
     @property
     def tasks(self):
@@ -99,12 +113,14 @@ class Category(sqlobject.SQLObject, Presentable):
     pool = sqlobject.ForeignKey('Pool')
     tasks = sqlobject.SQLMultipleJoin('Task')
 
+    TYPE = Presentable.TYPES.CATEGORY
+    """Presentable type."""
+
     def _init(self, *args, **kwargs):
         Presentable.__init__(self)
         sqlobject.SQLObject._init(self, *args, **kwargs)
 
         self.parent = self.pool.queuing
-        self.icon = "gtk-directory"
 
     def _set_name(self, new_name):
         """Set the name of the category."""
@@ -124,16 +140,24 @@ class Dustbin(Presentable):
     """
     Dustbin presentable of the L{Pool}s.
     """
+
+    TYPE = Presentable.TYPES.DUSTBIN
+    """Presentable type."""
+
     def __init__(self, pool):
         Presentable.__init__(self)
         self._pool = pool
         self.parent = pool.queuing
-        self.icon = "gtk-delete"
 
     @property
     def name(self):
         """Get the name of the presentable."""
         return _('Dustbin')
+
+    @property
+    def pool(self):
+        """Get the pool of the presentable."""
+        return self._pool
 
     @property
     def tasks(self):
