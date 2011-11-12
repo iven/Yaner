@@ -86,8 +86,6 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
 
         self._check_session_info()
 
-        self.connect('session-changed', self._on_session_changed)
-
     def _set_session_id(self, new_session_id):
         """Set the saved session id of the pool."""
         self._SO_set_session_id(new_session_id)
@@ -132,6 +130,10 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
             self._connected = new_status
             self.emit('status-changed')
 
+    def do_status_changed(self):
+        """When status changed, update queuing presentable."""
+        self.queuing.emit('changed')
+
     def _check_session_info(self):
         """Check if it is a new aria2 session, by get session info from aria2
         server. A new session means either it's first start of L{yaner}, or
@@ -146,9 +148,6 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         glib.timeout_add_seconds(self._SESSION_CHECK_INTERVAL,
                 self._check_session_info)
         return False
-
-    def _on_session_changed(self, pool):
-        print pool.session_id
 
     def _on_got_session_info(self, session_info):
         """When got session info, compare it with the saved session id.

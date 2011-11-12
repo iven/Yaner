@@ -99,6 +99,10 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """Get the text to show on the progress bar."""
         return '{:.2%}'.format(self.percent)
 
+    def start(self, deferred):
+        """This shouldn't be called directly, used by subclasses."""
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
+
     def _on_started(self, gid):
         """Task started callback, update task information."""
         self.status = self.STATUSES.RUNNING
@@ -136,8 +140,11 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         else:
             self.emit('changed')
 
+        self.pool.connected = True
+
     def _on_twisted_error(self, failure):
         """Handle errors occured when calling some function via twisted."""
+        self.pool.connected = False
         self.status = self.STATUSES.ERROR
         Notification(_('Network Error'), failure.getErrorMessage())
 
@@ -148,7 +155,7 @@ class NormalTask(Task):
         """Start the task."""
         deferred = self.pool.proxy.callRemote('aria2.addUri',
                 self.uris, self.options)
-        deferred.addCallbacks(self._on_started, self._on_twisted_error)
+        Task.start(self, deferred)
 
 class BTTask(Task):
     """BitTorrent Task."""
@@ -157,7 +164,7 @@ class BTTask(Task):
         """Start the task."""
         deferred = self.pool.proxy.callRemote('aria2.addTorrent',
                 self.metadata, self.uris, self.options)
-        deferred.addCallbacks(self._on_started, self._on_twisted_error)
+        Task.start(self, deferred)
 
 class MTTask(Task):
     """Metalink Task."""
@@ -166,5 +173,5 @@ class MTTask(Task):
         """Start the task."""
         deferred = self.pool.proxy.callRemote('aria2.addMetalink',
                 self.metadata, self.options)
-        deferred.addCallbacks(self._on_started, self._on_twisted_error)
+        Task.start(self, deferred)
 
