@@ -152,8 +152,10 @@ class TaskListView(gtk.TreeView):
 
         self._model = model
 
-        # Set up TreeViewColumn
-        column = gtk.TreeViewColumn()
+        # Set up columns
+        column = gtk.TreeViewColumn(_('Task'))
+        column.set_expand(True)
+        column.set_resizable(True)
         self.append_column(column)
 
         renderer = gtk.CellRendererPixbuf()
@@ -164,8 +166,17 @@ class TaskListView(gtk.TreeView):
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._markup_data_func)
 
+        column = gtk.TreeViewColumn(_('Progress'))
+        column.set_expand(True)
+        column.set_resizable(True)
+        self.append_column(column)
+
+        renderer = gtk.CellRendererProgress()
+        column.pack_start(renderer, True)
+        column.set_cell_data_func(renderer, self._progress_data_func)
+
         # TreeView properties
-        self.set_headers_visible(False)
+        #self.set_headers_visible(False)
         self.set_show_expanders(False)
         self.set_level_indentation(16)
         self.expand_all()
@@ -213,7 +224,7 @@ class TaskListView(gtk.TreeView):
 
         markup = '<small>' \
                      '<b>{0.name}</b>\n' \
-                     '<span fgcolor="{1}">{0.percent:.2%}</span>' \
+                     '<span fgcolor="{1}">{0.completed_length} / {0.total_length}</span>' \
                  '</small>' \
                  .format(task, color)
 
@@ -221,5 +232,15 @@ class TaskListView(gtk.TreeView):
                 markup = markup,
                 ellipsize_set = True,
                 ellipsize = pango.ELLIPSIZE_MIDDLE,
+                )
+
+    def _progress_data_func(self, cell_layout, renderer, model, iter_):
+        """Method for set the progress bar style in the column."""
+        task = model.get_value(iter_, self.model.COLUMNS.TASK)
+        renderer.set_properties(
+                value=task.percent * 100,
+                text='{:.2%}'.format(task.percent),
+                xpad = 2,
+                ypad = 2,
                 )
 
