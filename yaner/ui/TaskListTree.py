@@ -30,8 +30,9 @@ import pango
 
 from yaner.Task import Task
 from yaner.ui.Misc import get_mix_color
-from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
+from yaner.utils.Pretty import psize, pspeed
+from yaner.utils.Logging import LoggingMixin
 
 class TaskListModel(gtk.TreeStore, LoggingMixin):
     """
@@ -229,16 +230,23 @@ class TaskListView(gtk.TreeView):
         # Get the color for the description
         color = get_mix_color(self, state)
 
+        # If task completed, don't show completed length
+        if task.status == Task.STATUSES.COMPLETED:
+            completed_markup = ''
+        else:
+            completed_markup = '{} / '.format(psize(task.completed_length))
+
         markup = '<small>' \
-                     '<b>{0.name}</b>\n' \
-                     '<span fgcolor="{1}">{0.completed_length} / {0.total_length}</span>' \
+                     '<b>{}</b>\n' \
+                     '<span fgcolor="{}">{}{}</span>' \
                  '</small>' \
-                 .format(task, color)
+                 .format(task.name, color, completed_markup,
+                         psize(task.total_length))
 
         renderer.set_properties(
                 markup = markup,
                 ellipsize_set = True,
-                ellipsize = pango.ELLIPSIZE_MIDDLE,
+                ellipsize = pango.ELLIPSIZE_END,
                 )
 
     def _progress_data_func(self, cell_layout, renderer, model, iter_):
@@ -254,12 +262,10 @@ class TaskListView(gtk.TreeView):
     def _speed_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the up and down speed in the column."""
         task = model.get_value(iter_, self.model.COLUMNS.TASK)
-        markup = ''
+        markups = []
         if task.upload_speed:
-            markup += u'\u2B06 {0.upload_speed}'
+            markups.append(u'\u2B06 {}'.format(pspeed(task.upload_speed)))
         if task.download_speed:
-            markup += u'\n\u2B07 {0.download_speed}'
-        renderer.set_properties(
-                markup=markup.format(task),
-                )
+            markups.append(u'\n\u2B07 {}'.format(pspeed(task.download_speed)))
+        renderer.set_properties(markup=''.join(markups))
 
