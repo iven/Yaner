@@ -164,7 +164,7 @@ class TaskListView(gtk.TreeView):
 
         renderer = gtk.CellRendererText()
         column.pack_start(renderer, True)
-        column.set_cell_data_func(renderer, self._markup_data_func)
+        column.set_cell_data_func(renderer, self._desc_data_func)
 
         column = gtk.TreeViewColumn(_('Progress'))
         column.set_expand(True)
@@ -206,10 +206,8 @@ class TaskListView(gtk.TreeView):
                 stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
                 )
 
-    def _markup_data_func(self, cell_layout, renderer, model, iter_):
-        """
-        Method for format the text in the column.
-        """
+    def _desc_data_func(self, cell_layout, renderer, model, iter_):
+        """Method for format the description text in the column."""
         task = model.get_value(iter_, self.model.COLUMNS.TASK)
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
