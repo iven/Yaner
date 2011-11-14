@@ -106,7 +106,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         """
         iter_ = self.get_iter_for_task(task)
         if iter_:
-            self.set_data_for_task(iter_, task)
+            self.row_changed(self.get_path(iter_), iter_)
 
     def add_task(self, task):
         """
@@ -115,16 +115,10 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         """
         self.logger.debug(_('Adding task {}...').format(task.name))
         iter_ = self.insert(None, 0)
-        self.set_data_for_task(iter_, task)
+        self.set(iter_, self.COLUMNS.TASK, task)
 
         handler = task.connect('changed', self.on_task_changed)
         self._task_handlers[task] = handler
-
-    def set_data_for_task(self, iter_, task):
-        """
-        Update the iter data for task.
-        """
-        self.set(iter_, self.COLUMNS.TASK, task)
 
     def get_iter_for_task(self, task):
         """

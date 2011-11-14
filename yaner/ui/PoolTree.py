@@ -90,7 +90,7 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         """
         iter_ = self.get_iter_for_presentable(presentable)
         if iter_:
-            self.set_data_for_presentable(iter_, presentable)
+            self.row_changed(self.get_path(iter_), iter_)
 
     def add_presentable(self, presentable):
         """
@@ -109,16 +109,10 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
                 self.add_presentable(parent)
                 parent_iter = self.get_iter_for_presentable(parent)
         iter_ = self.append(parent_iter)
-        self.set_data_for_presentable(iter_, presentable)
+        self.set(iter_, self.COLUMNS.PRESENTABLE, presentable)
 
         handler = presentable.connect('changed', self.on_presentable_changed)
         self._presentable_handlers[presentable] = handler
-
-    def set_data_for_presentable(self, iter_, presentable):
-        """
-        Update the iter data for presentable.
-        """
-        self.set(iter_, self.COLUMNS.PRESENTABLE, presentable)
 
     def get_iter_for_presentable(self, presentable):
         """
