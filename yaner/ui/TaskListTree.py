@@ -160,7 +160,7 @@ class TaskListView(gtk.TreeView):
 
         renderer = gtk.CellRendererPixbuf()
         column.pack_start(renderer, False)
-        column.set_cell_data_func(renderer, self._pixbuf_data_func)
+        column.set_cell_data_func(renderer, self._status_data_func)
 
         renderer = gtk.CellRendererText()
         column.pack_start(renderer, True)
@@ -174,6 +174,15 @@ class TaskListView(gtk.TreeView):
         renderer = gtk.CellRendererProgress()
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._progress_data_func)
+
+        column = gtk.TreeViewColumn(_('Speed'))
+        column.set_expand(True)
+        column.set_resizable(True)
+        self.append_column(column)
+
+        renderer = gtk.CellRendererText()
+        column.pack_start(renderer, True)
+        column.set_cell_data_func(renderer, self._speed_data_func)
 
         # TreeView properties
         #self.set_headers_visible(False)
@@ -193,7 +202,7 @@ class TaskListView(gtk.TreeView):
         """Get the C{gtk.TreeSelection} of the tree view."""
         return self.get_selection()
 
-    def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
+    def _status_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
         task = model.get_value(iter_, self.model.COLUMNS.TASK)
         stock_ids = ('gtk-media-play',  # RUNNING
@@ -240,5 +249,17 @@ class TaskListView(gtk.TreeView):
                 text='{:.2%}'.format(task.percent),
                 xpad = 2,
                 ypad = 2,
+                )
+
+    def _speed_data_func(self, cell_layout, renderer, model, iter_):
+        """Method for set the up and down speed in the column."""
+        task = model.get_value(iter_, self.model.COLUMNS.TASK)
+        markup = ''
+        if task.upload_speed:
+            markup += u'\u2B06 {0.upload_speed}'
+        if task.download_speed:
+            markup += u'\n\u2B07 {0.download_speed}'
+        renderer.set_properties(
+                markup=markup.format(task),
                 )
 
