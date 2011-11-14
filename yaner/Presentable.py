@@ -58,13 +58,6 @@ class Presentable(LoggingMixin, gobject.GObject):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
-        self._description = ''
-
-    @property
-    def description(self):
-        """Get the description of the presentable."""
-        return self._description
-
 class Queuing(Presentable):
     """
     Queuing presentable of the L{Pool}s.
