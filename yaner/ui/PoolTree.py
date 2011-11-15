@@ -32,8 +32,9 @@ import pango
 
 from yaner.Presentable import Presentable
 from yaner.ui.Misc import get_mix_color
-from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
+from yaner.utils.Pretty import psize
+from yaner.utils.Logging import LoggingMixin
 
 class PoolModel(gtk.TreeStore, LoggingMixin):
     """
@@ -204,11 +205,14 @@ class PoolView(gtk.TreeView):
         # Get the color for the description
         color = get_mix_color(self, state)
 
+        tasks = presentable.tasks
+        total_length = sum(task.total_length for task in tasks)
+        description = '{} Task(s) {}'.format(tasks.count(), psize(total_length))
         markup = '<small>' \
-                     '<b>{0.name}</b>\n' \
-                     '<span fgcolor="{1}">{0.description}</span>' \
+                     '<b>{}</b>\n' \
+                     '<span fgcolor="{}">{}</span>' \
                  '</small>' \
-                 .format(presentable, color)
+                 .format(presentable.name, color, description)
 
         renderer.set_properties(
                 markup = markup,
