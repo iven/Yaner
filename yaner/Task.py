@@ -72,7 +72,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     """
 
     name = sqlobject.UnicodeCol()
-    status = sqlobject.IntCol(default=STATUSES.PAUSED)
+    status = sqlobject.IntCol(default=STATUSES.WAITING)
     deleted = sqlobject.BoolCol(default=False)
     type = sqlobject.IntCol()
     uris = sqlobject.PickleCol(default=[])
@@ -101,7 +101,6 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     def _on_started(self, gid):
         """Task started callback, update task information."""
-        self.status = self.STATUSES.ACTIVE
         self.gid = gid[-1] if isinstance(gid, list) else gid
         glib.timeout_add_seconds(1, self._call_tell_status)
 
@@ -129,8 +128,15 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.upload_speed = int(status['uploadSpeed'])
         self.connections = int(status['connections'])
 
-        if status['status'] == 'complete':
-            self.status = self.STATUSES.COMPLETE
+        statuses = {'active': self.STATUSES.ACTIVE,
+                'waiting': self.STATUSES.WAITING,
+                'paused': self.STATUSES.PAUSED,
+                'complete': self.STATUSES.COMPLETE,
+                'error': self.STATUSES.ERROR,
+                }
+        self.status = statuses[status['status']]
+
+        if self.status == self.STATUSES.COMPLETE:
             self.pool.queuing.emit('task-removed', self)
             self.category.emit('task-added', self)
         else:
