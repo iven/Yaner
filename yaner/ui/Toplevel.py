@@ -117,13 +117,13 @@ class Toplevel(gtk.Window, LoggingMixin):
         pool_view.set_level_indentation(16)
         pool_view.expand_all()
 
+        self._pool_view = pool_view
+
         pool_view.selection.set_mode(gtk.SELECTION_SINGLE)
         pool_view.selection.connect("changed",
                 self.on_pool_view_selection_changed)
         pool_view.selection.select_iter(
                 self._pool_model.get_iter_first())
-
-        self._pool_view = pool_view
 
         scrolled_window.add(self._pool_view)
 
@@ -236,9 +236,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         Pool view tree selection changed signal callback.
         Update the task list model.
         """
-        (model, iter_) = selection.get_selected()
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
-        self._task_list_model.presentable = presentable
+        self._task_list_model.presentable = self._pool_view.selected_presentable
 
     def on_task_new(self, action, user_data, task_type):
         """When task new action is activated, call the task new dialog."""
