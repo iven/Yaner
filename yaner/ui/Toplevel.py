@@ -51,11 +51,12 @@ class Toplevel(gtk.Window, LoggingMixin):
         Create toplevel window of L{yaner}. The window structure is
         like this:
             - vbox
-                - menubar
+                - toolbar
                 - hpaned
                     - scrolled_window
                         - _pool_view
                     - task_vbox
+                        - _task_list_view
         """
         gtk.Window.__init__(self)
         LoggingMixin.__init__(self)
@@ -73,9 +74,6 @@ class Toplevel(gtk.Window, LoggingMixin):
         # UIManager: Toolbar and menus
         self._action_group = None
         self._ui_manager = None
-
-        menubar = self.ui_manager.get_widget('/menubar')
-        vbox.pack_start(menubar, False, False, 0)
 
         toolbar = self.ui_manager.get_widget('/toolbar')
         vbox.pack_start(toolbar, False, False, 0)
