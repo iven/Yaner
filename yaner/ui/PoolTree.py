@@ -140,8 +140,6 @@ class PoolView(gtk.TreeView):
         """
         gtk.TreeView.__init__(self, model)
 
-        self._model = model
-
         # Set up TreeViewColumn
         column = gtk.TreeViewColumn()
         self.append_column(column)
@@ -153,18 +151,6 @@ class PoolView(gtk.TreeView):
         renderer = gtk.CellRendererText()
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._markup_data_func)
-
-        # TreeView properties
-        self.set_headers_visible(False)
-        self.set_show_expanders(False)
-        self.set_level_indentation(16)
-
-        self.selection.set_mode(gtk.SELECTION_SINGLE)
-
-    @property
-    def model(self):
-        """Get the L{model<PoolModel>} of the tree view."""
-        return self._model
 
     @property
     def selection(self):

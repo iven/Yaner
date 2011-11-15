@@ -89,7 +89,15 @@ class Toplevel(gtk.Window, LoggingMixin):
         hpaned.add2(task_vbox)
 
         self._task_list_model = TaskListModel()
-        self._task_list_view = TaskListView(self._task_list_model)
+
+        task_list_view = TaskListView(self._task_list_model)
+        task_list_view.set_show_expanders(False)
+        task_list_view.set_level_indentation(16)
+        task_list_view.expand_all()
+        task_list_view.selection.set_mode(gtk.SELECTION_SINGLE)
+
+        self._task_list_view = task_list_view
+
         task_vbox.pack_start(self._task_list_view, True, True, 0)
 
         # Left pane
@@ -104,15 +112,22 @@ class Toplevel(gtk.Window, LoggingMixin):
         for pool in Pool.select():
             self._add_pool(pool)
 
-        self._pool_view = PoolView(self._pool_model)
-        self._pool_view.set_size_request(200, -1)
-        self._pool_view.expand_all()
-        scrolled_window.add(self._pool_view)
+        pool_view = PoolView(self._pool_model)
+        pool_view.set_size_request(200, -1)
+        pool_view.set_headers_visible(False)
+        pool_view.set_show_expanders(False)
+        pool_view.set_level_indentation(16)
+        pool_view.expand_all()
 
-        self._pool_view.selection.connect("changed",
+        pool_view.selection.set_mode(gtk.SELECTION_SINGLE)
+        pool_view.selection.connect("changed",
                 self.on_pool_view_selection_changed)
-        self._pool_view.selection.select_iter(
+        pool_view.selection.select_iter(
                 self._pool_model.get_iter_first())
+
+        self._pool_view = pool_view
+
+        scrolled_window.add(self._pool_view)
 
         # Dialogs
         self._task_new_dialog = TaskNewDialog(bus)

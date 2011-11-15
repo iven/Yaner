@@ -145,8 +145,6 @@ class TaskListView(gtk.TreeView):
         """
         gtk.TreeView.__init__(self, model)
 
-        self._model = model
-
         # Set up columns
         column = gtk.TreeViewColumn(_('Task'))
         column.set_expand(True)
@@ -179,19 +177,6 @@ class TaskListView(gtk.TreeView):
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._speed_data_func)
 
-        # TreeView properties
-        #self.set_headers_visible(False)
-        self.set_show_expanders(False)
-        self.set_level_indentation(16)
-        self.expand_all()
-
-        self.selection.set_mode(gtk.SELECTION_SINGLE)
-
-    @property
-    def model(self):
-        """Get the L{model<TaskListModel>} of the tree view."""
-        return self._model
-
     @property
     def selection(self):
         """Get the C{gtk.TreeSelection} of the tree view."""
@@ -199,7 +184,7 @@ class TaskListView(gtk.TreeView):
 
     def _status_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
-        task = model.get_value(iter_, self.model.COLUMNS.TASK)
+        task = model.get_value(iter_, model.COLUMNS.TASK)
         stock_ids = ('gtk-media-play',  # RUNNING
                 'gtk-media-pause',      # PAUSED
                 'gtk-apply',            # COMPLETED
@@ -212,7 +197,7 @@ class TaskListView(gtk.TreeView):
 
     def _desc_data_func(self, cell_layout, renderer, model, iter_):
         """Method for format the description text in the column."""
-        task = model.get_value(iter_, self.model.COLUMNS.TASK)
+        task = model.get_value(iter_, model.COLUMNS.TASK)
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
             if self.has_focus():
@@ -245,7 +230,7 @@ class TaskListView(gtk.TreeView):
 
     def _progress_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the progress bar style in the column."""
-        task = model.get_value(iter_, self.model.COLUMNS.TASK)
+        task = model.get_value(iter_, model.COLUMNS.TASK)
         renderer.set_properties(
                 value=task.percent * 100,
                 text='{:.2%}'.format(task.percent),
@@ -255,7 +240,7 @@ class TaskListView(gtk.TreeView):
 
     def _speed_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the up and down speed in the column."""
-        task = model.get_value(iter_, self.model.COLUMNS.TASK)
+        task = model.get_value(iter_, model.COLUMNS.TASK)
         markups = []
         if task.upload_speed:
             markups.append(u'\u2B06 {}'.format(pspeed(task.upload_speed)))
