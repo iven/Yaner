@@ -30,8 +30,9 @@ import pango
 
 from yaner.Task import Task
 from yaner.ui.Misc import get_mix_color
-from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
+from yaner.utils.Pretty import psize, pspeed
+from yaner.utils.Logging import LoggingMixin
 
 class TaskListModel(gtk.TreeStore, LoggingMixin):
     """
@@ -105,7 +106,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         """
         iter_ = self.get_iter_for_task(task)
         if iter_:
-            self.set_data_for_task(iter_, task)
+            self.row_changed(self.get_path(iter_), iter_)
 
     def add_task(self, task):
         """
@@ -114,16 +115,10 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         """
         self.logger.debug(_('Adding task {}...').format(task.name))
         iter_ = self.insert(None, 0)
-        self.set_data_for_task(iter_, task)
+        self.set(iter_, self.COLUMNS.TASK, task)
 
         handler = task.connect('changed', self.on_task_changed)
         self._task_handlers[task] = handler
-
-    def set_data_for_task(self, iter_, task):
-        """
-        Update the iter data for task.
-        """
-        self.set(iter_, self.COLUMNS.TASK, task)
 
     def get_iter_for_task(self, task):
         """
@@ -152,20 +147,40 @@ class TaskListView(gtk.TreeView):
 
         self._model = model
 
-        # Set up TreeViewColumn
-        column = gtk.TreeViewColumn()
+        # Set up columns
+        column = gtk.TreeViewColumn(_('Task'))
+        column.set_expand(True)
+        column.set_resizable(True)
         self.append_column(column)
 
         renderer = gtk.CellRendererPixbuf()
         column.pack_start(renderer, False)
-        column.set_cell_data_func(renderer, self._pixbuf_data_func)
+        column.set_cell_data_func(renderer, self._status_data_func)
 
         renderer = gtk.CellRendererText()
         column.pack_start(renderer, True)
-        column.set_cell_data_func(renderer, self._markup_data_func)
+        column.set_cell_data_func(renderer, self._desc_data_func)
+
+        column = gtk.TreeViewColumn(_('Progress'))
+        column.set_expand(True)
+        column.set_resizable(True)
+        self.append_column(column)
+
+        renderer = gtk.CellRendererProgress()
+        column.pack_start(renderer, True)
+        column.set_cell_data_func(renderer, self._progress_data_func)
+
+        column = gtk.TreeViewColumn(_('Speed'))
+        column.set_expand(True)
+        column.set_resizable(True)
+        self.append_column(column)
+
+        renderer = gtk.CellRendererText()
+        column.pack_start(renderer, True)
+        column.set_cell_data_func(renderer, self._speed_data_func)
 
         # TreeView properties
-        self.set_headers_visible(False)
+        #self.set_headers_visible(False)
         self.set_show_expanders(False)
         self.set_level_indentation(16)
         self.expand_all()
@@ -182,7 +197,7 @@ class TaskListView(gtk.TreeView):
         """Get the C{gtk.TreeSelection} of the tree view."""
         return self.get_selection()
 
-    def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
+    def _status_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
         task = model.get_value(iter_, self.model.COLUMNS.TASK)
         stock_ids = ('gtk-media-play',  # RUNNING
@@ -195,10 +210,8 @@ class TaskListView(gtk.TreeView):
                 stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
                 )
 
-    def _markup_data_func(self, cell_layout, renderer, model, iter_):
-        """
-        Method for format the text in the column.
-        """
+    def _desc_data_func(self, cell_layout, renderer, model, iter_):
+        """Method for format the description text in the column."""
         task = model.get_value(iter_, self.model.COLUMNS.TASK)
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
@@ -211,15 +224,42 @@ class TaskListView(gtk.TreeView):
         # Get the color for the description
         color = get_mix_color(self, state)
 
+        # If task completed, don't show completed length
+        if task.status == Task.STATUSES.COMPLETED:
+            completed_markup = ''
+        else:
+            completed_markup = '{} / '.format(psize(task.completed_length))
+
         markup = '<small>' \
-                     '<b>{0.name}</b>\n' \
-                     '<span fgcolor="{1}">{0.percent:.2%}</span>' \
+                     '<b>{}</b>\n' \
+                     '<span fgcolor="{}">{}{}</span>' \
                  '</small>' \
-                 .format(task, color)
+                 .format(task.name, color, completed_markup,
+                         psize(task.total_length))
 
         renderer.set_properties(
                 markup = markup,
                 ellipsize_set = True,
-                ellipsize = pango.ELLIPSIZE_MIDDLE,
+                ellipsize = pango.ELLIPSIZE_END,
                 )
+
+    def _progress_data_func(self, cell_layout, renderer, model, iter_):
+        """Method for set the progress bar style in the column."""
+        task = model.get_value(iter_, self.model.COLUMNS.TASK)
+        renderer.set_properties(
+                value=task.percent * 100,
+                text='{:.2%}'.format(task.percent),
+                xpad = 2,
+                ypad = 2,
+                )
+
+    def _speed_data_func(self, cell_layout, renderer, model, iter_):
+        """Method for set the up and down speed in the column."""
+        task = model.get_value(iter_, self.model.COLUMNS.TASK)
+        markups = []
+        if task.upload_speed:
+            markups.append(u'\u2B06 {}'.format(pspeed(task.upload_speed)))
+        if task.download_speed:
+            markups.append(u'\n\u2B07 {}'.format(pspeed(task.download_speed)))
+        renderer.set_properties(markup=''.join(markups))
 
