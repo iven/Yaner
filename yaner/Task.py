@@ -65,6 +65,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         'PAUSED',
         'COMPLETE',
         'ERROR',
+        'REMOVED',
         ))
     """
     The statuses of the task, which is a L{Enum<yaner.utils.Enum>}.
@@ -73,7 +74,6 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     name = sqlobject.UnicodeCol()
     status = sqlobject.IntCol(default=STATUSES.WAITING)
-    deleted = sqlobject.BoolCol(default=False)
     type = sqlobject.IntCol()
     uris = sqlobject.PickleCol(default=[])
     completed_length = sqlobject.IntCol(default=0)
@@ -113,12 +113,13 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         Return True to keep calling this when timeout else stop.
 
         """
-        if self.status not in [self.STATUSES.COMPLETE, self.STATUSES.ERROR]:
+        if self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
+                self.STATUSES.REMOVED):
+            return False
+        else:
             deferred = self.pool.proxy.callRemote('aria2.tellStatus', self.gid)
             deferred.addCallbacks(self._update_status, self._on_twisted_error)
             return True
-        else:
-            return False
 
     def _update_status(self, status):
         """Update data fields of the task."""
@@ -133,6 +134,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
                 'paused': self.STATUSES.PAUSED,
                 'complete': self.STATUSES.COMPLETE,
                 'error': self.STATUSES.ERROR,
+                'removed': self.STATUSES.REMOVED,
                 }
         self.status = statuses[status['status']]
 

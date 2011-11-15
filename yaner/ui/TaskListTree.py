@@ -189,6 +189,7 @@ class TaskListView(gtk.TreeView):
                 statuses.PAUSED: 'gtk-media-pause',
                 statuses.COMPLETE: 'gtk-apply',
                 statuses.ERROR: 'gtk-stop',
+                statuses.REMOVED: 'gtk-delete',
                 }
         renderer.set_properties(
                 stock_id = stock_ids[task.status],
