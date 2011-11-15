@@ -92,7 +92,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         task_list_view.set_show_expanders(False)
         task_list_view.set_level_indentation(16)
         task_list_view.expand_all()
-        task_list_view.selection.set_mode(gtk.SELECTION_SINGLE)
+        task_list_view.selection.set_mode(gtk.SELECTION_MULTIPLE)
 
         self._task_list_view = task_list_view
 
