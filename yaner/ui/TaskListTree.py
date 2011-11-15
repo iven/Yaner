@@ -231,9 +231,12 @@ class TaskListView(gtk.TreeView):
     def _progress_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the progress bar style in the column."""
         task = model.get_task(iter_)
+        percent = 0 if (task.total_length == 0) else \
+                (float(task.completed_length) / task.total_length)
+
         renderer.set_properties(
-                value=task.percent * 100,
-                text='{:.2%}'.format(task.percent),
+                value=percent * 100,
+                text='{:.2%}'.format(percent),
                 xpad = 2,
                 ypad = 2,
                 )

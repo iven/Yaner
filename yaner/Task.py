@@ -76,7 +76,6 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     deleted = sqlobject.BoolCol(default=False)
     type = sqlobject.IntCol()
     uris = sqlobject.PickleCol(default=[])
-    percent = sqlobject.FloatCol(default=0)
     completed_length = sqlobject.IntCol(default=0)
     total_length = sqlobject.IntCol(default=0)
     gid = sqlobject.StringCol(default='')
@@ -125,9 +124,6 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """Update data fields of the task."""
         self.total_length = int(status['totalLength'])
         self.completed_length = int(status['completedLength'])
-        self.percent = 0 if (self.total_length == 0) else \
-                (float(self.completed_length) / self.total_length)
-
         self.download_speed = int(status['downloadSpeed'])
         self.upload_speed = int(status['uploadSpeed'])
         self.connections = int(status['connections'])
