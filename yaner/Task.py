@@ -94,9 +94,31 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.download_speed = 0
         self.connections = 0
 
+    @property
+    def completed(self):
+        """Check if task is completed, useful for task undelete."""
+        return self.total_length and (self.total_length != self.completed_length)
+
     def start(self, deferred):
         """This shouldn't be called directly, used by subclasses."""
         deferred.addCallbacks(self._on_started, self._on_twisted_error)
+
+    def pause(self):
+        """Pause task if it's running."""
+        if self.status == self.STATUSES.ACTIVE:
+            deferred = self.pool.proxy.callRemote('aria2.pause', self.gid)
+            deferred.addCallbacks(self._on_paused, self._on_twisted_error)
+
+    def remove(self):
+        """Remove task."""
+        if self.status == self.STATUSES.REMOVED:
+            self.pool.dustbin.remove_task(self)
+            self.destroySelf()
+        elif self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR):
+            self._on_removed()
+        else:
+            deferred = self.pool.proxy.callRemote('aria2.remove', self.gid)
+            deferred.addCallbacks(self._on_removed, self._on_twisted_error)
 
     def changed(self):
         """Emit signal "changed"."""
@@ -106,6 +128,21 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """Task started callback, update task information."""
         self.gid = gid[-1] if isinstance(gid, list) else gid
         glib.timeout_add_seconds(1, self._call_tell_status)
+
+    def _on_paused(self, gid):
+        """Task paused callback, emit signal "changed"."""
+        self.changed()
+
+    def _on_removed(self, gid=None):
+        """Task removed callback, remove task from previous presentable and
+        move it to dustbin.
+        """
+        if self.status == self.STATUSES.COMPLETE:
+            self.category.remove_task(self)
+        else:
+            self.pool.queuing.remove_task(self)
+        self.pool.dustbin.add_task(self)
+        self.status = self.STATUSES.REMOVED
 
     def _call_tell_status(self):
         """Call pool for the status of this task.
@@ -141,6 +178,8 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         if self.status == self.STATUSES.COMPLETE:
             self.pool.queuing.remove_task(self)
             self.category.add_task(self)
+        elif self.status == self.STATUSES.REMOVED:
+            return self._on_removed()
         else:
             self.changed()
 

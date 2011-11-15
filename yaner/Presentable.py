@@ -164,6 +164,6 @@ class Dustbin(Presentable):
 
     @property
     def tasks(self):
-        """Get the deleted tasks of the pool."""
+        """Get the removed tasks of the pool."""
         return self.pool.tasks.filter(Task.q.status == Task.STATUSES.REMOVED)
 

@@ -175,8 +175,8 @@ class Toplevel(gtk.Window, LoggingMixin):
                     self.on_task_start),
                 ("task_pause", 'gtk-media-pause', _("Pause"), None, None,
                     self.on_task_pause),
-                ("task_delete", 'gtk-delete', _("Delete"), None, None,
-                    self.on_task_delete),
+                ("task_remove", 'gtk-delete', _("Remove"), None, None,
+                    self.on_task_remove),
                 ("about", "gtk-about", None, None, None, self.about),
                 ("quit", "gtk-quit", None, None, None, self.destroy),
         )
@@ -246,10 +246,12 @@ class Toplevel(gtk.Window, LoggingMixin):
         pass
 
     def on_task_pause(self, action, user_data):
-        pass
+        for task in self._task_list_view.selected_tasks:
+            task.pause()
 
-    def on_task_delete(self, action, user_data):
-        pass
+    def on_task_remove(self, action, user_data):
+        for task in self._task_list_view.selected_tasks:
+            task.remove()
 
     def update(self):
         """Update the window."""

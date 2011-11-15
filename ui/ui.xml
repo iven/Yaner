@@ -10,7 +10,7 @@
         <separator />
         <toolitem action='task_start' />
         <toolitem action='task_pause' />
-        <toolitem action='task_delete' />
+        <toolitem action='task_remove' />
         <separator />
         <toolitem action='about' />
         <toolitem action='quit' />
