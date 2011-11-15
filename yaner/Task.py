@@ -60,9 +60,10 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     """
 
     STATUSES = Enum((
-        'RUNNING',
+        'ACTIVE',
+        'WAITING',
         'PAUSED',
-        'COMPLETED',
+        'COMPLETE',
         'ERROR',
         ))
     """
@@ -100,7 +101,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     def _on_started(self, gid):
         """Task started callback, update task information."""
-        self.status = self.STATUSES.RUNNING
+        self.status = self.STATUSES.ACTIVE
         self.gid = gid[-1] if isinstance(gid, list) else gid
         glib.timeout_add_seconds(1, self._call_tell_status)
 
@@ -110,7 +111,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         Return True to keep calling this when timeout else stop.
 
         """
-        if self.status not in [self.STATUSES.COMPLETED, self.STATUSES.ERROR]:
+        if self.status not in [self.STATUSES.COMPLETE, self.STATUSES.ERROR]:
             deferred = self.pool.proxy.callRemote('aria2.tellStatus', self.gid)
             deferred.addCallbacks(self._update_status, self._on_twisted_error)
             return True
@@ -129,7 +130,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.connections = int(status['connections'])
 
         if status['status'] == 'complete':
-            self.status = self.STATUSES.COMPLETED
+            self.status = self.STATUSES.COMPLETE
             self.pool.queuing.emit('task-removed', self)
             self.category.emit('task-added', self)
         else:

@@ -183,11 +183,13 @@ class TaskListView(gtk.TreeView):
     def _status_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
         task = model.get_task(iter_)
-        stock_ids = ('gtk-media-play',  # RUNNING
-                'gtk-media-pause',      # PAUSED
-                'gtk-apply',            # COMPLETED
-                'gtk-stop',             # ERROR
-                )
+        statuses = Task.STATUSES
+        stock_ids = {statuses.ACTIVE: 'gtk-media-play',
+                statuses.WAITING: 'gtk-refresh',
+                statuses.PAUSED: 'gtk-media-pause',
+                statuses.COMPLETE: 'gtk-apply',
+                statuses.ERROR: 'gtk-stop',
+                }
         renderer.set_properties(
                 stock_id = stock_ids[task.status],
                 stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
@@ -208,7 +210,7 @@ class TaskListView(gtk.TreeView):
         color = get_mix_color(self, state)
 
         # If task completed, don't show completed length
-        if task.status == Task.STATUSES.COMPLETED:
+        if task.status == Task.STATUSES.COMPLETE:
             completed_markup = ''
         else:
             completed_markup = '{} / '.format(psize(task.completed_length))

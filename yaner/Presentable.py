@@ -91,7 +91,7 @@ class Queuing(Presentable):
     def tasks(self):
         """Get the running tasks of the pool."""
         return self._pool.tasks.filter(Task.q.deleted == False).filter(
-                Task.q.status != Task.STATUSES.COMPLETED)
+                Task.q.status != Task.STATUSES.COMPLETE)
 
 class Category(sqlobject.SQLObject, Presentable):
     """
@@ -127,7 +127,7 @@ class Category(sqlobject.SQLObject, Presentable):
         """Get the comleted tasks of the category."""
         tasks = self._SO_get_tasks()
         return tasks.filter(Task.q.deleted == False).filter(
-                Task.q.status == Task.STATUSES.COMPLETED)
+                Task.q.status == Task.STATUSES.COMPLETE)
 
 class Dustbin(Presentable):
     """

@@ -162,10 +162,11 @@ class PoolView(gtk.TreeView):
         """Method for set the icon and its size in the column."""
         presentable = model.get_presentable(iter_)
 
-        icons = ('gtk-connect',     # QUEUING
-                'gtk-directory',    # CATEGORY
-                'gtk-delete',       # DUSTBIN
-                )
+        types = Presentable.TYPES
+        icons = {types.QUEUING: 'gtk-connect',
+                types.CATEGORY: 'gtk-directory',
+                types.DUSTBIN: 'gtk-delete',
+                }
         icon = icons[presentable.TYPE]
         if presentable.TYPE == Presentable.TYPES.QUEUING and \
                 not presentable.pool.connected:
