@@ -99,6 +99,10 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """This shouldn't be called directly, used by subclasses."""
         deferred.addCallbacks(self._on_started, self._on_twisted_error)
 
+    def changed(self):
+        """Emit signal "changed"."""
+        self.emit('changed')
+
     def _on_started(self, gid):
         """Task started callback, update task information."""
         self.gid = gid[-1] if isinstance(gid, list) else gid
@@ -137,10 +141,10 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.status = statuses[status['status']]
 
         if self.status == self.STATUSES.COMPLETE:
-            self.pool.queuing.emit('task-removed', self)
-            self.category.emit('task-added', self)
+            self.pool.queuing.remove_task(self)
+            self.category.add_task(self)
         else:
-            self.emit('changed')
+            self.changed()
 
         self.pool.connected = True
 

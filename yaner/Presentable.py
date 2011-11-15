@@ -58,6 +58,16 @@ class Presentable(LoggingMixin, gobject.GObject):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
+    def add_task(self, task):
+        """When task added, emit signals."""
+        self.emit('changed')
+        self.emit('task-added', task)
+
+    def remove_task(self, task):
+        """When task removed, emit signals."""
+        self.emit('changed')
+        self.emit('task-removed', task)
+
 class Queuing(Presentable):
     """
     Queuing presentable of the L{Pool}s.
