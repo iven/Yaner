@@ -173,6 +173,13 @@ class Toplevel(gtk.Window, LoggingMixin):
                     partial(self.on_task_new, task_type = Task.TYPES.BT)),
                 ("task_new_ml", None, _("Metalink"), None, None,
                     partial(self.on_task_new, task_type = Task.TYPES.ML)),
+                ("task_start", 'gtk-media-play', _("Start"), None, None,
+                    self.on_task_start),
+                ("task_pause", 'gtk-media-pause', _("Pause"), None, None,
+                    self.on_task_pause),
+                ("task_delete", 'gtk-delete', _("Delete"), None, None,
+                    self.on_task_delete),
+                ("about", "gtk-about", None, None, None, self.about),
                 ("quit", "gtk-quit", None, None, None, self.destroy),
         )
 
@@ -239,8 +246,20 @@ class Toplevel(gtk.Window, LoggingMixin):
         """When task new action is activated, call the task new dialog."""
         self.task_new_dialog.run_dialog(task_type)
 
+    def on_task_start(self, action, user_data):
+        pass
+
+    def on_task_pause(self, action, user_data):
+        pass
+
+    def on_task_delete(self, action, user_data):
+        pass
+
     def update(self):
         """Update the window."""
+        pass
+
+    def about(self, *args, **kwargs):
         pass
 
     def destroy(self, *args, **kwargs):
