@@ -66,9 +66,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
 
     @presentable.setter
     def presentable(self, new_presentable):
-        """
-        Set the current presentable of the tree model, and update it.
-        """
+        """Set the current presentable of the tree model, and update it."""
         if self.presentable in self._presentable_handlers:
             for handler in self._presentable_handlers.pop(self.presentable):
                 self.presentable.disconnect(handler)
@@ -83,9 +81,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
             self.add_task(task)
 
     def on_task_added(self, presentable, task):
-        """
-        When new task added in the presentable, add it to the model.
-        """
+        """When new task added in the presentable, add it to the model."""
         self.add_task(task)
 
     def on_task_removed(self, presentable, task):
@@ -101,18 +97,13 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
             task.disconnect(self._task_handlers.pop(task))
 
     def on_task_changed(self, task):
-        """
-        When a task changed, update the iter of the model.
-        """
+        """When a task changed, update the iter of the model."""
         iter_ = self.get_iter_for_task(task)
         if iter_:
             self.row_changed(self.get_path(iter_), iter_)
 
     def add_task(self, task):
-        """
-        Add a task to the model.
-        @TODO: Test this.
-        """
+        """Add a task to the model."""
         self.logger.debug(_('Adding task {}...').format(task.name))
         iter_ = self.insert(None, 0)
         self.set(iter_, self.COLUMNS.TASK, task)
@@ -121,16 +112,17 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         self._task_handlers[task] = handler
 
     def get_iter_for_task(self, task):
-        """
-        Get the TreeIter according to the task.
-        @TODO: Test this.
-        """
+        """Get the TreeIter according to the task."""
         iter_ = self.get_iter_first()
         while not iter_ is None:
-            if task is self.get_value(iter_, self.COLUMNS.TASK):
+            if task is self.get_task(iter_):
                 return iter_
             iter_ = self.iter_next(iter_)
         return None
+
+    def get_task(self, iter_):
+        """Get the task according to the given iter."""
+        return self.get_value(iter_, self.COLUMNS.TASK)
 
 class TaskListView(gtk.TreeView):
     """
@@ -182,9 +174,15 @@ class TaskListView(gtk.TreeView):
         """Get the C{gtk.TreeSelection} of the tree view."""
         return self.get_selection()
 
+    @property
+    def selected_tasks(self):
+        """Get selected tasks."""
+        (model, paths) = self.selection.get_selected_rows()
+        return (model.get_task(model.get_iter(path)) for path in paths)
+
     def _status_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
-        task = model.get_value(iter_, model.COLUMNS.TASK)
+        task = model.get_task(iter_)
         stock_ids = ('gtk-media-play',  # RUNNING
                 'gtk-media-pause',      # PAUSED
                 'gtk-apply',            # COMPLETED
@@ -197,7 +195,7 @@ class TaskListView(gtk.TreeView):
 
     def _desc_data_func(self, cell_layout, renderer, model, iter_):
         """Method for format the description text in the column."""
-        task = model.get_value(iter_, model.COLUMNS.TASK)
+        task = model.get_task(iter_)
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
             if self.has_focus():
@@ -230,7 +228,7 @@ class TaskListView(gtk.TreeView):
 
     def _progress_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the progress bar style in the column."""
-        task = model.get_value(iter_, model.COLUMNS.TASK)
+        task = model.get_task(iter_)
         renderer.set_properties(
                 value=task.percent * 100,
                 text='{:.2%}'.format(task.percent),
@@ -240,7 +238,7 @@ class TaskListView(gtk.TreeView):
 
     def _speed_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the up and down speed in the column."""
-        task = model.get_value(iter_, model.COLUMNS.TASK)
+        task = model.get_task(iter_)
         markups = []
         if task.upload_speed:
             markups.append(u'\u2B06 {}'.format(pspeed(task.upload_speed)))

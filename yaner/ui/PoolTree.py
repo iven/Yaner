@@ -67,9 +67,8 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
             self.add_presentable(presentable)
 
     def on_presentable_added(self, pool, presentable):
-        """
-        When new presentable appears in one of the pools, add it to the model.
-        @TODO: Test this.
+        """When new presentable appears in one of the pools, add it TODO
+        the model.
         """
         self.add_presentable(presentable)
 
@@ -86,18 +85,13 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
             presentable.disconnect(self._presentable_handlers.pop(presentable))
 
     def on_presentable_changed(self, presentable):
-        """
-        When a presentable changed, update the iter of the model.
-        """
+        """When a presentable changed, update the iter of the model."""
         iter_ = self.get_iter_for_presentable(presentable)
         if iter_:
             self.row_changed(self.get_path(iter_), iter_)
 
     def add_presentable(self, presentable):
-        """
-        Add a presentable to the model.
-        @TODO: Test this.
-        """
+        """Add a presentable to the model."""
         self.logger.debug(_('Adding presentable {0}...').format(
             presentable.name))
         parent = presentable.parent
@@ -116,16 +110,17 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         self._presentable_handlers[presentable] = handler
 
     def get_iter_for_presentable(self, presentable):
-        """
-        Get the TreeIter according to the presentable.
-        @TODO: Test this.
-        """
+        """Get the TreeIter according to the presentable."""
         iter_ = self.get_iter_first()
         while not iter_ is None:
-            if presentable is self.get_value(iter_, self.COLUMNS.PRESENTABLE):
+            if presentable is self.get_presentable(iter_):
                 return iter_
             iter_ = self.iter_next(iter_)
         return None
+
+    def get_presentable(self, iter_):
+        """Get the presentable according to the given iter."""
+        return self.get_value(iter_, self.COLUMNS.PRESENTABLE)
 
 class PoolView(gtk.TreeView):
     """
@@ -157,9 +152,15 @@ class PoolView(gtk.TreeView):
         """Get the C{gtk.TreeSelection} of the tree view."""
         return self.get_selection()
 
+    @property
+    def selected_presentable(self):
+        """Get selected presentable."""
+        (model, iter_) = self.selection.get_selected()
+        return model.get_presentable(iter_)
+
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+        presentable = model.get_presentable(iter_)
 
         icons = ('gtk-connect',     # QUEUING
                 'gtk-directory',    # CATEGORY
@@ -179,7 +180,7 @@ class PoolView(gtk.TreeView):
         """
         Method for format the text in the column.
         """
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+        presentable = model.get_presentable(iter_)
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
             if self.has_focus():
