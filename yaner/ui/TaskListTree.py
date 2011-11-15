@@ -178,7 +178,7 @@ class TaskListView(gtk.TreeView):
     def selected_tasks(self):
         """Get selected tasks."""
         (model, paths) = self.selection.get_selected_rows()
-        return (model.get_task(model.get_iter(path)) for path in paths)
+        return [model.get_task(model.get_iter(path)) for path in paths]
 
     def _status_data_func(self, cell_layout, renderer, model, iter_):
         """Method for set the icon and its size in the column."""
