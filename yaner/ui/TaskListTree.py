@@ -111,12 +111,17 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         handler = task.connect('changed', self.on_task_changed)
         self._task_handlers[task] = handler
 
-    def get_iter_for_task(self, task):
+    def get_iter_for_task(self, task, parent=None):
         """Get the TreeIter according to the task."""
-        iter_ = self.get_iter_first()
+        iter_ = self.iter_children(parent)
         while not iter_ is None:
             if task is self.get_task(iter_):
                 return iter_
+
+            result = self.get_iter_for_task(task, iter_)
+            if result:
+                return result
+
             iter_ = self.iter_next(iter_)
         return None
 

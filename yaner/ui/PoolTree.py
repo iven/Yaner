@@ -109,12 +109,17 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         handler = presentable.connect('changed', self.on_presentable_changed)
         self._presentable_handlers[presentable] = handler
 
-    def get_iter_for_presentable(self, presentable):
+    def get_iter_for_presentable(self, presentable, parent=None):
         """Get the TreeIter according to the presentable."""
-        iter_ = self.get_iter_first()
-        while not iter_ is None:
+        iter_ = self.iter_children(parent)
+        while iter_:
             if presentable is self.get_presentable(iter_):
                 return iter_
+
+            result = self.get_iter_for_presentable(presentable, iter_)
+            if result:
+                return result
+
             iter_ = self.iter_next(iter_)
         return None
 

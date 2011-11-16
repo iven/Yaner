@@ -137,12 +137,13 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """Task removed callback, remove task from previous presentable and
         move it to dustbin.
         """
-        if self.status == self.STATUSES.COMPLETE:
+        completed = (self.status == self.STATUSES.COMPLETE)
+        self.status = self.STATUSES.REMOVED
+        if completed:
             self.category.remove_task(self)
         else:
             self.pool.queuing.remove_task(self)
         self.pool.dustbin.add_task(self)
-        self.status = self.STATUSES.REMOVED
 
     def _call_tell_status(self):
         """Call pool for the status of this task.
