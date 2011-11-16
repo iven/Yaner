@@ -117,6 +117,12 @@ class Toplevel(gtk.Window, LoggingMixin):
         # Dialogs
         self._task_new_dialog = TaskNewDialog(bus)
 
+        # Status icon
+        status_icon = gtk.status_icon_new_from_stock('gtk-apply')
+        status_icon.connect('activate', self._on_status_icon_activated)
+
+        self.connect('delete-event', self._on_delete_event, status_icon)
+
         self.logger.info(_('Toplevel window initialized.'))
 
     @property
@@ -201,6 +207,23 @@ class Toplevel(gtk.Window, LoggingMixin):
         pool.connect('presentable-removed', self.update)
         pool.connect('status-changed', self.on_pool_status_changed)
         self._pool_model.add_pool(pool)
+
+    def _on_status_icon_activated(self, status_icon):
+        """When status icon clicked, switch the window visible or hidden."""
+        if self.get_property('visible'):
+            self.hide()
+        else:
+            self.present()
+
+    def _on_delete_event(self, window, event, status_icon):
+        """When window close button is clicked, try to hide the window instead
+        of quit the application.
+        """
+        if status_icon.is_embedded():
+            self.hide()
+            return True
+        else:
+            return False
 
     def on_pool_status_changed(self, pool):
         """
