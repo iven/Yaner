@@ -60,6 +60,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     """
 
     STATUSES = Enum((
+        'INACTIVE',
         'ACTIVE',
         'WAITING',
         'PAUSED',
@@ -73,7 +74,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     """
 
     name = sqlobject.UnicodeCol()
-    status = sqlobject.IntCol(default=STATUSES.WAITING)
+    status = sqlobject.IntCol(default=STATUSES.INACTIVE)
     type = sqlobject.IntCol()
     uris = sqlobject.PickleCol(default=[])
     completed_length = sqlobject.IntCol(default=0)
@@ -114,7 +115,8 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         if self.status == self.STATUSES.REMOVED:
             self.pool.dustbin.remove_task(self)
             self.destroySelf()
-        elif self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR):
+        elif self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
+                self.STATUSES.INACTIVE):
             self._on_removed()
         else:
             deferred = self.pool.proxy.callRemote('aria2.remove', self.gid)
@@ -127,6 +129,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     def _on_started(self, gid):
         """Task started callback, update task information."""
         self.gid = gid[-1] if isinstance(gid, list) else gid
+        self.status = self.STATUSES.ACTIVE
         glib.timeout_add_seconds(1, self._call_tell_status)
 
     def _on_paused(self, gid):
@@ -152,7 +155,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
         """
         if self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
-                self.STATUSES.REMOVED):
+                self.STATUSES.REMOVED, self.STATUSES.INACTIVE):
             return False
         else:
             deferred = self.pool.proxy.callRemote('aria2.tellStatus', self.gid)

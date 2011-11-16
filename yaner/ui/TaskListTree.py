@@ -195,6 +195,7 @@ class TaskListView(gtk.TreeView):
                 statuses.COMPLETE: 'gtk-apply',
                 statuses.ERROR: 'gtk-stop',
                 statuses.REMOVED: 'gtk-delete',
+                statuses.INACTIVE: 'gtk-disconnect',
                 }
         renderer.set_properties(
                 stock_id = stock_ids[task.status],
