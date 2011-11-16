@@ -344,8 +344,8 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         dialog = gtk.FileChooserDialog(_('Select download directory'),
                 self.widgets['dialog'],
                 gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                (_('_Cancel'), gtk.RESPONSE_CANCEL,
-                    _('_Select'), gtk.RESPONSE_OK))
+                (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                    gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         if dialog.run() == gtk.RESPONSE_OK:
             directory = dialog.get_filename()
             self.widgets['dir_entry'].set_text(directory)
