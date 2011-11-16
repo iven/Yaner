@@ -105,7 +105,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     def pause(self):
         """Pause task if it's running."""
-        if self.status == self.STATUSES.ACTIVE:
+        if self.status in [self.STATUSES.ACTIVE, self.STATUSES.WAITING]:
             deferred = self.pool.proxy.callRemote('aria2.pause', self.gid)
             deferred.addCallbacks(self._on_paused, self._on_twisted_error)
 
