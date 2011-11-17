@@ -73,6 +73,12 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     C{STATUSES.NAME} will return the type number of C{NAME}.
     """
 
+    _UPDATE_INTERVAL = 1
+    """Interval for status updating, in second(s)."""
+
+    _SYNC_INTERVAL = 60
+    """Interval for database sync, in second(s)."""
+
     name = sqlobject.UnicodeCol()
     status = sqlobject.IntCol(default=STATUSES.INACTIVE)
     type = sqlobject.IntCol()
@@ -88,6 +94,10 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     session_id = sqlobject.StringCol(default='')
 
+    class sqlmeta:
+        """Set sqlobject to sync lazily."""
+        lazyUpdate = True
+
     def _init(self, *args, **kwargs):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
@@ -98,6 +108,15 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.connections = 0
 
         self._status_update_handle = None
+        self._database_sync_handle = None
+
+    def _set_status(self, status):
+        """Always sync when task status changes."""
+        if hash(self) and self.status != status:
+            self._SO_set_status(status)
+            self.syncUpdate()
+        else:
+            self._SO_set_status(status)
 
     @property
     def completed(self):
@@ -139,14 +158,19 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         waiting before calling this.
         """
         if self._status_update_handle is None:
-            self._status_update_handle = \
-                    glib.timeout_add_seconds(1, self._call_tell_status)
+            self._status_update_handle = glib.timeout_add_seconds(
+                    self._UPDATE_INTERVAL, self._call_tell_status)
+            self._database_sync_handle = glib.timeout_add_seconds(
+                    self._SYNC_INTERVAL, self.syncUpdate)
 
     def end_update_status(self):
         """Stop updating status every second."""
         if self._status_update_handle:
             glib.source_remove(self._status_update_handle)
             self._status_update_handle = None
+        if self._database_sync_handle:
+            glib.source_remove(self._database_sync_handle)
+            self._database_sync_handle = None
 
     def _on_started(self, gid):
         """Task started callback, update task information."""
