@@ -219,17 +219,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         self.logger.debug(_('Adding pool {0}...').format(pool.name))
         pool.connect('presentable-added', self.update)
         pool.connect('presentable-removed', self.update)
-        pool.connect('status-changed', self.on_pool_status_changed)
         self._pool_model.add_pool(pool)
-
-    def on_pool_status_changed(self, pool):
-        """
-        Pool status-changed signal callback. Remove the pool and update
-        L{PoolModel}.
-        @TODO: Remove the pool, or fold it?
-        @TODO: Is this necessary?
-        """
-        pass
 
     def on_pool_view_selection_changed(self, selection):
         """
