@@ -86,6 +86,8 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     pool = sqlobject.ForeignKey('Pool')
     category = sqlobject.ForeignKey('Category')
 
+    session_id = sqlobject.StringCol(default='')
+
     def _init(self, *args, **kwargs):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
@@ -144,8 +146,17 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     def _on_started(self, gid):
         """Task started callback, update task information."""
+
+        def on_got_session_info(session_info):
+            """Set session id the task belongs to."""
+            self.session_id = session_info['sessionId']
+
+        deferred = self.pool.proxy.callRemote('aria2.getSessionInfo', self.gid)
+        deferred.addCallbacks(on_got_session_info, self._on_twisted_error)
+
         self.gid = gid[-1] if isinstance(gid, list) else gid
         self.status = self.STATUSES.ACTIVE
+
         self.begin_update_status()
 
     def _on_paused(self, gid):
