@@ -58,6 +58,16 @@ class Presentable(LoggingMixin, gobject.GObject):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
 
+    def add_task(self, task):
+        """When task added, emit signals."""
+        self.emit('changed')
+        self.emit('task-added', task)
+
+    def remove_task(self, task):
+        """When task removed, emit signals."""
+        self.emit('changed')
+        self.emit('task-removed', task)
+
 class Queuing(Presentable):
     """
     Queuing presentable of the L{Pool}s.
@@ -90,8 +100,9 @@ class Queuing(Presentable):
     @property
     def tasks(self):
         """Get the running tasks of the pool."""
-        return self._pool.tasks.filter(Task.q.deleted == False).filter(
-                Task.q.status != Task.STATUSES.COMPLETED)
+        return self.pool.tasks.filter(Task.q.status != \
+                Task.STATUSES.REMOVED).filter(Task.q.status != \
+                Task.STATUSES.COMPLETE)
 
 class Category(sqlobject.SQLObject, Presentable):
     """
@@ -126,8 +137,7 @@ class Category(sqlobject.SQLObject, Presentable):
     def _get_tasks(self):
         """Get the comleted tasks of the category."""
         tasks = self._SO_get_tasks()
-        return tasks.filter(Task.q.deleted == False).filter(
-                Task.q.status == Task.STATUSES.COMPLETED)
+        return tasks.filter(Task.q.status == Task.STATUSES.COMPLETE)
 
 class Dustbin(Presentable):
     """
@@ -154,6 +164,6 @@ class Dustbin(Presentable):
 
     @property
     def tasks(self):
-        """Get the deleted tasks of the pool."""
-        return self._pool.tasks.filter(Task.q.deleted == True)
+        """Get the removed tasks of the pool."""
+        return self.pool.tasks.filter(Task.q.status == Task.STATUSES.REMOVED)
 

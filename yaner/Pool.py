@@ -30,6 +30,7 @@ import sqlobject
 
 from twisted.web import xmlrpc
 
+from yaner.Task import Task
 from yaner.Misc import GObjectSQLObjectMeta
 from yaner.Presentable import Presentable, Queuing, Dustbin
 from yaner.utils.Logging import LoggingMixin
@@ -46,9 +47,9 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     __metaclass__ = GObjectSQLObjectMeta
 
     __gsignals__ = {
-            'status-changed': (gobject.SIGNAL_RUN_LAST,
+            'connected': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, ()),
-            'session-changed': (gobject.SIGNAL_RUN_LAST,
+            'disconnected': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, ()),
             'presentable-added': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, (Presentable,)),
@@ -59,15 +60,14 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     GObject signals of this class.
     """
 
-    _SESSION_CHECK_INTERVAL = 20
-    """Interval for checking if it's a new session, in second(s)."""
+    _CONNECTION_INTERVAL = 5
+    """Interval for keeping connection, in second(s)."""
 
     name = sqlobject.UnicodeCol()
     user = sqlobject.StringCol(default='')
     passwd = sqlobject.StringCol(default='')
     host = sqlobject.StringCol()
     port = sqlobject.IntCol(default=6800)
-    session_id = sqlobject.StringCol(default='')
 
     categories = sqlobject.SQLMultipleJoin('Category')
     tasks = sqlobject.SQLMultipleJoin('Task')
@@ -84,13 +84,8 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         self._connected = False
         self._proxy = None
 
-        self._check_session_info()
-
-    def _set_session_id(self, new_session_id):
-        """Set the saved session id of the pool."""
-        self._SO_set_session_id(new_session_id)
-        if hash(self):
-            self.emit('session-changed')
+        self.do_disconnected()
+        self._keep_connection()
 
     @property
     def proxy(self):
@@ -128,37 +123,56 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def connected(self, new_status):
         if new_status != self.connected:
             self._connected = new_status
-            self.emit('status-changed')
+            if self._connected:
+                self.emit('connected')
+            else:
+                self.emit('disconnected')
+            self.queuing.emit('changed')
 
-    def do_status_changed(self):
-        """When status changed, update queuing presentable."""
-        self.queuing.emit('changed')
+    def do_connected(self):
+        """When pool connected, try to resume last session."""
+        self._resume_session()
 
-    def _check_session_info(self):
-        """Check if it is a new aria2 session, by get session info from aria2
-        server. A new session means either it's first start of L{yaner}, or
-        the aria2 server is restarted, so we should call L{_got_session_info}
-        to do some work.
+    def do_disconnected(self):
+        """When status changed, mark all queuing tasks as inactive.
 
-        This also checks if the server is working well.
-
+        This will make a difference when start a task: paused tasks will
+        call C{aria2.unpause} method, while inactive tasks will call
+        C{aria2.addUri}, or other method to add them as new tasks.
         """
-        deferred = self.proxy.callRemote('aria2.getSessionInfo')
-        deferred.addCallbacks(self._on_got_session_info, self._on_twisted_error)
-        glib.timeout_add_seconds(self._SESSION_CHECK_INTERVAL,
-                self._check_session_info)
+        for task in self.queuing.tasks:
+            task.status = Task.STATUSES.INACTIVE
+            task.end_update_status()
+            task.changed()
+
+    def _keep_connection(self):
+        """Keep calling C{aria2.getVersion} and mark pool as connected."""
+
+        def on_got_version(version):
+            """When got aria2 version, mark the pool as connected."""
+            self.connected = True
+
+        deferred = self.proxy.callRemote('aria2.getVersion')
+        deferred.addCallbacks(on_got_version, self._on_twisted_error)
+
+        glib.timeout_add_seconds(self._CONNECTION_INTERVAL,
+                self._keep_connection)
         return False
 
-    def _on_got_session_info(self, session_info):
-        """When got session info, compare it with the saved session id.
-        If it's a new session, we should add tasks which need to be started
-        to the server.
+    def _resume_session(self):
+        """Get session id from pool."""
 
-        Also we should mark the server as connected.
+        def on_got_session_info(session_info):
+            """When got session info, call L{yaner.Task.begin_update_status}
+            on every task with the same session id.
+            """
+            for task in self.queuing.tasks.filter(
+                    Task.q.session_id == session_info['sessionId']):
+                task.status = Task.STATUSES.WAITING
+                task.begin_update_status()
 
-        """
-        self.connected = True
-        self.session_id = session_info['sessionId']
+        deferred = self.proxy.callRemote('aria2.getSessionInfo')
+        deferred.addCallbacks(on_got_session_info, self._on_twisted_error)
 
     def _on_twisted_error(self, failure):
         """When we meet a twisted error, it may be caused by network error,

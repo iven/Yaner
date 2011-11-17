@@ -51,11 +51,12 @@ class Toplevel(gtk.Window, LoggingMixin):
         Create toplevel window of L{yaner}. The window structure is
         like this:
             - vbox
-                - menubar
+                - toolbar
                 - hpaned
                     - scrolled_window
                         - _pool_view
                     - task_vbox
+                        - _task_list_view
         """
         gtk.Window.__init__(self)
         LoggingMixin.__init__(self)
@@ -74,9 +75,6 @@ class Toplevel(gtk.Window, LoggingMixin):
         self._action_group = None
         self._ui_manager = None
 
-        menubar = self.ui_manager.get_widget('/menubar')
-        vbox.pack_start(menubar, False, False, 0)
-
         toolbar = self.ui_manager.get_widget('/toolbar')
         vbox.pack_start(toolbar, False, False, 0)
 
@@ -89,7 +87,15 @@ class Toplevel(gtk.Window, LoggingMixin):
         hpaned.add2(task_vbox)
 
         self._task_list_model = TaskListModel()
-        self._task_list_view = TaskListView(self._task_list_model)
+
+        task_list_view = TaskListView(self._task_list_model)
+        task_list_view.set_show_expanders(False)
+        task_list_view.set_level_indentation(16)
+        task_list_view.expand_all()
+        task_list_view.selection.set_mode(gtk.SELECTION_MULTIPLE)
+
+        self._task_list_view = task_list_view
+
         task_vbox.pack_start(self._task_list_view, True, True, 0)
 
         # Left pane
@@ -104,15 +110,22 @@ class Toplevel(gtk.Window, LoggingMixin):
         for pool in Pool.select():
             self._add_pool(pool)
 
-        self._pool_view = PoolView(self._pool_model)
-        self._pool_view.set_size_request(200, -1)
-        self._pool_view.expand_all()
-        scrolled_window.add(self._pool_view)
+        pool_view = PoolView(self._pool_model)
+        pool_view.set_size_request(200, -1)
+        pool_view.set_headers_visible(False)
+        pool_view.set_show_expanders(False)
+        pool_view.set_level_indentation(16)
+        pool_view.expand_all()
 
-        self._pool_view.selection.connect("changed",
+        self._pool_view = pool_view
+
+        pool_view.selection.set_mode(gtk.SELECTION_SINGLE)
+        pool_view.selection.connect("changed",
                 self.on_pool_view_selection_changed)
-        self._pool_view.selection.select_iter(
+        pool_view.selection.select_iter(
                 self._pool_model.get_iter_first())
+
+        scrolled_window.add(self._pool_view)
 
         # Dialogs
         self._task_new_dialog = TaskNewDialog(bus)
@@ -164,6 +177,13 @@ class Toplevel(gtk.Window, LoggingMixin):
                     partial(self.on_task_new, task_type = Task.TYPES.BT)),
                 ("task_new_ml", None, _("Metalink"), None, None,
                     partial(self.on_task_new, task_type = Task.TYPES.ML)),
+                ("task_start", 'gtk-media-play', _("Start"), None, None,
+                    self.on_task_start),
+                ("task_pause", 'gtk-media-pause', _("Pause"), None, None,
+                    self.on_task_pause),
+                ("task_remove", 'gtk-delete', _("Remove"), None, None,
+                    self.on_task_remove),
+                ("about", "gtk-about", None, None, None, self.about),
                 ("quit", "gtk-quit", None, None, None, self.destroy),
         )
 
@@ -205,7 +225,6 @@ class Toplevel(gtk.Window, LoggingMixin):
         self.logger.debug(_('Adding pool {0}...').format(pool.name))
         pool.connect('presentable-added', self.update)
         pool.connect('presentable-removed', self.update)
-        pool.connect('status-changed', self.on_pool_status_changed)
         self._pool_model.add_pool(pool)
 
     def _on_status_icon_activated(self, status_icon):
@@ -225,30 +244,37 @@ class Toplevel(gtk.Window, LoggingMixin):
         else:
             return False
 
-    def on_pool_status_changed(self, pool):
-        """
-        Pool status-changed signal callback. Remove the pool and update
-        L{PoolModel}.
-        @TODO: Remove the pool, or fold it?
-        @TODO: Is this necessary?
-        """
-        pass
-
     def on_pool_view_selection_changed(self, selection):
         """
         Pool view tree selection changed signal callback.
         Update the task list model.
         """
-        (model, iter_) = selection.get_selected()
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
-        self._task_list_model.presentable = presentable
+        self._task_list_model.presentable = self._pool_view.selected_presentable
 
     def on_task_new(self, action, user_data, task_type):
         """When task new action is activated, call the task new dialog."""
         self.task_new_dialog.run_dialog(task_type)
 
+    def on_task_start(self, action, user_data):
+        """When task start button clicked, start or unpause the task."""
+        for task in self._task_list_view.selected_tasks:
+            task.start()
+
+    def on_task_pause(self, action, user_data):
+        """When task pause button clicked, pause the task."""
+        for task in self._task_list_view.selected_tasks:
+            task.pause()
+
+    def on_task_remove(self, action, user_data):
+        """When task remove button clicked, remove the task."""
+        for task in self._task_list_view.selected_tasks:
+            task.remove()
+
     def update(self):
         """Update the window."""
+        pass
+
+    def about(self, *args, **kwargs):
         pass
 
     def destroy(self, *args, **kwargs):

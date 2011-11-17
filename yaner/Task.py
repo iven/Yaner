@@ -60,10 +60,13 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     """
 
     STATUSES = Enum((
-        'RUNNING',
+        'INACTIVE',
+        'ACTIVE',
+        'WAITING',
         'PAUSED',
-        'COMPLETED',
+        'COMPLETE',
         'ERROR',
+        'REMOVED',
         ))
     """
     The statuses of the task, which is a L{Enum<yaner.utils.Enum>}.
@@ -71,11 +74,9 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     """
 
     name = sqlobject.UnicodeCol()
-    status = sqlobject.IntCol(default=STATUSES.PAUSED)
-    deleted = sqlobject.BoolCol(default=False)
+    status = sqlobject.IntCol(default=STATUSES.INACTIVE)
     type = sqlobject.IntCol()
     uris = sqlobject.PickleCol(default=[])
-    percent = sqlobject.FloatCol(default=0)
     completed_length = sqlobject.IntCol(default=0)
     total_length = sqlobject.IntCol(default=0)
     gid = sqlobject.StringCol(default='')
@@ -84,6 +85,8 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     pool = sqlobject.ForeignKey('Pool')
     category = sqlobject.ForeignKey('Category')
+
+    session_id = sqlobject.StringCol(default='')
 
     def _init(self, *args, **kwargs):
         LoggingMixin.__init__(self)
@@ -94,15 +97,93 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.download_speed = 0
         self.connections = 0
 
-    def start(self, deferred):
-        """This shouldn't be called directly, used by subclasses."""
-        deferred.addCallbacks(self._on_started, self._on_twisted_error)
+        self._status_update_handle = None
+
+    @property
+    def completed(self):
+        """Check if task is completed, useful for task undelete."""
+        return self.total_length and (self.total_length != self.completed_length)
+
+    def start(self):
+        """Unpause task if it's paused, otherwise add it (again)."""
+        if self.status in [self.STATUSES.PAUSED, self.STATUSES.WAITING]:
+            deferred = self.pool.proxy.callRemote('aria2.unpause', self.gid)
+            deferred.addCallbacks(self._on_unpaused, self._on_twisted_error)
+        elif self.status in [self.STATUSES.INACTIVE, self.STATUSES.ERROR]:
+            self.add()
+
+    def pause(self):
+        """Pause task if it's running."""
+        if self.status in [self.STATUSES.ACTIVE, self.STATUSES.WAITING]:
+            deferred = self.pool.proxy.callRemote('aria2.pause', self.gid)
+            deferred.addCallbacks(self._on_paused, self._on_twisted_error)
+
+    def remove(self):
+        """Remove task."""
+        if self.status == self.STATUSES.REMOVED:
+            self.pool.dustbin.remove_task(self)
+            self.destroySelf()
+        elif self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
+                self.STATUSES.INACTIVE):
+            self._on_removed()
+        else:
+            deferred = self.pool.proxy.callRemote('aria2.remove', self.gid)
+            deferred.addCallbacks(self._on_removed, self._on_twisted_error)
+
+    def changed(self):
+        """Emit signal "changed"."""
+        self.emit('changed')
+
+    def begin_update_status(self):
+        """Begin to update status every second. Task must be marked
+        waiting before calling this.
+        """
+        if self._status_update_handle is None:
+            self._status_update_handle = \
+                    glib.timeout_add_seconds(1, self._call_tell_status)
+
+    def end_update_status(self):
+        """Stop updating status every second."""
+        if self._status_update_handle:
+            glib.source_remove(self._status_update_handle)
+            self._status_update_handle = None
 
     def _on_started(self, gid):
         """Task started callback, update task information."""
-        self.status = self.STATUSES.RUNNING
+
+        def on_got_session_info(session_info):
+            """Set session id the task belongs to."""
+            self.session_id = session_info['sessionId']
+
+        deferred = self.pool.proxy.callRemote('aria2.getSessionInfo', self.gid)
+        deferred.addCallbacks(on_got_session_info, self._on_twisted_error)
+
         self.gid = gid[-1] if isinstance(gid, list) else gid
-        glib.timeout_add_seconds(1, self._call_tell_status)
+        self.status = self.STATUSES.ACTIVE
+
+        self.begin_update_status()
+
+    def _on_paused(self, gid):
+        """Task paused callback, update status."""
+        self.status = self.STATUSES.PAUSED
+        self.changed()
+
+    def _on_unpaused(self, gid):
+        """Task unpaused callback, update status."""
+        self.status = self.STATUSES.ACTIVE
+        self.changed()
+
+    def _on_removed(self, gid=None):
+        """Task removed callback, remove task from previous presentable and
+        move it to dustbin.
+        """
+        completed = (self.status == self.STATUSES.COMPLETE)
+        self.status = self.STATUSES.REMOVED
+        if completed:
+            self.category.remove_task(self)
+        else:
+            self.pool.queuing.remove_task(self)
+        self.pool.dustbin.add_task(self)
 
     def _call_tell_status(self):
         """Call pool for the status of this task.
@@ -110,63 +191,72 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         Return True to keep calling this when timeout else stop.
 
         """
-        if self.status not in [self.STATUSES.COMPLETED, self.STATUSES.ERROR]:
+        if self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
+                self.STATUSES.REMOVED, self.STATUSES.INACTIVE):
+            self.end_update_status()
+            return False
+        else:
             deferred = self.pool.proxy.callRemote('aria2.tellStatus', self.gid)
             deferred.addCallbacks(self._update_status, self._on_twisted_error)
             return True
-        else:
-            return False
 
     def _update_status(self, status):
         """Update data fields of the task."""
         self.total_length = int(status['totalLength'])
         self.completed_length = int(status['completedLength'])
-        self.percent = 0 if (self.total_length == 0) else \
-                (float(self.completed_length) / self.total_length)
-
         self.download_speed = int(status['downloadSpeed'])
         self.upload_speed = int(status['uploadSpeed'])
         self.connections = int(status['connections'])
 
-        if status['status'] == 'complete':
-            self.status = self.STATUSES.COMPLETED
-            self.pool.queuing.emit('task-removed', self)
-            self.category.emit('task-added', self)
+        statuses = {'active': self.STATUSES.ACTIVE,
+                'waiting': self.STATUSES.WAITING,
+                'paused': self.STATUSES.PAUSED,
+                'complete': self.STATUSES.COMPLETE,
+                'error': self.STATUSES.ERROR,
+                'removed': self.STATUSES.REMOVED,
+                }
+        self.status = statuses[status['status']]
+
+        if self.status == self.STATUSES.COMPLETE:
+            self.pool.queuing.remove_task(self)
+            self.category.add_task(self)
+        elif self.status == self.STATUSES.REMOVED:
+            return self._on_removed()
         else:
-            self.emit('changed')
+            self.changed()
 
         self.pool.connected = True
 
     def _on_twisted_error(self, failure):
         """Handle errors occured when calling some function via twisted."""
-        self.pool.connected = False
         self.status = self.STATUSES.ERROR
+        self.changed()
         Notification(_('Network Error'), failure.getErrorMessage())
 
 class NormalTask(Task):
     """Normal Task."""
 
-    def start(self):
-        """Start the task."""
+    def add(self):
+        """Add the task to pool."""
         deferred = self.pool.proxy.callRemote('aria2.addUri',
                 self.uris, self.options)
-        Task.start(self, deferred)
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
 
 class BTTask(Task):
     """BitTorrent Task."""
 
-    def start(self):
-        """Start the task."""
+    def add(self):
+        """Add the task to pool."""
         deferred = self.pool.proxy.callRemote('aria2.addTorrent',
                 self.metadata, self.uris, self.options)
-        Task.start(self, deferred)
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
 
 class MTTask(Task):
     """Metalink Task."""
 
-    def start(self):
-        """Start the task."""
+    def add(self):
+        """Add the task to pool."""
         deferred = self.pool.proxy.callRemote('aria2.addMetalink',
                 self.metadata, self.options)
-        Task.start(self, deferred)
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
 
