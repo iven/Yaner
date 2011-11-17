@@ -92,6 +92,9 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
 
     def add_presentable(self, presentable):
         """Add a presentable to the model."""
+        if self.get_iter_for_presentable(presentable):
+            return
+
         self.logger.debug(_('Adding presentable {0}...').format(
             presentable.name))
         parent = presentable.parent

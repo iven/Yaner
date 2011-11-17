@@ -130,6 +130,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
             deferred.addCallbacks(self._on_unpaused, self._on_twisted_error)
         elif self.status in [self.STATUSES.INACTIVE, self.STATUSES.ERROR]:
             self.add()
+            self.pool.queuing.add_task(self)
 
     def pause(self):
         """Pause task if it's running."""
@@ -255,7 +256,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """Handle errors occured when calling some function via twisted."""
         self.status = self.STATUSES.ERROR
         self.changed()
-        Notification(_('Network Error'), failure.getErrorMessage())
+        Notification(_('Network Error'), failure.getErrorMessage()).show()
 
 class NormalTask(Task):
     """Normal Task."""

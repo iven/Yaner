@@ -104,12 +104,13 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
 
     def add_task(self, task):
         """Add a task to the model."""
-        self.logger.debug(_('Adding task {}...').format(task.name))
-        iter_ = self.insert(None, 0)
-        self.set(iter_, self.COLUMNS.TASK, task)
+        if not self.get_iter_for_task(task):
+            self.logger.debug(_('Adding task {}...').format(task.name))
+            iter_ = self.insert(None, 0)
+            self.set(iter_, self.COLUMNS.TASK, task)
 
-        handler = task.connect('changed', self.on_task_changed)
-        self._task_handlers[task] = handler
+            handler = task.connect('changed', self.on_task_changed)
+            self._task_handlers[task] = handler
 
     def get_iter_for_task(self, task, parent=None):
         """Get the TreeIter according to the task."""
@@ -143,7 +144,7 @@ class TaskListView(gtk.TreeView):
         gtk.TreeView.__init__(self, model)
 
         # Set up columns
-        column = gtk.TreeViewColumn(_('Task'))
+        column = gtk.TreeViewColumn(_('Tasks'))
         column.set_expand(True)
         column.set_resizable(True)
         self.append_column(column)
@@ -166,13 +167,20 @@ class TaskListView(gtk.TreeView):
         column.set_cell_data_func(renderer, self._progress_data_func)
 
         column = gtk.TreeViewColumn(_('Speed'))
-        column.set_expand(True)
         column.set_resizable(True)
         self.append_column(column)
 
         renderer = gtk.CellRendererText()
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._speed_data_func)
+
+        column = gtk.TreeViewColumn(_('Connections'))
+        column.set_resizable(True)
+        self.append_column(column)
+
+        renderer = gtk.CellRendererText()
+        column.pack_start(renderer, True)
+        column.set_cell_data_func(renderer, self._connection_data_func)
 
     @property
     def selection(self):
@@ -252,9 +260,19 @@ class TaskListView(gtk.TreeView):
         """Method for set the up and down speed in the column."""
         task = model.get_task(iter_)
         markups = []
-        if task.upload_speed:
-            markups.append(u'\u2B06 {}'.format(pspeed(task.upload_speed)))
-        if task.download_speed:
-            markups.append(u'\n\u2B07 {}'.format(pspeed(task.download_speed)))
-        renderer.set_properties(markup=''.join(markups))
+        if task.status == Task.STATUSES.ACTIVE:
+            if task.upload_speed:
+                markups.append(u'\u2B06 {}'.format(pspeed(task.upload_speed)))
+            if task.download_speed:
+                markups.append(u'\u2B07 {}'.format(pspeed(task.download_speed)))
+        renderer.set_properties(markup='\n'.join(markups))
+
+    def _connection_data_func(self, cell_layout, renderer, model, iter_):
+        """Method for set the connections in the column."""
+        task = model.get_task(iter_)
+        if task.status == Task.STATUSES.ACTIVE:
+            markup = str(task.connections)
+        else:
+            markup = ''
+        renderer.set_properties(markup=markup, xalign=.5, yalign=.5)
 
