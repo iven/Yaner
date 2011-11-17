@@ -95,6 +95,8 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.download_speed = 0
         self.connections = 0
 
+        self._status_update_handle = None
+
     @property
     def completed(self):
         """Check if task is completed, useful for task undelete."""
@@ -126,14 +128,29 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """Emit signal "changed"."""
         self.emit('changed')
 
+    def begin_update_status(self):
+        """Begin to update status every second. Task must be marked
+        active before calling this.
+        """
+        if self._status_update_handle is None:
+            self._status_update_handle = \
+                    glib.timeout_add_seconds(1, self._call_tell_status)
+
+    def end_update_status(self):
+        """Stop updating status every second."""
+        if self._status_update_handle:
+            glib.source_remove(self._status_update_handle)
+            self._status_update_handle = None
+
     def _on_started(self, gid):
         """Task started callback, update task information."""
         self.gid = gid[-1] if isinstance(gid, list) else gid
         self.status = self.STATUSES.ACTIVE
-        glib.timeout_add_seconds(1, self._call_tell_status)
+        self.begin_update_status()
 
     def _on_paused(self, gid):
-        """Task paused callback, emit signal "changed"."""
+        """Task paused callback, update status."""
+        self.status = self.STATUSES.PAUSED
         self.changed()
 
     def _on_removed(self, gid=None):
@@ -156,6 +173,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """
         if self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
                 self.STATUSES.REMOVED, self.STATUSES.INACTIVE):
+            self.end_update_status()
             return False
         else:
             deferred = self.pool.proxy.callRemote('aria2.tellStatus', self.gid)
@@ -191,8 +209,8 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     def _on_twisted_error(self, failure):
         """Handle errors occured when calling some function via twisted."""
-        self.pool.connected = False
         self.status = self.STATUSES.ERROR
+        self.changed()
         Notification(_('Network Error'), failure.getErrorMessage())
 
 class NormalTask(Task):
