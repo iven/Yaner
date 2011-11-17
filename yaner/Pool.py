@@ -168,7 +168,7 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
             """
             for task in self.queuing.tasks.filter(
                     Task.q.session_id == session_info['sessionId']):
-                task.status = Task.STATUSES.ACTIVE
+                task.status = Task.STATUSES.WAITING
                 task.begin_update_status()
 
         deferred = self.proxy.callRemote('aria2.getSessionInfo')

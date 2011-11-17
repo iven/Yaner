@@ -104,9 +104,13 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """Check if task is completed, useful for task undelete."""
         return self.total_length and (self.total_length != self.completed_length)
 
-    def start(self, deferred):
-        """This shouldn't be called directly, used by subclasses."""
-        deferred.addCallbacks(self._on_started, self._on_twisted_error)
+    def start(self):
+        """Unpause task if it's paused, otherwise add it (again)."""
+        if self.status in [self.STATUSES.PAUSED, self.STATUSES.WAITING]:
+            deferred = self.pool.proxy.callRemote('aria2.unpause', self.gid)
+            deferred.addCallbacks(self._on_unpaused, self._on_twisted_error)
+        elif self.status in [self.STATUSES.INACTIVE, self.STATUSES.ERROR]:
+            self.add()
 
     def pause(self):
         """Pause task if it's running."""
@@ -132,7 +136,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 
     def begin_update_status(self):
         """Begin to update status every second. Task must be marked
-        active before calling this.
+        waiting before calling this.
         """
         if self._status_update_handle is None:
             self._status_update_handle = \
@@ -162,6 +166,11 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     def _on_paused(self, gid):
         """Task paused callback, update status."""
         self.status = self.STATUSES.PAUSED
+        self.changed()
+
+    def _on_unpaused(self, gid):
+        """Task unpaused callback, update status."""
+        self.status = self.STATUSES.ACTIVE
         self.changed()
 
     def _on_removed(self, gid=None):
@@ -227,27 +236,27 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
 class NormalTask(Task):
     """Normal Task."""
 
-    def start(self):
-        """Start the task."""
+    def add(self):
+        """Add the task to pool."""
         deferred = self.pool.proxy.callRemote('aria2.addUri',
                 self.uris, self.options)
-        Task.start(self, deferred)
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
 
 class BTTask(Task):
     """BitTorrent Task."""
 
-    def start(self):
-        """Start the task."""
+    def add(self):
+        """Add the task to pool."""
         deferred = self.pool.proxy.callRemote('aria2.addTorrent',
                 self.metadata, self.uris, self.options)
-        Task.start(self, deferred)
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
 
 class MTTask(Task):
     """Metalink Task."""
 
-    def start(self):
-        """Start the task."""
+    def add(self):
+        """Add the task to pool."""
         deferred = self.pool.proxy.callRemote('aria2.addMetalink',
                 self.metadata, self.options)
-        Task.start(self, deferred)
+        deferred.addCallbacks(self._on_started, self._on_twisted_error)
 

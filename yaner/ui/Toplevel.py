@@ -233,13 +233,17 @@ class Toplevel(gtk.Window, LoggingMixin):
         self.task_new_dialog.run_dialog(task_type)
 
     def on_task_start(self, action, user_data):
-        pass
+        """When task start button clicked, start or unpause the task."""
+        for task in self._task_list_view.selected_tasks:
+            task.start()
 
     def on_task_pause(self, action, user_data):
+        """When task pause button clicked, pause the task."""
         for task in self._task_list_view.selected_tasks:
             task.pause()
 
     def on_task_remove(self, action, user_data):
+        """When task remove button clicked, remove the task."""
         for task in self._task_list_view.selected_tasks:
             task.remove()
 
