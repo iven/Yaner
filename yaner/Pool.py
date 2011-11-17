@@ -46,9 +46,9 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     __metaclass__ = GObjectSQLObjectMeta
 
     __gsignals__ = {
-            'status-changed': (gobject.SIGNAL_RUN_LAST,
+            'connected': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, ()),
-            'session-changed': (gobject.SIGNAL_RUN_LAST,
+            'disconnected': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, ()),
             'presentable-added': (gobject.SIGNAL_RUN_LAST,
                 gobject.TYPE_NONE, (Presentable,)),
@@ -128,7 +128,11 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def connected(self, new_status):
         if new_status != self.connected:
             self._connected = new_status
-            self.emit('status-changed')
+            if self._connected:
+                self.emit('connected')
+            else:
+                self.emit('disconnected')
+            self.queuing.emit('changed')
 
     def do_status_changed(self):
         """When status changed, update queuing presentable."""
