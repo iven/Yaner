@@ -51,7 +51,7 @@ The version of L{yaner}.
 This is also used by the setup script.
 """
 
-__author__    = "Iven <ivenvd@gmail.com>"
+__author__    = "Iven Hsu (Xu Lijian) <ivenvd@gmail.com>"
 """The primary author of L{yaner}."""
 
 __license__   = "GPLv3"

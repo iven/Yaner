@@ -30,8 +30,10 @@ import gobject
 import os
 import sys
 import logging
+
 from functools import partial
 
+from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Task import Task
 from yaner.ui.Constants import UI_DIR
@@ -129,6 +131,9 @@ class Toplevel(gtk.Window, LoggingMixin):
 
         # Dialogs
         self._task_new_dialog = TaskNewDialog(bus)
+        self._task_new_dialog.widgets['dialog'].set_transient_for(self)
+
+        self._about_dialog = None
 
         # Status icon
         status_icon = gtk.status_icon_new_from_stock('gtk-apply')
@@ -156,6 +161,19 @@ class Toplevel(gtk.Window, LoggingMixin):
     def task_new_dialog(self):
         """Get the new task dialog of the window."""
         return self._task_new_dialog
+
+    @property
+    def about_dialog(self):
+        if self._about_dialog is None:
+            about_dialog = gtk.AboutDialog()
+            about_dialog.set_program_name(_('Yaner'))
+            about_dialog.set_version(__version__)
+            about_dialog.set_authors((__author__,))
+            about_dialog.set_website('https://github.com/iven/Yaner')
+            about_dialog.set_copyright(u'Copyright \u00a9 2010-2011 Iven Hsu')
+            about_dialog.set_transient_for(self)
+            self._about_dialog = about_dialog
+        return self._about_dialog
 
     @property
     def config(self):
@@ -275,7 +293,9 @@ class Toplevel(gtk.Window, LoggingMixin):
         pass
 
     def about(self, *args, **kwargs):
-        pass
+        """Show about dialog."""
+        self.about_dialog.run()
+        self.about_dialog.hide()
 
     def destroy(self, *args, **kwargs):
         """Destroy toplevel window and quit the application."""
