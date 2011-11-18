@@ -3,14 +3,14 @@
 import sys, os
 import shutil
 from glob import glob
-from os.path import basename, splitext, join, isdir
-from stat import *
+from os.path import basename, splitext, isdir
+from stat import S_IRUSR, S_IWUSR, S_IRGRP, S_IROTH
 from distutils.core import setup
 from distutils.command.install import install
 from distutils.command.install_data import install_data
 
 sys.path.insert(0, '.')
-from yaner import __version__ as version
+from yaner import __version__, __license__
 
 INSTALLED_FILES = "installed_files"
 
@@ -94,7 +94,7 @@ with open("yaner/Constants.py.in") as f:
     data = f.read()
 
 data = data.replace("@prefix@", prefix)
-data = data.replace("@version@", version)
+data = data.replace("@version@", __version__)
 
 with open("yaner/Constants.py", 'w') as f:
     f.write(data)
@@ -115,12 +115,12 @@ data_files.append(('share/applications/', ['yaner.desktop']))
 
 setup (
         name             = "yaner",
-        version          = version,
+        version          = __version__,
         description      = "GTK+ interface for aria2 download mananger",
-        author           = "Iven (Xu Lijian)",
+        author           = "Iven Hsu (Xu Lijian)",
         author_email     = "ivenvd@gmail.com",
         url              = "https://github.com/iven/Yaner",
-        license          = "GPL",
+        license          = __license__,
         data_files       = data_files,
         packages         = ["yaner", "yaner.ui", "yaner.utils"],
         scripts          = ["scripts/yaner"],
