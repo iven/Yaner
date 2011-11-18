@@ -50,9 +50,7 @@ else:
     pynotify.init('yaner')
 
 # Translation setup
-import os
 import gettext
-from yaner.Constants import PREFIX
 gettext.install('yaner', unicode=True)
 
 from yaner.Application import Application
