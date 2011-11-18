@@ -1,3 +1,12 @@
+0.1.0   <2011-11-18>
+======
+ * Full redesigned and rewritten, more flexible and easy to expand.
+ * Prettier GUI TreeViews.
+ * Basic task control, now you can remove tasks(but no restoring.
+ * Don't start aria2 automatically, but auto connect to it when possible.
+ * Use database instead of config files to store task data.
+ * Added logging system.
+
 0.0.9   <2011-01-25>
 ======
  * Replace confusing GtkFileChooserButton with GtkButton.

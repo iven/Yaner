@@ -8,316 +8,197 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-11-15 12:41+0800\n"
+"POT-Creation-Date: 2011-11-11 10:53+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../Yaner/Application.py:275
-#, python-format
-msgid "Error: %s"
-msgstr ""
-
-#: ../Yaner/Application.py:278
-msgid "filename to save"
-msgstr ""
-
-#: ../Yaner/Application.py:279
-msgid "referer page of the link"
-msgstr ""
-
-#: ../Yaner/Application.py:280
-msgid "cookies of the website"
-msgstr ""
-
-#: ../Yaner/Application.py:281
-msgid "display this help and exit"
-msgstr ""
-
-#: ../Yaner/Application.py:282
-msgid "output version information and exit"
-msgstr ""
-
-#: ../Yaner/Application.py:283
-msgid "Usage: yaner [OPTION]... [URI | MAGNET]..."
-msgstr ""
-
-#: ../Yaner/Application.py:285
-msgid "Options:"
-msgstr ""
-
-#: ../Yaner/Application.py:297
+#: ../scripts/../yaner/Application.py:52
 msgid "License GPLv3+: GNU GPL version 3 or later"
 msgstr ""
 
-#: ../Yaner/Application.py:299
+#: ../scripts/../yaner/Application.py:54
 msgid "This is free software:"
 msgstr ""
 
-#: ../Yaner/Application.py:300
-msgid "you are free to change and redistribute it."
+#: ../scripts/../yaner/Application.py:55
+msgid "You are free to change and redistribute it."
 msgstr ""
 
-#: ../Yaner/Application.py:301
+#: ../scripts/../yaner/Application.py:56
 msgid "There is NO WARRANTY, to the extent permitted by law."
 msgstr ""
 
-#: ../Yaner/Dialogs.py:280
+#: ../scripts/../yaner/Application.py:117
+msgid "Reading global configuration file..."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:120
+msgid "No global configuration file, creating..."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:131
+msgid "Connecting to global database file..."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:141
+msgid "Global database file connected."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:158
+msgid "Parsing command line arguments..."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:159
+msgid "Command line arguments: {0}"
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:162
+msgid "{0} download mananger."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:164
+msgid "filename to save"
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:166
+msgid "referer page of the link"
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:168
+msgid "cookies of the website"
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:170
+msgid "the download addresses"
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:172
+msgid "output version information and exit"
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:175
+msgid "Command line arguments parsed."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:207
+msgid "Logging system initialized, start logging..."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:211
+msgid "Initializing database for first start..."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:219
+#: ../scripts/../yaner/Configurations.py:81
+msgid "My Computer"
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:220
+#: ../scripts/../yaner/Configurations.py:103
+msgid "Default Category"
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:222
+msgid "Database initialized."
+msgstr ""
+
+#: ../scripts/../yaner/Application.py:229
+msgid "Application quit normally."
+msgstr ""
+
+#: ../scripts/../yaner/Presentable.py:136
+msgid "Dustbin"
+msgstr ""
+
+#: ../scripts/../yaner/ui/Dialogs.py:76
+msgid "No task options config file, creating..."
+msgstr ""
+
+#: ../scripts/../yaner/ui/Dialogs.py:344
 msgid "Select download directory"
 msgstr ""
 
-#: ../Yaner/Dialogs.py:283
+#: ../scripts/../yaner/ui/Dialogs.py:347
 msgid "_Cancel"
 msgstr ""
 
-#: ../Yaner/Dialogs.py:284
+#: ../scripts/../yaner/ui/Dialogs.py:348
 msgid "_Select"
 msgstr ""
 
-#: ../Yaner/Server.py:65
-msgid "Queuing"
+#: ../scripts/../yaner/ui/Misc.py:46
+msgid "@widget is not a gtk.Widget."
 msgstr ""
 
-#: ../Yaner/Server.py:66
-msgid "Completed"
+#: ../scripts/../yaner/ui/Misc.py:57
+msgid "Got mix color: {0}."
 msgstr ""
 
-#: ../Yaner/Server.py:67
-msgid "Recycled"
+#: ../scripts/../yaner/ui/PoolTree.py:103
+msgid "Adding presentable {0}..."
 msgstr ""
 
-#: ../Yaner/Server.py:177 ../Yaner/Task.py:231
-msgid "Network Error"
+#: ../scripts/../yaner/ui/PoolTree.py:110
+msgid "No parent presentable for {0}."
 msgstr ""
 
-#: ../glade/main.ui:37
-msgid "Yaner - Faster than a flash of lightning"
+#: ../scripts/../yaner/ui/TaskListTree.py:137
+msgid "Adding task {}..."
 msgstr ""
 
-#: ../glade/main.ui:50
-msgid "_File"
+#: ../scripts/../yaner/ui/Toplevel.py:63
+msgid "Initializing toplevel window..."
 msgstr ""
 
-#: ../glade/main.ui:111
-msgid "Tas_k"
+#: ../scripts/../yaner/ui/Toplevel.py:117
+msgid "Toplevel window initialized."
 msgstr ""
 
-#: ../glade/main.ui:150
-msgid "_Tools"
+#: ../scripts/../yaner/ui/Toplevel.py:145
+msgid "Initializing action group..."
 msgstr ""
 
-#: ../glade/main.ui:170
-msgid "_Help"
+#: ../scripts/../yaner/ui/Toplevel.py:150
+msgid "File"
 msgstr ""
 
-#: ../glade/main.ui:201 ../glade/task_new.ui:7
-msgid "Add new task"
+#: ../scripts/../yaner/ui/Toplevel.py:152
+msgid "HTTP/FTP/BT Magnet"
 msgstr ""
 
-#: ../glade/main.ui:505
-msgid "About Yaner"
-msgstr ""
-
-#: ../glade/main.ui:512
-msgid "Copyright © 2010 Iven Day(Xu Lijian)"
-msgstr ""
-
-#: ../glade/task_new.ui:67
-msgid "<b>URI(s)</b>"
-msgstr ""
-
-#: ../glade/task_new.ui:99
-msgid "Referer"
-msgstr ""
-
-#: ../glade/task_new.ui:110
-msgid "Rename"
-msgstr ""
-
-#: ../glade/task_new.ui:148 ../glade/task_profile.ui:249
-msgid "Connections"
-msgstr ""
-
-#: ../glade/task_new.ui:182 ../glade/task_new.ui:603 ../glade/task_new.ui:834
-msgid "<b>Settings</b> - Optional"
-msgstr ""
-
-#: ../glade/task_new.ui:215 ../glade/task_new.ui:296
-msgid "User"
-msgstr ""
-
-#: ../glade/task_new.ui:240 ../glade/task_new.ui:270
-msgid "Password"
-msgstr ""
-
-#: ../glade/task_new.ui:324
-msgid "<b>HTTP</b>"
-msgstr ""
-
-#: ../glade/task_new.ui:334
-msgid "<b>FTP</b>"
-msgstr ""
-
-#: ../glade/task_new.ui:350
-msgid "<b>Authorization</b> - Optional"
-msgstr ""
-
-#: ../glade/task_new.ui:365
-msgid "Normal / BT Magnet"
-msgstr ""
-
-#: ../glade/task_new.ui:400
-msgid "<b>Torrent File</b>"
-msgstr ""
-
-#: ../glade/task_new.ui:443
-msgid "<b>URI(s)</b> - Optional"
-msgstr ""
-
-#: ../glade/task_new.ui:475 ../glade/task_profile.ui:352
-msgid "Max open files"
-msgstr ""
-
-#: ../glade/task_new.ui:486 ../glade/task_profile.ui:499
-msgid "Seed time(min)"
-msgstr ""
-
-#: ../glade/task_new.ui:499 ../glade/task_profile.ui:512
-msgid "Seed ratio"
-msgstr ""
-
-#: ../glade/task_new.ui:558
-msgid "Max peers"
-msgstr ""
-
-#: ../glade/task_new.ui:584
-msgid "Preview mode - Try to download first and last pieces first"
-msgstr ""
-
-#: ../glade/task_new.ui:621
+#: ../scripts/../yaner/ui/Toplevel.py:154
 msgid "BitTorrent"
 msgstr ""
 
-#: ../glade/task_new.ui:657
-msgid "<b>Metalink File</b>"
-msgstr ""
-
-#: ../glade/task_new.ui:690 ../glade/task_profile.ui:591
-msgid "Download servers"
-msgstr ""
-
-#: ../glade/task_new.ui:701 ../glade/task_profile.ui:601
-msgid "Prefered locations"
-msgstr ""
-
-#: ../glade/task_new.ui:730 ../glade/task_profile.ui:614
-msgid "Language"
-msgstr ""
-
-#: ../glade/task_new.ui:805
-msgid "OS"
-msgstr ""
-
-#: ../glade/task_new.ui:818 ../glade/task_profile.ui:627
-msgid "Version"
-msgstr ""
-
-#: ../glade/task_new.ui:852 ../glade/task_profile.ui:720
+#: ../scripts/../yaner/ui/Toplevel.py:156
 msgid "Metalink"
 msgstr ""
 
-#: ../glade/task_new.ui:887
-msgid "Category"
+#: ../scripts/../yaner/ui/Toplevel.py:171
+msgid "Action group initialized."
 msgstr ""
 
-#: ../glade/task_new.ui:898
-msgid "Directory"
+#: ../scripts/../yaner/ui/Toplevel.py:177
+msgid "Initializing UI Manager..."
 msgstr ""
 
-#: ../glade/task_new.ui:959
-msgid "_Browse..."
+#: ../scripts/../yaner/ui/Toplevel.py:184
+msgid "Failed to add ui file to UIManager."
 msgstr ""
 
-#: ../glade/task_new.ui:986
-msgid "<b>Server and Category</b>"
+#: ../scripts/../yaner/ui/Toplevel.py:188
+msgid "UI Manager initialized."
 msgstr ""
 
-#: ../glade/task_profile.ui:7
-msgid "Default task profile"
+#: ../scripts/../yaner/ui/Toplevel.py:196
+msgid "Adding pool {0}..."
 msgstr ""
 
-#: ../glade/task_profile.ui:59
-msgid "Connect timeout(sec)"
-msgstr ""
-
-#: ../glade/task_profile.ui:84
-msgid "Timeout(sec)"
-msgstr ""
-
-#: ../glade/task_profile.ui:117
-msgid "<b>Timeout</b>"
-msgstr ""
-
-#: ../glade/task_profile.ui:150
-msgid "Max tries"
-msgstr ""
-
-#: ../glade/task_profile.ui:175
-msgid "Max file not found tries"
-msgstr ""
-
-#: ../glade/task_profile.ui:208
-msgid "<b>Retry</b>"
-msgstr ""
-
-#: ../glade/task_profile.ui:225
-msgid "General"
-msgstr ""
-
-#: ../glade/task_profile.ui:259
-msgid "Per server connections"
-msgstr ""
-
-#: ../glade/task_profile.ui:302
-msgid "Auto renaming"
-msgstr ""
-
-#: ../glade/task_profile.ui:327
-msgid "Normal"
-msgstr ""
-
-#: ../glade/task_profile.ui:377
-msgid "Max Peers"
-msgstr ""
-
-#: ../glade/task_profile.ui:407
-msgid "Tracker connect timeout(sec)"
-msgstr ""
-
-#: ../glade/task_profile.ui:437
-msgid "Tracker timeout(sec)"
-msgstr ""
-
-#: ../glade/task_profile.ui:465
-msgid "! Follow torrent"
-msgstr ""
-
-#: ../glade/task_profile.ui:481
-msgid "Preview mode"
-msgstr ""
-
-#: ../glade/task_profile.ui:566
-msgid "Bittorrent"
-msgstr ""
-
-#: ../glade/task_profile.ui:637
-msgid "! Follow metalink"
-msgstr ""
-
-#: ../glade/task_profile.ui:736
-msgid "<i>! Do NOT change this option.</i>"
+#: ../scripts/../yaner/utils/Configuration.py:62
+msgid "Created directory {0}."
 msgstr ""

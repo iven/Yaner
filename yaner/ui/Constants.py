@@ -1,10 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python2
+# vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
 
 # Yaner - GTK+ interface for aria2 download mananger
-# Copyright (C) 2010  Iven Day <ivenvd#gmail.com>
+# Copyright (C) 2010-2011  Iven <ivenvd#gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,27 +21,16 @@
 #
 
 """
-    This file contains functions converting numbers
-    to human readable format.
+This module contains the global constants of L{yaner.ui}.
 """
 
-from __future__ import division
+from os.path import join as _join
 
-def psize(num):
-    """
-    This function converts byte sizes into pretty format.
-    i.e., 1024 -> 1 KB.
-    """
-    num = int(num)
-    units = ('B', 'KB', 'MB', 'GB', 'TB')
-    for i in xrange(len(units)):
-        if num < 1024 ** (i + 1) * 2 or i == len(units) - 1:
-            num = '%.1f %s' % (num / (1024 ** i), units[i])
-            break
-    return num
+from yaner.Constants import DATA_DIR as _DATA_DIR
 
-def pspeed(num):
-    """
-    This is the speed version of psize.
-    """
-    return psize(num) + '/s'
+UI_DIR = _join(_DATA_DIR, "ui")
+"""
+The UI directory of L{yaner}, which contains UI definations and glade
+files.
+"""
+

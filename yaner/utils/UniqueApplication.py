@@ -1,10 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python2
+# vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
 
 # Yaner - GTK+ interface for aria2 download mananger
-# Copyright (C) 2010  Iven Day <ivenvd#gmail.com>
+# Copyright (C) 2010-2011  Iven <ivenvd#gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,18 +21,32 @@
 #
 
 """
-    This file contains the super class of a single instance application
-like Yaner, but could also be used by other programs.
+This module contains the super class of single instance applications
+like L{yaner}.
 """
 
 import dbus
 import dbus.service
 import dbus.mainloop.glib
 
-class SingleInstanceAppMixin:
-    "Single Instance Application"
+class UniqueApplicationMixin(object):
+    """
+    This class uses DBus to ensure there is only one instance of
+    this class.
+    """
 
     def __init__(self, bus_name):
+        """
+        This firstly creates and binds a C{dbus.service.BusName}.
+        When the second instances constructing, it fails and fallback
+        to C{on_instance_exists}, which should be implemented in
+        the subclass of L{UniqueApplicationMixin}.
+
+        @arg bus_name:Unique name identifies the application. Such as
+        'I{com.kissuki.yaner}'.
+        @type bus_name:str
+        """
+        object.__init__(self)
         dbus.mainloop.glib.DBusGMainLoop(set_as_default = True)
         self.bus = dbus.SessionBus()
         try:
@@ -41,14 +55,3 @@ class SingleInstanceAppMixin:
         except dbus.exceptions.NameExistsException:
             self.on_instance_exists()
 
-    def on_instance_exists(self):
-        """
-        This method is called when an instance of the program already
-        exists. It may be overwritten by subclasses.
-        """
-        print "Another instance is already running."
-        import sys
-        sys.exit(0)
-
-if __name__ == '__main__':
-    pass

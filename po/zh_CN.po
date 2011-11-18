@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: yaner 0.1.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-11-15 12:41+0800\n"
+"POT-Creation-Date: 2011-11-11 10:53+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -17,307 +17,189 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../Yaner/Application.py:275
-#, python-format
-msgid "Error: %s"
-msgstr "错误：%s"
-
-#: ../Yaner/Application.py:278
-msgid "filename to save"
-msgstr "保存的文件名"
-
-#: ../Yaner/Application.py:279
-msgid "referer page of the link"
-msgstr "链接的引用页"
-
-#: ../Yaner/Application.py:280
-msgid "cookies of the website"
-msgstr "网站的 Cookies"
-
-#: ../Yaner/Application.py:281
-msgid "display this help and exit"
-msgstr "显示此帮助并退出"
-
-#: ../Yaner/Application.py:282
-msgid "output version information and exit"
-msgstr "输出版本信息并退出"
-
-#: ../Yaner/Application.py:283
-msgid "Usage: yaner [OPTION]... [URI | MAGNET]..."
-msgstr "用法：yaner [选项]... [URI | MAGNET]..."
-
-#: ../Yaner/Application.py:285
-msgid "Options:"
-msgstr "选项："
-
-#: ../Yaner/Application.py:297
+#: ../scripts/../yaner/Application.py:52
 msgid "License GPLv3+: GNU GPL version 3 or later"
-msgstr "GPLv3+ 许可： GNU 通用公共许可证第 3 版本或更新"
+msgstr "GPLv3+ 许可：GNU 通用公共许可证第3 版或更新版本"
 
-#: ../Yaner/Application.py:299
+#: ../scripts/../yaner/Application.py:54
 msgid "This is free software:"
 msgstr "本软件是自由软件："
 
-#: ../Yaner/Application.py:300
-msgid "you are free to change and redistribute it."
+#: ../scripts/../yaner/Application.py:55
+msgid "You are free to change and redistribute it."
 msgstr "您可以自由修改和重新发布它。"
 
-#: ../Yaner/Application.py:301
+#: ../scripts/../yaner/Application.py:56
 msgid "There is NO WARRANTY, to the extent permitted by law."
 msgstr "在法律范围内没有其他保证。"
 
-#: ../Yaner/Dialogs.py:280
+#: ../scripts/../yaner/Application.py:117
+msgid "Reading global configuration file..."
+msgstr "全局配置文件读取中……"
+
+#: ../scripts/../yaner/Application.py:120
+msgid "No global configuration file, creating..."
+msgstr "无全局配置文件，创建中……"
+
+#: ../scripts/../yaner/Application.py:131
+msgid "Connecting to global database file..."
+msgstr "全局数据库文件读取中……"
+
+#: ../scripts/../yaner/Application.py:141
+msgid "Global database file connected."
+msgstr "已连接全局数据库文件。"
+
+#: ../scripts/../yaner/Application.py:158
+msgid "Parsing command line arguments..."
+msgstr "命令行参数解析中……"
+
+#: ../scripts/../yaner/Application.py:159
+msgid "Command line arguments: {0}"
+msgstr "命令行参数： {0}"
+
+#: ../scripts/../yaner/Application.py:162
+msgid "{0} download mananger."
+msgstr "{0} 下载管理器"
+
+#: ../scripts/../yaner/Application.py:164
+msgid "filename to save"
+msgstr "保存的文件名"
+
+#: ../scripts/../yaner/Application.py:166
+msgid "referer page of the link"
+msgstr "链接的引用页"
+
+#: ../scripts/../yaner/Application.py:168
+msgid "cookies of the website"
+msgstr "网站的 Cookies"
+
+#: ../scripts/../yaner/Application.py:170
+msgid "the download addresses"
+msgstr "下载地址"
+
+#: ../scripts/../yaner/Application.py:172
+msgid "output version information and exit"
+msgstr "输出版本信息并退出"
+
+#: ../scripts/../yaner/Application.py:175
+msgid "Command line arguments parsed."
+msgstr "命令行参数已解析。"
+
+#: ../scripts/../yaner/Application.py:207
+msgid "Logging system initialized, start logging..."
+msgstr "日志系统初始化完毕，开始记录……"
+
+#: ../scripts/../yaner/Application.py:211
+msgid "Initializing database for first start..."
+msgstr "为首次启动初始化数据库中……"
+
+#: ../scripts/../yaner/Application.py:219
+#: ../scripts/../yaner/Configurations.py:81
+msgid "My Computer"
+msgstr "我的电脑"
+
+#: ../scripts/../yaner/Application.py:220
+#: ../scripts/../yaner/Configurations.py:103
+msgid "Default Category"
+msgstr "默认分类"
+
+#: ../scripts/../yaner/Application.py:222
+msgid "Database initialized."
+msgstr "数据库初始化完毕。"
+
+#: ../scripts/../yaner/Application.py:229
+msgid "Application quit normally."
+msgstr "程序正常退出。"
+
+#: ../scripts/../yaner/Presentable.py:136
+msgid "Dustbin"
+msgstr "回收站"
+
+#: ../scripts/../yaner/ui/Dialogs.py:76
+msgid "No task options config file, creating..."
+msgstr "无任务选项配置文件，创建中……"
+
+#: ../scripts/../yaner/ui/Dialogs.py:344
 msgid "Select download directory"
 msgstr "选择下载目录"
 
-#: ../Yaner/Dialogs.py:283
+#: ../scripts/../yaner/ui/Dialogs.py:347
 msgid "_Cancel"
 msgstr "取消(_C)"
 
-#: ../Yaner/Dialogs.py:284
+#: ../scripts/../yaner/ui/Dialogs.py:348
 msgid "_Select"
 msgstr "选择(_S)"
 
-#: ../Yaner/Server.py:65
-msgid "Queuing"
-msgstr "排队中"
+#: ../scripts/../yaner/ui/Misc.py:46
+msgid "@widget is not a gtk.Widget."
+msgstr "@widget 并非 gtk.Widget。"
 
-#: ../Yaner/Server.py:66
-msgid "Completed"
-msgstr "已完成"
+#: ../scripts/../yaner/ui/Misc.py:57
+msgid "Got mix color: {0}."
+msgstr "得到混合颜色：{0}。"
 
-#: ../Yaner/Server.py:67
-msgid "Recycled"
-msgstr "回收站"
+#: ../scripts/../yaner/ui/PoolTree.py:103
+msgid "Adding presentable {0}..."
+msgstr "添加呈现器 {0} 中……"
 
-#: ../Yaner/Server.py:177 ../Yaner/Task.py:231
-msgid "Network Error"
-msgstr "网络错误"
+#: ../scripts/../yaner/ui/PoolTree.py:110
+msgid "No parent presentable for {0}."
+msgstr "{0} 无父呈现器。"
 
-#: ../glade/main.ui:37
-msgid "Yaner - Faster than a flash of lightning"
-msgstr "掩耳 - 迅雷不及掩耳"
+#: ../scripts/../yaner/ui/TaskListTree.py:137
+msgid "Adding task {}..."
+msgstr "添加任务 {} 中……"
 
-#: ../glade/main.ui:50
-msgid "_File"
-msgstr "文件(_F)"
+#: ../scripts/../yaner/ui/Toplevel.py:63
+msgid "Initializing toplevel window..."
+msgstr "初始化主窗口中……"
 
-#: ../glade/main.ui:111
-msgid "Tas_k"
-msgstr "任务(_K)"
+#: ../scripts/../yaner/ui/Toplevel.py:117
+msgid "Toplevel window initialized."
+msgstr "主窗口初始化完毕。"
 
-#: ../glade/main.ui:150
-msgid "_Tools"
-msgstr "工具(_T)"
+#: ../scripts/../yaner/ui/Toplevel.py:145
+msgid "Initializing action group..."
+msgstr "初始化动作组中……"
 
-#: ../glade/main.ui:170
-msgid "_Help"
-msgstr "帮助(_H)"
+#: ../scripts/../yaner/ui/Toplevel.py:150
+msgid "File"
+msgstr "文件"
 
-#: ../glade/main.ui:201 ../glade/task_new.ui:7
-msgid "Add new task"
-msgstr "添加新任务"
-
-#: ../glade/main.ui:505
-msgid "About Yaner"
-msgstr "关于掩耳"
-
-#: ../glade/main.ui:512
-msgid "Copyright © 2010 Iven Day(Xu Lijian)"
-msgstr "Copyright © 2010 Iven Day(许立剑)"
-
-#: ../glade/task_new.ui:67
-msgid "<b>URI(s)</b>"
-msgstr "<b>下载地址</b>"
-
-#: ../glade/task_new.ui:99
-msgid "Referer"
-msgstr "引用页"
-
-#: ../glade/task_new.ui:110
-msgid "Rename"
-msgstr "重命名"
-
-#: ../glade/task_new.ui:148 ../glade/task_profile.ui:249
-msgid "Connections"
-msgstr "连接数"
-
-#: ../glade/task_new.ui:182 ../glade/task_new.ui:603 ../glade/task_new.ui:834
-msgid "<b>Settings</b> - Optional"
-msgstr "<b>设置</b> - 可选"
-
-#: ../glade/task_new.ui:215 ../glade/task_new.ui:296
-msgid "User"
-msgstr "用户名"
-
-#: ../glade/task_new.ui:240 ../glade/task_new.ui:270
-msgid "Password"
-msgstr "密码"
-
-#: ../glade/task_new.ui:324
-msgid "<b>HTTP</b>"
+#: ../scripts/../yaner/ui/Toplevel.py:152
+msgid "HTTP/FTP/BT Magnet"
 msgstr ""
 
-#: ../glade/task_new.ui:334
-msgid "<b>FTP</b>"
-msgstr ""
-
-#: ../glade/task_new.ui:350
-msgid "<b>Authorization</b> - Optional"
-msgstr "<b>验证</b> - 可选"
-
-#: ../glade/task_new.ui:365
-msgid "Normal / BT Magnet"
-msgstr "普通 / BT 磁力链接"
-
-#: ../glade/task_new.ui:400
-msgid "<b>Torrent File</b>"
-msgstr "<b>种子文件</b>"
-
-#: ../glade/task_new.ui:443
-msgid "<b>URI(s)</b> - Optional"
-msgstr "<b>下载地址</b> - 可选"
-
-#: ../glade/task_new.ui:475 ../glade/task_profile.ui:352
-msgid "Max open files"
-msgstr "最大打开文件数"
-
-#: ../glade/task_new.ui:486 ../glade/task_profile.ui:499
-msgid "Seed time(min)"
-msgstr "做种时间（分）"
-
-#: ../glade/task_new.ui:499 ../glade/task_profile.ui:512
-msgid "Seed ratio"
-msgstr "做种比例"
-
-#: ../glade/task_new.ui:558
-msgid "Max peers"
-msgstr "最大节点数"
-
-#: ../glade/task_new.ui:584
-msgid "Preview mode - Try to download first and last pieces first"
-msgstr "预览模式 - 试着优先下载文件首尾部分"
-
-#: ../glade/task_new.ui:621
+#: ../scripts/../yaner/ui/Toplevel.py:154
 msgid "BitTorrent"
 msgstr ""
 
-#: ../glade/task_new.ui:657
-msgid "<b>Metalink File</b>"
-msgstr "<b>Metalink 文件</b>"
-
-#: ../glade/task_new.ui:690 ../glade/task_profile.ui:591
-msgid "Download servers"
-msgstr "下载服务器"
-
-#: ../glade/task_new.ui:701 ../glade/task_profile.ui:601
-msgid "Prefered locations"
-msgstr "优先地理位置"
-
-#: ../glade/task_new.ui:730 ../glade/task_profile.ui:614
-msgid "Language"
-msgstr "语言"
-
-#: ../glade/task_new.ui:805
-msgid "OS"
-msgstr "操作系统"
-
-#: ../glade/task_new.ui:818 ../glade/task_profile.ui:627
-msgid "Version"
-msgstr "版本号"
-
-#: ../glade/task_new.ui:852 ../glade/task_profile.ui:720
+#: ../scripts/../yaner/ui/Toplevel.py:156
 msgid "Metalink"
 msgstr ""
 
-#: ../glade/task_new.ui:887
-msgid "Category"
-msgstr "分类"
+#: ../scripts/../yaner/ui/Toplevel.py:171
+msgid "Action group initialized."
+msgstr "动作组初始化完毕。"
 
-#: ../glade/task_new.ui:898
-msgid "Directory"
-msgstr "目录"
+#: ../scripts/../yaner/ui/Toplevel.py:177
+msgid "Initializing UI Manager..."
+msgstr "初始化 UI 管理器中……"
 
-#: ../glade/task_new.ui:959
-msgid "_Browse..."
-msgstr "浏览(_B)..."
+#: ../scripts/../yaner/ui/Toplevel.py:184
+msgid "Failed to add ui file to UIManager."
+msgstr "添加 ui 文件到 UI 管理器失败。"
 
-#: ../glade/task_new.ui:986
-msgid "<b>Server and Category</b>"
-msgstr "<b>服务端和分类</b>"
+#: ../scripts/../yaner/ui/Toplevel.py:188
+msgid "UI Manager initialized."
+msgstr "UI 管理器初始化完毕。"
 
-#: ../glade/task_profile.ui:7
-msgid "Default task profile"
-msgstr "任务默认配置"
+#: ../scripts/../yaner/ui/Toplevel.py:196
+msgid "Adding pool {0}..."
+msgstr "添加池 {0} 中……"
 
-#: ../glade/task_profile.ui:59
-msgid "Connect timeout(sec)"
-msgstr "连接超时（秒）"
+#: ../scripts/../yaner/utils/Configuration.py:62
+msgid "Created directory {0}."
+msgstr "已创建目录：{0}"
 
-#: ../glade/task_profile.ui:84
-msgid "Timeout(sec)"
-msgstr "超时（秒）"
-
-#: ../glade/task_profile.ui:117
-msgid "<b>Timeout</b>"
-msgstr "<b>超时</b>"
-
-#: ../glade/task_profile.ui:150
-msgid "Max tries"
-msgstr "最大重试次数"
-
-#: ../glade/task_profile.ui:175
-msgid "Max file not found tries"
-msgstr "文件无法找到时重试次数"
-
-#: ../glade/task_profile.ui:208
-msgid "<b>Retry</b>"
-msgstr "<b>重试</b>"
-
-#: ../glade/task_profile.ui:225
-msgid "General"
-msgstr "常规"
-
-#: ../glade/task_profile.ui:259
-msgid "Per server connections"
-msgstr "每服务器连接数"
-
-#: ../glade/task_profile.ui:302
-msgid "Auto renaming"
-msgstr "自动重命名"
-
-#: ../glade/task_profile.ui:327
-msgid "Normal"
-msgstr "普通下载"
-
-#: ../glade/task_profile.ui:377
-msgid "Max Peers"
-msgstr "最大节点数"
-
-#: ../glade/task_profile.ui:407
-msgid "Tracker connect timeout(sec)"
-msgstr "Tracker 连接超时（秒）"
-
-#: ../glade/task_profile.ui:437
-msgid "Tracker timeout(sec)"
-msgstr "Tracker 超时（秒）"
-
-#: ../glade/task_profile.ui:465
-msgid "! Follow torrent"
-msgstr "! 跟踪种子"
-
-#: ../glade/task_profile.ui:481
-msgid "Preview mode"
-msgstr "预览模式"
-
-#: ../glade/task_profile.ui:566
-msgid "Bittorrent"
-msgstr ""
-
-#: ../glade/task_profile.ui:637
-msgid "! Follow metalink"
-msgstr "! 跟踪 Metalink"
-
-#: ../glade/task_profile.ui:736
-msgid "<i>! Do NOT change this option.</i>"
-msgstr "<i>! 不要修改此选项。</i>"
