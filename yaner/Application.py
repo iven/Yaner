@@ -26,11 +26,11 @@ This module contains the main application class of L{yaner}.
 
 import os
 import sys
+import gtk
 import logging
 import argparse
 import sqlobject
 import subprocess
-from twisted.internet import reactor
 
 from yaner import __version__
 from yaner.Pool import Pool
@@ -232,10 +232,10 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         self.logger.info(_('Application quit normally.'))
         self.data_conn.close()
         logging.shutdown()
-        reactor.stop()
+        gtk.main_quit()
 
     @staticmethod
     def run():
         """Run the main loop of the application."""
-        reactor.run()
+        gtk.main()
 

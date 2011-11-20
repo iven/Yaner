@@ -28,10 +28,9 @@ import glib
 import gobject
 import sqlobject
 
-from twisted.web import xmlrpc
-
 from yaner.Task import Task
 from yaner.Misc import GObjectSQLObjectMeta
+from yaner.Xmlrpc import ServerProxy
 from yaner.Presentable import Presentable, Queuing, Dustbin
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Notification import Notification
@@ -92,7 +91,7 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         """Get the xmlrpc proxy of the pool."""
         if self._proxy is None:
             connstr = 'http://{0.user}:{0.passwd}@{0.host}:{0.port}/rpc'
-            self._proxy = xmlrpc.Proxy(connstr.format(self))
+            self._proxy = ServerProxy(connstr.format(self))
         return self._proxy
 
     @property
@@ -148,12 +147,14 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def _keep_connection(self):
         """Keep calling C{aria2.getVersion} and mark pool as connected."""
 
-        def on_got_version(version):
+        def on_got_version(deferred):
             """When got aria2 version, mark the pool as connected."""
             self.connected = True
 
-        deferred = self.proxy.callRemote('aria2.getVersion')
-        deferred.addCallbacks(on_got_version, self._on_twisted_error)
+        deferred = self.proxy.call('aria2.getVersion')
+        deferred.add_callback(on_got_version)
+        deferred.add_errback(self._on_xmlrpc_error)
+        deferred.start()
 
         glib.timeout_add_seconds(self._CONNECTION_INTERVAL,
                 self._keep_connection)
@@ -162,20 +163,23 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def _resume_session(self):
         """Get session id from pool."""
 
-        def on_got_session_info(session_info):
+        def on_got_session_info(deferred):
             """When got session info, call L{yaner.Task.begin_update_status}
             on every task with the same session id.
             """
+            session_info = deferred.result
             for task in self.queuing.tasks.filter(
                     Task.q.session_id == session_info['sessionId']):
                 task.status = Task.STATUSES.WAITING
                 task.begin_update_status()
 
-        deferred = self.proxy.callRemote('aria2.getSessionInfo')
-        deferred.addCallbacks(on_got_session_info, self._on_twisted_error)
+        deferred = self.proxy.call('aria2.getSessionInfo')
+        deferred.add_callback(on_got_session_info)
+        deferred.add_errback(self._on_xmlrpc_error)
+        deferred.start()
 
-    def _on_twisted_error(self, failure):
-        """When we meet a twisted error, it may be caused by network error,
+    def _on_xmlrpc_error(self, deferred):
+        """When we meet a xmlrpc error, it may be caused by network error,
         mark the server as disconnected.
 
         """

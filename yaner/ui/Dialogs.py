@@ -28,8 +28,7 @@ import gtk
 import gobject
 import os
 import dbus.service
-
-from twisted.web import xmlrpc
+import xmlrpclib
 
 from yaner.Pool import Pool
 from yaner.Task import Task, NormalTask, BTTask, MTTask
@@ -388,7 +387,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         elif task_type != Task.TYPES.NORMAL and metadata_file:
             name = os.path.basename(metadata_file)
             with open(metadata_file) as m_file:
-                metadata = xmlrpc.Binary(m_file.read())
+                metadata = xmlrpclib.Binary(m_file.read())
         else:
             return
 

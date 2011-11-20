@@ -36,7 +36,7 @@ G{packagetree}
 @license:GPLv3
 @see:U{The Yaner webpage<https://github.com/iven/Yaner>}, U{The
 author's blog<http://www.kissuki.com/>}(In Chinese)
-@requires:PyGtk 2.12.0, twisted, pynotify
+@requires:
 """
 
 __package__ = "yaner"
