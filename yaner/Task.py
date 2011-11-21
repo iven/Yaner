@@ -168,7 +168,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
             self._status_update_handle = glib.timeout_add_seconds(
                     self._UPDATE_INTERVAL, self._call_tell_status)
             self._database_sync_handle = glib.timeout_add_seconds(
-                    self._SYNC_INTERVAL, self.syncUpdate)
+                    self._SYNC_INTERVAL, self._sync_update)
 
     def end_update_status(self):
         """Stop updating status every second."""
@@ -179,11 +179,16 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
             glib.source_remove(self._database_sync_handle)
             self._database_sync_handle = None
 
+    def _sync_update(self):
+        self.syncUpdate()
+        return True
+
     def _update_session_id(self):
         """Get session id of the pool and store it in task."""
         def on_got_session_info(deferred):
             """Set session id the task belongs to."""
             self.session_id = deferred.result['sessionId']
+            self.syncUpdate()
 
         deferred = self.pool.proxy.call('aria2.getSessionInfo', self.gid)
         deferred.add_callback(on_got_session_info)
@@ -197,6 +202,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.gid = gid[-1] if isinstance(gid, list) else gid
         self.status = self.STATUSES.ACTIVE
 
+        self._update_session_id()
         self.begin_update_status()
 
     def _on_paused(self, deferred):
