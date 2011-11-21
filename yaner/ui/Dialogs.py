@@ -30,6 +30,7 @@ import os
 import dbus.service
 import xmlrpclib
 
+from yaner import SQLSession
 from yaner.Pool import Pool
 from yaner.Task import Task, NormalTask, BTTask, MTTask
 from yaner.Presentable import Category
@@ -328,7 +329,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         self.init_options(options)
         # init the server cb
         widgets['pool_ls'].clear()
-        for pool in Pool.select():
+        for pool in SQLSession.query(Pool):
             widgets['pool_ls'].append([pool.name, pool])
         widgets['pool_cb'].set_active(0)
         # TODO: Show main window
@@ -393,7 +394,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
 
         TaskClasses = (NormalTask, BTTask, MTTask)
 
-        task = TaskClasses[task_type](name=name, type=task_type,
+        task = TaskClasses[task_type](name=unicode(name), type=task_type,
                 metadata=metadata, uris=uris, options=options,
                 category=self.active_category, pool=self.active_pool)
         task.start()

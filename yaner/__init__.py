@@ -57,3 +57,9 @@ __author__    = "Iven Hsu (Xu Lijian) <ivenvd@gmail.com>"
 __license__   = "GPLv3"
 """The license governing the use and distribution of L{yaner}."""
 
+from sqlalchemy import MetaData
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+SQLSession = scoped_session(sessionmaker())
+SQLMetaData = MetaData()
+

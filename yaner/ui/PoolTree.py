@@ -201,9 +201,9 @@ class PoolView(gtk.TreeView):
         # Get the color for the description
         color = get_mix_color(self, state)
 
-        tasks = presentable.tasks
+        tasks = list(presentable.tasks)
         total_length = sum(task.total_length for task in tasks)
-        description = '{} Task(s) {}'.format(tasks.count(), psize(total_length))
+        description = '{} Task(s) {}'.format(len(tasks), psize(total_length))
         markup = '<small>' \
                      '<b>{}</b>\n' \
                      '<span fgcolor="{}">{}</span>' \
