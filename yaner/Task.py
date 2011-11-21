@@ -184,6 +184,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         def on_got_session_info(deferred):
             """Set session id the task belongs to."""
             self.session_id = deferred.result['sessionId']
+            self.syncUpdate()
 
         deferred = self.pool.proxy.call('aria2.getSessionInfo', self.gid)
         deferred.add_callback(on_got_session_info)
@@ -197,6 +198,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self.gid = gid[-1] if isinstance(gid, list) else gid
         self.status = self.STATUSES.ACTIVE
 
+        self._update_session_id()
         self.begin_update_status()
 
     def _on_paused(self, deferred):

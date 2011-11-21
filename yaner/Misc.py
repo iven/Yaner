@@ -27,7 +27,7 @@ This module contains miscellaneous functions used by other modules.
 from gobject import GObjectMeta
 from sqlobject.declarative import DeclarativeMeta
 
-class GObjectSQLObjectMeta(GObjectMeta, DeclarativeMeta):
+class GObjectSQLObjectMeta(DeclarativeMeta, GObjectMeta):
     """Metaclass for GObject and SQLObject subclasses."""
     pass
 
