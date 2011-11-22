@@ -168,7 +168,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
             self._status_update_handle = glib.timeout_add_seconds(
                     self._UPDATE_INTERVAL, self._call_tell_status)
             self._database_sync_handle = glib.timeout_add_seconds(
-                    self._SYNC_INTERVAL, self.syncUpdate)
+                    self._SYNC_INTERVAL, self._sync_update)
 
     def end_update_status(self):
         """Stop updating status every second."""
@@ -178,6 +178,10 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         if self._database_sync_handle:
             glib.source_remove(self._database_sync_handle)
             self._database_sync_handle = None
+
+    def _sync_update(self):
+        self.syncUpdate()
+        return True
 
     def _update_session_id(self):
         """Get session id of the pool and store it in task."""
