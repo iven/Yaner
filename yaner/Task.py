@@ -332,7 +332,7 @@ BT_TASK_TABLE = Table('bt_task', SQLMetaData,
         Column('id', Integer, ForeignKey('task.id'), primary_key=True),
         )
 
-class MTTask(Task):
+class MLTask(Task):
     """Metalink Task."""
 
     def add(self):
@@ -343,7 +343,7 @@ class MTTask(Task):
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
 
-MT_TASK_TABLE = Table('mt_task', SQLMetaData,
+ML_TASK_TABLE = Table('ml_task', SQLMetaData,
         Column('id', Integer, ForeignKey('task.id'), primary_key=True),
         )
 

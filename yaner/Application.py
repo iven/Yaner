@@ -37,8 +37,8 @@ from sqlalchemy.orm import mapper, relationship, deferred
 from yaner import __version__
 from yaner import SQLSession, SQLMetaData
 from yaner.Pool import POOL_TABLE, Pool
-from yaner.Task import Task, NormalTask, BTTask, MTTask
-from yaner.Task import TASK_TABLE, NORMAL_TASK_TABLE, BT_TASK_TABLE, MT_TASK_TABLE
+from yaner.Task import Task, NormalTask, BTTask, MLTask
+from yaner.Task import TASK_TABLE, NORMAL_TASK_TABLE, BT_TASK_TABLE, ML_TASK_TABLE
 from yaner.Presentable import CATEGORY_TABLE, Category
 from yaner.Constants import U_CONFIG_DIR, BUS_NAME
 from yaner.ui.Dialogs import TaskNewDialog
@@ -232,7 +232,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
                 polymorphic_identity=Task.TYPES.NORMAL)
         mapper(BTTask, BT_TASK_TABLE, inherits=Task,
                 polymorphic_identity=Task.TYPES.BT)
-        mapper(MTTask, MT_TASK_TABLE, inherits=Task,
+        mapper(MLTask, ML_TASK_TABLE, inherits=Task,
                 polymorphic_identity=Task.TYPES.ML)
 
     def quit(self, *arg, **kwargs):

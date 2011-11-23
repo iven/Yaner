@@ -32,7 +32,7 @@ import xmlrpclib
 
 from yaner import SQLSession
 from yaner.Pool import Pool
-from yaner.Task import Task, NormalTask, BTTask, MTTask
+from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Category
 from yaner.Constants import U_CONFIG_DIR
 from yaner.Constants import BUS_NAME as INTERFACE_NAME
@@ -392,7 +392,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         else:
             return
 
-        TaskClasses = (NormalTask, BTTask, MTTask)
+        TaskClasses = (NormalTask, BTTask, MLTask)
 
         task = TaskClasses[task_type](name=unicode(name), type=task_type,
                 metadata=metadata, uris=uris, options=options,
