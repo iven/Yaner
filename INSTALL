@@ -1,8 +1,8 @@
 Dependences
 ======
-This software depends on Python and PyGTK >= 2.12
-sexy-python (libsexy bindings) is also used but optionnal.
-Of course librsvg-common is needed for a proper svg support in gtk/gdk.
+PyGTK >= 2.12
+SQLAlchemy >= 0.7.0
+PyNotify >= 0.1.1
 
 Install
 ======
@@ -27,6 +27,6 @@ Browser support
 ======
 For Firefox, install FlashGot, add a new DM in the preferences dialog:
 Executable path: /usr/bin/yaner (Or /usr/local/bin/yaner, etc.)
-Command line:    [URL] --referer [REFERER] --rename [FNAME] --cookie [COOKIE]
+Command line:    [URL] [--referer REFERER] [--rename FNAME] [--cookie COOKIE]
 
 Other browers are currently not supported.
