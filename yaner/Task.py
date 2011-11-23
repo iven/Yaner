@@ -26,21 +26,20 @@ This module contains the L{Task} class of L{yaner}.
 
 import glib
 import gobject
-import sqlobject
 
-from sqlobject.inheritance import InheritableSQLObject
+from sqlalchemy import Table, Column, Integer, PickleType, Unicode, ForeignKey
+from sqlalchemy.orm import reconstructor
+from sqlalchemy.ext.hybrid import hybrid_property
 
-from yaner.Misc import GObjectSQLObjectMeta
+from yaner import SQLMetaData, SQLSession
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 from yaner.utils.Notification import Notification
 
-class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
+class Task(gobject.GObject, LoggingMixin):
     """
     Task class is just downloading tasks, which provides data to L{TaskListModel}.
     """
-
-    __metaclass__ = GObjectSQLObjectMeta
 
     __gsignals__ = {
             'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
@@ -79,29 +78,31 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     _SYNC_INTERVAL = 60
     """Interval for database sync, in second(s)."""
 
-    name = sqlobject.UnicodeCol()
-    status = sqlobject.IntCol(default=STATUSES.INACTIVE)
-    type = sqlobject.IntCol()
-    uris = sqlobject.PickleCol(default=[])
-    completed_length = sqlobject.IntCol(default=0)
-    total_length = sqlobject.IntCol(default=0)
-    gid = sqlobject.StringCol(default='')
-    metadata = sqlobject.PickleCol(default=None)
-    options = sqlobject.PickleCol()
+    def __init__(self, name, type, pool, category, options,
+            status=STATUSES.INACTIVE, uris=[], completed_length=0,
+            total_length=0, gid=u'', metadata=None, session_id=u''):
+        self.name = name
+        self.status = status
+        self.type = type
+        self.uris = uris
+        self.completed_length = completed_length
+        self.total_length = total_length
+        self.gid = gid
+        self.metadata = metadata
+        self.options = options
+        self.session_id = session_id
+        self.pool = pool
+        self.category = category
 
-    pool = sqlobject.ForeignKey('Pool')
-    category = sqlobject.ForeignKey('Category')
+        SQLSession.add(self)
+        SQLSession.commit()
 
-    session_id = sqlobject.StringCol(default='')
+        self._init()
 
-    class sqlmeta:
-        """Set sqlobject to sync lazily."""
-        lazyUpdate = True
-
-    def _init(self, *args, **kwargs):
+    @reconstructor
+    def _init(self):
         LoggingMixin.__init__(self)
         gobject.GObject.__init__(self)
-        InheritableSQLObject._init(self, *args, **kwargs)
 
         self.upload_speed = 0
         self.download_speed = 0
@@ -110,13 +111,22 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         self._status_update_handle = None
         self._database_sync_handle = None
 
-    def _set_status(self, status):
+    def __repr__(self):
+        return u"<Task {}>".format(self.name)
+
+    @hybrid_property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, status):
         """Always sync when task status changes."""
         if hash(self) and self.status != status:
-            self._SO_set_status(status)
-            self.syncUpdate()
+            self._status = status
+            self._sync_update()
+            self.changed()
         else:
-            self._SO_set_status(status)
+            self._status = status
 
     @property
     def completed(self):
@@ -146,7 +156,8 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
         """Remove task."""
         if self.status == self.STATUSES.REMOVED:
             self.pool.dustbin.remove_task(self)
-            self.destroySelf()
+            SQLSession.delete(self)
+            self._sync_update()
         elif self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
                 self.STATUSES.INACTIVE):
             self._on_removed()
@@ -180,15 +191,15 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
             self._database_sync_handle = None
 
     def _sync_update(self):
-        self.syncUpdate()
+        SQLSession.commit()
         return True
 
     def _update_session_id(self):
         """Get session id of the pool and store it in task."""
         def on_got_session_info(deferred):
             """Set session id the task belongs to."""
-            self.session_id = deferred.result['sessionId']
-            self.syncUpdate()
+            self.session_id = unicode(deferred.result['sessionId'])
+            self._sync_update()
 
         deferred = self.pool.proxy.call('aria2.getSessionInfo', self.gid)
         deferred.add_callback(on_got_session_info)
@@ -198,7 +209,7 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     def _on_started(self, deferred):
         """Task started callback, update task information."""
 
-        gid = deferred.result
+        gid = unicode(deferred.result)
         self.gid = gid[-1] if isinstance(gid, list) else gid
         self.status = self.STATUSES.ACTIVE
 
@@ -208,12 +219,10 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     def _on_paused(self, deferred):
         """Task paused callback, update status."""
         self.status = self.STATUSES.PAUSED
-        self.changed()
 
     def _on_unpaused(self, deferred):
         """Task unpaused callback, update status."""
         self.status = self.STATUSES.ACTIVE
-        self.changed()
 
     def _on_removed(self, deferred=None):
         """Task removed callback, remove task from previous presentable and
@@ -275,8 +284,23 @@ class Task(InheritableSQLObject, gobject.GObject, LoggingMixin):
     def _on_xmlrpc_error(self, deferred):
         """Handle errors occured when calling some function via xmlrpc."""
         self.status = self.STATUSES.ERROR
-        self.changed()
         Notification(_('Network Error'), deferred.error.message).show()
+
+TASK_TABLE = Table('task', SQLMetaData,
+        Column('id', Integer, primary_key=True),
+        Column('name', Unicode),
+        Column('status', Integer, default=Task.STATUSES.INACTIVE),
+        Column('type', Integer, nullable=False),
+        Column('uris', PickleType, default=[]),
+        Column('completed_length', Integer, default=0),
+        Column('total_length', Integer, default=0),
+        Column('gid', Unicode, default=u''),
+        Column('metadata', PickleType, default=None),
+        Column('options', PickleType),
+        Column('session_id', Unicode, default=u''),
+        Column('category_id', Integer, ForeignKey('category.id')),
+        Column('pool_id', Integer, ForeignKey('pool.id')),
+        )
 
 class NormalTask(Task):
     """Normal Task."""
@@ -289,6 +313,10 @@ class NormalTask(Task):
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
 
+NORMAL_TASK_TABLE = Table('normal_task', SQLMetaData,
+        Column('id', Integer, ForeignKey('task.id'), primary_key=True),
+        )
+
 class BTTask(Task):
     """BitTorrent Task."""
 
@@ -300,6 +328,10 @@ class BTTask(Task):
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
 
+BT_TASK_TABLE = Table('bt_task', SQLMetaData,
+        Column('id', Integer, ForeignKey('task.id'), primary_key=True),
+        )
+
 class MTTask(Task):
     """Metalink Task."""
 
@@ -310,4 +342,8 @@ class MTTask(Task):
         deferred.add_callback(self._on_started)
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
+
+MT_TASK_TABLE = Table('mt_task', SQLMetaData,
+        Column('id', Integer, ForeignKey('task.id'), primary_key=True),
+        )
 

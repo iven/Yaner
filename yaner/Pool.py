@@ -26,24 +26,23 @@ This module contains the L{Pool} class of L{yaner}.
 
 import glib
 import gobject
-import sqlobject
 
+from sqlalchemy import Table, Column, Integer, Unicode
+from sqlalchemy.orm import reconstructor
+
+from yaner import SQLMetaData, SQLSession
 from yaner.Task import Task
-from yaner.Misc import GObjectSQLObjectMeta
 from yaner.Xmlrpc import ServerProxy
 from yaner.Presentable import Presentable, Queuing, Dustbin
 from yaner.utils.Logging import LoggingMixin
-from yaner.utils.Notification import Notification
 
-class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
+class Pool(gobject.GObject, LoggingMixin):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 
     A Pool is just a connection to the aria2 server, to avoid name conflict
     with download server.
     """
-
-    __metaclass__ = GObjectSQLObjectMeta
 
     __gsignals__ = {
             'connected': (gobject.SIGNAL_RUN_LAST,
@@ -62,19 +61,22 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     _CONNECTION_INTERVAL = 5
     """Interval for keeping connection, in second(s)."""
 
-    name = sqlobject.UnicodeCol()
-    user = sqlobject.StringCol(default='')
-    passwd = sqlobject.StringCol(default='')
-    host = sqlobject.StringCol()
-    port = sqlobject.IntCol(default=6800)
+    def __init__(self, name, host, user=u'', passwd=u'', port=6800):
+        self.name = name
+        self.user = user
+        self.passwd = passwd
+        self.host = host
+        self.port = port
 
-    categories = sqlobject.SQLMultipleJoin('Category')
-    tasks = sqlobject.SQLMultipleJoin('Task')
+        SQLSession.add(self)
+        SQLSession.commit()
 
-    def _init(self, *args, **kwargs):
-        LoggingMixin.__init__(self)
+        self._init()
+
+    @reconstructor
+    def _init(self):
         gobject.GObject.__init__(self)
-        sqlobject.SQLObject._init(self, *args, **kwargs)
+        LoggingMixin.__init__(self)
 
         self._queuing = None
         self._categories = []
@@ -85,6 +87,9 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
 
         self.do_disconnected()
         self._keep_connection()
+
+    def __repr__(self):
+        return u"<Pool {}>".format(self.name)
 
     @property
     def proxy(self):
@@ -168,10 +173,10 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
             on every task with the same session id.
             """
             session_info = deferred.result
-            for task in self.queuing.tasks.filter(
-                    Task.q.session_id == session_info['sessionId']):
-                task.status = Task.STATUSES.WAITING
-                task.begin_update_status()
+            for task in self.queuing.tasks:
+                if task.session_id == session_info['sessionId']:
+                    task.status = Task.STATUSES.WAITING
+                    task.begin_update_status()
 
         deferred = self.proxy.call('aria2.getSessionInfo')
         deferred.add_callback(on_got_session_info)
@@ -184,4 +189,13 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
 
         """
         self.connected = False
+
+POOL_TABLE = Table('pool', SQLMetaData,
+        Column('id', Integer, primary_key=True),
+        Column('name', Unicode),
+        Column('user', Unicode),
+        Column('passwd', Unicode),
+        Column('host', Unicode),
+        Column('port', Integer),
+        )
 

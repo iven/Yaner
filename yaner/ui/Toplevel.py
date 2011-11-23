@@ -33,6 +33,7 @@ import logging
 
 from functools import partial
 
+from yaner import SQLSession
 from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Task import Task
@@ -109,7 +110,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         self._pool_model = PoolModel()
 
         # Add Pools to the PoolModel
-        for pool in Pool.select():
+        for pool in SQLSession.query(Pool):
             self._add_pool(pool)
 
         pool_view = PoolView(self._pool_model)

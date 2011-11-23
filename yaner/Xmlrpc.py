@@ -22,11 +22,14 @@
 
 """This module contains async xmlrpc proxy."""
 
+import glib
 import gobject
 import socket
 import httplib
 import xmlrpclib
 import threading
+
+from functools import partial
 
 class _Deferred(threading.Thread, gobject.GObject):
 
@@ -53,17 +56,17 @@ class _Deferred(threading.Thread, gobject.GObject):
 
     def add_callback(self, func):
         """Connect signal "success" to func."""
-        self.connect("success", func)
+        self.connect("success", partial(glib.idle_add, func))
         return self
 
     def add_errback(self, func):
         """Connect signal "error" to func."""
-        self.connect("error", func)
+        self.connect("error", partial(glib.idle_add, func))
         return self
 
     def add_faultback(self, func):
         """Connect signal "fault" to func."""
-        self.connect("fault", func)
+        self.connect("fault", partial(glib.idle_add, func))
         return self
 
     def run(self):

@@ -25,10 +25,13 @@ This module contains the L{Presentable} class of L{yaner}.
 """
 
 import gobject
-import sqlobject
 
+from sqlalchemy import Table, Column, Integer, Unicode, ForeignKey
+from sqlalchemy.orm import reconstructor
+from sqlalchemy.ext.hybrid import hybrid_property
+
+from yaner import SQLMetaData, SQLSession
 from yaner.Task import Task
-from yaner.Misc import GObjectSQLObjectMeta
 from yaner.utils.Enum import Enum
 from yaner.utils.Logging import LoggingMixin
 
@@ -100,44 +103,57 @@ class Queuing(Presentable):
     @property
     def tasks(self):
         """Get the running tasks of the pool."""
-        return self.pool.tasks.filter(Task.q.status != \
-                Task.STATUSES.REMOVED).filter(Task.q.status != \
-                Task.STATUSES.COMPLETE)
+        return (task for task in self.pool.tasks if task.status not in \
+                {Task.STATUSES.REMOVED, Task.STATUSES.COMPLETE})
 
-class Category(sqlobject.SQLObject, Presentable):
+class Category(Presentable):
     """
     Category presentable of the L{Pool}s.
     """
 
-    __metaclass__ = GObjectSQLObjectMeta
-
-    name = sqlobject.UnicodeCol()
-    directory = sqlobject.UnicodeCol()
-
-    pool = sqlobject.ForeignKey('Pool')
-    tasks = sqlobject.SQLMultipleJoin('Task')
-
     TYPE = Presentable.TYPES.CATEGORY
     """Presentable type."""
 
-    def _init(self, *args, **kwargs):
+    def __init__(self, name, directory, pool):
+        self.name = name
+        self.directory = directory
+        self.pool = pool
+
+        SQLSession.add(self)
+        SQLSession.commit()
+
+        self._init()
+
+    @reconstructor
+    def _init(self):
         Presentable.__init__(self)
-        sqlobject.SQLObject._init(self, *args, **kwargs)
 
         self.parent = self.pool.queuing
 
-    def _set_name(self, new_name):
-        """Set the name of the category."""
-        self._SO_set_name(new_name)
-        # When creating a new Pool, Presentable.__init__ isn't called,
-        # hash(self) equals zero, and signals can't be emitted
+    def __repr__(self):
+        return u"<Category {}>".format(self.name)
+
+    @hybrid_property
+    def name(self):
+        return self._name_
+
+    @name.setter
+    def name(self, name):
+        """When setting the name of the category, emit signal "changed"."""
+        self._name_ = name
         if hash(self):
             self.emit('changed')
 
-    def _get_tasks(self):
-        """Get the comleted tasks of the category."""
-        tasks = self._SO_get_tasks()
-        return tasks.filter(Task.q.status == Task.STATUSES.COMPLETE)
+    @hybrid_property
+    def tasks(self):
+        return (task for task in self._tasks if task.status == Task.STATUSES.COMPLETE)
+
+CATEGORY_TABLE = Table('category', SQLMetaData,
+        Column('id', Integer, primary_key=True),
+        Column('name', Unicode),
+        Column('directory', Unicode),
+        Column('pool_id', Integer, ForeignKey('pool.id')),
+        )
 
 class Dustbin(Presentable):
     """
@@ -165,5 +181,6 @@ class Dustbin(Presentable):
     @property
     def tasks(self):
         """Get the removed tasks of the pool."""
-        return self.pool.tasks.filter(Task.q.status == Task.STATUSES.REMOVED)
+        return (task for task in self.pool.tasks \
+                if task.status == Task.STATUSES.REMOVED)
 
