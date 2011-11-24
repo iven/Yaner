@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -49,13 +49,13 @@ class _VERSION(argparse.Action):
     """Show version information of the application."""
 
     def __call__(self, parser, namespace, values, option_string=None):
-        print '{0} {1}'.format(__package__, __version__)
-        print 'Copyright (C) 2010-2011 Iven Hsu (Xu Lijian)'
-        print _('License GPLv3+: GNU GPL version 3 or later')
-        print '<http://gnu.org/licenses/gpl.html>.'
-        print _('This is free software:')
-        print _('You are free to change and redistribute it.')
-        print _('There is NO WARRANTY, to the extent permitted by law.')
+        print('{0} {1}'.format(__package__, __version__))
+        print('Copyright (C) 2010-2011 Iven Hsu (Xu Lijian)')
+        print(_('License GPLv3+: GNU GPL version 3 or later'))
+        print('<http://gnu.org/licenses/gpl.html>.')
+        print(_('This is free software:'))
+        print(_('You are free to change and redistribute it.'))
+        print(_('There is NO WARRANTY, to the extent permitted by law.'))
         sys.exit(0)
 
 class Application(UniqueApplicationMixin, LoggingMixin):
@@ -131,7 +131,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         if len(sys.argv) > 1:
             self._init_args(is_first_instance=False)
         else:
-            print "Another instance is already running."
+            print("Another instance is already running.")
         sys.exit(0)
 
     def _init_args(self, is_first_instance=True):
@@ -202,8 +202,8 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             SQLBase.metadata.create_all(engine)
 
             down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
-            pool = Pool(name=_(u'My Computer'), host=u'localhost')
-            Category(name=_(u'Default Category'), directory=unicode(down_dir), pool=pool)
+            pool = Pool(name=_('My Computer'), host='localhost')
+            Category(name=_('Default Category'), directory=down_dir, pool=pool)
 
             self.logger.info(_('Database initialized.'))
 

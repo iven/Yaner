@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -134,7 +134,7 @@ class Category(SQLBase, Presentable):
         self.parent = self.pool.queuing
 
     def __repr__(self):
-        return u"<Category {}>".format(self.name)
+        return "<Category {}>".format(self.name)
 
     @hybrid_property
     def name(self):

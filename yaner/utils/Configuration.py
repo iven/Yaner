@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -26,7 +26,7 @@ This module contains classes manipulating configuration files.
 
 import os
 import uuid
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 
 from yaner.utils.Logging import LoggingMixin
 
@@ -113,7 +113,7 @@ class ConfigParser(LoggingMixin, SafeConfigParser):
         self.add_section(section)
         self._sections_[section] = _ConfigSection(self, section)
 
-        for (option, value) in option_dict.iteritems():
+        for (option, value) in option_dict.items():
             self[section][option] = value
         self.save()
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -262,16 +262,16 @@ class TaskListView(Gtk.TreeView):
         markups = []
         if task.status == Task.STATUSES.ACTIVE:
             if task.upload_speed:
-                markups.append(u'\u2B06 {}'.format(pspeed(task.upload_speed)))
+                markups.append('\u2B06 {}'.format(pspeed(task.upload_speed)))
             if task.download_speed:
-                markups.append(u'\u2B07 {}'.format(pspeed(task.download_speed)))
+                markups.append('\u2B07 {}'.format(pspeed(task.download_speed)))
         renderer.set_properties(markup='\n'.join(markups))
 
     def _connection_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the connections in the column."""
         task = model.get_task(iter_)
         if task.status == Task.STATUSES.ACTIVE:
-            markup = str(task.connections)
+            markup = task.connections
         else:
             markup = ''
         renderer.set_properties(markup=markup, xalign=.5, yalign=.5)

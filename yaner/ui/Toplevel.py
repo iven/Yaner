@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -172,7 +172,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             about_dialog.set_version(__version__)
             about_dialog.set_authors((__author__,))
             about_dialog.set_website('https://github.com/iven/Yaner')
-            about_dialog.set_copyright(u'Copyright \u00a9 2010-2011 Iven Hsu')
+            about_dialog.set_copyright('Copyright \u00a9 2010-2011 Iven Hsu')
             about_dialog.set_transient_for(self)
             self._about_dialog = about_dialog
         return self._about_dialog

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import sys, os
 import shutil
@@ -25,7 +25,7 @@ class Install(install):
         if self.prefix:
             length += len(self.prefix)
         if length:
-            for counter in xrange(len(outputs)):
+            for counter in range(len(outputs)):
                 outputs[counter] = outputs[counter][length:]
         with open(INSTALLED_FILES, "w") as install_file:
             install_file.write("\n".join(outputs))
@@ -39,7 +39,8 @@ class InstallData(install_data):
             except:
                 self.warn("Could not chmod data file %s" % file)
         install_data.run(self)
-        map(chmod_data_file, self.get_outputs())
+        for output in self.get_outputs():
+            chmod_data_file(output)
 
 class Uninstall(install):
 
@@ -52,10 +53,10 @@ class Uninstall(install):
         if self.prefix:
             prepend += self.prefix
         if len(prepend):
-            for counter in xrange(len(install_files)):
+            for counter in range(len(install_files)):
                 install_files[counter] = prepend + install_files[counter].rstrip()
         for install_file in install_files:
-            print "Uninstalling %s" % install_file
+            print("Uninstalling %s" % install_file)
             try:
                 os.unlink(install_file)
             except:

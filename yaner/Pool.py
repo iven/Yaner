@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -66,7 +66,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     categories = relationship(Category, backref='pool')
     tasks = relationship(Task, backref='pool')
 
-    def __init__(self, name, host, user=u'', passwd=u'', port=6800):
+    def __init__(self, name, host, user='', passwd='', port=6800):
         self.name = name
         self.user = user
         self.passwd = passwd
@@ -94,7 +94,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         self._keep_connection()
 
     def __repr__(self):
-        return u"<Pool {}>".format(self.name)
+        return "<Pool {}>".format(self.name)
 
     @property
     def proxy(self):
@@ -121,7 +121,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     @property
     def presentables(self):
         """Get the presentables of the pool."""
-        return [self.queuing] + list(self.categories) + [self.dustbin]
+        return [self.queuing] + self.categories + [self.dustbin]
 
     @property
     def connected(self):

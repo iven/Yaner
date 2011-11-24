@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -23,8 +23,8 @@
 """This module contains async xmlrpc proxy."""
 
 import socket
-import httplib
-import xmlrpclib
+import http.client
+import xmlrpc.client
 import threading
 
 from functools import partial
@@ -76,13 +76,17 @@ class _Deferred(threading.Thread, GObject.GObject):
         """
         try:
             self.result = self.target(*self.args, **self.kwargs)
-        except xmlrpclib.Fault as self.fault:
+        except xmlrpc.client.Fault as fault:
+            self.fault = fault
             self.emit('fault')
-        except socket.error as self.error:
+        except socket.error as error:
+            self.error = error
             self.emit('error')
-        except httplib.error as self.error:
+        except http.client.error as error:
+            self.error = error
             self.emit('error')
-        except xmlrpclib.ProtocolError as self.error:
+        except xmlrpc.client.ProtocolError as error:
+            self.error = error
             self.emit('error')
         else:
             self.emit('success')
@@ -106,7 +110,7 @@ class ServerProxy(object):
         """Create a std C{ServerProxy} and return a L{_Deferred} to
         call it. The returned L{_Deferred} must be started manually.
         """
-        proxy = xmlrpclib.ServerProxy(self.connstr)
+        proxy = xmlrpc.client.ServerProxy(self.connstr)
         func = getattr(proxy, funcstr)
         return _Deferred(func, args=args, kwargs=kwargs)
 

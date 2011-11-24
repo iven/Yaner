@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -26,7 +26,7 @@ This module contains the dialog classes of L{yaner}.
 
 import os
 import dbus.service
-import xmlrpclib
+import xmlrpc.client
 
 from gi.repository import Gtk
 from gi.repository import GObject
@@ -97,7 +97,7 @@ class TaskDialogMixin(LoggingMixin):
     def option_widgets(self):
         """Map task option names to widgets."""
         if self._option_widgets == {}:
-            for (option, widget_name) in self._option_widget_names.iteritems():
+            for (option, widget_name) in self._option_widget_names.items():
                 self._option_widgets[option] = self.widgets[widget_name]
         return self._option_widgets
 
@@ -108,7 +108,7 @@ class TaskDialogMixin(LoggingMixin):
         """
         options = self._options
 
-        for (option, widget) in self.option_widgets.iteritems():
+        for (option, widget) in self.option_widgets.items():
             if option == 'seed-ratio':
                 options[option] = str(widget.get_value())
             elif hasattr(widget, 'get_value'):
@@ -133,7 +133,7 @@ class TaskDialogMixin(LoggingMixin):
         self._options = self.config['options'].copy()
         options = self._options
         if new_options:
-            for key, value in new_options.iteritems():
+            for key, value in new_options.items():
                 options[str(key)] = str(value)
         self.update_widgets()
 
@@ -143,7 +143,7 @@ class TaskDialogMixin(LoggingMixin):
         current options.
         """
         options = self._options
-        for (option, widget) in self.option_widgets.iteritems():
+        for (option, widget) in self.option_widgets.items():
             if hasattr(widget, 'set_value'):
                 widget.set_value(float(options[option]))
             elif hasattr(widget, 'set_text'):
@@ -390,13 +390,13 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         elif task_type != Task.TYPES.NORMAL and metadata_file:
             name = os.path.basename(metadata_file)
             with open(metadata_file) as m_file:
-                metafile = xmlrpclib.Binary(m_file.read())
+                metafile = xmlrpc.client.Binary(m_file.read())
         else:
             return
 
         TaskClasses = (NormalTask, BTTask, MLTask)
 
-        task = TaskClasses[task_type](name=unicode(name), type=task_type,
+        task = TaskClasses[task_type](name=name, type=task_type,
                 metafile=metafile, uris=uris, options=options,
                 category=self.active_category, pool=self.active_pool)
         task.start()
@@ -490,7 +490,7 @@ class TaskProfileDialog(TaskDialogMixin):
         if response == Gtk.ResponseType.OK:
             self._options = {}
             self.update_options()
-            for (key, value) in self._options.iteritems():
+            for (key, value) in self._options.items():
                 self.main_app.conf.task[key] = value
         dialog.hide()
 

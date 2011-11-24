@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -83,10 +83,10 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     uris = Column(PickleType, default=[])
     completed_length = Column(Integer, default=0)
     total_length = Column(Integer, default=0)
-    gid = Column(Unicode, default=u'')
+    gid = Column(Unicode, default='')
     metafile = deferred(Column(PickleType, default=None))
     options = Column(PickleType)
-    session_id = Column(Unicode, default=u'')
+    session_id = Column(Unicode, default='')
     category_id = Column(Integer, ForeignKey('category.id'))
     pool_id = Column(Integer, ForeignKey('pool.id'))
 
@@ -94,7 +94,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
 
     def __init__(self, name, type, pool, category, options,
             status=STATUSES.INACTIVE, uris=[], completed_length=0,
-            total_length=0, gid=u'', metafile=None, session_id=u''):
+            total_length=0, gid='', metafile=None, session_id=''):
         self.name = name
         self.status = status
         self.type = type
@@ -126,7 +126,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         self._database_sync_handle = None
 
     def __repr__(self):
-        return u"<Task {}>".format(self.name)
+        return "<Task {}>".format(self.name)
 
     @hybrid_property
     def status(self):
@@ -212,7 +212,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         """Get session id of the pool and store it in task."""
         def on_got_session_info(deferred):
             """Set session id the task belongs to."""
-            self.session_id = unicode(deferred.result['sessionId'])
+            self.session_id = deferred.result['sessionId']
             self._sync_update()
 
         deferred = self.pool.proxy.call('aria2.getSessionInfo', self.gid)
@@ -223,7 +223,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     def _on_started(self, deferred):
         """Task started callback, update task information."""
 
-        gid = unicode(deferred.result)
+        gid = deferred.result
         self.gid = gid[-1] if isinstance(gid, list) else gid
         self.status = self.STATUSES.ACTIVE
 
