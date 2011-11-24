@@ -38,9 +38,10 @@ from yaner import SQLSession, SQLBase
 from yaner.Pool import Pool
 from yaner.Task import Task
 from yaner.Presentable import Category
-from yaner.Constants import U_CONFIG_DIR, BUS_NAME
+from yaner.Constants import BUS_NAME
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.Toplevel import Toplevel
+from yaner.utils.XDG import save_config_path
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
 from yaner.utils.UniqueApplication import UniqueApplicationMixin
@@ -64,7 +65,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
     _NAME = __package__
     """The name of the application, used by L{_LOG_FILE}, etc."""
 
-    _CONFIG_DIR = U_CONFIG_DIR
+    _CONFIG_DIR = save_config_path('yaner')
     """User config directory containing configuration files and log files."""
 
     _LOG_FILE = '{0}.log'.format(_NAME)

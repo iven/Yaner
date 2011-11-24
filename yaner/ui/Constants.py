@@ -24,13 +24,3 @@
 This module contains the global constants of L{yaner.ui}.
 """
 
-from os.path import join as _join
-
-from yaner.Constants import DATA_DIR as _DATA_DIR
-
-UI_DIR = _join(_DATA_DIR, "ui")
-"""
-The UI directory of L{yaner}, which contains UI definations and glade
-files.
-"""
-

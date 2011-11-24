@@ -35,9 +35,8 @@ from yaner import SQLSession
 from yaner.Pool import Pool
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Category
-from yaner.Constants import U_CONFIG_DIR
 from yaner.Constants import BUS_NAME as INTERFACE_NAME
-from yaner.ui.Constants import UI_DIR
+from yaner.utils.XDG import save_config_path, load_first_data
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
 
@@ -47,7 +46,7 @@ class TaskDialogMixin(LoggingMixin):
     dialogs.
     """
 
-    _CONFIG_DIR = U_CONFIG_DIR
+    _CONFIG_DIR = save_config_path('yaner')
     """
     User config directory containing configuration files and log files.
     """
@@ -161,7 +160,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
     OBJECT_NAME = '/task_new_dialog'
     """DBus object name of the dialog."""
 
-    _UI_FILE = os.path.join(UI_DIR, "task_new.ui")
+    _UI_FILE = load_first_data('yaner', 'ui', 'task_new.ui')
     """The Glade UI file of this dialog."""
 
     _WIDGET_NAMES = (
@@ -408,7 +407,7 @@ class TaskProfileDialog(TaskDialogMixin):
     This class contains widgets and methods related to default task profile dialog.
     """
 
-    _UI_FILE = os.path.join(UI_DIR, "task_profile.ui")
+    _UI_FILE = load_first_data('yaner', 'ui', 'task_profile.ui')
     """The Glade UI file of this dialog."""
 
     def __init__(self, main_app):

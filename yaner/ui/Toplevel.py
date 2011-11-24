@@ -24,7 +24,6 @@
 This module contains the toplevel window class of L{yaner}.
 """
 
-import os
 import sys
 import logging
 
@@ -36,16 +35,16 @@ from yaner import SQLSession
 from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Task import Task
-from yaner.ui.Constants import UI_DIR
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
+from yaner.utils.XDG import load_first_data
 from yaner.utils.Logging import LoggingMixin
 
 class Toplevel(Gtk.Window, LoggingMixin):
     """Toplevel window of L{yaner}."""
 
-    _UI_FILE = os.path.join(UI_DIR, "ui.xml")
+    _UI_FILE = load_first_data('yaner', 'ui', 'ui.xml')
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
     def __init__(self, bus, config):
