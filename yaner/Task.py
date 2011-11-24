@@ -27,16 +27,16 @@ This module contains the L{Task} class of L{yaner}.
 import glib
 import gobject
 
-from sqlalchemy import Table, Column, Integer, PickleType, Unicode, ForeignKey
-from sqlalchemy.orm import reconstructor
+from sqlalchemy import Column, Integer, PickleType, Unicode, ForeignKey
+from sqlalchemy.orm import reconstructor, deferred
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from yaner import SQLMetaData, SQLSession
+from yaner import SQLBase, SQLSession
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 from yaner.utils.Notification import Notification
 
-class Task(gobject.GObject, LoggingMixin):
+class Task(SQLBase, gobject.GObject, LoggingMixin):
     """
     Task class is just downloading tasks, which provides data to L{TaskListModel}.
     """
@@ -78,9 +78,24 @@ class Task(gobject.GObject, LoggingMixin):
     _SYNC_INTERVAL = 60
     """Interval for database sync, in second(s)."""
 
+    name = Column(Unicode)
+    _status = Column(Integer, default=STATUSES.INACTIVE)
+    type = Column(Integer, nullable=False)
+    uris = Column(PickleType, default=[])
+    completed_length = Column(Integer, default=0)
+    total_length = Column(Integer, default=0)
+    gid = Column(Unicode, default=u'')
+    metafile = deferred(Column(PickleType, default=None))
+    options = Column(PickleType)
+    session_id = Column(Unicode, default=u'')
+    category_id = Column(Integer, ForeignKey('category.id'))
+    pool_id = Column(Integer, ForeignKey('pool.id'))
+
+    __mapper_args__ = {'polymorphic_on': type}
+
     def __init__(self, name, type, pool, category, options,
             status=STATUSES.INACTIVE, uris=[], completed_length=0,
-            total_length=0, gid=u'', metadata=None, session_id=u''):
+            total_length=0, gid=u'', metafile=None, session_id=u''):
         self.name = name
         self.status = status
         self.type = type
@@ -88,7 +103,7 @@ class Task(gobject.GObject, LoggingMixin):
         self.completed_length = completed_length
         self.total_length = total_length
         self.gid = gid
-        self.metadata = metadata
+        self.metafile = metafile
         self.options = options
         self.session_id = session_id
         self.pool = pool
@@ -286,24 +301,12 @@ class Task(gobject.GObject, LoggingMixin):
         self.status = self.STATUSES.ERROR
         Notification(_('Network Error'), deferred.error.message).show()
 
-TASK_TABLE = Table('task', SQLMetaData,
-        Column('id', Integer, primary_key=True),
-        Column('name', Unicode),
-        Column('status', Integer, default=Task.STATUSES.INACTIVE),
-        Column('type', Integer, nullable=False),
-        Column('uris', PickleType, default=[]),
-        Column('completed_length', Integer, default=0),
-        Column('total_length', Integer, default=0),
-        Column('gid', Unicode, default=u''),
-        Column('metadata', PickleType, default=None),
-        Column('options', PickleType),
-        Column('session_id', Unicode, default=u''),
-        Column('category_id', Integer, ForeignKey('category.id')),
-        Column('pool_id', Integer, ForeignKey('pool.id')),
-        )
-
 class NormalTask(Task):
     """Normal Task."""
+
+    __mapper_args__ = {'polymorphic_identity': Task.TYPES.NORMAL}
+
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
 
     def add(self):
         """Add the task to pool."""
@@ -313,37 +316,35 @@ class NormalTask(Task):
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
 
-NORMAL_TASK_TABLE = Table('normal_task', SQLMetaData,
-        Column('id', Integer, ForeignKey('task.id'), primary_key=True),
-        )
-
 class BTTask(Task):
     """BitTorrent Task."""
+
+    __mapper_args__ = {'polymorphic_identity': Task.TYPES.BT}
+
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
 
     def add(self):
         """Add the task to pool."""
         deferred = self.pool.proxy.call('aria2.addTorrent',
-                self.metadata, self.uris, self.options)
+                self.metafile, self.uris, self.options)
         deferred.add_callback(self._on_started)
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
-
-BT_TASK_TABLE = Table('bt_task', SQLMetaData,
-        Column('id', Integer, ForeignKey('task.id'), primary_key=True),
-        )
 
 class MLTask(Task):
     """Metalink Task."""
 
+    __mapper_args__ = {'polymorphic_identity': Task.TYPES.ML}
+
+    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
+
     def add(self):
         """Add the task to pool."""
         deferred = self.pool.proxy.call('aria2.addMetalink',
-                self.metadata, self.options)
+                self.metafile, self.options)
         deferred.add_callback(self._on_started)
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
 
-ML_TASK_TABLE = Table('ml_task', SQLMetaData,
-        Column('id', Integer, ForeignKey('task.id'), primary_key=True),
-        )
+gobject.type_register(Task)
 

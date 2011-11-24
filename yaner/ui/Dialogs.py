@@ -384,18 +384,18 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         if task_type == Task.TYPES.NORMAL and uris:
             name = options['out'] if options['out'] else \
                     os.path.basename(uris[0])
-            metadata = None
+            metafile = None
         elif task_type != Task.TYPES.NORMAL and metadata_file:
             name = os.path.basename(metadata_file)
             with open(metadata_file) as m_file:
-                metadata = xmlrpclib.Binary(m_file.read())
+                metafile = xmlrpclib.Binary(m_file.read())
         else:
             return
 
         TaskClasses = (NormalTask, BTTask, MLTask)
 
         task = TaskClasses[task_type](name=unicode(name), type=task_type,
-                metadata=metadata, uris=uris, options=options,
+                metafile=metafile, uris=uris, options=options,
                 category=self.active_category, pool=self.active_pool)
         task.start()
         task.pool.queuing.emit('task-added', task)

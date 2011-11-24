@@ -32,14 +32,12 @@ import argparse
 import subprocess
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import mapper, relationship, deferred
 
 from yaner import __version__
-from yaner import SQLSession, SQLMetaData
-from yaner.Pool import POOL_TABLE, Pool
-from yaner.Task import Task, NormalTask, BTTask, MLTask
-from yaner.Task import TASK_TABLE, NORMAL_TASK_TABLE, BT_TASK_TABLE, ML_TASK_TABLE
-from yaner.Presentable import CATEGORY_TABLE, Category
+from yaner import SQLSession, SQLBase
+from yaner.Pool import Pool
+from yaner.Task import Task
+from yaner.Presentable import Category
 from yaner.Constants import U_CONFIG_DIR, BUS_NAME
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.Toplevel import Toplevel
@@ -197,14 +195,11 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         data_file = os.path.join(self._CONFIG_DIR, self._DATA_FILE)
         engine = create_engine('sqlite:///' + data_file)
         SQLSession.configure(bind=engine)
-        SQLMetaData.bind = engine
-
-        self._init_mapping()
 
         if not os.path.exists(data_file):
             self.logger.info(_('Initializing database for first start...'))
 
-            SQLMetaData.create_all(engine)
+            SQLBase.metadata.create_all(engine)
 
             down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
             pool = Pool(name=_(u'My Computer'), host=u'localhost')
@@ -213,27 +208,6 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             self.logger.info(_('Database initialized.'))
 
         self.logger.info(_('Global database file connected.'))
-
-    def _init_mapping(self):
-        """Initialize mapping between Table and classes."""
-        mapper(Pool, POOL_TABLE, properties={
-            'categories': relationship(Category, order_by=CATEGORY_TABLE.c.id, backref='pool'),
-            'tasks': relationship(Task, order_by=TASK_TABLE.c.id, backref='pool'),
-            })
-        mapper(Category, CATEGORY_TABLE, properties={
-            '_name_': CATEGORY_TABLE.c.name,
-            '_tasks': relationship(Task, order_by=TASK_TABLE.c.id, backref='category'),
-            })
-        mapper(Task, TASK_TABLE, polymorphic_on=TASK_TABLE.c.type, properties={
-            '_status': TASK_TABLE.c.status,
-            'metadata': deferred(TASK_TABLE.c.metadata),
-            })
-        mapper(NormalTask, NORMAL_TASK_TABLE, inherits=Task,
-                polymorphic_identity=Task.TYPES.NORMAL)
-        mapper(BTTask, BT_TASK_TABLE, inherits=Task,
-                polymorphic_identity=Task.TYPES.BT)
-        mapper(MLTask, ML_TASK_TABLE, inherits=Task,
-                polymorphic_identity=Task.TYPES.ML)
 
     def quit(self, *arg, **kwargs):
         """

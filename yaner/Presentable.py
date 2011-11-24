@@ -26,11 +26,11 @@ This module contains the L{Presentable} class of L{yaner}.
 
 import gobject
 
-from sqlalchemy import Table, Column, Integer, Unicode, ForeignKey
-from sqlalchemy.orm import reconstructor
+from sqlalchemy import Column, Integer, Unicode, ForeignKey
+from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from yaner import SQLMetaData, SQLSession
+from yaner import SQLSession, SQLBase
 from yaner.Task import Task
 from yaner.utils.Enum import Enum
 from yaner.utils.Logging import LoggingMixin
@@ -106,13 +106,18 @@ class Queuing(Presentable):
         return (task for task in self.pool.tasks if task.status not in \
                 {Task.STATUSES.REMOVED, Task.STATUSES.COMPLETE})
 
-class Category(Presentable):
+class Category(SQLBase, Presentable):
     """
     Category presentable of the L{Pool}s.
     """
 
     TYPE = Presentable.TYPES.CATEGORY
     """Presentable type."""
+
+    _name_ = Column(Unicode)
+    directory = Column(Unicode)
+    _tasks = relationship(Task, backref='category')
+    pool_id = Column(Integer, ForeignKey('pool.id'))
 
     def __init__(self, name, directory, pool):
         self.name = name
@@ -147,13 +152,6 @@ class Category(Presentable):
     @hybrid_property
     def tasks(self):
         return (task for task in self._tasks if task.status == Task.STATUSES.COMPLETE)
-
-CATEGORY_TABLE = Table('category', SQLMetaData,
-        Column('id', Integer, primary_key=True),
-        Column('name', Unicode),
-        Column('directory', Unicode),
-        Column('pool_id', Integer, ForeignKey('pool.id')),
-        )
 
 class Dustbin(Presentable):
     """

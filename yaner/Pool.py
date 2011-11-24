@@ -27,16 +27,16 @@ This module contains the L{Pool} class of L{yaner}.
 import glib
 import gobject
 
-from sqlalchemy import Table, Column, Integer, Unicode
-from sqlalchemy.orm import reconstructor
+from sqlalchemy import Column, Integer, Unicode
+from sqlalchemy.orm import reconstructor, relationship
 
-from yaner import SQLMetaData, SQLSession
+from yaner import SQLSession, SQLBase
 from yaner.Task import Task
 from yaner.Xmlrpc import ServerProxy
-from yaner.Presentable import Presentable, Queuing, Dustbin
+from yaner.Presentable import Presentable, Queuing, Category, Dustbin
 from yaner.utils.Logging import LoggingMixin
 
-class Pool(gobject.GObject, LoggingMixin):
+class Pool(SQLBase, gobject.GObject, LoggingMixin):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 
@@ -60,6 +60,14 @@ class Pool(gobject.GObject, LoggingMixin):
 
     _CONNECTION_INTERVAL = 5
     """Interval for keeping connection, in second(s)."""
+
+    name = Column(Unicode)
+    user = Column(Unicode)
+    passwd = Column(Unicode)
+    host = Column(Unicode)
+    port = Column(Integer)
+    categories = relationship(Category, backref='pool')
+    tasks = relationship(Task, backref='pool')
 
     def __init__(self, name, host, user=u'', passwd=u'', port=6800):
         self.name = name
@@ -190,12 +198,5 @@ class Pool(gobject.GObject, LoggingMixin):
         """
         self.connected = False
 
-POOL_TABLE = Table('pool', SQLMetaData,
-        Column('id', Integer, primary_key=True),
-        Column('name', Unicode),
-        Column('user', Unicode),
-        Column('passwd', Unicode),
-        Column('host', Unicode),
-        Column('port', Integer),
-        )
+gobject.type_register(Pool)
 
