@@ -24,7 +24,7 @@
 This module contains miscellaneous functions used by other modules.
 """
 
-from gobject import GObjectMeta
+from gi.repository.GObject import GObjectMeta
 from sqlalchemy import Column, Integer
 from sqlalchemy.ext.declarative import DeclarativeMeta, declared_attr
 

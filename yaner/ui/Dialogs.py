@@ -24,11 +24,12 @@
 This module contains the dialog classes of L{yaner}.
 """
 
-import gtk
-import gobject
 import os
 import dbus.service
 import xmlrpclib
+
+from gi.repository import Gtk
+from gi.repository import GObject
 
 from yaner import SQLSession
 from yaner.Pool import Pool
@@ -85,7 +86,7 @@ class TaskDialogMixin(LoggingMixin):
     def builder(self):
         """Get the UI builder of the dialog."""
         if self._builder is None:
-            builder = gtk.Builder()
+            builder = Gtk.Builder()
             builder.set_translation_domain('yaner')
             builder.add_from_file(self._UI_FILE)
             builder.connect_signals(self)
@@ -258,7 +259,8 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         tbuffer = textview.get_buffer()
         uris = tbuffer.get_text(
                 tbuffer.get_start_iter(),
-                tbuffer.get_end_iter()
+                tbuffer.get_end_iter(),
+                False
                 )
         return uris.split()
 
@@ -302,14 +304,14 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
 
     def _init_liststores(self, widgets):
         """Init ListStores."""
-        widgets['pool_ls'] = gtk.ListStore(
-                gobject.TYPE_STRING,
+        widgets['pool_ls'] = Gtk.ListStore(
+                GObject.TYPE_STRING,
                 Pool,
                 )
         widgets['pool_cb'].set_model(widgets['pool_ls'])
 
-        widgets['category_ls'] = gtk.ListStore(
-                gobject.TYPE_STRING,
+        widgets['category_ls'] = Gtk.ListStore(
+                GObject.TYPE_STRING,
                 Category,
                 )
         widgets['category_cb'].set_model(widgets['category_ls'])
@@ -341,12 +343,12 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         When directory chooser button clicked, popup the dialog, and update
         the directory entry.
         """
-        dialog = gtk.FileChooserDialog(_('Select download directory'),
+        dialog = Gtk.FileChooserDialog(_('Select download directory'),
                 self.widgets['dialog'],
-                gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                    gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        if dialog.run() == gtk.RESPONSE_OK:
+                Gtk.FileChooserAction.SELECT_FOLDER,
+                (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                    Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        if dialog.run() == Gtk.ResponseType.OK:
             directory = dialog.get_filename()
             self.widgets['dir_entry'].set_text(directory)
         dialog.destroy()
@@ -372,7 +374,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         """
         Create a new download task if uris are provided.
         """
-        if response != gtk.RESPONSE_OK:
+        if response != Gtk.ResponseType.OK:
             dialog.hide()
             return
 
@@ -485,7 +487,7 @@ class TaskProfileDialog(TaskDialogMixin):
         """
         Save the options to the config file.
         """
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             self._options = {}
             self.update_options()
             for (key, value) in self._options.iteritems():

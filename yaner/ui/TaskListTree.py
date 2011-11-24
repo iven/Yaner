@@ -25,8 +25,8 @@ This module contains the classes of the task list tree view on the
 topright of the toplevel window.
 """
 
-import gtk
-import pango
+from gi.repository import Gtk
+from gi.repository import Pango
 
 from yaner.Task import Task
 from yaner.ui.Misc import get_mix_color
@@ -34,7 +34,7 @@ from yaner.utils.Enum import Enum
 from yaner.utils.Pretty import psize, pspeed
 from yaner.utils.Logging import LoggingMixin
 
-class TaskListModel(gtk.TreeStore, LoggingMixin):
+class TaskListModel(Gtk.TreeStore, LoggingMixin):
     """
     The tree interface used by task list treeviews.
     """
@@ -51,7 +51,7 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         @arg tasks:Tasks providing data to L{TaskListModel}.
         @type tasks:L{yaner.Task}
         """
-        gtk.TreeStore.__init__(self, Task)
+        Gtk.TreeStore.__init__(self, Task)
         LoggingMixin.__init__(self)
 
         self._presentable = None
@@ -130,9 +130,9 @@ class TaskListModel(gtk.TreeStore, LoggingMixin):
         """Get the task according to the given iter."""
         return self.get_value(iter_, self.COLUMNS.TASK)
 
-class TaskListView(gtk.TreeView):
+class TaskListView(Gtk.TreeView):
     """
-    The C{gtk.TreeView} displaying L{TaskListModel}.
+    The C{Gtk.TreeView} displaying L{TaskListModel}.
     """
 
     def __init__(self, model):
@@ -141,50 +141,50 @@ class TaskListView(gtk.TreeView):
         @arg model:The interface of the tree view.
         @type model:L{TaskListModel}
         """
-        gtk.TreeView.__init__(self, model)
+        Gtk.TreeView.__init__(self, model)
 
         # Set up columns
-        column = gtk.TreeViewColumn(_('Tasks'))
+        column = Gtk.TreeViewColumn(_('Tasks'))
         column.set_expand(True)
         column.set_resizable(True)
         self.append_column(column)
 
-        renderer = gtk.CellRendererPixbuf()
+        renderer = Gtk.CellRendererPixbuf()
         column.pack_start(renderer, False)
         column.set_cell_data_func(renderer, self._status_data_func)
 
-        renderer = gtk.CellRendererText()
+        renderer = Gtk.CellRendererText()
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._desc_data_func)
 
-        column = gtk.TreeViewColumn(_('Progress'))
+        column = Gtk.TreeViewColumn(_('Progress'))
         column.set_expand(True)
         column.set_resizable(True)
         self.append_column(column)
 
-        renderer = gtk.CellRendererProgress()
+        renderer = Gtk.CellRendererProgress()
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._progress_data_func)
 
-        column = gtk.TreeViewColumn(_('Speed'))
+        column = Gtk.TreeViewColumn(_('Speed'))
         column.set_resizable(True)
         self.append_column(column)
 
-        renderer = gtk.CellRendererText()
+        renderer = Gtk.CellRendererText()
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._speed_data_func)
 
-        column = gtk.TreeViewColumn(_('Connections'))
+        column = Gtk.TreeViewColumn(_('Connections'))
         column.set_resizable(True)
         self.append_column(column)
 
-        renderer = gtk.CellRendererText()
+        renderer = Gtk.CellRendererText()
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._connection_data_func)
 
     @property
     def selection(self):
-        """Get the C{gtk.TreeSelection} of the tree view."""
+        """Get the C{Gtk.TreeSelection} of the tree view."""
         return self.get_selection()
 
     @property
@@ -193,7 +193,7 @@ class TaskListView(gtk.TreeView):
         (model, paths) = self.selection.get_selected_rows()
         return [model.get_task(model.get_iter(path)) for path in paths]
 
-    def _status_data_func(self, cell_layout, renderer, model, iter_):
+    def _status_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""
         task = model.get_task(iter_)
         statuses = Task.STATUSES
@@ -207,20 +207,20 @@ class TaskListView(gtk.TreeView):
                 }
         renderer.set_properties(
                 stock_id = stock_ids[task.status],
-                stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
+                stock_size = Gtk.IconSize.LARGE_TOOLBAR,
                 )
 
-    def _desc_data_func(self, cell_layout, renderer, model, iter_):
+    def _desc_data_func(self, column, renderer, model, iter_, data=None):
         """Method for format the description text in the column."""
         task = model.get_task(iter_)
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
             if self.has_focus():
-                state = gtk.STATE_SELECTED
+                state = Gtk.StateType.SELECTED
             else:
-                state = gtk.STATE_ACTIVE
+                state = Gtk.StateType.ACTIVE
         else:
-            state = gtk.STATE_NORMAL
+            state = Gtk.StateType.NORMAL
         # Get the color for the description
         color = get_mix_color(self, state)
 
@@ -240,10 +240,10 @@ class TaskListView(gtk.TreeView):
         renderer.set_properties(
                 markup = markup,
                 ellipsize_set = True,
-                ellipsize = pango.ELLIPSIZE_END,
+                ellipsize = Pango.EllipsizeMode.END,
                 )
 
-    def _progress_data_func(self, cell_layout, renderer, model, iter_):
+    def _progress_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the progress bar style in the column."""
         task = model.get_task(iter_)
         percent = 0 if (task.total_length == 0) else \
@@ -256,7 +256,7 @@ class TaskListView(gtk.TreeView):
                 ypad = 2,
                 )
 
-    def _speed_data_func(self, cell_layout, renderer, model, iter_):
+    def _speed_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the up and down speed in the column."""
         task = model.get_task(iter_)
         markups = []
@@ -267,7 +267,7 @@ class TaskListView(gtk.TreeView):
                 markups.append(u'\u2B07 {}'.format(pspeed(task.download_speed)))
         renderer.set_properties(markup='\n'.join(markups))
 
-    def _connection_data_func(self, cell_layout, renderer, model, iter_):
+    def _connection_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the connections in the column."""
         task = model.get_task(iter_)
         if task.status == Task.STATUSES.ACTIVE:

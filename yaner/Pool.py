@@ -24,9 +24,8 @@
 This module contains the L{Pool} class of L{yaner}.
 """
 
-import glib
-import gobject
-
+from gi.repository import GLib
+from gi.repository import GObject
 from sqlalchemy import Column, Integer, Unicode
 from sqlalchemy.orm import reconstructor, relationship
 
@@ -36,7 +35,7 @@ from yaner.Xmlrpc import ServerProxy
 from yaner.Presentable import Presentable, Queuing, Category, Dustbin
 from yaner.utils.Logging import LoggingMixin
 
-class Pool(SQLBase, gobject.GObject, LoggingMixin):
+class Pool(SQLBase, GObject.GObject, LoggingMixin):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 
@@ -45,14 +44,12 @@ class Pool(SQLBase, gobject.GObject, LoggingMixin):
     """
 
     __gsignals__ = {
-            'connected': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, ()),
-            'disconnected': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, ()),
-            'presentable-added': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Presentable,)),
-            'presentable-removed': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Presentable,)),
+            'connected': (GObject.SignalFlags.RUN_LAST, None, ()),
+            'disconnected': (GObject.SignalFlags.RUN_LAST, None, ()),
+            'presentable-added': (GObject.SignalFlags.RUN_LAST,
+                None, (Presentable,)),
+            'presentable-removed': (GObject.SignalFlags.RUN_LAST,
+                None, (Presentable,)),
             }
     """
     GObject signals of this class.
@@ -83,7 +80,7 @@ class Pool(SQLBase, gobject.GObject, LoggingMixin):
 
     @reconstructor
     def _init(self):
-        gobject.GObject.__init__(self)
+        GObject.GObject.__init__(self)
         LoggingMixin.__init__(self)
 
         self._queuing = None
@@ -169,7 +166,7 @@ class Pool(SQLBase, gobject.GObject, LoggingMixin):
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
 
-        glib.timeout_add_seconds(self._CONNECTION_INTERVAL,
+        GLib.timeout_add_seconds(self._CONNECTION_INTERVAL,
                 self._keep_connection)
         return False
 
@@ -198,5 +195,5 @@ class Pool(SQLBase, gobject.GObject, LoggingMixin):
         """
         self.connected = False
 
-gobject.type_register(Pool)
+GObject.type_register(Pool)
 

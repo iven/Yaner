@@ -1,12 +1,10 @@
 <ui>
     <toolbar>
-        <toolitem action='task_new_tool_menu'>
-            <menu action='task_new'>
-                <menuitem action='task_new_normal' />
-                <menuitem action='task_new_bt' />
-                <menuitem action='task_new_ml' />
-            </menu>
-        </toolitem>
+        <toolitem action='task_new_normal' />
+        <!--
+            <toolitem action='task_new_bt' />
+            <toolitem action='task_new_ml' />
+        -->
         <separator />
         <toolitem action='task_start' />
         <toolitem action='task_pause' />

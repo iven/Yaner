@@ -26,25 +26,29 @@ placed under a directory in $PATH.
     We just do some requirement checking here, and then load the main
 window of the application.
 """
-import pygtk
-pygtk.require('2.0')
-import gtk
-
-if gtk.pygtk_version < (2, 12, 0):
-    raise SystemExit(' * Error: PyGtk 2.12.0 or later required')
 
 try:
-    import pynotify
+    import gi
 except ImportError:
-    raise SystemExit(' * Error: the "pynotify" module is missing. \
-            Check if it is installed properly.')
+    raise SystemExit(' * Error: pygobject required')
+
+try:
+    gi.require_version('Gtk', '3.0')
+except ValueError:
+    raise SystemExit(' * Error: Gtk3 required')
+
+try:
+    from gi.repository import Notify
+except ImportError:
+    raise SystemExit(' * Error: libnotify required')
 else:
-    pynotify.init('yaner')
+    Notify.init('yaner')
 
 # Translation setup
 import gettext
-gettext.install('yaner', unicode=True)
+gettext.install('yaner')
 
 from yaner.Application import Application
 main_app = Application()
 main_app.run()
+

@@ -21,14 +21,14 @@
 #
 
 """
-This module contains the tree view classes of the C{gtk.TreeView} on the
+This module contains the tree view classes of the C{Gtk.TreeView} on the
 left of the toplevel window.
 
 A B{Pool} means a aria2 server, to avoid conflict with download servers.
 """
 
-import gtk
-import pango
+from gi.repository import Gtk
+from gi.repository import Pango
 
 from yaner.Presentable import Presentable
 from yaner.ui.Misc import get_mix_color
@@ -36,7 +36,7 @@ from yaner.utils.Enum import Enum
 from yaner.utils.Pretty import psize
 from yaner.utils.Logging import LoggingMixin
 
-class PoolModel(gtk.TreeStore, LoggingMixin):
+class PoolModel(Gtk.TreeStore, LoggingMixin):
     """
     The tree interface used by L{PoolView}.
     """
@@ -49,7 +49,7 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
 
     def __init__(self):
         """L{PoolModel} initializing."""
-        gtk.TreeStore.__init__(self, Presentable)
+        Gtk.TreeStore.__init__(self, Presentable)
         LoggingMixin.__init__(self)
 
         self._pool_handlers = {}
@@ -130,9 +130,9 @@ class PoolModel(gtk.TreeStore, LoggingMixin):
         """Get the presentable according to the given iter."""
         return self.get_value(iter_, self.COLUMNS.PRESENTABLE)
 
-class PoolView(gtk.TreeView):
+class PoolView(Gtk.TreeView):
     """
-    The C{gtk.TreeView} displaying L{PoolModel}.
+    The C{Gtk.TreeView} displaying L{PoolModel}.
     """
 
     def __init__(self, model):
@@ -141,23 +141,23 @@ class PoolView(gtk.TreeView):
         @arg model:The interface of the tree view.
         @type model:L{PoolModel}
         """
-        gtk.TreeView.__init__(self, model)
+        Gtk.TreeView.__init__(self, model)
 
         # Set up TreeViewColumn
-        column = gtk.TreeViewColumn()
+        column = Gtk.TreeViewColumn()
         self.append_column(column)
 
-        renderer = gtk.CellRendererPixbuf()
+        renderer = Gtk.CellRendererPixbuf()
         column.pack_start(renderer, False)
         column.set_cell_data_func(renderer, self._pixbuf_data_func)
 
-        renderer = gtk.CellRendererText()
+        renderer = Gtk.CellRendererText()
         column.pack_start(renderer, True)
         column.set_cell_data_func(renderer, self._markup_data_func)
 
     @property
     def selection(self):
-        """Get the C{gtk.TreeSelection} of the tree view."""
+        """Get the C{Gtk.TreeSelection} of the tree view."""
         return self.get_selection()
 
     @property
@@ -166,7 +166,7 @@ class PoolView(gtk.TreeView):
         (model, iter_) = self.selection.get_selected()
         return model.get_presentable(iter_)
 
-    def _pixbuf_data_func(self, cell_layout, renderer, model, iter_):
+    def _pixbuf_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""
         presentable = model.get_presentable(iter_)
 
@@ -182,10 +182,10 @@ class PoolView(gtk.TreeView):
 
         renderer.set_properties(
                 stock_id = icon,
-                stock_size = gtk.ICON_SIZE_LARGE_TOOLBAR,
+                stock_size = Gtk.IconSize.LARGE_TOOLBAR,
                 )
 
-    def _markup_data_func(self, cell_layout, renderer, model, iter_):
+    def _markup_data_func(self, column, renderer, model, iter_, data=None):
         """
         Method for format the text in the column.
         """
@@ -193,11 +193,11 @@ class PoolView(gtk.TreeView):
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
             if self.has_focus():
-                state = gtk.STATE_SELECTED
+                state = Gtk.StateType.SELECTED
             else:
-                state = gtk.STATE_ACTIVE
+                state = Gtk.StateType.ACTIVE
         else:
-            state = gtk.STATE_NORMAL
+            state = Gtk.StateType.NORMAL
         # Get the color for the description
         color = get_mix_color(self, state)
 
@@ -213,6 +213,6 @@ class PoolView(gtk.TreeView):
         renderer.set_properties(
                 markup = markup,
                 ellipsize_set = True,
-                ellipsize = pango.ELLIPSIZE_MIDDLE,
+                ellipsize = Pango.EllipsizeMode.MIDDLE,
                 )
 

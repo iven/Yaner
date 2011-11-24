@@ -26,11 +26,11 @@ This module contains the main application class of L{yaner}.
 
 import os
 import sys
-import gtk
 import logging
 import argparse
 import subprocess
 
+from gi.repository import Gtk
 from sqlalchemy import create_engine
 
 from yaner import __version__
@@ -218,10 +218,10 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         SQLSession.commit()
         SQLSession.close()
         logging.shutdown()
-        gtk.main_quit()
+        Gtk.main_quit()
 
     @staticmethod
     def run():
         """Run the main loop of the application."""
-        gtk.main()
+        Gtk.main()
 

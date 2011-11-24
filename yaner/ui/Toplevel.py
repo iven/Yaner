@@ -24,13 +24,12 @@
 This module contains the toplevel window class of L{yaner}.
 """
 
-import gtk
-import glib
-import gobject
 import os
 import sys
 import logging
 
+from gi.repository import Gtk
+from gi.repository import GObject
 from functools import partial
 
 from yaner import SQLSession
@@ -43,7 +42,7 @@ from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.utils.Logging import LoggingMixin
 
-class Toplevel(gtk.Window, LoggingMixin):
+class Toplevel(Gtk.Window, LoggingMixin):
     """Toplevel window of L{yaner}."""
 
     _UI_FILE = os.path.join(UI_DIR, "ui.xml")
@@ -61,17 +60,17 @@ class Toplevel(gtk.Window, LoggingMixin):
                     - task_vbox
                         - _task_list_view
         """
-        gtk.Window.__init__(self)
+        Gtk.Window.__init__(self)
         LoggingMixin.__init__(self)
 
         self.logger.info(_('Initializing toplevel window...'))
 
         self._config = config
 
-        self.set_default_size(800, 600)
+        self.set_size_request(650, 450)
 
         # The toplevel vbox
-        vbox = gtk.VBox(False, 0)
+        vbox = Gtk.VBox(False, 0)
         self.add(vbox)
 
         # UIManager: Toolbar and menus
@@ -82,11 +81,11 @@ class Toplevel(gtk.Window, LoggingMixin):
         vbox.pack_start(toolbar, False, False, 0)
 
         # HPaned: PoolView as left, TaskVBox as right
-        hpaned = gtk.HPaned()
+        hpaned = Gtk.HPaned()
         vbox.pack_start(hpaned, True, True, 0)
 
         # Right pane
-        task_vbox = gtk.VBox(False, 12)
+        task_vbox = Gtk.VBox(False, 12)
         hpaned.add2(task_vbox)
 
         self._task_list_model = TaskListModel()
@@ -95,17 +94,19 @@ class Toplevel(gtk.Window, LoggingMixin):
         task_list_view.set_show_expanders(False)
         task_list_view.set_level_indentation(16)
         task_list_view.expand_all()
-        task_list_view.selection.set_mode(gtk.SELECTION_MULTIPLE)
+        task_list_view.selection.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         self._task_list_view = task_list_view
 
         task_vbox.pack_start(self._task_list_view, True, True, 0)
 
         # Left pane
-        scrolled_window = gtk.ScrolledWindow()
-        scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_NEVER)
-        scrolled_window.set_shadow_type(gtk.SHADOW_IN)
-        hpaned.add1(scrolled_window)
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC,
+                Gtk.PolicyType.NEVER)
+        scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
+        scrolled_window.set_size_request(80, -1)
+        hpaned.pack1(scrolled_window, True, True)
 
         self._pool_model = PoolModel()
 
@@ -122,7 +123,7 @@ class Toplevel(gtk.Window, LoggingMixin):
 
         self._pool_view = pool_view
 
-        pool_view.selection.set_mode(gtk.SELECTION_SINGLE)
+        pool_view.selection.set_mode(Gtk.SelectionMode.SINGLE)
         pool_view.selection.connect("changed",
                 self.on_pool_view_selection_changed)
         pool_view.selection.select_iter(
@@ -137,7 +138,7 @@ class Toplevel(gtk.Window, LoggingMixin):
         self._about_dialog = None
 
         # Status icon
-        status_icon = gtk.status_icon_new_from_stock('gtk-apply')
+        status_icon = Gtk.StatusIcon(stock='gtk-apply')
         status_icon.connect('activate', self._on_status_icon_activated)
 
         self.connect('delete-event', self._on_delete_event, status_icon)
@@ -166,7 +167,7 @@ class Toplevel(gtk.Window, LoggingMixin):
     @property
     def about_dialog(self):
         if self._about_dialog is None:
-            about_dialog = gtk.AboutDialog()
+            about_dialog = Gtk.AboutDialog()
             about_dialog.set_program_name(_('Yaner'))
             about_dialog.set_version(__version__)
             about_dialog.set_authors((__author__,))
@@ -188,13 +189,11 @@ class Toplevel(gtk.Window, LoggingMixin):
         # The actions used by L{action_group}. The members are:
         # name, stock-id, label, accelerator, tooltip, callback
         action_entries = (
-                ("file", None, _("File")),
-                ("task_new", "gtk-add"),
-                ("task_new_normal", None, _("HTTP/FTP/BT Magnet"), None, None,
+                ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None, None,
                     partial(self.on_task_new, task_type = Task.TYPES.NORMAL)),
-                ("task_new_bt", None, _("BitTorrent"), None, None,
+                ("task_new_bt", 'gtk-add', _("BitTorrent"), None, None,
                     partial(self.on_task_new, task_type = Task.TYPES.BT)),
-                ("task_new_ml", None, _("Metalink"), None, None,
+                ("task_new_ml", 'gtk-add', _("Metalink"), None, None,
                     partial(self.on_task_new, task_type = Task.TYPES.ML)),
                 ("task_start", 'gtk-media-play', _("Start"), None, None,
                     self.on_task_start),
@@ -206,15 +205,8 @@ class Toplevel(gtk.Window, LoggingMixin):
                 ("quit", "gtk-quit", None, None, None, self.destroy),
         )
 
-        action_group = gtk.ActionGroup("ToplevelActions")
+        action_group = Gtk.ActionGroup("ToplevelActions")
         action_group.add_actions(action_entries, self)
-
-        # Hack for the MenuToolButton
-        gobject.type_register(MenuToolAction)
-        MenuToolAction.set_tool_item_type(gtk.MenuToolButton)
-        menu_tool_action = MenuToolAction(
-                "task_new_tool_menu", None, None, 'gtk-add')
-        action_group.add_action(menu_tool_action)
 
         self.logger.info(_('Action group initialized.'))
 
@@ -224,11 +216,11 @@ class Toplevel(gtk.Window, LoggingMixin):
         """Initialize the UIManager, including menus and toolbar."""
         self.logger.info(_('Initializing UI Manager...'))
 
-        ui_manager = gtk.UIManager()
+        ui_manager = Gtk.UIManager()
         ui_manager.insert_action_group(self.action_group)
         try:
             ui_manager.add_ui_from_file(self._UI_FILE)
-        except glib.GError:
+        except GObject.GError:
             self.logger.exception(_("Failed to add ui file to UIManager."))
             logging.shutdown()
             sys.exit(1)
@@ -300,11 +292,5 @@ class Toplevel(gtk.Window, LoggingMixin):
 
     def destroy(self, *args, **kwargs):
         """Destroy toplevel window and quit the application."""
-        gtk.Window.destroy(self)
-
-class MenuToolAction(gtk.Action):
-    """
-    C{gtk.Action} used by C{gtk.MenuToolButton}.
-    """
-    __gtype_name__ = "MenuToolAction"
+        Gtk.Window.destroy(self)
 
