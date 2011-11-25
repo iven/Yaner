@@ -1,7 +1,8 @@
 <ui>
     <toolbar>
-        <toolitem action='task_new_normal' />
+        <toolitem action='task_new' />
         <!--
+            <toolitem action='task_new_normal' />
             <toolitem action='task_new_bt' />
             <toolitem action='task_new_ml' />
         -->

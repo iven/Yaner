@@ -188,6 +188,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
         # The actions used by L{action_group}. The members are:
         # name, stock-id, label, accelerator, tooltip, callback
         action_entries = (
+                ("task_new", 'gtk-add', _("New Task"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.NORMAL)),
                 ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None, None,
                     partial(self.on_task_new, task_type = Task.TYPES.NORMAL)),
                 ("task_new_bt", 'gtk-add', _("BitTorrent"), None, None,
