@@ -47,7 +47,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
     _UI_FILE = load_first_data('yaner', 'ui', 'ui.xml')
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
-    def __init__(self, bus, config):
+    def __init__(self, config):
         """
         Create toplevel window of L{yaner}. The window structure is
         like this:
@@ -131,7 +131,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         scrolled_window.add(self._pool_view)
 
         # Dialogs
-        self._task_new_dialog = TaskNewDialog(bus)
+        self._task_new_dialog = TaskNewDialog()
         self._task_new_dialog.widgets['dialog'].set_transient_for(self)
 
         self._about_dialog = None

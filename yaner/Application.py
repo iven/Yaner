@@ -44,7 +44,6 @@ from yaner.ui.Toplevel import Toplevel
 from yaner.utils.XDG import save_config_path
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
-from yaner.utils.UniqueApplication import UniqueApplicationMixin
 
 class _VERSION(argparse.Action):
     """Show version information of the application."""
@@ -59,7 +58,7 @@ class _VERSION(argparse.Action):
         print(_('There is NO WARRANTY, to the extent permitted by law.'))
         sys.exit(0)
 
-class Application(UniqueApplicationMixin, LoggingMixin):
+class Application(LoggingMixin):
     """Main application of L{yaner}."""
 
     _NAME = __package__
@@ -85,7 +84,6 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         <Toplevel>}, and initialize logging configuration.
         """
         LoggingMixin.__init__(self)
-        UniqueApplicationMixin.__init__(self, BUS_NAME)
 
         self._toplevel = None
         self._config = None
@@ -103,7 +101,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
     def toplevel(self):
         """Get the toplevel window of L{yaner}."""
         if self._toplevel is None:
-            self._toplevel = Toplevel(self.bus, self.config)
+            self._toplevel = Toplevel(self.config)
             self._toplevel.connect("destroy", self.quit)
         return self._toplevel
 
@@ -123,17 +121,6 @@ class Application(UniqueApplicationMixin, LoggingMixin):
                 config.update(GLOBAL_CONFIG)
             self._config = config
         return self._config
-
-    def on_instance_exists(self):
-        """
-        This method is called when an instance of the application
-        already exists, which is required by L{UniqueApplicationMixin}.
-        """
-        if len(sys.argv) > 1:
-            self._init_args(is_first_instance=False)
-        else:
-            print("Another instance is already running.")
-        sys.exit(0)
 
     def _init_args(self, is_first_instance=True):
         """Process command line arguments."""
@@ -166,9 +153,9 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             if args.rename is not None:
                 options['out'] = args.rename
 
-            task_new_dialog = self.bus.get_object(
-                    BUS_NAME, TaskNewDialog.OBJECT_NAME)
-            task_new_dialog.run_dialog(Task.TYPES.NORMAL, options)
+#            task_new_dialog = self.bus.get_object(
+#                    BUS_NAME, TaskNewDialog.OBJECT_NAME)
+#            task_new_dialog.run_dialog(Task.TYPES.NORMAL, options)
 
     def _init_logging(self):
         """Set up basic config for logging."""

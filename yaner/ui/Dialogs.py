@@ -25,7 +25,6 @@ This module contains the dialog classes of L{yaner}.
 """
 
 import os
-import dbus.service
 import xmlrpc.client
 
 from gi.repository import Gtk
@@ -35,7 +34,6 @@ from yaner import SQLSession
 from yaner.Pool import Pool
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Category
-from yaner.Constants import BUS_NAME as INTERFACE_NAME
 from yaner.utils.XDG import save_config_path, load_first_data
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
@@ -152,7 +150,7 @@ class TaskDialogMixin(LoggingMixin):
         if options['bt-prioritize-piece'] == 'head,tail':
             self.option_widgets['bt-prioritize-piece'].set_active(True)
 
-class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
+class TaskNewDialog(TaskDialogMixin):
     """
     This class contains widgets and methods related to new task dialog.
     """
@@ -199,9 +197,8 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
             }
     """Map task option names to widget names."""
 
-    def __init__(self, bus):
+    def __init__(self):
         TaskDialogMixin.__init__(self, self._UI_FILE, self._OPTION_DICT)
-        dbus.service.Object.__init__(self, bus, self.OBJECT_NAME)
 
         self._widgets = {}
 
@@ -315,8 +312,6 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
                 )
         widgets['category_cb'].set_model(widgets['category_ls'])
 
-    @dbus.service.method(INTERFACE_NAME,
-            in_signature = 'ia{ss}', out_signature = '')
     def run_dialog(self, task_type, options = {}):
         """
         Popup new task dialog.
