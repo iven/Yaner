@@ -24,9 +24,14 @@
 This module contains miscellaneous functions used by other modules.
 """
 
+import sys
+import argparse
+
 from gi.repository.GObject import GObjectMeta
 from sqlalchemy import Column, Integer
 from sqlalchemy.ext.declarative import DeclarativeMeta, declared_attr
+
+from yaner import __package__, __version__
 
 class DeclarativeGObjectMeta(DeclarativeMeta, GObjectMeta):
     """Metaclass for Declarative and GObject subclasses."""
@@ -40,4 +45,17 @@ class SQLBase(object):
         return cls.__name__.lower()
 
     id = Column(Integer, primary_key=True)
+
+class _VERSION(argparse.Action):
+    """Show version information of the application."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        print('{0} {1}'.format(__package__, __version__))
+        print('Copyright (C) 2010-2011 Iven Hsu (Xu Lijian)')
+        print(_('License GPLv3+: GNU GPL version 3 or later'))
+        print('<http://gnu.org/licenses/gpl.html>.')
+        print(_('This is free software:'))
+        print(_('You are free to change and redistribute it.'))
+        print(_('There is NO WARRANTY, to the extent permitted by law.'))
+        sys.exit(0)
 
