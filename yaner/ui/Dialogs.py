@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -24,19 +24,17 @@
 This module contains the dialog classes of L{yaner}.
 """
 
-import gtk
-import gobject
 import os
-import dbus.service
+import xmlrpc.client
 
-from twisted.web import xmlrpc
+from gi.repository import Gtk
+from gi.repository import GObject
 
+from yaner import SQLSession
 from yaner.Pool import Pool
-from yaner.Task import Task, NormalTask, BTTask, MTTask
+from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Category
-from yaner.Constants import U_CONFIG_DIR
-from yaner.Constants import BUS_NAME as INTERFACE_NAME
-from yaner.ui.Constants import UI_DIR
+from yaner.ui.Misc import load_ui_file
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
 
@@ -44,11 +42,6 @@ class TaskDialogMixin(LoggingMixin):
     """
     This class contains attributes and methods used by task related
     dialogs.
-    """
-
-    _CONFIG_DIR = U_CONFIG_DIR
-    """
-    User config directory containing configuration files and log files.
     """
 
     _CONFIG_FILE = 'task.conf'
@@ -73,19 +66,14 @@ class TaskDialogMixin(LoggingMixin):
         If the file doesn't exist, read from the default configuration.
         """
         if TaskDialogMixin._CONFIG is None:
-            config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
-            if config.empty():
-                self.logger.info(_('No task options config file, creating...'))
-                from yaner.Configurations import TASK_CONFIG
-                config.update({'options': TASK_CONFIG['options'].copy()})
-            TaskDialogMixin._CONFIG = config
+            TaskDialogMixin._CONFIG = ConfigParser(self._CONFIG_FILE)
         return TaskDialogMixin._CONFIG
 
     @property
     def builder(self):
         """Get the UI builder of the dialog."""
         if self._builder is None:
-            builder = gtk.Builder()
+            builder = Gtk.Builder()
             builder.set_translation_domain('yaner')
             builder.add_from_file(self._UI_FILE)
             builder.connect_signals(self)
@@ -96,7 +84,7 @@ class TaskDialogMixin(LoggingMixin):
     def option_widgets(self):
         """Map task option names to widgets."""
         if self._option_widgets == {}:
-            for (option, widget_name) in self._option_widget_names.iteritems():
+            for (option, widget_name) in self._option_widget_names.items():
                 self._option_widgets[option] = self.widgets[widget_name]
         return self._option_widgets
 
@@ -107,7 +95,7 @@ class TaskDialogMixin(LoggingMixin):
         """
         options = self._options
 
-        for (option, widget) in self.option_widgets.iteritems():
+        for (option, widget) in self.option_widgets.items():
             if option == 'seed-ratio':
                 options[option] = str(widget.get_value())
             elif hasattr(widget, 'get_value'):
@@ -129,10 +117,10 @@ class TaskDialogMixin(LoggingMixin):
         Reset options and widgets to default. If new_options is provided,
         current options will be updated with it.
         """
-        self._options = self.config['options'].copy()
+        self._options = dict(self.config['new'])
         options = self._options
         if new_options:
-            for key, value in new_options.iteritems():
+            for key, value in new_options.items():
                 options[str(key)] = str(value)
         self.update_widgets()
 
@@ -142,7 +130,7 @@ class TaskDialogMixin(LoggingMixin):
         current options.
         """
         options = self._options
-        for (option, widget) in self.option_widgets.iteritems():
+        for (option, widget) in self.option_widgets.items():
             if hasattr(widget, 'set_value'):
                 widget.set_value(float(options[option]))
             elif hasattr(widget, 'set_text'):
@@ -152,15 +140,12 @@ class TaskDialogMixin(LoggingMixin):
         if options['bt-prioritize-piece'] == 'head,tail':
             self.option_widgets['bt-prioritize-piece'].set_active(True)
 
-class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
+class TaskNewDialog(TaskDialogMixin):
     """
     This class contains widgets and methods related to new task dialog.
     """
 
-    OBJECT_NAME = '/task_new_dialog'
-    """DBus object name of the dialog."""
-
-    _UI_FILE = os.path.join(UI_DIR, "task_new.ui")
+    _UI_FILE = load_ui_file('task_new.ui')
     """The Glade UI file of this dialog."""
 
     _WIDGET_NAMES = (
@@ -199,9 +184,8 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
             }
     """Map task option names to widget names."""
 
-    def __init__(self, bus):
+    def __init__(self):
         TaskDialogMixin.__init__(self, self._UI_FILE, self._OPTION_DICT)
-        dbus.service.Object.__init__(self, bus, self.OBJECT_NAME)
 
         self._widgets = {}
 
@@ -258,7 +242,8 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         tbuffer = textview.get_buffer()
         uris = tbuffer.get_text(
                 tbuffer.get_start_iter(),
-                tbuffer.get_end_iter()
+                tbuffer.get_end_iter(),
+                False
                 )
         return uris.split()
 
@@ -302,20 +287,18 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
 
     def _init_liststores(self, widgets):
         """Init ListStores."""
-        widgets['pool_ls'] = gtk.ListStore(
-                gobject.TYPE_STRING,
+        widgets['pool_ls'] = Gtk.ListStore(
+                GObject.TYPE_STRING,
                 Pool,
                 )
         widgets['pool_cb'].set_model(widgets['pool_ls'])
 
-        widgets['category_ls'] = gtk.ListStore(
-                gobject.TYPE_STRING,
+        widgets['category_ls'] = Gtk.ListStore(
+                GObject.TYPE_STRING,
                 Category,
                 )
         widgets['category_cb'].set_model(widgets['category_ls'])
 
-    @dbus.service.method(INTERFACE_NAME,
-            in_signature = 'ia{ss}', out_signature = '')
     def run_dialog(self, task_type, options = {}):
         """
         Popup new task dialog.
@@ -329,7 +312,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         self.init_options(options)
         # init the server cb
         widgets['pool_ls'].clear()
-        for pool in Pool.select():
+        for pool in SQLSession.query(Pool):
             widgets['pool_ls'].append([pool.name, pool])
         widgets['pool_cb'].set_active(0)
         # TODO: Show main window
@@ -341,12 +324,12 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         When directory chooser button clicked, popup the dialog, and update
         the directory entry.
         """
-        dialog = gtk.FileChooserDialog(_('Select download directory'),
+        dialog = Gtk.FileChooserDialog(_('Select download directory'),
                 self.widgets['dialog'],
-                gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                    gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        if dialog.run() == gtk.RESPONSE_OK:
+                Gtk.FileChooserAction.SELECT_FOLDER,
+                (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                    Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        if dialog.run() == Gtk.ResponseType.OK:
             directory = dialog.get_filename()
             self.widgets['dir_entry'].set_text(directory)
         dialog.destroy()
@@ -372,7 +355,7 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         """
         Create a new download task if uris are provided.
         """
-        if response != gtk.RESPONSE_OK:
+        if response != Gtk.ResponseType.OK:
             dialog.hide()
             return
 
@@ -384,18 +367,18 @@ class TaskNewDialog(TaskDialogMixin, dbus.service.Object):
         if task_type == Task.TYPES.NORMAL and uris:
             name = options['out'] if options['out'] else \
                     os.path.basename(uris[0])
-            metadata = None
+            metafile = None
         elif task_type != Task.TYPES.NORMAL and metadata_file:
             name = os.path.basename(metadata_file)
             with open(metadata_file) as m_file:
-                metadata = xmlrpc.Binary(m_file.read())
+                metafile = xmlrpc.client.Binary(m_file.read())
         else:
             return
 
-        TaskClasses = (NormalTask, BTTask, MTTask)
+        TaskClasses = (NormalTask, BTTask, MLTask)
 
         task = TaskClasses[task_type](name=name, type=task_type,
-                metadata=metadata, uris=uris, options=options,
+                metafile=metafile, uris=uris, options=options,
                 category=self.active_category, pool=self.active_pool)
         task.start()
         task.pool.queuing.emit('task-added', task)
@@ -406,7 +389,7 @@ class TaskProfileDialog(TaskDialogMixin):
     This class contains widgets and methods related to default task profile dialog.
     """
 
-    _UI_FILE = os.path.join(UI_DIR, "task_profile.ui")
+    _UI_FILE = load_ui_file('task_profile.ui')
     """The Glade UI file of this dialog."""
 
     def __init__(self, main_app):
@@ -485,10 +468,10 @@ class TaskProfileDialog(TaskDialogMixin):
         """
         Save the options to the config file.
         """
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             self._options = {}
             self.update_options()
-            for (key, value) in self._options.iteritems():
+            for (key, value) in self._options.items():
                 self.main_app.conf.task[key] = value
         dialog.hide()
 

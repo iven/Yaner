@@ -6,9 +6,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: yaner 0.1.1\n"
+"Project-Id-Version: yaner 0.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-11 10:53+0800\n"
+"POT-Creation-Date: 2011-11-28 23:16+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -17,189 +17,408 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../scripts/../yaner/Application.py:52
-msgid "License GPLv3+: GNU GPL version 3 or later"
-msgstr "GPLv3+ 许可：GNU 通用公共许可证第3 版或更新版本"
-
-#: ../scripts/../yaner/Application.py:54
-msgid "This is free software:"
-msgstr "本软件是自由软件："
-
-#: ../scripts/../yaner/Application.py:55
-msgid "You are free to change and redistribute it."
-msgstr "您可以自由修改和重新发布它。"
-
-#: ../scripts/../yaner/Application.py:56
-msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr "在法律范围内没有其他保证。"
-
-#: ../scripts/../yaner/Application.py:117
+#: scripts/../yaner/Application.py:89
 msgid "Reading global configuration file..."
 msgstr "全局配置文件读取中……"
 
-#: ../scripts/../yaner/Application.py:120
-msgid "No global configuration file, creating..."
-msgstr "无全局配置文件，创建中……"
-
-#: ../scripts/../yaner/Application.py:131
-msgid "Connecting to global database file..."
-msgstr "全局数据库文件读取中……"
-
-#: ../scripts/../yaner/Application.py:141
-msgid "Global database file connected."
-msgstr "已连接全局数据库文件。"
-
-#: ../scripts/../yaner/Application.py:158
-msgid "Parsing command line arguments..."
-msgstr "命令行参数解析中……"
-
-#: ../scripts/../yaner/Application.py:159
-msgid "Command line arguments: {0}"
-msgstr "命令行参数： {0}"
-
-#: ../scripts/../yaner/Application.py:162
-msgid "{0} download mananger."
-msgstr "{0} 下载管理器"
-
-#: ../scripts/../yaner/Application.py:164
-msgid "filename to save"
-msgstr "保存的文件名"
-
-#: ../scripts/../yaner/Application.py:166
-msgid "referer page of the link"
-msgstr "链接的引用页"
-
-#: ../scripts/../yaner/Application.py:168
-msgid "cookies of the website"
-msgstr "网站的 Cookies"
-
-#: ../scripts/../yaner/Application.py:170
-msgid "the download addresses"
-msgstr "下载地址"
-
-#: ../scripts/../yaner/Application.py:172
-msgid "output version information and exit"
-msgstr "输出版本信息并退出"
-
-#: ../scripts/../yaner/Application.py:175
-msgid "Command line arguments parsed."
-msgstr "命令行参数已解析。"
-
-#: ../scripts/../yaner/Application.py:207
+#: scripts/../yaner/Application.py:107
 msgid "Logging system initialized, start logging..."
 msgstr "日志系统初始化完毕，开始记录……"
 
-#: ../scripts/../yaner/Application.py:211
+#: scripts/../yaner/Application.py:112
+msgid "Connecting to global database file..."
+msgstr "全局数据库文件读取中……"
+
+#: scripts/../yaner/Application.py:119
 msgid "Initializing database for first start..."
 msgstr "为首次启动初始化数据库中……"
 
-#: ../scripts/../yaner/Application.py:219
-#: ../scripts/../yaner/Configurations.py:81
+#: scripts/../yaner/Application.py:124
 msgid "My Computer"
 msgstr "我的电脑"
 
-#: ../scripts/../yaner/Application.py:220
-#: ../scripts/../yaner/Configurations.py:103
+#: scripts/../yaner/Application.py:125
 msgid "Default Category"
 msgstr "默认分类"
 
-#: ../scripts/../yaner/Application.py:222
+#: scripts/../yaner/Application.py:127
 msgid "Database initialized."
 msgstr "数据库初始化完毕。"
 
-#: ../scripts/../yaner/Application.py:229
+#: scripts/../yaner/Application.py:129
+msgid "Global database file connected."
+msgstr "已连接全局数据库文件。"
+
+#: scripts/../yaner/Application.py:162
 msgid "Application quit normally."
 msgstr "程序正常退出。"
 
-#: ../scripts/../yaner/Presentable.py:136
+#: scripts/../yaner/Misc.py:55
+msgid "License GPLv3+: GNU GPL version 3 or later"
+msgstr "GPLv3+ 许可：GNU 通用公共许可证第3 版或更新版本"
+
+#: scripts/../yaner/Misc.py:57
+msgid "This is free software:"
+msgstr "本软件是自由软件："
+
+#: scripts/../yaner/Misc.py:58
+msgid "You are free to change and redistribute it."
+msgstr "您可以自由修改和重新发布它。"
+
+#: scripts/../yaner/Misc.py:59
+msgid "There is NO WARRANTY, to the extent permitted by law."
+msgstr "在法律范围内没有其他保证。"
+
+#: scripts/../yaner/Presentable.py:170
 msgid "Dustbin"
 msgstr "回收站"
 
-#: ../scripts/../yaner/ui/Dialogs.py:76
-msgid "No task options config file, creating..."
-msgstr "无任务选项配置文件，创建中……"
+#: scripts/../yaner/Task.py:302
+msgid "Network Error"
+msgstr "网络错误"
 
-#: ../scripts/../yaner/ui/Dialogs.py:344
+#: scripts/../yaner/ui/Dialogs.py:327
 msgid "Select download directory"
 msgstr "选择下载目录"
 
-#: ../scripts/../yaner/ui/Dialogs.py:347
-msgid "_Cancel"
-msgstr "取消(_C)"
-
-#: ../scripts/../yaner/ui/Dialogs.py:348
-msgid "_Select"
-msgstr "选择(_S)"
-
-#: ../scripts/../yaner/ui/Misc.py:46
-msgid "@widget is not a gtk.Widget."
+#: scripts/../yaner/ui/Misc.py:53
+msgid "@widget is not a Gtk.Widget."
 msgstr "@widget 并非 gtk.Widget。"
 
-#: ../scripts/../yaner/ui/Misc.py:57
+#: scripts/../yaner/ui/Misc.py:64
 msgid "Got mix color: {0}."
 msgstr "得到混合颜色：{0}。"
 
-#: ../scripts/../yaner/ui/PoolTree.py:103
+#: scripts/../yaner/ui/PoolTree.py:98
 msgid "Adding presentable {0}..."
 msgstr "添加呈现器 {0} 中……"
 
-#: ../scripts/../yaner/ui/PoolTree.py:110
+#: scripts/../yaner/ui/PoolTree.py:105
 msgid "No parent presentable for {0}."
 msgstr "{0} 无父呈现器。"
 
-#: ../scripts/../yaner/ui/TaskListTree.py:137
+#: scripts/../yaner/ui/TaskListTree.py:108
 msgid "Adding task {}..."
 msgstr "添加任务 {} 中……"
 
-#: ../scripts/../yaner/ui/Toplevel.py:63
+#: scripts/../yaner/ui/TaskListTree.py:147
+msgid "Tasks"
+msgstr "任务"
+
+#: scripts/../yaner/ui/TaskListTree.py:160
+msgid "Progress"
+msgstr "进度"
+
+#: scripts/../yaner/ui/TaskListTree.py:169
+msgid "Speed"
+msgstr "速度"
+
+#: scripts/../yaner/ui/TaskListTree.py:177 scripts/../yaner/ui/task_new.ui:203
+#: scripts/../yaner/ui/task_profile.ui:249
+msgid "Connections"
+msgstr "连接"
+
+#: scripts/../yaner/ui/Toplevel.py:65
 msgid "Initializing toplevel window..."
 msgstr "初始化主窗口中……"
 
-#: ../scripts/../yaner/ui/Toplevel.py:117
+#: scripts/../yaner/ui/Toplevel.py:145
 msgid "Toplevel window initialized."
 msgstr "主窗口初始化完毕。"
 
-#: ../scripts/../yaner/ui/Toplevel.py:145
+#: scripts/../yaner/ui/Toplevel.py:170
+msgid "Yaner"
+msgstr "掩耳"
+
+#: scripts/../yaner/ui/Toplevel.py:186
 msgid "Initializing action group..."
 msgstr "初始化动作组中……"
 
-#: ../scripts/../yaner/ui/Toplevel.py:150
-msgid "File"
-msgstr "文件"
+#: scripts/../yaner/ui/Toplevel.py:191
+msgid "New Task"
+msgstr "新任务"
 
-#: ../scripts/../yaner/ui/Toplevel.py:152
+#: scripts/../yaner/ui/Toplevel.py:193
 msgid "HTTP/FTP/BT Magnet"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:154
+#: scripts/../yaner/ui/Toplevel.py:195 scripts/../yaner/ui/task_new.ui:711
 msgid "BitTorrent"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:156
+#: scripts/../yaner/ui/Toplevel.py:197 scripts/../yaner/ui/task_new.ui:958
+#: scripts/../yaner/ui/task_profile.ui:720
 msgid "Metalink"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:171
+#: scripts/../yaner/ui/Toplevel.py:199
+msgid "Start"
+msgstr "开始"
+
+#: scripts/../yaner/ui/Toplevel.py:201
+msgid "Pause"
+msgstr "暂停"
+
+#: scripts/../yaner/ui/Toplevel.py:203
+msgid "Remove"
+msgstr "删除"
+
+#: scripts/../yaner/ui/Toplevel.py:212
 msgid "Action group initialized."
 msgstr "动作组初始化完毕。"
 
-#: ../scripts/../yaner/ui/Toplevel.py:177
+#: scripts/../yaner/ui/Toplevel.py:218
 msgid "Initializing UI Manager..."
 msgstr "初始化 UI 管理器中……"
 
-#: ../scripts/../yaner/ui/Toplevel.py:184
+#: scripts/../yaner/ui/Toplevel.py:225
 msgid "Failed to add ui file to UIManager."
 msgstr "添加 ui 文件到 UI 管理器失败。"
 
-#: ../scripts/../yaner/ui/Toplevel.py:188
+#: scripts/../yaner/ui/Toplevel.py:229
 msgid "UI Manager initialized."
 msgstr "UI 管理器初始化完毕。"
 
-#: ../scripts/../yaner/ui/Toplevel.py:196
+#: scripts/../yaner/ui/Toplevel.py:237
 msgid "Adding pool {0}..."
 msgstr "添加池 {0} 中……"
 
-#: ../scripts/../yaner/utils/Configuration.py:62
-msgid "Created directory {0}."
-msgstr "已创建目录：{0}"
+#: scripts/../yaner/ui/task_new.ui:7
+msgid "Add new task"
+msgstr "添加新任务"
 
+#: scripts/../yaner/ui/task_new.ui:114
+msgid "<b>URI(s)</b>"
+msgstr "<b>一个或多个地址</b>"
+
+#: scripts/../yaner/ui/task_new.ui:152
+msgid "Referer"
+msgstr "引用页"
+
+#: scripts/../yaner/ui/task_new.ui:164
+msgid "Rename"
+msgstr "重命名"
+
+#: scripts/../yaner/ui/task_new.ui:238 scripts/../yaner/ui/task_new.ui:691
+#: scripts/../yaner/ui/task_new.ui:938
+msgid "<b>Settings</b> - Optional"
+msgstr "<b>设置</b> - 可选"
+
+#: scripts/../yaner/ui/task_new.ui:276 scripts/../yaner/ui/task_new.ui:360
+msgid "User"
+msgstr "用户"
+
+#: scripts/../yaner/ui/task_new.ui:302 scripts/../yaner/ui/task_new.ui:333
+msgid "Password"
+msgstr "密码"
+
+#: scripts/../yaner/ui/task_new.ui:389
+msgid "<b>HTTP</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:400
+msgid "<b>FTP</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:417
+msgid "<b>Authorization</b> - Optional"
+msgstr "<b>验证</b> - 可选"
+
+#: scripts/../yaner/ui/task_new.ui:434
+msgid "Normal / BT Magnet"
+msgstr "普通 / 磁力链接"
+
+#: scripts/../yaner/ui/task_new.ui:473
+msgid "<b>Torrent File</b>"
+msgstr "<b>种子文件</b>"
+
+#: scripts/../yaner/ui/task_new.ui:519
+msgid "<b>URI(s)</b> - Optional"
+msgstr "<b>一个或多个地址</b> - 可选"
+
+#: scripts/../yaner/ui/task_new.ui:557 scripts/../yaner/ui/task_profile.ui:352
+msgid "Max open files"
+msgstr "最多打开文件数"
+
+#: scripts/../yaner/ui/task_new.ui:569 scripts/../yaner/ui/task_profile.ui:499
+msgid "Seed time(min)"
+msgstr "做种时间（分）"
+
+#: scripts/../yaner/ui/task_new.ui:583 scripts/../yaner/ui/task_profile.ui:512
+msgid "Seed ratio"
+msgstr "做种比例"
+
+#: scripts/../yaner/ui/task_new.ui:643
+msgid "Max peers"
+msgstr "最多 Peer 数"
+
+#: scripts/../yaner/ui/task_new.ui:669
+msgid "Preview mode - Try to download first and last pieces first"
+msgstr "预览模式 - 试图优先下载文件最前一段和最后一段"
+
+#: scripts/../yaner/ui/task_new.ui:751
+msgid "<b>Metalink File</b>"
+msgstr "<b>Metalink 文件</b>"
+
+#: scripts/../yaner/ui/task_new.ui:789 scripts/../yaner/ui/task_profile.ui:591
+msgid "Download servers"
+msgstr "下载服务器数"
+
+#: scripts/../yaner/ui/task_new.ui:801
+msgid "Preferred locations"
+msgstr "优先选择地点"
+
+#: scripts/../yaner/ui/task_new.ui:831 scripts/../yaner/ui/task_profile.ui:614
+msgid "Language"
+msgstr "语言"
+
+#: scripts/../yaner/ui/task_new.ui:907
+msgid "OS"
+msgstr "操作系统"
+
+#: scripts/../yaner/ui/task_new.ui:921 scripts/../yaner/ui/task_profile.ui:627
+msgid "Version"
+msgstr "版本"
+
+#: scripts/../yaner/ui/task_new.ui:999
+msgid "Category"
+msgstr "分类"
+
+#: scripts/../yaner/ui/task_new.ui:1011
+msgid "Directory"
+msgstr "目录"
+
+#: scripts/../yaner/ui/task_new.ui:1075
+msgid "_Browse..."
+msgstr "浏览(_B)"
+
+#: scripts/../yaner/ui/task_new.ui:1106
+msgid "<b>Server and Category</b>"
+msgstr "<b>服务器和分类</b>"
+
+#: scripts/../yaner/ui/task_profile.ui:7
+msgid "Default task profile"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:59
+#, fuzzy
+msgid "Connect timeout(sec)"
+msgstr "连接"
+
+#: scripts/../yaner/ui/task_profile.ui:84
+msgid "Timeout(sec)"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:117
+msgid "<b>Timeout</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:150
+msgid "Max tries"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:175
+msgid "Max file not found tries"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:208
+msgid "<b>Retry</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:225
+msgid "General"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:259
+#, fuzzy
+msgid "Per server connections"
+msgstr "连接"
+
+#: scripts/../yaner/ui/task_profile.ui:302
+msgid "Auto renaming"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:327
+msgid "Normal"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:377
+msgid "Max Peers"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:407
+msgid "Tracker connect timeout(sec)"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:437
+msgid "Tracker timeout(sec)"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:465
+msgid "! Follow torrent"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:481
+msgid "Preview mode"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:566
+msgid "Bittorrent"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:601
+msgid "Prefered locations"
+msgstr "优先选择地点"
+
+#: scripts/../yaner/ui/task_profile.ui:637
+msgid "! Follow metalink"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:736
+msgid "<i>! Do NOT change this option.</i>"
+msgstr ""
+
+#~ msgid "No global configuration file, creating..."
+#~ msgstr "无全局配置文件，创建中……"
+
+#~ msgid "Parsing command line arguments..."
+#~ msgstr "命令行参数解析中……"
+
+#~ msgid "Command line arguments: {0}"
+#~ msgstr "命令行参数： {0}"
+
+#~ msgid "{0} download mananger."
+#~ msgstr "{0} 下载管理器"
+
+#~ msgid "filename to save"
+#~ msgstr "保存的文件名"
+
+#~ msgid "referer page of the link"
+#~ msgstr "链接的引用页"
+
+#~ msgid "cookies of the website"
+#~ msgstr "网站的 Cookies"
+
+#~ msgid "the download addresses"
+#~ msgstr "下载地址"
+
+#~ msgid "output version information and exit"
+#~ msgstr "输出版本信息并退出"
+
+#~ msgid "Command line arguments parsed."
+#~ msgstr "命令行参数已解析。"
+
+#~ msgid "No task options config file, creating..."
+#~ msgstr "无任务选项配置文件，创建中……"
+
+#~ msgid "_Cancel"
+#~ msgstr "取消(_C)"
+
+#~ msgid "_Select"
+#~ msgstr "选择(_S)"
+
+#~ msgid "File"
+#~ msgstr "文件"
+
+#~ msgid "Created directory {0}."
+#~ msgstr "已创建目录：{0}"

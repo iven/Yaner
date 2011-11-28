@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -24,26 +24,33 @@
 This module contains miscellaneous functions used by other modules.
 """
 
-import gtk
+import os
 import logging
+
+from gi.repository import Gtk
 
 _module = '{0}.Misc'.format(__package__)
 _logger = logging.getLogger(_module)
+
+def load_ui_file(filename):
+    """Get the UI file path by filename."""
+    directory = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(directory, filename)
 
 def get_mix_color(widget, state):
     """
     Get lighter color than the normal text color, which is mixed with
     M{textcolor * 0.7 + basecolor * 0.3}.
     @arg widget:The widget where the text display on.
-    @type widget:C{gtk.Widget}
+    @type widget:C{Gtk.Widget}
     @arg state:Current state of the L{widget}.
     @type state:C{int}
     """
     try:
-        if not isinstance(widget, gtk.Widget):
+        if not isinstance(widget, Gtk.Widget):
             raise TypeError
     except TypeError:
-        _logger.exception(_("@widget is not a gtk.Widget."))
+        _logger.exception(_("@widget is not a Gtk.Widget."))
         return 'gray'
 
     color = {}

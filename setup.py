@@ -1,7 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import sys, os
-import shutil
 from glob import glob
 from os.path import basename, splitext, isdir
 from stat import S_IRUSR, S_IWUSR, S_IRGRP, S_IROTH
@@ -25,7 +24,7 @@ class Install(install):
         if self.prefix:
             length += len(self.prefix)
         if length:
-            for counter in xrange(len(outputs)):
+            for counter in range(len(outputs)):
                 outputs[counter] = outputs[counter][length:]
         with open(INSTALLED_FILES, "w") as install_file:
             install_file.write("\n".join(outputs))
@@ -39,7 +38,8 @@ class InstallData(install_data):
             except:
                 self.warn("Could not chmod data file %s" % file)
         install_data.run(self)
-        map(chmod_data_file, self.get_outputs())
+        for output in self.get_outputs():
+            chmod_data_file(output)
 
 class Uninstall(install):
 
@@ -52,10 +52,10 @@ class Uninstall(install):
         if self.prefix:
             prepend += self.prefix
         if len(prepend):
-            for counter in xrange(len(install_files)):
+            for counter in range(len(install_files)):
                 install_files[counter] = prepend + install_files[counter].rstrip()
         for install_file in install_files:
-            print "Uninstalling %s" % install_file
+            print("Uninstalling %s" % install_file)
             try:
                 os.unlink(install_file)
             except:
@@ -88,17 +88,6 @@ if not prefix or not len(prefix):
 if sys.argv[1] in ("install", "uninstall") and len(prefix):
     sys.argv += ["--prefix", prefix]
 
-shutil.move("yaner/Constants.py", "yaner/Constants.py.in")
-
-with open("yaner/Constants.py.in") as f:
-    data = f.read()
-
-data = data.replace("@prefix@", prefix)
-data = data.replace("@version@", __version__)
-
-with open("yaner/Constants.py", 'w') as f:
-    f.write(data)
-
 data_files = []
 po_buildcmd = "msgfmt -o build/locale/%s/yaner.mo po/%s.po"
 for po_file in glob('po/*.po'):
@@ -109,24 +98,24 @@ for po_file in glob('po/*.po'):
         os.system(po_buildcmd % (po_name, po_name))
     data_files.append(("share/locale/%s/LC_MESSAGES" % po_name,
         glob('build/locale/%s/yaner.mo' % po_name)))
-data_files.append(("share/yaner/ui/", glob('ui/*')))
-data_files.append(("share/yaner/config/", glob('config/*')))
+config_dir = os.getenv('XDG_CONFIG_DIRS', '/etc/xdg/').split(':')[0]
+data_files.append((os.path.join(config_dir, 'yaner'), glob('config/*')))
 data_files.append(('share/applications/', ['yaner.desktop']))
 
 setup (
-        name             = "yaner",
-        version          = __version__,
-        description      = "GTK+ interface for aria2 download mananger",
-        author           = "Iven Hsu (Xu Lijian)",
-        author_email     = "ivenvd@gmail.com",
-        url              = "https://github.com/iven/Yaner",
-        license          = __license__,
-        data_files       = data_files,
-        packages         = ["yaner", "yaner.ui", "yaner.utils"],
-        scripts          = ["scripts/yaner"],
-        cmdclass         = {"uninstall" : Uninstall,
-                            "install" : Install,
-                            "install_data" : InstallData}
-     )
+    name             = "yaner",
+    version          = __version__,
+    description      = "GTK+ interface for aria2 download mananger",
+    author           = "Iven Hsu (Xu Lijian)",
+    author_email     = "ivenvd@gmail.com",
+    url              = "https://github.com/iven/Yaner",
+    license          = __license__,
+    data_files       = data_files,
+    packages         = ["yaner", "yaner.ui", "yaner.utils"],
+    package_data     = {'yaner.ui': ['*.ui', 'ui.xml']},
+    scripts          = ["scripts/yaner"],
+    cmdclass         = {"uninstall" : Uninstall,
+                        "install" : Install,
+                        "install_data" : InstallData},
+    )
 
-shutil.move("yaner/Constants.py.in", "yaner/Constants.py")

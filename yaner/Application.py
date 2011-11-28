@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -25,45 +25,27 @@ This module contains the main application class of L{yaner}.
 """
 
 import os
-import sys
 import logging
-import argparse
-import sqlobject
-import subprocess
-from twisted.internet import reactor
 
-from yaner import __version__
+from gi.repository import Gtk, GLib, Gio
+from sqlalchemy import create_engine
+
+from yaner import __package__
+from yaner import SQLSession, SQLBase
+from yaner.XDG import save_data_file, save_config_file, load_first_config
 from yaner.Pool import Pool
-from yaner.Task import Task, NormalTask, BTTask, MTTask
+from yaner.Task import Task
 from yaner.Presentable import Category
-from yaner.Constants import U_CONFIG_DIR, BUS_NAME
-from yaner.ui.Dialogs import TaskNewDialog
+from yaner.Constants import BUS_NAME
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
-from yaner.utils.UniqueApplication import UniqueApplicationMixin
 
-class _VERSION(argparse.Action):
-    """Show version information of the application."""
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        print '{0} {1}'.format(__package__, __version__)
-        print 'Copyright (C) 2010-2011 Iven Hsu (Xu Lijian)'
-        print _('License GPLv3+: GNU GPL version 3 or later')
-        print '<http://gnu.org/licenses/gpl.html>.'
-        print _('This is free software:')
-        print _('You are free to change and redistribute it.')
-        print _('There is NO WARRANTY, to the extent permitted by law.')
-        sys.exit(0)
-
-class Application(UniqueApplicationMixin, LoggingMixin):
+class Application(Gtk.Application, LoggingMixin):
     """Main application of L{yaner}."""
 
     _NAME = __package__
     """The name of the application, used by L{_LOG_FILE}, etc."""
-
-    _CONFIG_DIR = U_CONFIG_DIR
-    """User config directory containing configuration files and log files."""
 
     _LOG_FILE = '{0}.log'.format(_NAME)
     """The logging file of the application."""
@@ -81,29 +63,19 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         It handles command line options, creates L{toplevel window
         <Toplevel>}, and initialize logging configuration.
         """
+        Gtk.Application.__init__(self, application_id=BUS_NAME, flags=0)
         LoggingMixin.__init__(self)
-        UniqueApplicationMixin.__init__(self, BUS_NAME)
 
         self._toplevel = None
         self._config = None
-        self._data_conn = None
 
-        self._init_logging()
-        if len(sys.argv) > 1:
-            self._init_args()
-
-        # Set the database as default sqlobject connection
-        sqlobject.processConnection = self.data_conn
-
-        # Set up and show toplevel window
-        self.toplevel.show_all()
+        self._init_action_group()
 
     @property
     def toplevel(self):
         """Get the toplevel window of L{yaner}."""
         if self._toplevel is None:
-            self._toplevel = Toplevel(self.bus, self.config)
-            self._toplevel.connect("destroy", self.quit)
+            self._toplevel = Toplevel(self.config)
         return self._toplevel
 
     @property
@@ -115,83 +87,11 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         """
         if self._config is None:
             self.logger.info(_('Reading global configuration file...'))
-            config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
-            if config.empty():
-                self.logger.info(_('No global configuration file, creating...'))
-                from yaner.Configurations import GLOBAL_CONFIG
-                config.update(GLOBAL_CONFIG)
-            self._config = config
+            self._config = ConfigParser(load_first_config(self._CONFIG_FILE))
         return self._config
-
-    @property
-    def data_conn(self):
-        """Get the global database, which contains pool, category and
-        task informations."""
-        if self._data_conn is None:
-            self.logger.info(_('Connecting to global database file...'))
-
-            # Connect to the database and set as default connection
-            data_file = os.path.join(self._CONFIG_DIR, self._DATA_FILE)
-            data_conn = sqlobject.connectionForURI('sqlite://' + data_file)
-            self._data_conn = sqlobject.sqlhub.processConnection = data_conn
-
-            if not os.path.exists(data_file):
-                self._init_database()
-
-            self.logger.info(_('Global database file connected.'))
-
-        return self._data_conn
-
-    def on_instance_exists(self):
-        """
-        This method is called when an instance of the application
-        already exists, which is required by L{UniqueApplicationMixin}.
-        """
-        if len(sys.argv) > 1:
-            self._init_args(is_first_instance=False)
-        else:
-            print "Another instance is already running."
-        sys.exit(0)
-
-    def _init_args(self, is_first_instance=True):
-        """Process command line arguments."""
-        self.logger.info(_('Parsing command line arguments...'))
-        self.logger.debug(_('Command line arguments: {0}').format(sys.argv))
-
-        parser = argparse.ArgumentParser(
-                description=_('{0} download mananger.').format(self._NAME))
-        parser.add_argument('-n', '--rename', metavar='FILENAME',
-                help=_('filename to save'))
-        parser.add_argument('-r', '--referer', nargs='?', const='',
-                default='', help=_('referer page of the link'))
-        parser.add_argument('-c', '--cookie', nargs='?', const='',
-                default='', help=_('cookies of the website'))
-        parser.add_argument('uris', nargs='*', metavar='URI | MAGNET',
-                help=_('the download addresses'))
-        parser.add_argument('-v', '--version', action=_VERSION, nargs=0,
-                help=_('output version information and exit'))
-        args = parser.parse_args()
-
-        self.logger.info(_('Command line arguments parsed.'))
-
-        if is_first_instance:
-            subprocess.Popen(sys.argv)
-        else:
-            options = {'referer': args.referer,
-                    'header': args.cookie,
-                    'uris': str(args.uris),
-                    }
-            if args.rename is not None:
-                options['out'] = args.rename
-
-            task_new_dialog = self.bus.get_object(
-                    BUS_NAME, TaskNewDialog.OBJECT_NAME)
-            task_new_dialog.run_dialog(Task.TYPES.NORMAL, options)
 
     def _init_logging(self):
         """Set up basic config for logging."""
-        if not os.path.exists(self._CONFIG_DIR):
-            os.makedirs(self._CONFIG_DIR)
         formatstr = ' '.join((
             '%(levelname)-8s',
             '%(name)s.%(funcName)s,',
@@ -199,7 +99,7 @@ class Application(UniqueApplicationMixin, LoggingMixin):
             '%(message)s'
             ))
         logging.basicConfig(
-            filename = os.path.join(self._CONFIG_DIR, self._LOG_FILE),
+            filename = save_config_file(self._LOG_FILE),
             filemode = 'w',
             format = formatstr,
             level = logging.DEBUG
@@ -207,35 +107,60 @@ class Application(UniqueApplicationMixin, LoggingMixin):
         self.logger.info(_('Logging system initialized, start logging...'))
 
     def _init_database(self):
-        """Set up database when the application first starts."""
-        self.logger.info(_('Initializing database for first start...'))
+        """Connect to database and set up database if this is the first
+        start of the application."""
+        self.logger.info(_('Connecting to global database file...'))
 
-        Pool.createTable()
-        Category.createTable()
-        Task.createTable()
-        NormalTask.createTable()
-        BTTask.createTable()
-        MTTask.createTable()
+        data_file = save_data_file(self._DATA_FILE)
+        engine = create_engine('sqlite:///' + data_file)
+        SQLSession.configure(bind=engine)
 
-        down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
+        if not os.path.exists(data_file):
+            self.logger.info(_('Initializing database for first start...'))
 
-        pool = Pool(name=_('My Computer'), host='localhost')
-        Category(name=_('Default Category'), directory=down_dir, pool=pool)
+            SQLBase.metadata.create_all(engine)
 
-        self.logger.info(_('Database initialized.'))
+            down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
+            pool = Pool(name=_('My Computer'), host='localhost')
+            Category(name=_('Default Category'), directory=down_dir, pool=pool)
 
-    def quit(self, *arg, **kwargs):
+            self.logger.info(_('Database initialized.'))
+
+        self.logger.info(_('Global database file connected.'))
+
+    def _init_action_group(self):
+        """Insert 'cmdline' action for opening new task dialog."""
+        action_group = Gio.SimpleActionGroup()
+        action = Gio.SimpleAction.new(name='cmdline',
+                                      parameter_type=GLib.VariantType.new('s'))
+        action.connect('activate', self.on_cmdline)
+        action_group.insert(action)
+        self.set_action_group(action_group)
+
+    def on_cmdline(self, action, data):
+        """When application started with command line arguments, open new
+        task dialog.
         """
-        The callback function of the I{destory} signal of L{toplevel}.
-        Just quit the application.
+        task_new_dialog = self.toplevel.task_new_dialog
+        task_new_dialog.run_dialog(Task.TYPES.NORMAL, eval(data.unpack()))
+
+    def do_activate(self):
+        """When Application activated, present the main window."""
+        self.toplevel.present()
+
+    def do_startup(self):
+        """When start up, initialize logging and database systems, and
+        show the toplevel window.
         """
+        LoggingMixin.__init__(self)
+        self._init_database()
+        self.toplevel.set_application(self)
+        self.toplevel.show_all()
+
+    def do_shutdown(self):
+        """When shutdown, finalize database and logging systems."""
         self.logger.info(_('Application quit normally.'))
-        self.data_conn.close()
+        SQLSession.commit()
+        SQLSession.close()
         logging.shutdown()
-        reactor.stop()
-
-    @staticmethod
-    def run():
-        """Run the main loop of the application."""
-        reactor.run()
 

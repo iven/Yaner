@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -24,19 +24,18 @@
 This module contains the L{Pool} class of L{yaner}.
 """
 
-import glib
-import gobject
-import sqlobject
+from gi.repository import GLib
+from gi.repository import GObject
+from sqlalchemy import Column, Integer, Unicode
+from sqlalchemy.orm import reconstructor, relationship
 
-from twisted.web import xmlrpc
-
+from yaner import SQLSession, SQLBase
 from yaner.Task import Task
-from yaner.Misc import GObjectSQLObjectMeta
-from yaner.Presentable import Presentable, Queuing, Dustbin
+from yaner.Xmlrpc import ServerProxy
+from yaner.Presentable import Presentable, Queuing, Category, Dustbin
 from yaner.utils.Logging import LoggingMixin
-from yaner.utils.Notification import Notification
 
-class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
+class Pool(SQLBase, GObject.GObject, LoggingMixin):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 
@@ -44,17 +43,13 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     with download server.
     """
 
-    __metaclass__ = GObjectSQLObjectMeta
-
     __gsignals__ = {
-            'connected': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, ()),
-            'disconnected': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, ()),
-            'presentable-added': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Presentable,)),
-            'presentable-removed': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Presentable,)),
+            'connected': (GObject.SignalFlags.RUN_LAST, None, ()),
+            'disconnected': (GObject.SignalFlags.RUN_LAST, None, ()),
+            'presentable-added': (GObject.SignalFlags.RUN_LAST,
+                None, (Presentable,)),
+            'presentable-removed': (GObject.SignalFlags.RUN_LAST,
+                None, (Presentable,)),
             }
     """
     GObject signals of this class.
@@ -63,19 +58,30 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     _CONNECTION_INTERVAL = 5
     """Interval for keeping connection, in second(s)."""
 
-    name = sqlobject.UnicodeCol()
-    user = sqlobject.StringCol(default='')
-    passwd = sqlobject.StringCol(default='')
-    host = sqlobject.StringCol()
-    port = sqlobject.IntCol(default=6800)
+    name = Column(Unicode)
+    user = Column(Unicode)
+    passwd = Column(Unicode)
+    host = Column(Unicode)
+    port = Column(Integer)
+    categories = relationship(Category, backref='pool')
+    tasks = relationship(Task, backref='pool')
 
-    categories = sqlobject.SQLMultipleJoin('Category')
-    tasks = sqlobject.SQLMultipleJoin('Task')
+    def __init__(self, name, host, user='', passwd='', port=6800):
+        self.name = name
+        self.user = user
+        self.passwd = passwd
+        self.host = host
+        self.port = port
 
-    def _init(self, *args, **kwargs):
+        SQLSession.add(self)
+        SQLSession.commit()
+
+        self._init()
+
+    @reconstructor
+    def _init(self):
+        GObject.GObject.__init__(self)
         LoggingMixin.__init__(self)
-        gobject.GObject.__init__(self)
-        sqlobject.SQLObject._init(self, *args, **kwargs)
 
         self._queuing = None
         self._categories = []
@@ -87,12 +93,15 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
         self.do_disconnected()
         self._keep_connection()
 
+    def __repr__(self):
+        return "<Pool {}>".format(self.name)
+
     @property
     def proxy(self):
         """Get the xmlrpc proxy of the pool."""
         if self._proxy is None:
             connstr = 'http://{0.user}:{0.passwd}@{0.host}:{0.port}/rpc'
-            self._proxy = xmlrpc.Proxy(connstr.format(self))
+            self._proxy = ServerProxy(connstr.format(self))
         return self._proxy
 
     @property
@@ -112,7 +121,7 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     @property
     def presentables(self):
         """Get the presentables of the pool."""
-        return [self.queuing] + list(self.categories) + [self.dustbin]
+        return [self.queuing] + self.categories + [self.dustbin]
 
     @property
     def connected(self):
@@ -148,36 +157,43 @@ class Pool(sqlobject.SQLObject, gobject.GObject, LoggingMixin):
     def _keep_connection(self):
         """Keep calling C{aria2.getVersion} and mark pool as connected."""
 
-        def on_got_version(version):
+        def on_got_version(deferred):
             """When got aria2 version, mark the pool as connected."""
             self.connected = True
 
-        deferred = self.proxy.callRemote('aria2.getVersion')
-        deferred.addCallbacks(on_got_version, self._on_twisted_error)
+        deferred = self.proxy.call('aria2.getVersion')
+        deferred.add_callback(on_got_version)
+        deferred.add_errback(self._on_xmlrpc_error)
+        deferred.start()
 
-        glib.timeout_add_seconds(self._CONNECTION_INTERVAL,
+        GLib.timeout_add_seconds(self._CONNECTION_INTERVAL,
                 self._keep_connection)
         return False
 
     def _resume_session(self):
         """Get session id from pool."""
 
-        def on_got_session_info(session_info):
+        def on_got_session_info(deferred):
             """When got session info, call L{yaner.Task.begin_update_status}
             on every task with the same session id.
             """
-            for task in self.queuing.tasks.filter(
-                    Task.q.session_id == session_info['sessionId']):
-                task.status = Task.STATUSES.WAITING
-                task.begin_update_status()
+            session_info = deferred.result
+            for task in self.queuing.tasks:
+                if task.session_id == session_info['sessionId']:
+                    task.status = Task.STATUSES.WAITING
+                    task.begin_update_status()
 
-        deferred = self.proxy.callRemote('aria2.getSessionInfo')
-        deferred.addCallbacks(on_got_session_info, self._on_twisted_error)
+        deferred = self.proxy.call('aria2.getSessionInfo')
+        deferred.add_callback(on_got_session_info)
+        deferred.add_errback(self._on_xmlrpc_error)
+        deferred.start()
 
-    def _on_twisted_error(self, failure):
-        """When we meet a twisted error, it may be caused by network error,
+    def _on_xmlrpc_error(self, deferred):
+        """When we meet a xmlrpc error, it may be caused by network error,
         mark the server as disconnected.
 
         """
         self.connected = False
+
+GObject.type_register(Pool)
 

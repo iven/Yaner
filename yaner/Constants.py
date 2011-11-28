@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -22,23 +22,6 @@
 
 """
 This module contains the global constants of L{yaner}.
-"""
-
-from os.path import join as _join
-from xdg.BaseDirectory import xdg_config_home as _config_home
-
-PREFIX = "@prefix@"
-"""The install prefix, usually "I{/usr}" or "I{/usr/local}"."""
-
-DATA_DIR = _join(PREFIX, "share/{0}".format(__package__))
-"""
-The global data directory of L{yaner}, which contains default
-configurations, ui related files, icons, etc.
-"""
-
-U_CONFIG_DIR = _join(_config_home, __package__)
-"""
-The directory containing user configurations.
 """
 
 BUS_NAME = 'com.kissuki.{0}'.format(__package__)
