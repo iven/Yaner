@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-11-11 10:53+0800\n"
+"POT-Creation-Date: 2011-11-28 23:16+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,188 +17,361 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../scripts/../yaner/Application.py:52
-msgid "License GPLv3+: GNU GPL version 3 or later"
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:54
-msgid "This is free software:"
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:55
-msgid "You are free to change and redistribute it."
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:56
-msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:117
+#: scripts/../yaner/Application.py:89
 msgid "Reading global configuration file..."
 msgstr ""
 
-#: ../scripts/../yaner/Application.py:120
-msgid "No global configuration file, creating..."
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:131
-msgid "Connecting to global database file..."
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:141
-msgid "Global database file connected."
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:158
-msgid "Parsing command line arguments..."
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:159
-msgid "Command line arguments: {0}"
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:162
-msgid "{0} download mananger."
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:164
-msgid "filename to save"
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:166
-msgid "referer page of the link"
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:168
-msgid "cookies of the website"
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:170
-msgid "the download addresses"
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:172
-msgid "output version information and exit"
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:175
-msgid "Command line arguments parsed."
-msgstr ""
-
-#: ../scripts/../yaner/Application.py:207
+#: scripts/../yaner/Application.py:107
 msgid "Logging system initialized, start logging..."
 msgstr ""
 
-#: ../scripts/../yaner/Application.py:211
+#: scripts/../yaner/Application.py:112
+msgid "Connecting to global database file..."
+msgstr ""
+
+#: scripts/../yaner/Application.py:119
 msgid "Initializing database for first start..."
 msgstr ""
 
-#: ../scripts/../yaner/Application.py:219
-#: ../scripts/../yaner/Configurations.py:81
+#: scripts/../yaner/Application.py:124
 msgid "My Computer"
 msgstr ""
 
-#: ../scripts/../yaner/Application.py:220
-#: ../scripts/../yaner/Configurations.py:103
+#: scripts/../yaner/Application.py:125
 msgid "Default Category"
 msgstr ""
 
-#: ../scripts/../yaner/Application.py:222
+#: scripts/../yaner/Application.py:127
 msgid "Database initialized."
 msgstr ""
 
-#: ../scripts/../yaner/Application.py:229
+#: scripts/../yaner/Application.py:129
+msgid "Global database file connected."
+msgstr ""
+
+#: scripts/../yaner/Application.py:162
 msgid "Application quit normally."
 msgstr ""
 
-#: ../scripts/../yaner/Presentable.py:136
+#: scripts/../yaner/Misc.py:55
+msgid "License GPLv3+: GNU GPL version 3 or later"
+msgstr ""
+
+#: scripts/../yaner/Misc.py:57
+msgid "This is free software:"
+msgstr ""
+
+#: scripts/../yaner/Misc.py:58
+msgid "You are free to change and redistribute it."
+msgstr ""
+
+#: scripts/../yaner/Misc.py:59
+msgid "There is NO WARRANTY, to the extent permitted by law."
+msgstr ""
+
+#: scripts/../yaner/Presentable.py:170
 msgid "Dustbin"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Dialogs.py:76
-msgid "No task options config file, creating..."
+#: scripts/../yaner/Task.py:302
+msgid "Network Error"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Dialogs.py:344
+#: scripts/../yaner/ui/Dialogs.py:327
 msgid "Select download directory"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Dialogs.py:347
-msgid "_Cancel"
+#: scripts/../yaner/ui/Misc.py:53
+msgid "@widget is not a Gtk.Widget."
 msgstr ""
 
-#: ../scripts/../yaner/ui/Dialogs.py:348
-msgid "_Select"
-msgstr ""
-
-#: ../scripts/../yaner/ui/Misc.py:46
-msgid "@widget is not a gtk.Widget."
-msgstr ""
-
-#: ../scripts/../yaner/ui/Misc.py:57
+#: scripts/../yaner/ui/Misc.py:64
 msgid "Got mix color: {0}."
 msgstr ""
 
-#: ../scripts/../yaner/ui/PoolTree.py:103
+#: scripts/../yaner/ui/PoolTree.py:98
 msgid "Adding presentable {0}..."
 msgstr ""
 
-#: ../scripts/../yaner/ui/PoolTree.py:110
+#: scripts/../yaner/ui/PoolTree.py:105
 msgid "No parent presentable for {0}."
 msgstr ""
 
-#: ../scripts/../yaner/ui/TaskListTree.py:137
+#: scripts/../yaner/ui/TaskListTree.py:108
 msgid "Adding task {}..."
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:63
+#: scripts/../yaner/ui/TaskListTree.py:147
+msgid "Tasks"
+msgstr ""
+
+#: scripts/../yaner/ui/TaskListTree.py:160
+msgid "Progress"
+msgstr ""
+
+#: scripts/../yaner/ui/TaskListTree.py:169
+msgid "Speed"
+msgstr ""
+
+#: scripts/../yaner/ui/TaskListTree.py:177 scripts/../yaner/ui/task_new.ui:203
+#: scripts/../yaner/ui/task_profile.ui:249
+msgid "Connections"
+msgstr ""
+
+#: scripts/../yaner/ui/Toplevel.py:65
 msgid "Initializing toplevel window..."
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:117
+#: scripts/../yaner/ui/Toplevel.py:145
 msgid "Toplevel window initialized."
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:145
+#: scripts/../yaner/ui/Toplevel.py:170
+msgid "Yaner"
+msgstr ""
+
+#: scripts/../yaner/ui/Toplevel.py:186
 msgid "Initializing action group..."
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:150
-msgid "File"
+#: scripts/../yaner/ui/Toplevel.py:191
+msgid "New Task"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:152
+#: scripts/../yaner/ui/Toplevel.py:193
 msgid "HTTP/FTP/BT Magnet"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:154
+#: scripts/../yaner/ui/Toplevel.py:195 scripts/../yaner/ui/task_new.ui:711
 msgid "BitTorrent"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:156
+#: scripts/../yaner/ui/Toplevel.py:197 scripts/../yaner/ui/task_new.ui:958
+#: scripts/../yaner/ui/task_profile.ui:720
 msgid "Metalink"
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:171
+#: scripts/../yaner/ui/Toplevel.py:199
+msgid "Start"
+msgstr ""
+
+#: scripts/../yaner/ui/Toplevel.py:201
+msgid "Pause"
+msgstr ""
+
+#: scripts/../yaner/ui/Toplevel.py:203
+msgid "Remove"
+msgstr ""
+
+#: scripts/../yaner/ui/Toplevel.py:212
 msgid "Action group initialized."
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:177
+#: scripts/../yaner/ui/Toplevel.py:218
 msgid "Initializing UI Manager..."
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:184
+#: scripts/../yaner/ui/Toplevel.py:225
 msgid "Failed to add ui file to UIManager."
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:188
+#: scripts/../yaner/ui/Toplevel.py:229
 msgid "UI Manager initialized."
 msgstr ""
 
-#: ../scripts/../yaner/ui/Toplevel.py:196
+#: scripts/../yaner/ui/Toplevel.py:237
 msgid "Adding pool {0}..."
 msgstr ""
 
-#: ../scripts/../yaner/utils/Configuration.py:62
-msgid "Created directory {0}."
+#: scripts/../yaner/ui/task_new.ui:7
+msgid "Add new task"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:114
+msgid "<b>URI(s)</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:152
+msgid "Referer"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:164
+msgid "Rename"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:238 scripts/../yaner/ui/task_new.ui:691
+#: scripts/../yaner/ui/task_new.ui:938
+msgid "<b>Settings</b> - Optional"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:276 scripts/../yaner/ui/task_new.ui:360
+msgid "User"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:302 scripts/../yaner/ui/task_new.ui:333
+msgid "Password"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:389
+msgid "<b>HTTP</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:400
+msgid "<b>FTP</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:417
+msgid "<b>Authorization</b> - Optional"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:434
+msgid "Normal / BT Magnet"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:473
+msgid "<b>Torrent File</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:519
+msgid "<b>URI(s)</b> - Optional"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:557 scripts/../yaner/ui/task_profile.ui:352
+msgid "Max open files"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:569 scripts/../yaner/ui/task_profile.ui:499
+msgid "Seed time(min)"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:583 scripts/../yaner/ui/task_profile.ui:512
+msgid "Seed ratio"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:643
+msgid "Max peers"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:669
+msgid "Preview mode - Try to download first and last pieces first"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:751
+msgid "<b>Metalink File</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:789 scripts/../yaner/ui/task_profile.ui:591
+msgid "Download servers"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:801
+msgid "Preferred locations"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:831 scripts/../yaner/ui/task_profile.ui:614
+msgid "Language"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:907
+msgid "OS"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:921 scripts/../yaner/ui/task_profile.ui:627
+msgid "Version"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:999
+msgid "Category"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:1011
+msgid "Directory"
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:1075
+msgid "_Browse..."
+msgstr ""
+
+#: scripts/../yaner/ui/task_new.ui:1106
+msgid "<b>Server and Category</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:7
+msgid "Default task profile"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:59
+msgid "Connect timeout(sec)"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:84
+msgid "Timeout(sec)"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:117
+msgid "<b>Timeout</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:150
+msgid "Max tries"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:175
+msgid "Max file not found tries"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:208
+msgid "<b>Retry</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:225
+msgid "General"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:259
+msgid "Per server connections"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:302
+msgid "Auto renaming"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:327
+msgid "Normal"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:377
+msgid "Max Peers"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:407
+msgid "Tracker connect timeout(sec)"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:437
+msgid "Tracker timeout(sec)"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:465
+msgid "! Follow torrent"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:481
+msgid "Preview mode"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:566
+msgid "Bittorrent"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:601
+msgid "Prefered locations"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:637
+msgid "! Follow metalink"
+msgstr ""
+
+#: scripts/../yaner/ui/task_profile.ui:736
+msgid "<i>! Do NOT change this option.</i>"
 msgstr ""
