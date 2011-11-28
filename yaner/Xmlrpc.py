@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -22,29 +22,26 @@
 
 """This module contains async xmlrpc proxy."""
 
-import glib
-import gobject
 import socket
-import httplib
-import xmlrpclib
+import http.client
+import xmlrpc.client
 import threading
 
 from functools import partial
+from gi.repository import GLib
+from gi.repository import GObject
 
-class _Deferred(threading.Thread, gobject.GObject):
+class _Deferred(threading.Thread, GObject.GObject):
 
     __gsignals__ = {
-            'success': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, ()),
-            'fault': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, ()),
-            'error': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, ()),
+            'success': (GObject.SignalFlags.RUN_LAST, None, ()),
+            'fault': (GObject.SignalFlags.RUN_LAST, None, ()),
+            'error': (GObject.SignalFlags.RUN_LAST, None, ()),
             }
 
     def __init__(self, target, args=(), kwargs=None):
         threading.Thread.__init__(self)
-        gobject.GObject.__init__(self)
+        GObject.GObject.__init__(self)
 
         self.target = target
         self.args = args
@@ -56,17 +53,17 @@ class _Deferred(threading.Thread, gobject.GObject):
 
     def add_callback(self, func):
         """Connect signal "success" to func."""
-        self.connect("success", partial(glib.idle_add, func))
+        self.connect("success", partial(GLib.idle_add, func))
         return self
 
     def add_errback(self, func):
         """Connect signal "error" to func."""
-        self.connect("error", partial(glib.idle_add, func))
+        self.connect("error", partial(GLib.idle_add, func))
         return self
 
     def add_faultback(self, func):
         """Connect signal "fault" to func."""
-        self.connect("fault", partial(glib.idle_add, func))
+        self.connect("fault", partial(GLib.idle_add, func))
         return self
 
     def run(self):
@@ -79,13 +76,17 @@ class _Deferred(threading.Thread, gobject.GObject):
         """
         try:
             self.result = self.target(*self.args, **self.kwargs)
-        except xmlrpclib.Fault as self.fault:
+        except xmlrpc.client.Fault as fault:
+            self.fault = fault
             self.emit('fault')
-        except socket.error as self.error:
+        except socket.error as error:
+            self.error = error
             self.emit('error')
-        except httplib.error as self.error:
+        except http.client.error as error:
+            self.error = error
             self.emit('error')
-        except xmlrpclib.ProtocolError as self.error:
+        except xmlrpc.client.ProtocolError as error:
+            self.error = error
             self.emit('error')
         else:
             self.emit('success')
@@ -109,7 +110,7 @@ class ServerProxy(object):
         """Create a std C{ServerProxy} and return a L{_Deferred} to
         call it. The returned L{_Deferred} must be started manually.
         """
-        proxy = xmlrpclib.ServerProxy(self.connstr)
+        proxy = xmlrpc.client.ServerProxy(self.connstr)
         func = getattr(proxy, funcstr)
         return _Deferred(func, args=args, kwargs=kwargs)
 

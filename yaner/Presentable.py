@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -24,8 +24,7 @@
 This module contains the L{Presentable} class of L{yaner}.
 """
 
-import gobject
-
+from gi.repository import GObject
 from sqlalchemy import Column, Integer, Unicode, ForeignKey
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -35,16 +34,15 @@ from yaner.Task import Task
 from yaner.utils.Enum import Enum
 from yaner.utils.Logging import LoggingMixin
 
-class Presentable(LoggingMixin, gobject.GObject):
+class Presentable(LoggingMixin, GObject.GObject):
     """
     The Presentable class of L{yaner}, which provides data for L{PoolModel}.
     """
 
     __gsignals__ = {
-            'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
-            'task-added': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (Task,)),
-            'task-removed': (gobject.SIGNAL_RUN_LAST,
-                gobject.TYPE_NONE, (Task,)),
+            'changed': (GObject.SignalFlags.RUN_LAST, None, ()),
+            'task-added': (GObject.SignalFlags.RUN_LAST, None, (Task,)),
+            'task-removed': (GObject.SignalFlags.RUN_LAST, None, (Task,)),
             }
     """
     GObject signals of this class.
@@ -59,7 +57,7 @@ class Presentable(LoggingMixin, gobject.GObject):
 
     def __init__(self):
         LoggingMixin.__init__(self)
-        gobject.GObject.__init__(self)
+        GObject.GObject.__init__(self)
 
     def add_task(self, task):
         """When task added, emit signals."""
@@ -136,7 +134,7 @@ class Category(SQLBase, Presentable):
         self.parent = self.pool.queuing
 
     def __repr__(self):
-        return u"<Category {}>".format(self.name)
+        return "<Category {}>".format(self.name)
 
     @hybrid_property
     def name(self):

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -24,9 +24,8 @@
 This module contains the L{Task} class of L{yaner}.
 """
 
-import glib
-import gobject
-
+from gi.repository import GLib
+from gi.repository import GObject
 from sqlalchemy import Column, Integer, PickleType, Unicode, ForeignKey
 from sqlalchemy.orm import reconstructor, deferred
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -36,13 +35,13 @@ from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 from yaner.utils.Notification import Notification
 
-class Task(SQLBase, gobject.GObject, LoggingMixin):
+class Task(SQLBase, GObject.GObject, LoggingMixin):
     """
     Task class is just downloading tasks, which provides data to L{TaskListModel}.
     """
 
     __gsignals__ = {
-            'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
+            'changed': (GObject.SignalFlags.RUN_LAST, None, ()),
             }
     """
     GObject signals of this class.
@@ -84,10 +83,10 @@ class Task(SQLBase, gobject.GObject, LoggingMixin):
     uris = Column(PickleType, default=[])
     completed_length = Column(Integer, default=0)
     total_length = Column(Integer, default=0)
-    gid = Column(Unicode, default=u'')
+    gid = Column(Unicode, default='')
     metafile = deferred(Column(PickleType, default=None))
     options = Column(PickleType)
-    session_id = Column(Unicode, default=u'')
+    session_id = Column(Unicode, default='')
     category_id = Column(Integer, ForeignKey('category.id'))
     pool_id = Column(Integer, ForeignKey('pool.id'))
 
@@ -95,7 +94,7 @@ class Task(SQLBase, gobject.GObject, LoggingMixin):
 
     def __init__(self, name, type, pool, category, options,
             status=STATUSES.INACTIVE, uris=[], completed_length=0,
-            total_length=0, gid=u'', metafile=None, session_id=u''):
+            total_length=0, gid='', metafile=None, session_id=''):
         self.name = name
         self.status = status
         self.type = type
@@ -117,7 +116,7 @@ class Task(SQLBase, gobject.GObject, LoggingMixin):
     @reconstructor
     def _init(self):
         LoggingMixin.__init__(self)
-        gobject.GObject.__init__(self)
+        GObject.GObject.__init__(self)
 
         self.upload_speed = 0
         self.download_speed = 0
@@ -127,7 +126,7 @@ class Task(SQLBase, gobject.GObject, LoggingMixin):
         self._database_sync_handle = None
 
     def __repr__(self):
-        return u"<Task {}>".format(self.name)
+        return "<Task {}>".format(self.name)
 
     @hybrid_property
     def status(self):
@@ -150,7 +149,7 @@ class Task(SQLBase, gobject.GObject, LoggingMixin):
 
     def start(self):
         """Unpause task if it's paused, otherwise add it (again)."""
-        if self.status in [self.STATUSES.PAUSED, self.STATUSES.WAITING]:
+        if self.status == self.STATUSES.PAUSED:
             deferred = self.pool.proxy.call('aria2.unpause', self.gid)
             deferred.add_callback(self._on_unpaused)
             deferred.add_errback(self._on_xmlrpc_error)
@@ -191,18 +190,18 @@ class Task(SQLBase, gobject.GObject, LoggingMixin):
         waiting before calling this.
         """
         if self._status_update_handle is None:
-            self._status_update_handle = glib.timeout_add_seconds(
+            self._status_update_handle = GLib.timeout_add_seconds(
                     self._UPDATE_INTERVAL, self._call_tell_status)
-            self._database_sync_handle = glib.timeout_add_seconds(
+            self._database_sync_handle = GLib.timeout_add_seconds(
                     self._SYNC_INTERVAL, self._sync_update)
 
     def end_update_status(self):
         """Stop updating status every second."""
         if self._status_update_handle:
-            glib.source_remove(self._status_update_handle)
+            GLib.source_remove(self._status_update_handle)
             self._status_update_handle = None
         if self._database_sync_handle:
-            glib.source_remove(self._database_sync_handle)
+            GLib.source_remove(self._database_sync_handle)
             self._database_sync_handle = None
 
     def _sync_update(self):
@@ -213,7 +212,7 @@ class Task(SQLBase, gobject.GObject, LoggingMixin):
         """Get session id of the pool and store it in task."""
         def on_got_session_info(deferred):
             """Set session id the task belongs to."""
-            self.session_id = unicode(deferred.result['sessionId'])
+            self.session_id = deferred.result['sessionId']
             self._sync_update()
 
         deferred = self.pool.proxy.call('aria2.getSessionInfo', self.gid)
@@ -224,7 +223,7 @@ class Task(SQLBase, gobject.GObject, LoggingMixin):
     def _on_started(self, deferred):
         """Task started callback, update task information."""
 
-        gid = unicode(deferred.result)
+        gid = deferred.result
         self.gid = gid[-1] if isinstance(gid, list) else gid
         self.status = self.STATUSES.ACTIVE
 
@@ -299,7 +298,8 @@ class Task(SQLBase, gobject.GObject, LoggingMixin):
     def _on_xmlrpc_error(self, deferred):
         """Handle errors occured when calling some function via xmlrpc."""
         self.status = self.STATUSES.ERROR
-        Notification(_('Network Error'), deferred.error.message).show()
+        message = getattr(deferred.error, 'message', str(deferred.error))
+        Notification(_('Network Error'), message).show()
 
 class NormalTask(Task):
     """Normal Task."""
@@ -346,5 +346,5 @@ class MLTask(Task):
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
 
-gobject.type_register(Task)
+GObject.type_register(Task)
 

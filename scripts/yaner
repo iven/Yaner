@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -26,25 +26,72 @@ placed under a directory in $PATH.
     We just do some requirement checking here, and then load the main
 window of the application.
 """
-import pygtk
-pygtk.require('2.0')
-import gtk
 
-if gtk.pygtk_version < (2, 12, 0):
-    raise SystemExit(' * Error: PyGtk 2.12.0 or later required')
+import sys
+import gettext
+import argparse
+
+from yaner import __package__
+from yaner.Misc import _VERSION
+
+# Setup Translation
+gettext.install('yaner')
+
+# Parse command line arguments
+options = None
+if len(sys.argv) > 1:
+    parser = argparse.ArgumentParser(
+            description=_('{0} download mananger.').format(__package__))
+    parser.add_argument('-n', '--rename', metavar='FILENAME',
+            help=_('filename to save'))
+    parser.add_argument('-r', '--referer', nargs='?', const='',
+            default='', help=_('referer page of the link'))
+    parser.add_argument('-c', '--cookie', nargs='?', const='',
+            default='', help=_('cookies of the website'))
+    parser.add_argument('uris', nargs='*', metavar='URI | MAGNET',
+            help=_('the download addresses'))
+    parser.add_argument('-v', '--version', action=_VERSION, nargs=0,
+            help=_('output version information and exit'))
+    args = parser.parse_args()
+
+    options = {'referer': args.referer,
+               'header': args.cookie,
+               'uris': str(args.uris),
+              }
+    if args.rename is not None:
+        options['out'] = args.rename
+
+# Requirements
+try:
+    import gi
+except ImportError:
+    raise SystemExit(' * Error: pygobject required')
 
 try:
-    import pynotify
-except ImportError:
-    raise SystemExit(' * Error: the "pynotify" module is missing. \
-            Check if it is installed properly.')
+    gi.require_version('Gtk', '3.0')
+except ValueError:
+    raise SystemExit(' * Error: Gtk3 required')
+
+try:
+    gi.require_version('GLib', '2.0')
+except ValueError:
+    raise SystemExit(' * Error: GLib2 required')
 else:
-    pynotify.init('yaner')
+    from gi.repository import GLib
 
-# Translation setup
-import gettext
-gettext.install('yaner', unicode=True)
+try:
+    from gi.repository import Notify
+except ImportError:
+    raise SystemExit(' * Error: libnotify required')
+else:
+    Notify.init('yaner')
 
+# Start the Application
 from yaner.Application import Application
 main_app = Application()
-main_app.run()
+if options is not None:
+    main_app.register(None)
+    # FIXME: GLib works strange when passing dictionaries, maybe a bug
+    main_app.activate_action('cmdline', GLib.Variant.new_string(str(options)))
+main_app.run(None)
+

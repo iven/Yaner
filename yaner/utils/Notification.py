@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=UTF-8
 
 # This file is part of Yaner.
@@ -22,13 +22,14 @@
 
 """This module contains the Notification class."""
 
-import pynotify
+from gi.repository import Notify
 
 from yaner import __package__ as DEFAULT_ICON
 
-class Notification(pynotify.Notification):
-    """This class provides a pre-set icon to C{pynotify.Notification}."""
+class Notification(Notify.Notification):
+    """This class provides a pre-set icon to C{Notify.Notification}."""
 
     def __init__(self, summary, description, icon=DEFAULT_ICON):
-        pynotify.Notification.__init__(self, summary, description, icon)
+        Notify.Notification.__init__(self, summary=summary,
+                body=description, icon_name=icon)
 
