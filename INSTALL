@@ -1,20 +1,22 @@
 Dependences
 ======
-PyGTK >= 2.12
+Python >= 3.2.0
+PyGObject
+GTK3
+libnotify
 SQLAlchemy >= 0.7.0
-PyNotify >= 0.1.1
 
 Install
 ======
 Run the setup.py script to install, e.g.:
     python setup.py install (as root, or with root rights using sudo)
 
-To install it to /usr/local (or any other prefix) use:
-    python setup.py install --prefix=/usr/local
+To install it to /usr (or any other prefix) use:
+    python setup.py install --prefix=/usr
 (specify --prefix _after_ install or it won't work)
 
 If you use Debian / Ubuntu, you should install like this:
-    python setup.py install --prefix=/usr/local --install-layout=deb
+    python setup.py install --prefix=/usr --install-layout=deb
 
 Uninstall
 ======
