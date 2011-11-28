@@ -98,8 +98,9 @@ for po_file in glob('po/*.po'):
         os.system(po_buildcmd % (po_name, po_name))
     data_files.append(("share/locale/%s/LC_MESSAGES" % po_name,
         glob('build/locale/%s/yaner.mo' % po_name)))
+config_dir = os.getenv('XDG_CONFIG_DIRS', '/etc/xdg/').split(':')[0]
+data_files.append((os.path.join(config_dir, 'yaner'), glob('config/*')))
 data_files.append(("share/yaner/ui/", glob('ui/*')))
-data_files.append(("share/yaner/config/", glob('config/*')))
 data_files.append(('share/applications/', ['yaner.desktop']))
 
 setup (

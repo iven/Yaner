@@ -30,13 +30,14 @@ import logging
 from gi.repository import Gtk, GLib, Gio
 from sqlalchemy import create_engine
 
+from yaner import __package__
 from yaner import SQLSession, SQLBase
+from yaner.XDG import save_data_file, save_config_file, load_first_config
 from yaner.Pool import Pool
 from yaner.Task import Task
 from yaner.Presentable import Category
 from yaner.Constants import BUS_NAME
 from yaner.ui.Toplevel import Toplevel
-from yaner.utils.XDG import save_config_path
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
 
@@ -45,9 +46,6 @@ class Application(Gtk.Application, LoggingMixin):
 
     _NAME = __package__
     """The name of the application, used by L{_LOG_FILE}, etc."""
-
-    _CONFIG_DIR = save_config_path('yaner')
-    """User config directory containing configuration files and log files."""
 
     _LOG_FILE = '{0}.log'.format(_NAME)
     """The logging file of the application."""
@@ -89,18 +87,11 @@ class Application(Gtk.Application, LoggingMixin):
         """
         if self._config is None:
             self.logger.info(_('Reading global configuration file...'))
-            config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
-            if config.empty():
-                self.logger.info(_('No global configuration file, creating...'))
-                from yaner.Configurations import GLOBAL_CONFIG
-                config.update(GLOBAL_CONFIG)
-            self._config = config
+            self._config = ConfigParser(load_first_config(self._CONFIG_FILE))
         return self._config
 
     def _init_logging(self):
         """Set up basic config for logging."""
-        if not os.path.exists(self._CONFIG_DIR):
-            os.makedirs(self._CONFIG_DIR)
         formatstr = ' '.join((
             '%(levelname)-8s',
             '%(name)s.%(funcName)s,',
@@ -108,7 +99,7 @@ class Application(Gtk.Application, LoggingMixin):
             '%(message)s'
             ))
         logging.basicConfig(
-            filename = os.path.join(self._CONFIG_DIR, self._LOG_FILE),
+            filename = save_config_file(self._LOG_FILE),
             filemode = 'w',
             format = formatstr,
             level = logging.DEBUG
@@ -120,7 +111,7 @@ class Application(Gtk.Application, LoggingMixin):
         start of the application."""
         self.logger.info(_('Connecting to global database file...'))
 
-        data_file = os.path.join(self._CONFIG_DIR, self._DATA_FILE)
+        data_file = save_data_file(self._DATA_FILE)
         engine = create_engine('sqlite:///' + data_file)
         SQLSession.configure(bind=engine)
 
@@ -140,7 +131,8 @@ class Application(Gtk.Application, LoggingMixin):
     def _init_action_group(self):
         """Insert 'cmdline' action for opening new task dialog."""
         action_group = Gio.SimpleActionGroup()
-        action = Gio.SimpleAction.new(name='cmdline', parameter_type=GLib.VariantType.new('s'))
+        action = Gio.SimpleAction.new(name='cmdline',
+                                      parameter_type=GLib.VariantType.new('s'))
         action.connect('activate', self.on_cmdline)
         action_group.insert(action)
         self.set_action_group(action_group)

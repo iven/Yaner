@@ -34,7 +34,7 @@ from yaner import SQLSession
 from yaner.Pool import Pool
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Category
-from yaner.utils.XDG import save_config_path, load_first_data
+from yaner.utils.XDG import load_first_data
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
 
@@ -42,11 +42,6 @@ class TaskDialogMixin(LoggingMixin):
     """
     This class contains attributes and methods used by task related
     dialogs.
-    """
-
-    _CONFIG_DIR = save_config_path('yaner')
-    """
-    User config directory containing configuration files and log files.
     """
 
     _CONFIG_FILE = 'task.conf'
@@ -71,12 +66,7 @@ class TaskDialogMixin(LoggingMixin):
         If the file doesn't exist, read from the default configuration.
         """
         if TaskDialogMixin._CONFIG is None:
-            config = ConfigParser(self._CONFIG_DIR, self._CONFIG_FILE)
-            if config.empty():
-                self.logger.info(_('No task options config file, creating...'))
-                from yaner.Configurations import TASK_CONFIG
-                config.update({'options': TASK_CONFIG['options'].copy()})
-            TaskDialogMixin._CONFIG = config
+            TaskDialogMixin._CONFIG = ConfigParser(self._CONFIG_FILE)
         return TaskDialogMixin._CONFIG
 
     @property
@@ -127,7 +117,7 @@ class TaskDialogMixin(LoggingMixin):
         Reset options and widgets to default. If new_options is provided,
         current options will be updated with it.
         """
-        self._options = self.config['options'].copy()
+        self._options = dict(self.config['new'])
         options = self._options
         if new_options:
             for key, value in new_options.items():
