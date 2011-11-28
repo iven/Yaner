@@ -24,12 +24,18 @@
 This module contains miscellaneous functions used by other modules.
 """
 
+import os
 import logging
 
 from gi.repository import Gtk
 
 _module = '{0}.Misc'.format(__package__)
 _logger = logging.getLogger(_module)
+
+def load_ui_file(filename):
+    """Get the UI file path by filename."""
+    directory = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(directory, filename)
 
 def get_mix_color(widget, state):
     """

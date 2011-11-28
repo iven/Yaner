@@ -100,22 +100,22 @@ for po_file in glob('po/*.po'):
         glob('build/locale/%s/yaner.mo' % po_name)))
 config_dir = os.getenv('XDG_CONFIG_DIRS', '/etc/xdg/').split(':')[0]
 data_files.append((os.path.join(config_dir, 'yaner'), glob('config/*')))
-data_files.append(("share/yaner/ui/", glob('ui/*')))
 data_files.append(('share/applications/', ['yaner.desktop']))
 
 setup (
-        name             = "yaner",
-        version          = __version__,
-        description      = "GTK+ interface for aria2 download mananger",
-        author           = "Iven Hsu (Xu Lijian)",
-        author_email     = "ivenvd@gmail.com",
-        url              = "https://github.com/iven/Yaner",
-        license          = __license__,
-        data_files       = data_files,
-        packages         = ["yaner", "yaner.ui", "yaner.utils"],
-        scripts          = ["scripts/yaner"],
-        cmdclass         = {"uninstall" : Uninstall,
-                            "install" : Install,
-                            "install_data" : InstallData}
-     )
+    name             = "yaner",
+    version          = __version__,
+    description      = "GTK+ interface for aria2 download mananger",
+    author           = "Iven Hsu (Xu Lijian)",
+    author_email     = "ivenvd@gmail.com",
+    url              = "https://github.com/iven/Yaner",
+    license          = __license__,
+    data_files       = data_files,
+    packages         = ["yaner", "yaner.ui", "yaner.utils"],
+    package_data     = {'yaner.ui': ['*.ui', 'ui.xml']},
+    scripts          = ["scripts/yaner"],
+    cmdclass         = {"uninstall" : Uninstall,
+                        "install" : Install,
+                        "install_data" : InstallData},
+    )
 

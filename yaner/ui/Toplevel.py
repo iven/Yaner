@@ -38,13 +38,13 @@ from yaner.Task import Task
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
-from yaner.utils.XDG import load_first_data
+from yaner.ui.Misc import load_ui_file
 from yaner.utils.Logging import LoggingMixin
 
 class Toplevel(Gtk.Window, LoggingMixin):
     """Toplevel window of L{yaner}."""
 
-    _UI_FILE = load_first_data('yaner', 'ui', 'ui.xml')
+    _UI_FILE = load_ui_file('ui.xml')
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
     def __init__(self, config):
