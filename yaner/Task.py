@@ -298,7 +298,8 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     def _on_xmlrpc_error(self, deferred):
         """Handle errors occured when calling some function via xmlrpc."""
         self.status = self.STATUSES.ERROR
-        Notification(_('Network Error'), deferred.error.message).show()
+        message = getattr(deferred.error, 'message', str(deferred.error))
+        Notification(_('Network Error'), message).show()
 
 class NormalTask(Task):
     """Normal Task."""

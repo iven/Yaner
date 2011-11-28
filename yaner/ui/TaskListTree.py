@@ -247,7 +247,7 @@ class TaskListView(Gtk.TreeView):
         """Method for set the progress bar style in the column."""
         task = model.get_task(iter_)
         percent = 0 if (task.total_length == 0) else \
-                (float(task.completed_length) / task.total_length)
+                (task.completed_length / task.total_length)
 
         renderer.set_properties(
                 value=percent * 100,

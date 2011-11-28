@@ -30,5 +30,6 @@ class Notification(Notify.Notification):
     """This class provides a pre-set icon to C{Notify.Notification}."""
 
     def __init__(self, summary, description, icon=DEFAULT_ICON):
-        Notify.Notification.__init__(self, summary, description, icon)
+        Notify.Notification.__init__(self, summary=summary,
+                body=description, icon_name=icon)
 
