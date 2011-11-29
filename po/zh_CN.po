@@ -6,7 +6,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: yaner 0.2.0\n"
+"Project-Id-Version: yaner 0.2.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-11-28 23:16+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
