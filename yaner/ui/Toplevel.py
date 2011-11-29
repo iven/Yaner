@@ -274,14 +274,17 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
     def _on_task_list_view_button_pressed(self, treeview, event):
         """Popup menu when necessary."""
+        # If the clicked row is not selected, select it only
+        selection = treeview.get_selection()
+        (model, paths) = selection.get_selected_rows()
+        current_path = treeview.get_path_at_pos(event.x, event.y)
+        if current_path is None:
+            selection.unselect_all()
+
         if event.button == 3:
-            # If the clicked row is not selected, select it only
-            selection = treeview.get_selection()
-            (model, paths) = selection.get_selected_rows()
-            current_path = treeview.get_path_at_pos(event.x, event.y)[0]
-            if current_path not in paths:
+            if current_path is not None and current_path[0] not in paths:
                 selection.unselect_all()
-                selection.select_path(current_path)
+                selection.select_path(current_path[0])
 
             popup_dict = {Presentable.TYPES.QUEUING: 'queuing_task',
                           Presentable.TYPES.CATEGORY: 'category_task',
