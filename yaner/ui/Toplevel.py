@@ -35,6 +35,7 @@ from yaner import SQLSession
 from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Task import Task
+from yaner.Presentable import Presentable
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
@@ -96,6 +97,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         task_list_view.set_level_indentation(16)
         task_list_view.expand_all()
         task_list_view.selection.set_mode(Gtk.SelectionMode.MULTIPLE)
+        task_list_view.connect('button-press-event', self._on_task_list_view_button_pressed)
 
         self._task_list_view = task_list_view
 
@@ -214,7 +216,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
         if self._popups is None:
             get_widget = self.ui_manager.get_widget
             popups = {}
-            for popup_name in ('tray', ):
+            for popup_name in ('tray', 'queuing_task', 'category_task',
+                               'dustbin_task'):
                 popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
             self._popups = popups
         return self._popups
@@ -266,6 +269,26 @@ class Toplevel(Gtk.Window, LoggingMixin):
             return True
         else:
             return False
+
+    def _on_task_list_view_button_pressed(self, treeview, event):
+        """Popup menu when necessary."""
+        if event.button == 3:
+            # If the clicked row is not selected, select it only
+            selection = treeview.get_selection()
+            (model, paths) = selection.get_selected_rows()
+            current_path = treeview.get_path_at_pos(event.x, event.y)[0]
+            if current_path not in paths:
+                selection.unselect_all()
+                selection.select_path(current_path)
+
+            popup_dict = {Presentable.TYPES.QUEUING: 'queuing_task',
+                          Presentable.TYPES.CATEGORY: 'category_task',
+                          Presentable.TYPES.DUSTBIN: 'dustbin_task',
+                         }
+            popup_menu = self.popups[popup_dict[model.presentable.TYPE]]
+            popup_menu.popup(None, None, None, None, event.button, event.time)
+            return True
+        return False
 
     def on_pool_view_selection_changed(self, selection):
         """

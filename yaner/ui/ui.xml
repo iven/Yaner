@@ -23,5 +23,16 @@
         <separator />
         <menuitem action='quit' />
     </popup>
+    <popup name='queuing_task_popup'>
+        <menuitem action='task_start' />
+        <menuitem action='task_pause' />
+        <menuitem action='task_remove' />
+    </popup>
+    <popup name='category_task_popup'>
+        <menuitem action='task_remove' />
+    </popup>
+    <popup name='dustbin_task_popup'>
+        <menuitem action='task_remove' />
+    </popup>
 </ui>
 
