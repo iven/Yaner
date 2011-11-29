@@ -55,7 +55,7 @@ if len(sys.argv) > 1:
     args = parser.parse_args()
 
     options = {'referer': args.referer,
-               'header': args.cookie,
+               'header': 'Cookie: {}'.format(args.cookie),
                'uris': str(args.uris),
               }
     if args.rename is not None:
