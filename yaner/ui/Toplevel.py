@@ -111,22 +111,23 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         self._pool_model = PoolModel()
 
-        # Add Pools to the PoolModel
-        for pool in SQLSession.query(Pool):
-            self._add_pool(pool)
-
         pool_view = PoolView(self._pool_model)
         pool_view.set_size_request(200, -1)
         pool_view.set_headers_visible(False)
         pool_view.set_show_expanders(False)
         pool_view.set_level_indentation(16)
-        pool_view.expand_all()
 
         self._pool_view = pool_view
 
         pool_view.selection.set_mode(Gtk.SelectionMode.SINGLE)
         pool_view.selection.connect("changed",
                 self.on_pool_view_selection_changed)
+
+        # Add Pools to the PoolModel
+        for pool in SQLSession.query(Pool):
+            self._pool_model.add_pool(pool)
+        pool_view.expand_all()
+        # Select first iter
         pool_view.selection.select_iter(
                 self._pool_model.get_iter_first())
 
@@ -241,16 +242,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """Get the global configuration of the application."""
         return self._config
 
-    def _add_pool(self, pool):
-        """
-        Initialize pools for the application.
-        A pool is an alias for an aria2 server.
-        """
-        self.logger.debug(_('Adding pool {0}...').format(pool.name))
-        pool.connect('presentable-added', self.update)
-        pool.connect('presentable-removed', self.update)
-        self._pool_model.add_pool(pool)
-
     def _on_status_icon_activated(self, status_icon):
         """When status icon clicked, switch the window visible or hidden."""
         self.action_group.get_action('toggle_hidden').activate()
@@ -313,10 +304,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """When task remove button clicked, remove the task."""
         for task in self._task_list_view.selected_tasks:
             task.remove()
-
-    def update(self):
-        """Update the window."""
-        pass
 
     def about(self, *args, **kwargs):
         """Show about dialog."""
