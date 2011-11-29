@@ -79,6 +79,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
         toolbar = self.ui_manager.get_widget('/toolbar')
         vbox.pack_start(toolbar, False, False, 0)
 
+        self._popups = None
+
         # HPaned: PoolView as left, TaskVBox as right
         hpaned = Gtk.HPaned()
         vbox.pack_start(hpaned, True, True, 0)
@@ -139,6 +141,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         # Status icon
         status_icon = Gtk.StatusIcon(stock='gtk-apply')
         status_icon.connect('activate', self._on_status_icon_activated)
+        status_icon.connect('popup-menu', self._on_status_icon_popup)
 
         self.connect('delete-event', self._on_delete_event, status_icon)
 
@@ -148,15 +151,72 @@ class Toplevel(Gtk.Window, LoggingMixin):
     def ui_manager(self):
         """Get the UI Manager of L{yaner}."""
         if self._ui_manager is None:
-            self._ui_manager = self._init_ui_manager()
+            self.logger.info(_('Initializing UI Manager...'))
+
+            ui_manager = Gtk.UIManager()
+            ui_manager.insert_action_group(self.action_group)
+            try:
+                ui_manager.add_ui_from_file(self._UI_FILE)
+            except GObject.GError:
+                self.logger.exception(_("Failed to add ui file to UIManager."))
+                logging.shutdown()
+                sys.exit(1)
+            else:
+                self.logger.info(_('UI Manager initialized.'))
+            self._ui_manager = ui_manager
         return self._ui_manager
 
     @property
     def action_group(self):
         """Get the action group of L{yaner}."""
         if self._action_group is None:
-            self._action_group = self._init_action_group()
+            self.logger.info(_('Initializing action group...'))
+
+            # The actions used by L{action_group}. The members are:
+            # name, stock-id, label, accelerator, tooltip, callback
+            action_entries = (
+                ("task_new", 'gtk-add', _("New Task"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.NORMAL)),
+                ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.NORMAL)),
+                ("task_new_bt", 'gtk-add', _("BitTorrent"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.BT)),
+                ("task_new_ml", 'gtk-add', _("Metalink"), None, None,
+                    partial(self.on_task_new, task_type = Task.TYPES.ML)),
+                ("task_start", 'gtk-media-play', _("Start"), None, None,
+                    self.on_task_start),
+                ("task_pause", 'gtk-media-pause', _("Pause"), None, None,
+                    self.on_task_pause),
+                ("task_start_all", 'gtk-media-play', _("Start All"), None, None,
+                    self.on_task_start_all),
+                ("task_pause_all", 'gtk-media-pause', _("Pause All"), None, None,
+                    self.on_task_pause_all),
+                ("task_remove", 'gtk-delete', _("Remove"), None, None,
+                    self.on_task_remove),
+                ("toggle_hidden", None, _("Show / Hide"), None, None,
+                    self._on_toggle_hidden),
+                ("about", "gtk-about", None, None, None, self.about),
+                ("quit", "gtk-quit", None, None, None, self.destroy),
+            )
+
+            action_group = Gtk.ActionGroup("ToplevelActions")
+            action_group.add_actions(action_entries, self)
+
+            self.logger.info(_('Action group initialized.'))
+
+            self._action_group = action_group
         return self._action_group
+
+    @property
+    def popups(self):
+        """Get popup menus, which is a dict."""
+        if self._popups is None:
+            get_widget = self.ui_manager.get_widget
+            popups = {}
+            for popup_name in ('tray', ):
+                popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
+            self._popups = popups
+        return self._popups
 
     @property
     def task_new_dialog(self):
@@ -181,54 +241,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """Get the global configuration of the application."""
         return self._config
 
-    def _init_action_group(self):
-        """Initialize the action group."""
-        self.logger.info(_('Initializing action group...'))
-
-        # The actions used by L{action_group}. The members are:
-        # name, stock-id, label, accelerator, tooltip, callback
-        action_entries = (
-                ("task_new", 'gtk-add', _("New Task"), None, None,
-                    partial(self.on_task_new, task_type = Task.TYPES.NORMAL)),
-                ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None, None,
-                    partial(self.on_task_new, task_type = Task.TYPES.NORMAL)),
-                ("task_new_bt", 'gtk-add', _("BitTorrent"), None, None,
-                    partial(self.on_task_new, task_type = Task.TYPES.BT)),
-                ("task_new_ml", 'gtk-add', _("Metalink"), None, None,
-                    partial(self.on_task_new, task_type = Task.TYPES.ML)),
-                ("task_start", 'gtk-media-play', _("Start"), None, None,
-                    self.on_task_start),
-                ("task_pause", 'gtk-media-pause', _("Pause"), None, None,
-                    self.on_task_pause),
-                ("task_remove", 'gtk-delete', _("Remove"), None, None,
-                    self.on_task_remove),
-                ("about", "gtk-about", None, None, None, self.about),
-                ("quit", "gtk-quit", None, None, None, self.destroy),
-        )
-
-        action_group = Gtk.ActionGroup("ToplevelActions")
-        action_group.add_actions(action_entries, self)
-
-        self.logger.info(_('Action group initialized.'))
-
-        return action_group
-
-    def _init_ui_manager(self):
-        """Initialize the UIManager, including menus and toolbar."""
-        self.logger.info(_('Initializing UI Manager...'))
-
-        ui_manager = Gtk.UIManager()
-        ui_manager.insert_action_group(self.action_group)
-        try:
-            ui_manager.add_ui_from_file(self._UI_FILE)
-        except GObject.GError:
-            self.logger.exception(_("Failed to add ui file to UIManager."))
-            logging.shutdown()
-            sys.exit(1)
-        else:
-            self.logger.info(_('UI Manager initialized.'))
-            return ui_manager
-
     def _add_pool(self, pool):
         """
         Initialize pools for the application.
@@ -241,6 +253,14 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
     def _on_status_icon_activated(self, status_icon):
         """When status icon clicked, switch the window visible or hidden."""
+        self.action_group.get_action('toggle_hidden').activate()
+
+    def _on_status_icon_popup(self, status_icon, button, activate_time):
+        """When status icon right-clicked, show the menu."""
+        self.popups['tray'].popup(None, None, None, None, button, activate_time)
+
+    def _on_toggle_hidden(self, action, user_data):
+        """Toggle the toplevel window shown or hidden."""
         if self.get_property('visible'):
             self.hide()
         else:
@@ -276,6 +296,18 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """When task pause button clicked, pause the task."""
         for task in self._task_list_view.selected_tasks:
             task.pause()
+
+    def on_task_start_all(self, action, user_data):
+        """Start or unpause all the tasks."""
+        for pool in SQLSession.query(Pool):
+            for task in pool.queuing.tasks:
+                task.start()
+
+    def on_task_pause_all(self, action, user_data):
+        """Pause all the tasks."""
+        for pool in SQLSession.query(Pool):
+            for task in pool.queuing.tasks:
+                task.pause()
 
     def on_task_remove(self, action, user_data):
         """When task remove button clicked, remove the task."""
