@@ -1,3 +1,17 @@
+0.2.1   <2011-11-29>
+======
+ * Fixed cookie format, cookies works now.
+ * Fixed metafile encoding, so BT and ML tasks can be added now.
+
+0.2.0   <2011-11-28>
+======
+ * Use PyGObject + GTK3 instead of pygtk.
+ * Use Python3 instead of Python2.
+ * Use SQLAlchemy instead of SQLObject, which doesn't support Python3.
+ * Much Python3 and GTK3 features, makes the code cleaner.
+ * Removed twisted, which doesn't support Python3 nor GTK3.
+ * Small fixes.
+
 0.1.0   <2011-11-18>
 ======
  * Full redesigned and rewritten, more flexible and easy to expand.
