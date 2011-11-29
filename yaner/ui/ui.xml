@@ -32,6 +32,7 @@
         <menuitem action='task_remove' />
     </popup>
     <popup name='dustbin_task_popup'>
+        <menuitem action='task_restore' />
         <menuitem action='task_remove' />
     </popup>
 </ui>

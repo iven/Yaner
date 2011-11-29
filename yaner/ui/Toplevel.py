@@ -196,6 +196,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
                     self.on_task_pause_all),
                 ("task_remove", 'gtk-delete', _("Remove"), None, None,
                     self.on_task_remove),
+                ("task_restore", 'gtk-undelete', _("Restore"), None, None,
+                    self.on_task_restore),
                 ("toggle_hidden", None, _("Show / Hide"), None, None,
                     self._on_toggle_hidden),
                 ("about", "gtk-about", None, None, None, self.about),
@@ -340,6 +342,11 @@ class Toplevel(Gtk.Window, LoggingMixin):
         else:
             for task in tasks:
                 task.trash()
+
+    def on_task_restore(self, action, user_data):
+        """When task is removed, restore the task."""
+        for task in self._task_list_view.selected_tasks:
+            task.restore()
 
     def about(self, *args, **kwargs):
         """Show about dialog."""

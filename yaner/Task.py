@@ -145,7 +145,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     @property
     def completed(self):
         """Check if task is completed, useful for task undelete."""
-        return self.total_length and (self.total_length != self.completed_length)
+        return self.total_length and (self.total_length == self.completed_length)
 
     def start(self):
         """Unpause task if it's paused, otherwise add it (again)."""
@@ -177,6 +177,17 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
             deferred.add_callback(self._on_trashed)
             deferred.add_errback(self._on_xmlrpc_error)
             deferred.start()
+
+    def restore(self):
+        """Restore task."""
+        if self.status == self.STATUSES.TRASHED:
+            self.pool.dustbin.remove_task(self)
+            if self.completed:
+                self.category.add_task(self)
+                self.status = self.STATUSES.COMPLETE
+            else:
+                self.pool.queuing.add_task(self)
+                self.status = self.STATUSES.INACTIVE
 
     def remove(self):
         """Remove task."""
