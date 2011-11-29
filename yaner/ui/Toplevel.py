@@ -325,8 +325,21 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
     def on_task_remove(self, action, user_data):
         """When task remove button clicked, remove the task."""
-        for task in self._task_list_view.selected_tasks:
-            task.remove()
+        tasks = self._task_list_view.selected_tasks
+        if self._pool_view.selected_presentable.TYPE == Presentable.TYPES.DUSTBIN:
+            dialog = Gtk.MessageDialog(self, Gtk.DialogFlags.MODAL,
+                                       Gtk.MessageType.WARNING,
+                                       Gtk.ButtonsType.YES_NO,
+                                       _('Are you sure to remove these tasks?'),
+                                      )
+            response = dialog.run()
+            dialog.destroy()
+            if response == Gtk.ResponseType.YES:
+                for task in tasks:
+                    task.remove()
+        else:
+            for task in tasks:
+                task.trash()
 
     def about(self, *args, **kwargs):
         """Show about dialog."""

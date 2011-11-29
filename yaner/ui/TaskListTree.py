@@ -202,7 +202,7 @@ class TaskListView(Gtk.TreeView):
                 statuses.PAUSED: 'gtk-media-pause',
                 statuses.COMPLETE: 'gtk-apply',
                 statuses.ERROR: 'gtk-stop',
-                statuses.REMOVED: 'gtk-delete',
+                statuses.TRASHED: 'gtk-delete',
                 statuses.INACTIVE: 'gtk-disconnect',
                 }
         renderer.set_properties(

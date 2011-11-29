@@ -64,7 +64,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         'PAUSED',
         'COMPLETE',
         'ERROR',
-        'REMOVED',
+        'TRASHED',
         ))
     """
     The statuses of the task, which is a L{Enum<yaner.utils.Enum>}.
@@ -166,20 +166,24 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
             deferred.add_errback(self._on_xmlrpc_error)
             deferred.start()
 
+    def trash(self):
+        """Move task to dustbin."""
+        if self.status in (self.STATUSES.COMPLETE, self.STATUSES. ERROR,
+                           self.STATUSES.INACTIVE):
+            self._on_trashed()
+        elif self.status in (self.STATUSES.WAITING, self.STATUSES.ACTIVE,
+                             self.STATUSES.PAUSED):
+            deferred = self.pool.proxy.call('aria2.remove', self.gid)
+            deferred.add_callback(self._on_trashed)
+            deferred.add_errback(self._on_xmlrpc_error)
+            deferred.start()
+
     def remove(self):
         """Remove task."""
-        if self.status == self.STATUSES.REMOVED:
+        if self.status == self.STATUSES.TRASHED:
             self.pool.dustbin.remove_task(self)
             SQLSession.delete(self)
             self._sync_update()
-        elif self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
-                self.STATUSES.INACTIVE):
-            self._on_removed()
-        else:
-            deferred = self.pool.proxy.call('aria2.remove', self.gid)
-            deferred.add_callback(self._on_removed)
-            deferred.add_errback(self._on_xmlrpc_error)
-            deferred.start()
 
     def changed(self):
         """Emit signal "changed"."""
@@ -238,12 +242,12 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         """Task unpaused callback, update status."""
         self.status = self.STATUSES.ACTIVE
 
-    def _on_removed(self, deferred=None):
+    def _on_trashed(self, deferred=None):
         """Task removed callback, remove task from previous presentable and
         move it to dustbin.
         """
         completed = (self.status == self.STATUSES.COMPLETE)
-        self.status = self.STATUSES.REMOVED
+        self.status = self.STATUSES.TRASHED
         if completed:
             self.category.remove_task(self)
         else:
@@ -257,7 +261,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
 
         """
         if self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
-                self.STATUSES.REMOVED, self.STATUSES.INACTIVE):
+                self.STATUSES.TRASHED, self.STATUSES.INACTIVE):
             self.end_update_status()
             return False
         else:
@@ -281,15 +285,15 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
                 'paused': self.STATUSES.PAUSED,
                 'complete': self.STATUSES.COMPLETE,
                 'error': self.STATUSES.ERROR,
-                'removed': self.STATUSES.REMOVED,
+                'removed': self.STATUSES.TRASHED,
                 }
         self.status = statuses[status['status']]
 
         if self.status == self.STATUSES.COMPLETE:
             self.pool.queuing.remove_task(self)
             self.category.add_task(self)
-        elif self.status == self.STATUSES.REMOVED:
-            return self._on_removed()
+        elif self.status == self.STATUSES.TRASHED:
+            return self._on_trashed()
         else:
             self.changed()
 
