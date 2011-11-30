@@ -370,8 +370,8 @@ class TaskNewDialog(TaskDialogMixin):
             metafile = None
         elif task_type != Task.TYPES.NORMAL and metadata_file:
             name = os.path.basename(metadata_file)
-            with open(metadata_file) as m_file:
-                metafile = xmlrpc.client.Binary(m_file.read().encode('utf-8'))
+            with open(metadata_file, 'br') as m_file:
+                metafile = xmlrpc.client.Binary(m_file.read())
         else:
             return
 
