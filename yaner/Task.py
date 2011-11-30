@@ -33,6 +33,7 @@ from sqlalchemy.orm import reconstructor, deferred
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from yaner import SQLBase, SQLSession
+from yaner.Misc import unquote
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 from yaner.utils.Notification import Notification
@@ -126,6 +127,8 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
 
         self._status_update_handle = None
         self._database_sync_handle = None
+
+        self._renamed = False
 
     def __repr__(self):
         return "<Task {}>".format(self.name)
@@ -337,11 +340,13 @@ class NormalTask(Task):
         """For normal task, if there is only one task(magnet may have more than
         one), use it's name for task name.
         """
-        files = deferred.result['files']
-        if len(files) == 1:
-            name = os.path.basename(files[0]['path'])
-            if name not in (self.name, ''):
-                self.name = name
+        if not self._renamed:
+            files = deferred.result['files']
+            if len(files) == 1:
+                name = unquote(os.path.basename(files[0]['path']))
+                if name != '':
+                    self.name = name
+                    self._renamed = True
         Task._update_status(self, deferred)
 
 class BTTask(Task):

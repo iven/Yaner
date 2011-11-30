@@ -5,6 +5,7 @@ PyGObject
 GTK3
 libnotify
 SQLAlchemy >= 0.7.0
+python-chardet
 
 Install
 ======
