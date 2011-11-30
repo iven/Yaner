@@ -24,6 +24,8 @@
 This module contains the L{Task} class of L{yaner}.
 """
 
+import os
+
 from gi.repository import GLib
 from gi.repository import GObject
 from sqlalchemy import Column, Integer, PickleType, Unicode, ForeignKey
@@ -330,6 +332,17 @@ class NormalTask(Task):
         deferred.add_callback(self._on_started)
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
+
+    def _update_status(self, deferred):
+        """For normal task, if there is only one task(magnet may have more than
+        one), use it's name for task name.
+        """
+        files = deferred.result['files']
+        if len(files) == 1:
+            name = os.path.basename(files[0]['path'])
+            if name not in (self.name, ''):
+                self.name = name
+        Task._update_status(self, deferred)
 
 class BTTask(Task):
     """BitTorrent Task."""
