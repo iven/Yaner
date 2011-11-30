@@ -315,7 +315,6 @@ class TaskNewDialog(TaskDialogMixin):
         for pool in SQLSession.query(Pool):
             widgets['pool_ls'].append([pool.name, pool])
         widgets['pool_cb'].set_active(0)
-        # TODO: Show main window
         # run the dialog
         widgets['dialog'].run()
 

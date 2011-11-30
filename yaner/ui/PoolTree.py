@@ -67,9 +67,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
             self.add_presentable(presentable)
 
     def on_presentable_added(self, pool, presentable):
-        """When new presentable appears in one of the pools, add it TODO
-        the model.
-        """
+        """When new presentable appears in one of the pools, add it to the model."""
         self.add_presentable(presentable)
 
     def on_presentable_removed(self, pool, presentable):

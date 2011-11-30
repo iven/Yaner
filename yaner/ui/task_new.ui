@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkFileFilter" id="metalink_filefilter"/>
   <object class="GtkDialog" id="dialog">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -15,6 +16,7 @@
       <object class="GtkBox" id="dialog_vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="dialog_action_area">
@@ -91,6 +93,7 @@
                             <property name="right_padding">5</property>
                             <child>
                               <object class="GtkScrolledWindow" id="normal_uri_sw">
+                                <property name="height_request">70</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="shadow_type">in</property>
@@ -497,6 +500,7 @@
                             <property name="right_padding">5</property>
                             <child>
                               <object class="GtkScrolledWindow" id="bt_uri_sw">
+                                <property name="height_request">70</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="shadow_type">in</property>
@@ -1141,7 +1145,6 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkFileFilter" id="metalink_filefilter"/>
   <object class="GtkAdjustment" id="seed_ratio_adjustment">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
