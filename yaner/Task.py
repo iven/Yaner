@@ -364,6 +364,17 @@ class BTTask(Task):
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
 
+    def _update_status(self, deferred):
+        """For BT task, use internal name of the torrent if possible.
+        """
+        if not self._renamed:
+            if 'bittorrent' in deferred.result:
+                name = unquote(deferred.result['bittorrent']['info']['name'])
+                if name != '':
+                    self.name = name
+                    self._renamed = True
+        Task._update_status(self, deferred)
+
 class MLTask(Task):
     """Metalink Task."""
 
