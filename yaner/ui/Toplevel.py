@@ -136,9 +136,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         scrolled_window.add(self._pool_view)
 
         # Dialogs
-        self._task_new_dialog = TaskNewDialog()
-        self._task_new_dialog.widgets['dialog'].set_transient_for(self)
-
+        self._task_new_dialog = None
         self._about_dialog = None
 
         # Status icon
@@ -227,6 +225,9 @@ class Toplevel(Gtk.Window, LoggingMixin):
     @property
     def task_new_dialog(self):
         """Get the new task dialog of the window."""
+        if self._task_new_dialog is None:
+            self._task_new_dialog = TaskNewDialog(self, self._pool_model)
+            self._task_new_dialog.set_transient_for(self)
         return self._task_new_dialog
 
     @property
@@ -304,7 +305,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
     def on_task_new(self, action, user_data, task_type):
         """When task new action is activated, call the task new dialog."""
-        self.task_new_dialog.run_dialog(task_type)
+        self.task_new_dialog.run()
 
     def on_task_start(self, action, user_data):
         """When task start button clicked, start or unpause the task."""

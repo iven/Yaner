@@ -122,7 +122,7 @@ class Application(Gtk.Application, LoggingMixin):
 
             down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
             pool = Pool(name=_('My Computer'), host='localhost')
-            Category(name=_('Default Category'), directory=down_dir, pool=pool)
+            Category(name=_('My Downloads'), directory=down_dir, pool=pool)
 
             self.logger.info(_('Database initialized.'))
 

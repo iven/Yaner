@@ -174,7 +174,7 @@ class PoolView(Gtk.TreeView):
                 types.DUSTBIN: 'gtk-delete',
                 }
         icon = icons[presentable.TYPE]
-        if presentable.TYPE == Presentable.TYPES.QUEUING and \
+        if presentable.TYPE == types.QUEUING and \
                 not presentable.pool.connected:
             icon = 'gtk-disconnect'
 

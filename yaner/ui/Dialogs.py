@@ -29,14 +29,144 @@ import xmlrpc.client
 
 from gi.repository import Gtk
 from gi.repository import GObject
+from gi.repository import Pango
 
 from yaner import SQLSession
 from yaner.Pool import Pool
 from yaner.Task import Task, NormalTask, BTTask, MLTask
-from yaner.Presentable import Category
+from yaner.Presentable import Presentable, Category
 from yaner.ui.Misc import load_ui_file
+from yaner.ui.Widgets import AlignedFrame
+from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
+
+class TaskNewDialog(Gtk.Dialog):
+    """Base class for all new task dialogs."""
+    def __init__(self, parent, pool_model):
+        Gtk.Dialog.__init__(self, title=_('New Task'), parent=parent,
+                            flags=(Gtk.DialogFlags.DESTROY_WITH_PARENT |
+                                   Gtk.DialogFlags.MODAL),
+                            buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                     Gtk.STOCK_OK, Gtk.ResponseType.OK
+                                    )
+                           )
+
+        ### Content Area
+        content_area = self.get_content_area()
+
+        vbox = Gtk.VBox(spacing=5)
+        vbox.set_border_width(5)
+        content_area.add(vbox)
+        self.main_vbox = vbox
+
+        ## Advanced
+        expander = Gtk.Expander(label=_('Advanced'), resize_toplevel=True)
+        vbox.pack_end(expander, expand=False, fill=True, padding=0)
+        self.advanced_expander = expander
+
+        ## Save to
+        frame = AlignedFrame(label=_('Save to'))
+        vbox.pack_end(frame, expand=True, fill=True, padding=0)
+
+        # Category
+        hbox = Gtk.HBox(spacing=5)
+        frame.add(hbox)
+
+        category_model = Gtk.TreeModelFilter(child_model=pool_model)
+        category_model.set_visible_func(self._category_visible_func, None)
+
+        category_cb = Gtk.ComboBox(model=category_model)
+        hbox.pack_start(category_cb, expand=True, fill=True, padding=0)
+
+        renderer = Gtk.CellRendererPixbuf()
+        category_cb.pack_start(renderer, False)
+        category_cb.set_cell_data_func(renderer, self._pixbuf_data_func, None)
+
+        renderer = Gtk.CellRendererText()
+        category_cb.pack_start(renderer, True)
+        category_cb.set_cell_data_func(renderer, self._markup_data_func, None)
+
+        # Directory
+        dir_entry = Gtk.Entry()
+        hbox.pack_start(dir_entry, expand=True, fill=True, padding=0)
+
+        dir_chooser_button = Gtk.Button(label=_('_Browse...'), use_underline=True)
+        dir_chooser_button.connect('clicked', self._on_dir_choosing, dir_entry)
+        hbox.pack_start(dir_chooser_button, expand=True, fill=True, padding=0)
+
+        # Connect signal and select the first pool
+        category_cb.connect('changed', self._on_category_cb_changed, dir_entry)
+        category_cb.set_active(0)
+
+        content_area.show_all()
+
+    def _pixbuf_data_func(self, cell_layout, renderer, model, iter_, data=None):
+        """Method for set the icon and its size in the column."""
+        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+
+        if presentable.TYPE == Presentable.TYPES.QUEUING:
+            if presentable.pool.connected:
+                icon = 'gtk-connect'
+            else:
+                icon = 'gtk-disconnect'
+        elif presentable.TYPE == Presentable.TYPES.CATEGORY:
+            icon = 'gtk-directory'
+
+        renderer.set_properties(
+                stock_id = icon,
+                stock_size = Gtk.IconSize.LARGE_TOOLBAR,
+                )
+
+    def _markup_data_func(self, cell_layout, renderer, model, iter_, data=None):
+        """
+        Method for format the text in the column.
+        """
+        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+
+        renderer.set_properties(
+                markup = presentable.name,
+                ellipsize_set = True,
+                ellipsize = Pango.EllipsizeMode.MIDDLE,
+                )
+
+    def _category_visible_func(self, model, iter_, data):
+        """Show categorys of the selected pool in the combobox."""
+        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+        return presentable.TYPE in (Presentable.TYPES.CATEGORY,
+                                    Presentable.TYPES.QUEUING)
+
+    def _on_category_cb_changed(self, category_cb, dir_entry):
+        """When category combobox changed, update the directory entry."""
+        iter_ = category_cb.get_active_iter()
+        model = category_cb.get_model()
+        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+        if presentable.TYPE == Presentable.TYPES.QUEUING:
+            category_cb.set_active_iter(model.iter_children(iter_))
+        else:
+            dir_entry.set_text(presentable.directory)
+
+    def _on_dir_choosing(self, button, entry):
+        """When directory chooser button clicked, popup the dialog, and update
+        the directory entry.
+        """
+        dialog = Gtk.FileChooserDialog(_('Select download directory'),
+                                       self,
+                                       Gtk.FileChooserAction.SELECT_FOLDER,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.ACCEPT
+                                       )
+                                      )
+        dialog.set_transient_for(self.get_parent())
+        if dialog.run() == Gtk.ResponseType.ACCEPT:
+            entry.set_text(dialog.get_filename())
+        dialog.destroy()
+
+    def run(self):
+        """Popup new task dialog."""
+        Gtk.Dialog.run(self)
+        self.hide()
+
 
 class TaskDialogMixin(LoggingMixin):
     """
@@ -140,7 +270,7 @@ class TaskDialogMixin(LoggingMixin):
         if options['bt-prioritize-piece'] == 'head,tail':
             self.option_widgets['bt-prioritize-piece'].set_active(True)
 
-class TaskNewDialog(TaskDialogMixin):
+class TaskNewDialogOld(TaskDialogMixin):
     """
     This class contains widgets and methods related to new task dialog.
     """
