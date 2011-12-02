@@ -6,6 +6,7 @@ GTK3
 libnotify
 SQLAlchemy >= 0.7.0
 python-chardet
+dconf
 
 Install
 ======
@@ -18,6 +19,9 @@ To install it to /usr (or any other prefix) use:
 
 If you use Debian / Ubuntu, you should install like this:
     python setup.py install --prefix=/usr --install-layout=deb
+
+After that, run this as root:
+    glib-compile-schemas /usr/share/glib-2.0/schemas/
 
 Uninstall
 ======
