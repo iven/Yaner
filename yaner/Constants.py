@@ -24,12 +24,11 @@
 This module contains the global constants of L{yaner}.
 """
 
-BUS_NAME = 'com.kissuki.{0}'.format(__package__)
+APPLICATION_ID = 'com.kissuki.yaner'
 """
-The unique bus name of the application, which identifies
-the application when using DBus to implement the
-L{UniqueApplicationMixin} class.
+The unique bus name of the application, which identifies the application when
+using L{Gtk.Application} to make the application unique.
 
-This is also used as the DBus interface.
+This is also used as the gsettings schema id.
 """
 

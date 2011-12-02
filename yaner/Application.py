@@ -36,7 +36,7 @@ from yaner.XDG import save_data_file, save_config_file, load_first_config
 from yaner.Pool import Pool
 from yaner.Task import Task
 from yaner.Presentable import Category
-from yaner.Constants import BUS_NAME
+from yaner.Constants import APPLICATION_ID
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
@@ -63,7 +63,7 @@ class Application(Gtk.Application, LoggingMixin):
         It handles command line options, creates L{toplevel window
         <Toplevel>}, and initialize logging configuration.
         """
-        Gtk.Application.__init__(self, application_id=BUS_NAME, flags=0)
+        Gtk.Application.__init__(self, application_id=APPLICATION_ID, flags=0)
         LoggingMixin.__init__(self)
 
         self._toplevel = None
