@@ -28,21 +28,27 @@ import os
 import xmlrpc.client
 
 from gi.repository import Gtk
+from gi.repository import Gio
 from gi.repository import GObject
 from gi.repository import Pango
+from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner import SQLSession
 from yaner.Pool import Pool
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Presentable, Category
 from yaner.ui.Misc import load_ui_file
-from yaner.ui.Widgets import AlignedFrame
+from yaner.ui.Widgets import AlignedExpander
 from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
 
 class TaskNewDialog(Gtk.Dialog):
     """Base class for all new task dialogs."""
+
+    settings = Gio.Settings('com.kissuki.yaner.task')
+    """GSettings instance for task configurations."""
+
     def __init__(self, parent, pool_model):
         Gtk.Dialog.__init__(self, title=_('New Task'), parent=parent,
                             flags=(Gtk.DialogFlags.DESTROY_WITH_PARENT |
@@ -51,6 +57,8 @@ class TaskNewDialog(Gtk.Dialog):
                                      Gtk.STOCK_OK, Gtk.ResponseType.OK
                                     )
                            )
+
+        self.task_options = {}
 
         ### Content Area
         content_area = self.get_content_area()
@@ -61,23 +69,26 @@ class TaskNewDialog(Gtk.Dialog):
         self.main_vbox = vbox
 
         ## Advanced
-        expander = Gtk.Expander(label=_('Advanced'), resize_toplevel=True)
-        vbox.pack_end(expander, expand=False, fill=True, padding=0)
-        self.advanced_expander = expander
+        expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
+        vbox.pack_end(expander, expand=True, fill=True, padding=0)
+
+        advanced_box = Gtk.VBox(spacing=5)
+        expander.add(advanced_box)
+        self.advanced_box = advanced_box
 
         ## Save to
-        frame = AlignedFrame(label=_('Save to'))
-        vbox.pack_end(frame, expand=True, fill=True, padding=0)
+        expander = AlignedExpander(_('<b>Save to...</b>'))
+        vbox.pack_end(expander, expand=True, fill=True, padding=0)
 
         # Category
         hbox = Gtk.HBox(spacing=5)
-        frame.add(hbox)
+        expander.add(hbox)
 
         category_model = Gtk.TreeModelFilter(child_model=pool_model)
         category_model.set_visible_func(self._category_visible_func, None)
 
         category_cb = Gtk.ComboBox(model=category_model)
-        hbox.pack_start(category_cb, expand=True, fill=True, padding=0)
+        hbox.pack_start(category_cb, expand=False, fill=True, padding=0)
 
         renderer = Gtk.CellRendererPixbuf()
         category_cb.pack_start(renderer, False)
@@ -93,7 +104,7 @@ class TaskNewDialog(Gtk.Dialog):
 
         dir_chooser_button = Gtk.Button(label=_('_Browse...'), use_underline=True)
         dir_chooser_button.connect('clicked', self._on_dir_choosing, dir_entry)
-        hbox.pack_start(dir_chooser_button, expand=True, fill=True, padding=0)
+        hbox.pack_start(dir_chooser_button, expand=False, fill=True, padding=0)
 
         # Connect signal and select the first pool
         category_cb.connect('changed', self._on_category_cb_changed, dir_entry)
@@ -162,10 +173,121 @@ class TaskNewDialog(Gtk.Dialog):
             entry.set_text(dialog.get_filename())
         dialog.destroy()
 
+    def bind(self, name, widget, property,
+             bind_settings=True, bind_flags=BindFlags.GET,
+             bind_signal=True, signal_name='changed'):
+        """Bind property to settings and task options."""
+
+        def signal_callback(widget, data):
+            """When widget changed, add new value to the task opti)ns."""
+            self.task_options[name] = widget.get_property(property)
+
+        if bind_settings:
+            self.settings.bind(name, widget, property, bind_flags)
+        if bind_signal:
+            widget.connect(signal_name, signal_callback)
+            widget.emit(signal_name)
+
     def run(self):
         """Popup new task dialog."""
         Gtk.Dialog.run(self)
         self.hide()
+
+class NormalTaskNewDialog(TaskNewDialog):
+    """New task dialog for normal tasks."""
+    def __init__(self, parent, pool_model):
+        TaskNewDialog.__init__(self, parent, pool_model)
+
+        ## Main Box
+        expander = AlignedExpander(
+            _('<b>Mirrors</b> - one or more URI(s) for <b>one</b> task'))
+        self.main_vbox.pack_start(expander, expand=True, fill=True, padding=0)
+
+        vbox = Gtk.VBox(spacing=5)
+        expander.add(vbox)
+
+        scrolled_window = Gtk.ScrolledWindow(
+            None, None, shadow_type=Gtk.ShadowType.IN,
+            hscrollbar_policy=Gtk.PolicyType.NEVER,
+            vscrollbar_policy=Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.set_size_request(-1, 70)
+        vbox.pack_start(scrolled_window, expand=True, fill=True, padding=0)
+
+        text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
+        scrolled_window.add(text_view)
+
+        hbox = Gtk.HBox(spacing=5)
+        vbox.pack_start(hbox, expand=True, fill=True, padding=0)
+
+        # Rename
+        rename_label = Gtk.Label(_('Rename'))
+        hbox.pack_start(rename_label, expand=False, fill=True, padding=0)
+
+        rename_entry = Gtk.Entry(activates_default=True)
+        hbox.pack_start(rename_entry, expand=True, fill=True, padding=0)
+
+        # Connections
+        split_label = Gtk.Label(_('Connections'))
+        hbox.pack_start(split_label, expand=False, fill=True, padding=0)
+
+        split_adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        split_button = Gtk.SpinButton(adjustment=split_adjustment, numeric=True)
+        hbox.pack_start(split_button, expand=True, fill=True, padding=0)
+        self.bind('split', split_button, 'value')
+
+        self.main_vbox.show_all()
+
+        ## Advanced
+        hbox = Gtk.HBox(spacing=5)
+        self.advanced_box.pack_start(hbox, expand=True, fill=True, padding=0)
+
+        # Referer
+        referer_label = Gtk.Label(_('Referer'))
+        hbox.pack_start(referer_label, expand=False, fill=True, padding=0)
+
+        referer_entry = Gtk.Entry(activates_default=True)
+        hbox.pack_start(referer_entry, expand=True, fill=True, padding=0)
+        self.bind('referer', referer_entry, 'text')
+
+        # Authorization
+        auth_expander = AlignedExpander(_('Authorization'), expanded=False)
+        self.advanced_box.pack_start(auth_expander, expand=True,
+                                     fill=True, padding=0)
+
+        auth_table = Gtk.Table(3, 3, False, row_spacing=5, column_spacing=5)
+        auth_expander.add(auth_table)
+
+        http_label = Gtk.Label(_('HTTP'))
+        auth_table.attach_defaults(http_label, 0, 1, 1, 2)
+
+        ftp_label = Gtk.Label(_('FTP'))
+        auth_table.attach_defaults(ftp_label, 0, 1, 2, 3)
+
+        user_label = Gtk.Label(_('User'))
+        auth_table.attach_defaults(user_label, 1, 2, 0, 1)
+
+        passwd_label = Gtk.Label(_('Password'))
+        auth_table.attach_defaults(passwd_label, 2, 3, 0, 1)
+
+        http_user_entry = Gtk.Entry(activates_default=True)
+        auth_table.attach_defaults(http_user_entry, 1, 2, 1, 2)
+        self.bind('http-user', http_user_entry, 'text')
+
+        http_passwd_entry = Gtk.Entry(activates_default=True)
+        auth_table.attach_defaults(http_passwd_entry, 2, 3, 1, 2)
+        self.bind('http-passwd', http_passwd_entry, 'text')
+
+        ftp_user_entry = Gtk.Entry(activates_default=True)
+        auth_table.attach_defaults(ftp_user_entry, 1, 2, 2, 3)
+        self.bind('ftp-user', ftp_user_entry, 'text')
+
+        ftp_passwd_entry = Gtk.Entry(activates_default=True)
+        auth_table.attach_defaults(ftp_passwd_entry, 2, 3, 2, 3)
+        self.bind('ftp-passwd', ftp_passwd_entry, 'text')
+
+        self.advanced_box.show_all()
+
+
 
 
 class TaskDialogMixin(LoggingMixin):

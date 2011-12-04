@@ -24,19 +24,15 @@
 
 from gi.repository import Gtk
 
-class AlignedFrame(Gtk.Frame):
-    """A L{Gtk.Frame} with no shadow, and with an alignment that can place its
-    children nicely.
-    """
-    def __init__(self, label):
-        Gtk.Frame.__init__(self, shadow_type=Gtk.ShadowType.NONE)
-
-        label = Gtk.Label(label='<b>{}</b>'.format(label), use_markup=True)
-        self.set_label_widget(label)
+class AlignedExpander(Gtk.Expander):
+    """A L{Gtk.Expander} with an alignment that can place its children nicely."""
+    def __init__(self, markup, expanded=True):
+        Gtk.Expander.__init__(self, label=markup, use_markup=True,
+                              resize_toplevel=True, expanded=expanded)
 
         self.alignment = Gtk.Alignment()
-        self.alignment.set_padding(5, 5, 12, 5)
-        Gtk.Frame.add(self, self.alignment)
+        self.alignment.set_padding(0, 0, 12, 5)
+        Gtk.Expander.add(self, self.alignment)
 
     def add(self, child):
         """Add child to alignment."""
