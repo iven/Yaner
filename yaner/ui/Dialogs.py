@@ -59,6 +59,7 @@ class TaskNewDialog(Gtk.Dialog):
                            )
 
         self.task_options = {}
+        self.active_category = None
 
         ### Content Area
         content_area = self.get_content_area()
@@ -101,6 +102,7 @@ class TaskNewDialog(Gtk.Dialog):
         # Directory
         dir_entry = Gtk.Entry()
         hbox.pack_start(dir_entry, expand=True, fill=True, padding=0)
+        self.bind('dir', dir_entry, 'text')
 
         dir_chooser_button = Gtk.Button(label=_('_Browse...'), use_underline=True)
         dir_chooser_button.connect('clicked', self._on_dir_choosing, dir_entry)
@@ -155,6 +157,7 @@ class TaskNewDialog(Gtk.Dialog):
         if presentable.TYPE == Presentable.TYPES.QUEUING:
             category_cb.set_active_iter(model.iter_children(iter_))
         else:
+            self.active_category = presentable
             dir_entry.set_text(presentable.directory)
 
     def _on_dir_choosing(self, button, entry):
@@ -178,7 +181,7 @@ class TaskNewDialog(Gtk.Dialog):
              bind_signal=True, signal_name='changed'):
         """Bind property to settings and task options."""
 
-        def signal_callback(widget, data):
+        def signal_callback(widget):
             """When widget changed, add new value to the task opti)ns."""
             self.task_options[name] = widget.get_property(property)
 
@@ -188,10 +191,13 @@ class TaskNewDialog(Gtk.Dialog):
             widget.connect(signal_name, signal_callback)
             widget.emit(signal_name)
 
-    def run(self):
+    def run(self, options=None):
         """Popup new task dialog."""
+        if 'header' in self.task_options:
+            del self.task_options['header']
+        if options is not None:
+            self.task_options.update_options()
         Gtk.Dialog.run(self)
-        self.hide()
 
 class NormalTaskNewDialog(TaskNewDialog):
     """New task dialog for normal tasks."""
@@ -215,6 +221,7 @@ class NormalTaskNewDialog(TaskNewDialog):
 
         text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
         scrolled_window.add(text_view)
+        self.uris_text_view = text_view
 
         hbox = Gtk.HBox(spacing=5)
         vbox.pack_start(hbox, expand=True, fill=True, padding=0)
@@ -225,6 +232,7 @@ class NormalTaskNewDialog(TaskNewDialog):
 
         rename_entry = Gtk.Entry(activates_default=True)
         hbox.pack_start(rename_entry, expand=True, fill=True, padding=0)
+        self.bind('out', rename_entry, 'text')
 
         # Connections
         split_label = Gtk.Label(_('Connections'))
@@ -248,6 +256,7 @@ class NormalTaskNewDialog(TaskNewDialog):
         referer_entry = Gtk.Entry(activates_default=True)
         hbox.pack_start(referer_entry, expand=True, fill=True, padding=0)
         self.bind('referer', referer_entry, 'text')
+        self.referer_entry = referer_entry
 
         # Authorization
         auth_expander = AlignedExpander(_('Authorization'), expanded=False)
@@ -286,6 +295,46 @@ class NormalTaskNewDialog(TaskNewDialog):
         self.bind('ftp-passwd', ftp_passwd_entry, 'text')
 
         self.advanced_box.show_all()
+
+    def do_response(self, response):
+        """Create a new download task if uris are provided."""
+        if response != Gtk.ResponseType.OK:
+            self.hide()
+            return
+
+        tbuffer = self.uris_text_view.get_buffer()
+        uris = tbuffer.get_text(
+            tbuffer.get_start_iter(),
+            tbuffer.get_end_iter(),
+            False
+            ).split()
+        if not uris:
+            return
+
+        options = self.task_options
+        name = options['out'] if options['out'] else os.path.basename(uris[0])
+        # SpinButton returns double, but aria2 expects integer
+        options['split'] = int(options['split'])
+
+        NormalTask(name=name, type=Task.TYPES.NORMAL, uris=uris,
+                   options=options, category=self.active_category,
+                   pool=self.active_category.pool).start()
+
+        self.hide()
+
+    def run(self, options=None):
+        """Run the dialog."""
+        self.uris_text_view.get_buffer().set_text('')
+        self.referer_entry.set_text('')
+        if options is not None:
+            if 'uris' in options:
+                self.uris_text_view.get_buffer().set_text(options.pop('uris'))
+            if 'referer' in options:
+                self.referer_entry.set_text(options.pop('referer'))
+
+        TaskNewDialog.run(self, options)
+
+
 
 
 
