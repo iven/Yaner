@@ -28,6 +28,7 @@ A B{Pool} means a aria2 server, to avoid conflict with download servers.
 """
 
 from gi.repository import Gtk
+from gi.repository import GLib
 from gi.repository import Pango
 
 from yaner.Presentable import Presentable
@@ -206,7 +207,8 @@ class PoolView(Gtk.TreeView):
                      '<b>{}</b>\n' \
                      '<span fgcolor="{}">{}</span>' \
                  '</small>' \
-                 .format(presentable.name, color, description)
+                 .format(GLib.markup_escape_text(presentable.name),
+                         color, description)
 
         renderer.set_properties(
                 markup = markup,

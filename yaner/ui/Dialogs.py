@@ -28,6 +28,7 @@ import os
 import xmlrpc.client
 
 from gi.repository import Gtk
+from gi.repository import GLib
 from gi.repository import Gio
 from gi.repository import GObject
 from gi.repository import Pango
@@ -138,7 +139,7 @@ class TaskNewDialog(Gtk.Dialog):
         presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
 
         renderer.set_properties(
-                markup = presentable.name,
+                markup = GLib.markup_escape_text(presentable.name),
                 ellipsize_set = True,
                 ellipsize = Pango.EllipsizeMode.MIDDLE,
                 )
@@ -232,7 +233,8 @@ class NormalTaskNewDialog(TaskNewDialog):
 
         rename_entry = Gtk.Entry(activates_default=True)
         hbox.pack_start(rename_entry, expand=True, fill=True, padding=0)
-        self.bind('out', rename_entry, 'text')
+        self.bind('out', rename_entry, 'text', bind_settings=False)
+        self.rename_entry = rename_entry
 
         # Connections
         split_label = Gtk.Label(_('Connections'))
@@ -326,11 +328,14 @@ class NormalTaskNewDialog(TaskNewDialog):
         """Run the dialog."""
         self.uris_text_view.get_buffer().set_text('')
         self.referer_entry.set_text('')
+        self.rename_entry.set_text('')
         if options is not None:
             if 'uris' in options:
                 self.uris_text_view.get_buffer().set_text(options.pop('uris'))
             if 'referer' in options:
                 self.referer_entry.set_text(options.pop('referer'))
+            if 'out' in options:
+                self.rename_entry.set_text(options.pop('out'))
 
         TaskNewDialog.run(self, options)
 
