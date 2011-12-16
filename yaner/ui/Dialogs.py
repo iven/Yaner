@@ -196,7 +196,7 @@ class TaskNewDialog(Gtk.Dialog):
         if 'header' in self.task_options:
             del self.task_options['header']
         if options is not None:
-            self.task_options.update_options()
+            self.task_options.update(options)
         Gtk.Dialog.run(self)
 
 class NormalTaskNewDialog(TaskNewDialog):

@@ -141,8 +141,8 @@ class Application(Gtk.Application, LoggingMixin):
         """When application started with command line arguments, open new
         task dialog.
         """
-        task_new_dialog = self.toplevel.task_new_dialog
-        task_new_dialog.run_dialog(Task.TYPES.NORMAL, eval(data.unpack()))
+        dialog = self.toplevel.normal_task_new_dialog
+        dialog.run(eval(data.unpack()))
 
     def do_activate(self):
         """When Application activated, present the main window."""

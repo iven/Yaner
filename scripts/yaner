@@ -56,7 +56,7 @@ if len(sys.argv) > 1:
 
     options = {'referer': args.referer,
                'header': 'Cookie: {}'.format(args.cookie),
-               'uris': str(args.uris),
+               'uris': '\n'.join(args.uris),
               }
     if args.rename is not None:
         options['out'] = args.rename
