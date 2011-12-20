@@ -39,7 +39,7 @@ from yaner.Pool import Pool
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Presentable, Category
 from yaner.ui.Misc import load_ui_file
-from yaner.ui.Widgets import AlignedExpander
+from yaner.ui.Widgets import AlignedExpander, URIsView
 from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
@@ -213,16 +213,9 @@ class NormalTaskNewDialog(TaskNewDialog):
         vbox = Gtk.VBox(spacing=5)
         expander.add(vbox)
 
-        scrolled_window = Gtk.ScrolledWindow(
-            None, None, shadow_type=Gtk.ShadowType.IN,
-            hscrollbar_policy=Gtk.PolicyType.NEVER,
-            vscrollbar_policy=Gtk.PolicyType.AUTOMATIC)
-        scrolled_window.set_size_request(-1, 70)
-        vbox.pack_start(scrolled_window, expand=True, fill=True, padding=0)
-
-        text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
-        scrolled_window.add(text_view)
-        self.uris_text_view = text_view
+        uris_view = URIsView()
+        vbox.pack_start(uris_view, expand=True, fill=True, padding=0)
+        self.uris_view = uris_view
 
         hbox = Gtk.HBox(spacing=5)
         vbox.pack_start(hbox, expand=True, fill=True, padding=0)
@@ -304,12 +297,7 @@ class NormalTaskNewDialog(TaskNewDialog):
             self.hide()
             return
 
-        tbuffer = self.uris_text_view.get_buffer()
-        uris = tbuffer.get_text(
-            tbuffer.get_start_iter(),
-            tbuffer.get_end_iter(),
-            False
-            ).split()
+        uris = self.uris_view.get_uris()
         if not uris:
             return
 
@@ -326,12 +314,12 @@ class NormalTaskNewDialog(TaskNewDialog):
 
     def run(self, options=None):
         """Run the dialog."""
-        self.uris_text_view.get_buffer().set_text('')
+        self.uris_view.set_uris('')
         self.referer_entry.set_text('')
         self.rename_entry.set_text('')
         if options is not None:
             if 'uris' in options:
-                self.uris_text_view.get_buffer().set_text(options.pop('uris'))
+                self.uris_view.set_uris(options.pop('uris'))
             if 'referer' in options:
                 self.referer_entry.set_text(options.pop('referer'))
             if 'out' in options:

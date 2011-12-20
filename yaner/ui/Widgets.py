@@ -22,6 +22,8 @@
 
 """This module contains some widgets for common use."""
 
+import collections
+
 from gi.repository import Gtk
 
 class AlignedExpander(Gtk.Expander):
@@ -37,4 +39,35 @@ class AlignedExpander(Gtk.Expander):
     def add(self, child):
         """Add child to alignment."""
         self.alignment.add(child)
+
+class URIsView(Gtk.ScrolledWindow):
+    """ScrolledWindow with a text view for getting/setting URIs."""
+    def __init__(self):
+        Gtk.ScrolledWindow.__init__(
+            self, None, None, shadow_type=Gtk.ShadowType.IN,
+            hscrollbar_policy=Gtk.PolicyType.NEVER,
+            vscrollbar_policy=Gtk.PolicyType.AUTOMATIC)
+        self.set_size_request(-1, 70)
+
+        text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
+        self.add(text_view)
+
+    def get_uris(self):
+        text_view = self.get_child()
+        tbuffer = text_view.get_buffer()
+        return tbuffer.get_text(
+            tbuffer.get_start_iter(),
+            tbuffer.get_end_iter(),
+            False
+            ).split()
+
+    def set_uris(self, uris):
+        text_view = self.get_child()
+        tbuffer = text_view.get_buffer()
+        if isinstance(uris, str):
+            tbuffer.set_text(uris)
+        elif isinstance(uris, collections.Sequence):
+            tbuffer.set_text('\n'.join(uris))
+        else:
+            raise TypeError('URIs should be a string or sequence.')
 
