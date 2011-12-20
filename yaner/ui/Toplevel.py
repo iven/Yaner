@@ -34,7 +34,7 @@ from yaner import SQLSession
 from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Presentable import Presentable
-from yaner.ui.Dialogs import NormalTaskNewDialog
+from yaner.ui.Dialogs import NormalTaskNewDialog, BTTaskNewDialog
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.ui.Misc import load_ui_file
@@ -135,6 +135,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         # Dialogs
         self._normal_task_new_dialog = None
+        self._bt_task_new_dialog = None
+        self._ml_task_new_dialog = None
         self._about_dialog = None
 
         # Status icon
@@ -174,8 +176,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
             # The actions used by L{action_group}. The members are:
             # name, stock-id, label, accelerator, tooltip, callback
             action_entries = (
-                ("task_new", 'gtk-add', _("New Task"), None, None,
-                    self.on_normal_task_new),
                 ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None, None,
                     self.on_normal_task_new),
                 ("task_new_bt", 'gtk-add', _("BitTorrent"), None, None,
@@ -228,6 +228,24 @@ class Toplevel(Gtk.Window, LoggingMixin):
                                                                self._pool_model)
             self._normal_task_new_dialog.set_transient_for(self)
         return self._normal_task_new_dialog
+
+    @property
+    def bt_task_new_dialog(self):
+        """Get the new bittorrent task dialog of the window."""
+        if self._bt_task_new_dialog is None:
+            self._bt_task_new_dialog = BTTaskNewDialog(self,
+                                                       self._pool_model)
+            self._bt_task_new_dialog.set_transient_for(self)
+        return self._bt_task_new_dialog
+
+    @property
+    def ml_task_new_dialog(self):
+        """Get the new metalink task dialog of the window."""
+        if self._ml_task_new_dialog is None:
+            #self._ml_task_new_dialog = MLTaskNewDialog(self,
+            #                                           self._pool_model)
+            self._ml_task_new_dialog.set_transient_for(self)
+        return self._ml_task_new_dialog
 
     @property
     def about_dialog(self):

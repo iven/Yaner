@@ -327,7 +327,101 @@ class NormalTaskNewDialog(TaskNewDialog):
 
         TaskNewDialog.run(self, options)
 
+class BTTaskNewDialog(TaskNewDialog):
+    """New task dialog for BT tasks."""
+    def __init__(self, parent, pool_model):
+        TaskNewDialog.__init__(self, parent, pool_model)
 
+        ## Main Box
+        expander = AlignedExpander(_('<b>Torrent file</b>'))
+        self.main_vbox.pack_start(expander, expand=True, fill=True, padding=0)
+
+        torrent_button = Gtk.FileChooserButton(title=_('Select torrent file'))
+        expander.add(torrent_button)
+
+        self.main_vbox.show_all()
+
+        ## Advanced
+        # Settings
+        expander = AlignedExpander(_('Settings'))
+        self.advanced_box.pack_start(expander, expand=True, fill=True, padding=0)
+
+        vbox = Gtk.VBox(spacing=5)
+        expander.add(vbox)
+
+        settings_table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
+        vbox.pack_start(settings_table, expand=True, fill=True, padding=0)
+
+        label = Gtk.Label(_('Max open files:'))
+        settings_table.attach_defaults(label, 0, 1, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
+        settings_table.attach_defaults(spin_button, 1, 2, 0, 1)
+        self.bind('bt-max-open-files', spin_button, 'value')
+
+        label = Gtk.Label(_('Max peers:'))
+        settings_table.attach_defaults(label, 2, 3, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
+        settings_table.attach_defaults(spin_button, 3, 4, 0, 1)
+        self.bind('bt-max-peers', spin_button, 'value')
+
+        label = Gtk.Label(_('Seed time(min):'))
+        settings_table.attach_defaults(label, 0, 1, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=7200, step_increment=1)
+        spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
+        settings_table.attach_defaults(spin_button, 1, 2, 1, 2)
+        self.bind('seed-time', spin_button, 'value')
+
+        label = Gtk.Label(_('Seed ratio:'))
+        settings_table.attach_defaults(label, 2, 3, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=20, step_increment=.1)
+        spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True, digits=1)
+        settings_table.attach_defaults(spin_button, 3, 4, 1, 2)
+        self.bind('seed-ratio', spin_button, 'value')
+
+        check_button = Gtk.CheckButton(
+            label=_('Preview mode'),
+            tooltip_text=_('Try to download first and last pieces first'))
+        vbox.pack_start(check_button, expand=True, fill=True, padding=0)
+        self.bind('bt-prioritize', check_button, 'active', signal_name='toggled')
+
+        # Mirrors
+        expander = AlignedExpander(_('Mirrors'), expanded=False)
+        expander.set_tooltip_text(
+            _('For single file torrents, a mirror can be a ' \
+              'complete URI pointing to the resource or if the mirror ' \
+              'ends with /, name in torrent file is added. For ' \
+              'multi-file torrents, name and path in torrent are ' \
+              'added to form a URI for each file.'))
+        self.advanced_box.pack_start(expander, expand=True, fill=True, padding=0)
+
+        vbox = Gtk.VBox(spacing=5)
+        expander.add(vbox)
+
+        uris_view = URIsView()
+        vbox.pack_start(uris_view, expand=True, fill=True, padding=0)
+        self.uris_view = uris_view
+
+        self.advanced_box.show_all()
+
+    def do_response(self, response):
+        """Create a new download task if uris are provided."""
+        if response != Gtk.ResponseType.OK:
+            self.hide()
+            return
+
+        self.hide()
+
+    def run(self, options=None):
+        """Run the dialog."""
+        self.uris_view.set_uris('')
+
+        TaskNewDialog.run(self, options)
 
 
 
