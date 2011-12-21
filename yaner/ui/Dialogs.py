@@ -336,8 +336,12 @@ class BTTaskNewDialog(TaskNewDialog):
         expander = AlignedExpander(_('<b>Torrent file</b>'))
         self.main_vbox.pack_start(expander, expand=True, fill=True, padding=0)
 
-        torrent_button = Gtk.FileChooserButton(title=_('Select torrent file'))
+        file_filter = Gtk.FileFilter()
+        file_filter.add_mime_type('application/x-bittorrent')
+        torrent_button = Gtk.FileChooserButton(title=_('Select torrent file'),
+                                               filter=file_filter)
         expander.add(torrent_button)
+        self.torrent_button = torrent_button
 
         self.main_vbox.show_all()
 
@@ -414,6 +418,25 @@ class BTTaskNewDialog(TaskNewDialog):
         if response != Gtk.ResponseType.OK:
             self.hide()
             return
+
+        uris = self.uris_view.get_uris()
+        torrent_filename = self.torrent_button.get_filename()
+        if torrent_filename is None:
+            return
+        else:
+            name = os.path.basename(torrent_filename)
+            with open(torrent_filename, 'br') as torrent_file:
+                metafile = xmlrpc.client.Binary(torrent_file.read())
+
+        options = self.task_options
+        if options.pop('bt-prioritize'):
+            options['bt-prioritize-size'] = 'head,tail'
+        for key in ('seed-time', 'bt-max-open-files', 'bt-max-peers'):
+            options[key] = int(options[key])
+
+        BTTask(name=name, type=Task.TYPES.BT, metafile=metafile, uris=uris,
+               options=options, category=self.active_category,
+               pool=self.active_category.pool).start()
 
         self.hide()
 
