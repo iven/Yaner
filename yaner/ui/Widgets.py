@@ -70,14 +70,13 @@ class URIsView(Gtk.ScrolledWindow):
             ).split()
 
     def set_uris(self, uris):
-        if uris != self.get_uris():
-            tbuffer = self.text_buffer
-            if isinstance(uris, str):
-                tbuffer.set_text(uris)
-            elif isinstance(uris, collections.Sequence):
-                tbuffer.set_text('\n'.join(uris))
-            else:
-                raise TypeError('URIs should be a string or sequence.')
+        tbuffer = self.text_buffer
+        if isinstance(uris, str):
+            tbuffer.set_text(uris)
+        elif isinstance(uris, collections.Sequence):
+            tbuffer.set_text('\n'.join(uris))
+        else:
+            raise TypeError('URIs should be a string or sequence.')
 
     uris = GObject.property(getter=get_uris, setter=set_uris)
 
