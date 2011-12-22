@@ -35,7 +35,7 @@ from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Presentable
-from yaner.ui.Widgets import AlignedExpander, URIsView
+from yaner.ui.Widgets import AlignedExpander, URIsView, MetafileChooserButton
 from yaner.ui.PoolTree import PoolModel
 
 class TaskNewDialog(Gtk.Dialog):
@@ -292,7 +292,7 @@ class NormalTaskNewDialog(TaskNewDialog):
             self.hide()
             return
 
-        options = self.task_options
+        options = self.task_options.copy()
         uris = options.pop('uris')
         if not uris:
             return
@@ -333,12 +333,11 @@ class BTTaskNewDialog(TaskNewDialog):
         expander = AlignedExpander(_('<b>Torrent file</b>'))
         self.main_vbox.pack_start(expander, expand=True, fill=True, padding=0)
 
-        file_filter = Gtk.FileFilter()
-        file_filter.add_mime_type('application/x-bittorrent')
-        torrent_button = Gtk.FileChooserButton(title=_('Select torrent file'),
-                                               filter=file_filter)
-        expander.add(torrent_button)
-        self.torrent_button = torrent_button
+        button = MetafileChooserButton(title=_('Select torrent file'),
+                                       mime_types=['application/x-bittorrent']
+                                      )
+        expander.add(button)
+        self.bind('torrent_filename', button, 'filename', bind_settings=False)
 
         self.main_vbox.show_all()
 
@@ -417,7 +416,9 @@ class BTTaskNewDialog(TaskNewDialog):
             self.hide()
             return
 
-        torrent_filename = self.torrent_button.get_filename()
+        options = self.task_options.copy()
+
+        torrent_filename = options.pop('torrent_filename')
         if torrent_filename is None:
             return
         else:
@@ -425,7 +426,6 @@ class BTTaskNewDialog(TaskNewDialog):
             with open(torrent_filename, 'br') as torrent_file:
                 metafile = xmlrpc.client.Binary(torrent_file.read())
 
-        options = self.task_options
         uris = options.pop('uris')
         category = options.pop('category')
         if options.pop('bt-prioritize'):
@@ -454,13 +454,12 @@ class MLTaskNewDialog(TaskNewDialog):
         expander = AlignedExpander(_('<b>Metalink file</b>'))
         self.main_vbox.pack_start(expander, expand=True, fill=True, padding=0)
 
-        file_filter = Gtk.FileFilter()
-        file_filter.add_mime_type('application/metalink4+xml')
-        file_filter.add_mime_type('application/metalink+xml')
-        button = Gtk.FileChooserButton(title=_('Select metalink file'),
-                                               filter=file_filter)
+        button = MetafileChooserButton(title=_('Select metalink file'),
+                                       mime_types=['application/metalink4+xml',
+                                                   'application/metalink+xml']
+                                      )
         expander.add(button)
-        self.metalink_button = button
+        self.bind('metalink_filename', button, 'filename', bind_settings=False)
 
         self.main_vbox.show_all()
 
@@ -519,7 +518,9 @@ class MLTaskNewDialog(TaskNewDialog):
             self.hide()
             return
 
-        metalink_filename = self.metalink_button.get_filename()
+        options = self.task_options.copy()
+
+        metalink_filename = options.pop('metalink_filename')
         if metalink_filename is None:
             return
         else:
@@ -527,12 +528,12 @@ class MLTaskNewDialog(TaskNewDialog):
             with open(metalink_filename, 'br') as metalink_file:
                 metafile = xmlrpc.client.Binary(metalink_file.read())
 
-        options = self.task_options
+        category = options.pop('category')
         options['metalink-servers'] = int(options['metalink-servers'])
 
         MLTask(name=name, type=Task.TYPES.ML, metafile=metafile,
-               options=options, category=self.active_category,
-               pool=self.active_category.pool).start()
+               options=options, category=category,
+               pool=category.pool).start()
 
         self.hide()
 

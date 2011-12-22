@@ -80,3 +80,21 @@ class URIsView(Gtk.ScrolledWindow):
 
     uris = GObject.property(getter=get_uris, setter=set_uris)
 
+class MetafileChooserButton(Gtk.FileChooserButton):
+    """A single file chooser button with a file filter."""
+
+    filename = GObject.property(getter=Gtk.FileChooserButton.get_filename)
+
+    def __init__(self, title, mime_types):
+        Gtk.FileChooserButton.__init__(self, title=title)
+
+        file_filter = Gtk.FileFilter()
+        for mime_type in mime_types:
+            file_filter.add_mime_type(mime_type)
+
+        self.set_filter(file_filter)
+
+    def do_file_set(self):
+        """When the file selected, update filename property."""
+        self.notify('filename')
+
