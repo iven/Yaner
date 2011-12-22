@@ -102,7 +102,7 @@ class Queuing(Presentable):
     def tasks(self):
         """Get the running tasks of the pool."""
         return (task for task in self.pool.tasks if task.status not in \
-                {Task.STATUSES.REMOVED, Task.STATUSES.COMPLETE})
+                {Task.STATUSES.TRASHED, Task.STATUSES.COMPLETE})
 
 class Category(SQLBase, Presentable):
     """
@@ -178,5 +178,5 @@ class Dustbin(Presentable):
     def tasks(self):
         """Get the removed tasks of the pool."""
         return (task for task in self.pool.tasks \
-                if task.status == Task.STATUSES.REMOVED)
+                if task.status == Task.STATUSES.TRASHED)
 

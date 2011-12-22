@@ -1,11 +1,8 @@
 <ui>
     <toolbar>
-        <toolitem action='task_new' />
-        <!--
-            <toolitem action='task_new_normal' />
-            <toolitem action='task_new_bt' />
-            <toolitem action='task_new_ml' />
-        -->
+        <toolitem action='task_new_normal' />
+        <toolitem action='task_new_bt' />
+        <toolitem action='task_new_ml' />
         <separator />
         <toolitem action='task_start' />
         <toolitem action='task_pause' />
@@ -14,5 +11,28 @@
         <toolitem action='about' />
         <toolitem action='quit' />
     </toolbar>
+    <popup name='tray_popup'>
+        <menuitem action='toggle_hidden' />
+        <separator />
+        <menuitem action='task_new_normal' />
+        <menuitem action='task_new_bt' />
+        <menuitem action='task_new_ml' />
+        <menuitem action='task_start_all' />
+        <menuitem action='task_pause_all' />
+        <separator />
+        <menuitem action='quit' />
+    </popup>
+    <popup name='queuing_task_popup'>
+        <menuitem action='task_start' />
+        <menuitem action='task_pause' />
+        <menuitem action='task_remove' />
+    </popup>
+    <popup name='category_task_popup'>
+        <menuitem action='task_remove' />
+    </popup>
+    <popup name='dustbin_task_popup'>
+        <menuitem action='task_restore' />
+        <menuitem action='task_remove' />
+    </popup>
 </ui>
 

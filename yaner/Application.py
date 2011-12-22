@@ -36,7 +36,7 @@ from yaner.XDG import save_data_file, save_config_file, load_first_config
 from yaner.Pool import Pool
 from yaner.Task import Task
 from yaner.Presentable import Category
-from yaner.Constants import BUS_NAME
+from yaner.Constants import APPLICATION_ID
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Configuration import ConfigParser
@@ -63,7 +63,7 @@ class Application(Gtk.Application, LoggingMixin):
         It handles command line options, creates L{toplevel window
         <Toplevel>}, and initialize logging configuration.
         """
-        Gtk.Application.__init__(self, application_id=BUS_NAME, flags=0)
+        Gtk.Application.__init__(self, application_id=APPLICATION_ID, flags=0)
         LoggingMixin.__init__(self)
 
         self._toplevel = None
@@ -122,7 +122,7 @@ class Application(Gtk.Application, LoggingMixin):
 
             down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
             pool = Pool(name=_('My Computer'), host='localhost')
-            Category(name=_('Default Category'), directory=down_dir, pool=pool)
+            Category(name=_('My Downloads'), directory=down_dir, pool=pool)
 
             self.logger.info(_('Database initialized.'))
 
@@ -141,8 +141,8 @@ class Application(Gtk.Application, LoggingMixin):
         """When application started with command line arguments, open new
         task dialog.
         """
-        task_new_dialog = self.toplevel.task_new_dialog
-        task_new_dialog.run_dialog(Task.TYPES.NORMAL, eval(data.unpack()))
+        dialog = self.toplevel.normal_task_new_dialog
+        dialog.run(eval(data.unpack()))
 
     def do_activate(self):
         """When Application activated, present the main window."""

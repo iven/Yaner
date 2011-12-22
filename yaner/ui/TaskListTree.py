@@ -26,6 +26,7 @@ topright of the toplevel window.
 """
 
 from gi.repository import Gtk
+from gi.repository import GLib
 from gi.repository import Pango
 
 from yaner.Task import Task
@@ -202,7 +203,7 @@ class TaskListView(Gtk.TreeView):
                 statuses.PAUSED: 'gtk-media-pause',
                 statuses.COMPLETE: 'gtk-apply',
                 statuses.ERROR: 'gtk-stop',
-                statuses.REMOVED: 'gtk-delete',
+                statuses.TRASHED: 'gtk-delete',
                 statuses.INACTIVE: 'gtk-disconnect',
                 }
         renderer.set_properties(
@@ -226,16 +227,16 @@ class TaskListView(Gtk.TreeView):
 
         # If task completed, don't show completed length
         if task.status == Task.STATUSES.COMPLETE:
-            completed_markup = ''
+            completed_text = ''
         else:
-            completed_markup = '{} / '.format(psize(task.completed_length))
+            completed_text = '{} / '.format(psize(task.completed_length))
 
         markup = '<small>' \
                      '<b>{}</b>\n' \
                      '<span fgcolor="{}">{}{}</span>' \
                  '</small>' \
-                 .format(task.name, color, completed_markup,
-                         psize(task.total_length))
+                 .format(GLib.markup_escape_text(task.name),
+                         color, completed_text, psize(task.total_length))
 
         renderer.set_properties(
                 markup = markup,
@@ -259,20 +260,20 @@ class TaskListView(Gtk.TreeView):
     def _speed_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the up and down speed in the column."""
         task = model.get_task(iter_)
-        markups = []
+        text = []
         if task.status == Task.STATUSES.ACTIVE:
             if task.upload_speed:
-                markups.append('\u2B06 {}'.format(pspeed(task.upload_speed)))
+                text.append('\u2B06 {}'.format(pspeed(task.upload_speed)))
             if task.download_speed:
-                markups.append('\u2B07 {}'.format(pspeed(task.download_speed)))
-        renderer.set_properties(markup='\n'.join(markups))
+                text.append('\u2B07 {}'.format(pspeed(task.download_speed)))
+        renderer.set_properties(text='\n'.join(text))
 
     def _connection_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the connections in the column."""
         task = model.get_task(iter_)
         if task.status == Task.STATUSES.ACTIVE:
-            markup = task.connections
+            text = task.connections
         else:
-            markup = ''
-        renderer.set_properties(markup=markup, xalign=.5, yalign=.5)
+            text = ''
+        renderer.set_properties(text=text, xalign=.5, yalign=.5)
 

@@ -25,6 +25,8 @@ This module contains miscellaneous functions used by other modules.
 """
 
 import sys
+import urllib
+import chardet
 import argparse
 
 from gi.repository.GObject import GObjectMeta
@@ -58,4 +60,14 @@ class _VERSION(argparse.Action):
         print(_('You are free to change and redistribute it.'))
         print(_('There is NO WARRANTY, to the extent permitted by law.'))
         sys.exit(0)
+
+def unquote(string):
+    """Unquote URI and auto detect encoding."""
+    assert(isinstance(string, str))
+    byte_string = urllib.parse.unquote_to_bytes(string)
+    result = chardet.detect(byte_string)
+    if result['confidence'] >= .8753:
+        return byte_string.decode(result['encoding'])
+    else:
+        return string
 
