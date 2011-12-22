@@ -113,7 +113,7 @@ setup (
     license          = __license__,
     data_files       = data_files,
     packages         = ["yaner", "yaner.ui", "yaner.utils"],
-    package_data     = {'yaner.ui': ['*.ui', 'ui.xml']},
+    package_data     = {'yaner.ui': ['ui.xml']},
     scripts          = ["scripts/yaner"],
     cmdclass         = {"uninstall" : Uninstall,
                         "install" : Install,
