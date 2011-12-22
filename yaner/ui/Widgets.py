@@ -24,7 +24,7 @@
 
 import collections
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
 class AlignedExpander(Gtk.Expander):
     """A L{Gtk.Expander} with an alignment that can place its children nicely."""
@@ -42,6 +42,7 @@ class AlignedExpander(Gtk.Expander):
 
 class URIsView(Gtk.ScrolledWindow):
     """ScrolledWindow with a text view for getting/setting URIs."""
+
     def __init__(self):
         Gtk.ScrolledWindow.__init__(
             self, None, None, shadow_type=Gtk.ShadowType.IN,
@@ -52,9 +53,16 @@ class URIsView(Gtk.ScrolledWindow):
         text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
         self.add(text_view)
 
+        text_buffer = text_view.get_buffer()
+        text_buffer.connect('changed', self._text_changed)
+        self.text_buffer = text_buffer
+
+    def _text_changed(self, text_buffer):
+        """When text in the buffer changed, update uris property."""
+        self.notify('uris')
+
     def get_uris(self):
-        text_view = self.get_child()
-        tbuffer = text_view.get_buffer()
+        tbuffer = self.text_buffer
         return tbuffer.get_text(
             tbuffer.get_start_iter(),
             tbuffer.get_end_iter(),
@@ -62,12 +70,14 @@ class URIsView(Gtk.ScrolledWindow):
             ).split()
 
     def set_uris(self, uris):
-        text_view = self.get_child()
-        tbuffer = text_view.get_buffer()
-        if isinstance(uris, str):
-            tbuffer.set_text(uris)
-        elif isinstance(uris, collections.Sequence):
-            tbuffer.set_text('\n'.join(uris))
-        else:
-            raise TypeError('URIs should be a string or sequence.')
+        if uris != self.get_uris():
+            tbuffer = self.text_buffer
+            if isinstance(uris, str):
+                tbuffer.set_text(uris)
+            elif isinstance(uris, collections.Sequence):
+                tbuffer.set_text('\n'.join(uris))
+            else:
+                raise TypeError('URIs should be a string or sequence.')
+
+    uris = GObject.property(getter=get_uris, setter=set_uris)
 

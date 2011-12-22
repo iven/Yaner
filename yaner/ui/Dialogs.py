@@ -173,18 +173,21 @@ class TaskNewDialog(Gtk.Dialog):
 
     def bind(self, name, widget, property,
              bind_settings=True, bind_flags=BindFlags.GET,
-             bind_signal=True, signal_name='changed'):
+             bind_signal=True):
         """Bind property to settings and task options."""
 
-        def signal_callback(widget):
+        def property_changed(widget, property_spec=None):
             """When widget changed, add new value to the task opti)ns."""
             self.task_options[name] = widget.get_property(property)
+            if property == 'uris':
+                print(self.task_options)
 
         if bind_settings:
             self.settings.bind(name, widget, property, bind_flags)
         if bind_signal:
-            widget.connect(signal_name, signal_callback)
-            widget.emit(signal_name)
+            signal_name = 'notify::{}'.format(property)
+            widget.connect(signal_name, property_changed)
+            widget.notify(property)
 
     def run(self, options=None):
         """Popup new task dialog."""
@@ -209,6 +212,7 @@ class NormalTaskNewDialog(TaskNewDialog):
 
         uris_view = URIsView()
         vbox.pack_start(uris_view, expand=True, fill=True, padding=0)
+        self.bind('uris', uris_view, 'uris', bind_settings=False)
         self.uris_view = uris_view
 
         hbox = Gtk.HBox(spacing=5)
@@ -291,11 +295,11 @@ class NormalTaskNewDialog(TaskNewDialog):
             self.hide()
             return
 
-        uris = self.uris_view.get_uris()
+        options = self.task_options
+        uris = options.pop('uris')
         if not uris:
             return
 
-        options = self.task_options
         name = options['out'] if options['out'] else os.path.basename(uris[0])
         # SpinButton returns double, but aria2 expects integer
         options['split'] = int(options['split'])
@@ -386,7 +390,7 @@ class BTTaskNewDialog(TaskNewDialog):
             label=_('Preview mode'),
             tooltip_text=_('Try to download first and last pieces first'))
         vbox.pack_start(check_button, expand=True, fill=True, padding=0)
-        self.bind('bt-prioritize', check_button, 'active', signal_name='toggled')
+        self.bind('bt-prioritize', check_button, 'active')
 
         # Mirrors
         expander = AlignedExpander(_('Mirrors'), expanded=False)
@@ -403,6 +407,7 @@ class BTTaskNewDialog(TaskNewDialog):
 
         uris_view = URIsView()
         vbox.pack_start(uris_view, expand=True, fill=True, padding=0)
+        self.bind('uris', uris_view, 'uris', bind_settings=False)
         self.uris_view = uris_view
 
         self.advanced_box.show_all()
@@ -413,7 +418,6 @@ class BTTaskNewDialog(TaskNewDialog):
             self.hide()
             return
 
-        uris = self.uris_view.get_uris()
         torrent_filename = self.torrent_button.get_filename()
         if torrent_filename is None:
             return
@@ -423,6 +427,7 @@ class BTTaskNewDialog(TaskNewDialog):
                 metafile = xmlrpc.client.Binary(torrent_file.read())
 
         options = self.task_options
+        uris = options.pop('uris')
         if options.pop('bt-prioritize'):
             options['bt-prioritize-size'] = 'head,tail'
         for key in ('seed-time', 'bt-max-open-files', 'bt-max-peers'):
