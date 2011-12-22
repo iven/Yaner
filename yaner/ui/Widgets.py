@@ -74,8 +74,10 @@ class URIsView(Gtk.ScrolledWindow):
             tbuffer = self.text_buffer
             if isinstance(uris, str):
                 tbuffer.set_text(uris)
+                self.notify('uris')
             elif isinstance(uris, collections.Sequence):
                 tbuffer.set_text('\n'.join(uris))
+                self.notify('uris')
             else:
                 raise TypeError('URIs should be a string or sequence.')
 
