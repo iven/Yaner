@@ -54,7 +54,6 @@ class TaskNewDialog(Gtk.Dialog):
                            )
 
         self.task_options = {}
-        self.active_category = None
 
         ### Content Area
         content_area = self.get_content_area()
@@ -152,7 +151,7 @@ class TaskNewDialog(Gtk.Dialog):
         if presentable.TYPE == Presentable.TYPES.QUEUING:
             category_cb.set_active_iter(model.iter_children(iter_))
         else:
-            self.active_category = presentable
+            self.task_options['category'] = presentable
             dir_entry.set_text(presentable.directory)
 
     def _on_dir_choosing(self, button, entry):
@@ -179,8 +178,6 @@ class TaskNewDialog(Gtk.Dialog):
         def property_changed(widget, property_spec=None):
             """When widget changed, add new value to the task opti)ns."""
             self.task_options[name] = widget.get_property(property)
-            if property == 'uris':
-                print(self.task_options)
 
         if bind_settings:
             self.settings.bind(name, widget, property, bind_flags)
@@ -301,12 +298,14 @@ class NormalTaskNewDialog(TaskNewDialog):
             return
 
         name = options['out'] if options['out'] else os.path.basename(uris[0])
+        category = options.pop('category')
+
         # SpinButton returns double, but aria2 expects integer
         options['split'] = int(options['split'])
 
         NormalTask(name=name, type=Task.TYPES.NORMAL, uris=uris,
-                   options=options, category=self.active_category,
-                   pool=self.active_category.pool).start()
+                   options=options, category=category,
+                   pool=category.pool).start()
 
         self.hide()
 
@@ -428,14 +427,15 @@ class BTTaskNewDialog(TaskNewDialog):
 
         options = self.task_options
         uris = options.pop('uris')
+        category = options.pop('category')
         if options.pop('bt-prioritize'):
             options['bt-prioritize-size'] = 'head,tail'
         for key in ('seed-time', 'bt-max-open-files', 'bt-max-peers'):
             options[key] = int(options[key])
 
         BTTask(name=name, type=Task.TYPES.BT, metafile=metafile, uris=uris,
-               options=options, category=self.active_category,
-               pool=self.active_category.pool).start()
+               options=options, category=category,
+               pool=category.pool).start()
 
         self.hide()
 
