@@ -34,7 +34,7 @@ from yaner import SQLSession
 from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Presentable import Presentable
-from yaner.ui.Dialogs import NormalTaskNewDialog, BTTaskNewDialog
+from yaner.ui.Dialogs import NormalTaskNewDialog, BTTaskNewDialog, MLTaskNewDialog
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.ui.Misc import load_ui_file
@@ -242,8 +242,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
     def ml_task_new_dialog(self):
         """Get the new metalink task dialog of the window."""
         if self._ml_task_new_dialog is None:
-            #self._ml_task_new_dialog = MLTaskNewDialog(self,
-            #                                           self._pool_model)
+            self._ml_task_new_dialog = MLTaskNewDialog(self,
+                                                       self._pool_model)
             self._ml_task_new_dialog.set_transient_for(self)
         return self._ml_task_new_dialog
 
