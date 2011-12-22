@@ -2,12 +2,6 @@
 # - Bugs
 # * Modification
 
-* Python 3.
-* PyGObject.
-
-+ Restore Tasks.
-+ Convert percent-encoded string to utf8.
-+ Menus.
 + Double click to start/pause.
 + GUI for servers and categories.
 + Proxy.

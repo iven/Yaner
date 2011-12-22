@@ -1,3 +1,12 @@
+0.3.0   <2011-12-23>
+======
+ * Added popup menus for status icons and treeviews.
+ * Added task restore.
+ * Added filename encoding auto-detection.
+ * Simplified task new dialogs a lot.
+ * Fixed task name displaying when it contains special characters.
+ * Use GSettings to store task options.
+
 0.2.1   <2011-11-29>
 ======
  * Fixed cookie format, cookies works now.
