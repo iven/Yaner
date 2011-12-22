@@ -28,6 +28,7 @@ A B{Pool} means a aria2 server, to avoid conflict with download servers.
 """
 
 from gi.repository import Gtk
+from gi.repository import GLib
 from gi.repository import Pango
 
 from yaner.Presentable import Presentable
@@ -67,9 +68,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
             self.add_presentable(presentable)
 
     def on_presentable_added(self, pool, presentable):
-        """When new presentable appears in one of the pools, add it TODO
-        the model.
-        """
+        """When new presentable appears in one of the pools, add it to the model."""
         self.add_presentable(presentable)
 
     def on_presentable_removed(self, pool, presentable):
@@ -176,7 +175,7 @@ class PoolView(Gtk.TreeView):
                 types.DUSTBIN: 'gtk-delete',
                 }
         icon = icons[presentable.TYPE]
-        if presentable.TYPE == Presentable.TYPES.QUEUING and \
+        if presentable.TYPE == types.QUEUING and \
                 not presentable.pool.connected:
             icon = 'gtk-disconnect'
 
@@ -208,7 +207,8 @@ class PoolView(Gtk.TreeView):
                      '<b>{}</b>\n' \
                      '<span fgcolor="{}">{}</span>' \
                  '</small>' \
-                 .format(presentable.name, color, description)
+                 .format(GLib.markup_escape_text(presentable.name),
+                         color, description)
 
         renderer.set_properties(
                 markup = markup,
