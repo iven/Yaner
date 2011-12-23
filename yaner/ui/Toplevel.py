@@ -46,7 +46,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
     _UI_FILE = load_ui_file('ui.xml')
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
-    def __init__(self, config):
+    def __init__(self):
         """
         Create toplevel window of L{yaner}. The window structure is
         like this:
@@ -63,7 +63,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         self.logger.info(_('Initializing toplevel window...'))
 
-        self._config = config
         self._popups = None
 
         # UIManager: Toolbar and menus
@@ -261,11 +260,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
             about_dialog.set_transient_for(self)
             self._about_dialog = about_dialog
         return self._about_dialog
-
-    @property
-    def config(self):
-        """Get the global configuration of the application."""
-        return self._config
 
     def _on_status_icon_activated(self, status_icon):
         """When status icon clicked, switch the window visible or hidden."""

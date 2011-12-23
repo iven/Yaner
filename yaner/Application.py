@@ -32,13 +32,12 @@ from sqlalchemy import create_engine
 
 from yaner import __package__
 from yaner import SQLSession, SQLBase
-from yaner.XDG import save_data_file, load_first_config
+from yaner.XDG import save_data_file
 from yaner.Pool import Pool
 from yaner.Presentable import Category
 from yaner.Constants import APPLICATION_ID
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
-from yaner.utils.Configuration import ConfigParser
 
 class Application(Gtk.Application, LoggingMixin):
     """Main application of L{yaner}."""
@@ -74,20 +73,8 @@ class Application(Gtk.Application, LoggingMixin):
     def toplevel(self):
         """Get the toplevel window of L{yaner}."""
         if self._toplevel is None:
-            self._toplevel = Toplevel(self.config)
+            self._toplevel = Toplevel()
         return self._toplevel
-
-    @property
-    def config(self):
-        """
-        Get the global configuration of the application.
-        If the file doesn't exist, read from the default configuration.
-        If the user configuration directory doesn't exist, create it.
-        """
-        if self._config is None:
-            self.logger.info(_('Reading global configuration file...'))
-            self._config = ConfigParser(load_first_config(self._CONFIG_FILE))
-        return self._config
 
     def _init_logging(self):
         """Set up basic config for logging."""
