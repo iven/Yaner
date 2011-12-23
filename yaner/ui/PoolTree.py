@@ -60,6 +60,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         """When a pool is added to the model, connect signals, and add all
         Presentables to the model.
         """
+        self.logger.debug(_('Adding {}...').format(pool))
         self._pool_handlers[pool] = [
                 pool.connect('presentable-added', self.on_presentable_added),
                 pool.connect('presentable-removed', self.on_presentable_removed),
@@ -94,8 +95,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         if self.get_iter_for_presentable(presentable):
             return
 
-        self.logger.debug(_('Adding presentable {0}...').format(
-            presentable.name))
+        self.logger.debug(_('Adding {}...').format(presentable))
         parent = presentable.parent
         parent_iter = None
         if not parent is None:

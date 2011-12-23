@@ -32,9 +32,8 @@ from sqlalchemy import create_engine
 
 from yaner import __package__
 from yaner import SQLSession, SQLBase
-from yaner.XDG import save_data_file, save_config_file, load_first_config
+from yaner.XDG import save_data_file, load_first_config
 from yaner.Pool import Pool
-from yaner.Task import Task
 from yaner.Presentable import Category
 from yaner.Constants import APPLICATION_ID
 from yaner.ui.Toplevel import Toplevel
@@ -99,7 +98,7 @@ class Application(Gtk.Application, LoggingMixin):
             '%(message)s'
             ))
         logging.basicConfig(
-            filename = save_config_file(self._LOG_FILE),
+            #filename = save_config_file(self._LOG_FILE),
             filemode = 'w',
             format = formatstr,
             level = logging.DEBUG
@@ -120,9 +119,19 @@ class Application(Gtk.Application, LoggingMixin):
 
             SQLBase.metadata.create_all(engine)
 
-            down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
             pool = Pool(name=_('My Computer'), host='localhost')
+
+            down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
             Category(name=_('My Downloads'), directory=down_dir, pool=pool)
+
+            docs_dir = os.environ.get('XDG_DOCUMENTS_DIR', os.path.expanduser('~'))
+            Category(name=_('Documents'), directory=docs_dir, pool=pool)
+
+            videos_dir = os.environ.get('XDG_VIDEOS_DIR', os.path.expanduser('~'))
+            Category(name=_('Videos'), directory=videos_dir, pool=pool)
+
+            music_dir = os.environ.get('XDG_MUSIC_DIR', os.path.expanduser('~'))
+            Category(name=_('Music'), directory=music_dir, pool=pool)
 
             self.logger.info(_('Database initialized.'))
 
@@ -141,26 +150,33 @@ class Application(Gtk.Application, LoggingMixin):
         """When application started with command line arguments, open new
         task dialog.
         """
+        options = eval(data.unpack())
+        self.logger.info(_('Received task options from command line arguments.'))
+        self.logger.debug(str(options))
+
         dialog = self.toplevel.normal_task_new_dialog
-        dialog.run(eval(data.unpack()))
+        dialog.run(options)
 
     def do_activate(self):
         """When Application activated, present the main window."""
+        self.logger.debug(_('Activating toplevel window...'))
         self.toplevel.present()
 
     def do_startup(self):
         """When start up, initialize logging and database systems, and
         show the toplevel window.
         """
-        LoggingMixin.__init__(self)
+        self._init_logging()
         self._init_database()
         self.toplevel.set_application(self)
         self.toplevel.show_all()
 
     def do_shutdown(self):
         """When shutdown, finalize database and logging systems."""
-        self.logger.info(_('Application quit normally.'))
+        self.logger.info(_('Shutting down database...'))
         SQLSession.commit()
         SQLSession.close()
+
+        self.logger.info(_('Application quit normally.'))
         logging.shutdown()
 

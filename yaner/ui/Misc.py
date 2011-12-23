@@ -29,6 +29,8 @@ import logging
 
 from gi.repository import Gtk
 
+from yaner.ui import __package__
+
 _module = '{0}.Misc'.format(__package__)
 _logger = logging.getLogger(_module)
 
@@ -61,7 +63,7 @@ def get_mix_color(widget, state):
                 getattr(style.base[state], component) * 0.3
                 )
     color = '#{red:02X}{green:02X}{blue:02X}'.format(**color)
-    _logger.debug(_("Got mix color: {0}.").format(color))
+    #_logger.debug(_("Got mix color: {0}.").format(color))
 
     return color
 
