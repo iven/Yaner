@@ -2,6 +2,21 @@
 <schemalist>
     <schema id='com.kissuki.yaner' path='/com/kissuki/yaner/'>
         <child schema='com.kissuki.yaner.task' name='task' />
+        <child schema='com.kissuki.yaner.ui' name='ui' />
+    </schema>
+    <schema id='com.kissuki.yaner.ui' path='/com/kissuki/yaner/ui/'>
+        <key type='u' name='width'>
+            <default>650</default>
+            <summary>Toplevel window width</summary>
+        </key>
+        <key type='u' name='height'>
+            <default>450</default>
+            <summary>Toplevel window height</summary>
+        </key>
+        <key type='b' name='maximized'>
+            <default>false</default>
+            <summary>Toplevel window maximized</summary>
+        </key>
     </schema>
     <schema id='com.kissuki.yaner.task' path='/com/kissuki/yaner/task/'>
         <key type='u' name='max-concurrent-downloads'>

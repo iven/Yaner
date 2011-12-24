@@ -29,6 +29,8 @@ import logging
 
 from gi.repository import Gtk
 from gi.repository import GObject
+from gi.repository import Gio
+from gi.repository import Gdk
 
 from yaner import SQLSession
 from yaner import __version__, __author__
@@ -63,13 +65,18 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         self.logger.info(_('Initializing toplevel window...'))
 
+        self._settings = None
+
         self._popups = None
 
         # UIManager: Toolbar and menus
         self._action_group = None
         self._ui_manager = None
 
-        self.set_default_size(650, 450)
+        self.set_default_size(self.settings.get_uint('width'),
+                              self.settings.get_uint('height'))
+        if self.settings.get_boolean('maximized'):
+            self.maximize()
 
         # The toplevel vbox
         vbox = Gtk.VBox(False, 0)
@@ -105,7 +112,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC,
                                    Gtk.PolicyType.NEVER)
         scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
-        scrolled_window.set_size_request(80, -1)
+        scrolled_window.set_size_request(90, -1)
         hpaned.pack1(scrolled_window, True, True)
 
         self._pool_model = PoolModel()
@@ -145,6 +152,13 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self.connect('delete-event', self._on_delete_event, status_icon)
 
         self.logger.info(_('Toplevel window initialized.'))
+
+    @property
+    def settings(self):
+        """Get the GSettings object."""
+        if self._settings is None:
+            self._settings = Gio.Settings('com.kissuki.yaner.ui')
+        return self._settings
 
     @property
     def ui_manager(self):
@@ -380,6 +394,18 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """When task is removed, restore the task."""
         for task in self._task_list_view.selected_tasks:
             task.restore()
+
+    def do_configure_event(self, event):
+        """When window size changed, save it in GSettings."""
+        settings = self.settings
+        if not settings.get_boolean('maximized'):
+            settings.set_uint('width', event.width)
+            settings.set_uint('height', event.height)
+
+    def do_window_state_event(self, event):
+        """When window maximized, save it in GSettings."""
+        maximized = event.new_window_state & Gdk.WindowState.MAXIMIZED
+        self.settings.set_boolean('maximized', maximized)
 
     def about(self, *args, **kwargs):
         """Show about dialog."""
