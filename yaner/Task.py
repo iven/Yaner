@@ -111,6 +111,10 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         self.pool = pool
         self.category = category
 
+        LoggingMixin.__init__(self)
+        self.logger.info(_('Adding new task: {}...').format(self))
+        self.logger.debug(_('Task options: {}').format(options))
+
         SQLSession.add(self)
         SQLSession.commit()
 
@@ -131,7 +135,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         self._renamed = False
 
     def __repr__(self):
-        return "<Task {}>".format(self.name)
+        return _("<Task {}>").format(self.name)
 
     @hybrid_property
     def status(self):
@@ -210,6 +214,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         waiting before calling this.
         """
         if self._status_update_handle is None:
+            self.logger.info(_('{}: begin updating status.').format(self))
             self._status_update_handle = GLib.timeout_add_seconds(
                     self._UPDATE_INTERVAL, self._call_tell_status)
             self._database_sync_handle = GLib.timeout_add_seconds(
@@ -218,6 +223,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     def end_update_status(self):
         """Stop updating status every second."""
         if self._status_update_handle:
+            self.logger.info(_('{}: end updating status.').format(self))
             GLib.source_remove(self._status_update_handle)
             self._status_update_handle = None
         if self._database_sync_handle:

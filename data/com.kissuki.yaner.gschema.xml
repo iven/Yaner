@@ -4,16 +4,14 @@
         <child schema='com.kissuki.yaner.task' name='task' />
     </schema>
     <schema id='com.kissuki.yaner.task' path='/com/kissuki/yaner/task/'>
-        <key type='i' name='max-concurrent-downloads'>
-            <range min='1' max='1024' />
+        <key type='u' name='max-concurrent-downloads'>
             <default>5</default>
             <summary>Max concurrent downloads</summary>
             <description>
                 Set maximum number of parallel downloads for every static (HTTP/FTP) URI, torrent and metalink. Default: 5
             </description>
         </key>
-        <key type='i' name='max-connection-per-server'>
-            <range min='1' max='20' />
+        <key type='u' name='max-connection-per-server'>
             <default>1</default>
             <summary>Max connection per server</summary>
             <description>
@@ -62,32 +60,28 @@
                 Use this proxy server for FTP. To erase previously defined proxy, use "". This affects all URIs. The format of PROXY is [http://][USER:PASSWORD@]HOST[:PORT]
             </description>
         </key>
-        <key type='i' name='connect-timeout'>
-            <range min='1' max='600' />
+        <key type='u' name='connect-timeout'>
             <default>60</default>
             <summary>Connect timeout</summary>
             <description>
                 Set the connect timeout in seconds to establish connection to HTTP/FTP/proxy server. After the connection is established, this option makes no effect and timeout option is used instead. Default: 60
             </description>
         </key>
-        <key type='i' name='timeout'>
-            <range min='1' max='600' />
+        <key type='u' name='timeout'>
             <default>60</default>
             <summary>Timeout</summary>
             <description>
                 Set timeout in seconds. Default: 60
             </description>
         </key>
-        <key type='i' name='max-file-not-found'>
-            <range min='0' max='10' />
+        <key type='u' name='max-file-not-found'>
             <default>0</default>
             <summary>Max file not found</summary>
             <description>
                 If aria2 receives ‘file not found’ status from the remote HTTP/FTP servers NUM times without getting a single byte, then force the download to fail. Specify 0 to disable this option. This options is effective only when using HTTP/FTP servers. Default: 0
             </description>
         </key>
-        <key type='i' name='split'>
-            <range min='1' max='1024' />
+        <key type='u' name='split'>
             <default>5</default>
             <summary>Max tries</summary>
             <description>
@@ -122,8 +116,7 @@
                 If true is specified, when a file whose suffix is ".meta4" or ".metalink" or content type of "application/metalink4+xml" or "application/metalink+xml" is downloaded, aria2 parses it as a metalink file and downloads files mentioned in it. If false is specified, the action mentioned above is not taken. Default: true
             </description>
         </key>
-        <key type='i' name='seed-time'>
-            <range min='0' max='7200' />
+        <key type='u' name='seed-time'>
             <default>120</default>
             <summary>Seed time</summary>
             <description>
@@ -131,39 +124,34 @@
             </description>
         </key>
         <key type='d' name='seed-ratio'>
-            <range min='0' max='20' />
             <default>1.0</default>
             <summary>Seed ratio</summary>
             <description>
                 Specify share ratio. Seed completed torrents until share ratio reaches RATIO. You are strongly encouraged to specify equals or more than 1.0 here. Specify 0.0 if you intend to do seeding regardless of share ratio. If --seed-time option is specified along with this option, seeding ends when at least one of the conditions is satisfied. Default: 1.0
             </description>
         </key>
-        <key type='i' name='bt-max-open-files'>
-            <range min='1' max='1024' />
+        <key type='u' name='bt-max-open-files'>
             <default>100</default>
             <summary>Max open files in BT</summary>
             <description>
                 Specify maximum number of files to open in each BitTorrent download. Default: 100
             </description>
         </key>
-        <key type='i' name='bt-max-peers'>
-            <range min='0' max='1024' />
+        <key type='u' name='bt-max-peers'>
             <default>55</default>
             <summary>Max peers in BT</summary>
             <description>
                  Specify the maximum number of peers per torrent.  0 means unlimited. Default: 55
             </description>
         </key>
-        <key type='i' name='bt-tracker-connect-timeout'>
-            <range min='1' max='600' />
+        <key type='u' name='bt-tracker-connect-timeout'>
             <default>60</default>
             <summary>BT tracker connect timeout</summary>
             <description>
                 Set the connect timeout in seconds to establish connection to tracker. After the connection is established, this option makes no effect and bt-tracker-timeout option is used instead. Default: 60
             </description>
         </key>
-        <key type='i' name='bt-tracker-timeout'>
-            <range min='1' max='600' />
+        <key type='u' name='bt-tracker-timeout'>
             <default>60</default>
             <summary>BT tracker timeout</summary>
             <description>
@@ -184,8 +172,7 @@
                 Enable BT prioritize, wrapper of 'bt-prioritize-piece' for conveniece.
             </description>
         </key>
-        <key type='i' name='metalink-servers'>
-            <range min='1' max='64' />
+        <key type='u' name='metalink-servers'>
             <default>5</default>
             <summary>Metalink servers</summary>
             <description>

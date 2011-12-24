@@ -59,6 +59,9 @@ class Presentable(LoggingMixin, GObject.GObject):
         LoggingMixin.__init__(self)
         GObject.GObject.__init__(self)
 
+    def __repr__(self):
+        return '<{}>'.format(self.name)
+
     def add_task(self, task):
         """When task added, emit signals."""
         self.emit('changed')
@@ -134,7 +137,7 @@ class Category(SQLBase, Presentable):
         self.parent = self.pool.queuing
 
     def __repr__(self):
-        return "<Category {}>".format(self.name)
+        return _("<Category {}>").format(self.name)
 
     @hybrid_property
     def name(self):
@@ -163,6 +166,9 @@ class Dustbin(Presentable):
         Presentable.__init__(self)
         self._pool = pool
         self.parent = pool.queuing
+
+    def __repr__(self):
+        return '<{}>'.format(self.name)
 
     @property
     def name(self):

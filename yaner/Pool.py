@@ -94,7 +94,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         self._keep_connection()
 
     def __repr__(self):
-        return "<Pool {}>".format(self.name)
+        return _("<Pool {}>").format(self.name)
 
     @property
     def proxy(self):
@@ -140,6 +140,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
 
     def do_connected(self):
         """When pool connected, try to resume last session."""
+        self.logger.info('{}: connected.'.format(self))
         self._resume_session()
 
     def do_disconnected(self):
@@ -149,6 +150,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         call C{aria2.unpause} method, while inactive tasks will call
         C{aria2.addUri}, or other method to add them as new tasks.
         """
+        self.logger.info('{}: disconnected.'.format(self))
         for task in self.queuing.tasks:
             task.status = Task.STATUSES.INACTIVE
             task.end_update_status()

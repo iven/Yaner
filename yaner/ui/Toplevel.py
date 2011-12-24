@@ -46,7 +46,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
     _UI_FILE = load_ui_file('ui.xml')
     """The menu and toolbar interfaces, used by L{ui_manager}."""
 
-    def __init__(self, config):
+    def __init__(self):
         """
         Create toplevel window of L{yaner}. The window structure is
         like this:
@@ -63,7 +63,11 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         self.logger.info(_('Initializing toplevel window...'))
 
-        self._config = config
+        self._popups = None
+
+        # UIManager: Toolbar and menus
+        self._action_group = None
+        self._ui_manager = None
 
         self.set_default_size(650, 450)
 
@@ -71,14 +75,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
         vbox = Gtk.VBox(False, 0)
         self.add(vbox)
 
-        # UIManager: Toolbar and menus
-        self._action_group = None
-        self._ui_manager = None
-
         toolbar = self.ui_manager.get_widget('/toolbar')
         vbox.pack_start(toolbar, False, False, 0)
-
-        self._popups = None
 
         # HPaned: PoolView as left, TaskVBox as right
         hpaned = Gtk.HPaned()
@@ -86,52 +84,54 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         # Right pane
         task_vbox = Gtk.VBox(False, 12)
-        hpaned.add2(task_vbox)
+        hpaned.pack2(task_vbox, True, False)
 
         self._task_list_model = TaskListModel()
+
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
+        scrolled_window.set_size_request(400, -1)
+        task_vbox.pack_start(scrolled_window, True, True, 0)
 
         task_list_view = TaskListView(self._task_list_model)
         task_list_view.set_show_expanders(False)
         task_list_view.set_level_indentation(16)
         task_list_view.expand_all()
         task_list_view.selection.set_mode(Gtk.SelectionMode.MULTIPLE)
-        task_list_view.connect('button-press-event', self._on_task_list_view_button_pressed)
+        task_list_view.connect('button-press-event',
+                               self._on_task_list_view_button_pressed)
+        scrolled_window.add(task_list_view)
 
         self._task_list_view = task_list_view
-
-        task_vbox.pack_start(self._task_list_view, True, True, 0)
 
         # Left pane
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC,
-                Gtk.PolicyType.NEVER)
+                                   Gtk.PolicyType.NEVER)
         scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
-        scrolled_window.set_size_request(80, -1)
-        hpaned.pack1(scrolled_window, True, True)
+        scrolled_window.set_size_request(180, -1)
+        hpaned.pack1(scrolled_window, False, False)
 
         self._pool_model = PoolModel()
 
         pool_view = PoolView(self._pool_model)
-        pool_view.set_size_request(200, -1)
         pool_view.set_headers_visible(False)
         pool_view.set_show_expanders(False)
         pool_view.set_level_indentation(16)
+        scrolled_window.add(pool_view)
 
         self._pool_view = pool_view
 
         pool_view.selection.set_mode(Gtk.SelectionMode.SINGLE)
         pool_view.selection.connect("changed",
-                self.on_pool_view_selection_changed)
+                                    self.on_pool_view_selection_changed)
 
         # Add Pools to the PoolModel
         for pool in SQLSession.query(Pool):
             self._pool_model.add_pool(pool)
         pool_view.expand_all()
         # Select first iter
-        pool_view.selection.select_iter(
-                self._pool_model.get_iter_first())
-
-        scrolled_window.add(self._pool_view)
+        pool_view.selection.select_iter(self._pool_model.get_iter_first())
 
         # Dialogs
         self._normal_task_new_dialog = None
@@ -160,6 +160,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
                 ui_manager.add_ui_from_file(self._UI_FILE)
             except GObject.GError:
                 self.logger.exception(_("Failed to add ui file to UIManager."))
+                SQLSession.close()
                 logging.shutdown()
                 sys.exit(1)
             else:
@@ -212,12 +213,14 @@ class Toplevel(Gtk.Window, LoggingMixin):
     def popups(self):
         """Get popup menus, which is a dict."""
         if self._popups is None:
+            self.logger.info(_('Initializing popup menus...'))
             get_widget = self.ui_manager.get_widget
             popups = {}
             for popup_name in ('tray', 'queuing_task', 'category_task',
                                'dustbin_task'):
                 popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
             self._popups = popups
+            self.logger.info(_('Popup menus initialized.'))
         return self._popups
 
     @property
@@ -260,25 +263,24 @@ class Toplevel(Gtk.Window, LoggingMixin):
             self._about_dialog = about_dialog
         return self._about_dialog
 
-    @property
-    def config(self):
-        """Get the global configuration of the application."""
-        return self._config
-
     def _on_status_icon_activated(self, status_icon):
         """When status icon clicked, switch the window visible or hidden."""
+        self.logger.debug(_('Status icon activated.'))
         self.action_group.get_action('toggle_hidden').activate()
 
     def _on_status_icon_popup(self, status_icon, button, activate_time):
         """When status icon right-clicked, show the menu."""
+        self.logger.debug(_('Status icon menu popuped.'))
         self.popups['tray'].popup(None, None, None, None, button, activate_time)
 
     def _on_toggle_hidden(self, action, user_data):
         """Toggle the toplevel window shown or hidden."""
         if self.get_property('visible'):
             self.hide()
+            self.logger.debug(_('Toplevel window hidden.'))
         else:
             self.present()
+            self.logger.debug(_('Toplevel window shown.'))
 
     def _on_delete_event(self, window, event, status_icon):
         """When window close button is clicked, try to hide the window instead
@@ -286,6 +288,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """
         if status_icon.is_embedded():
             self.hide()
+            self.logger.debug(_('Toplevel window hidden.'))
             return True
         else:
             return False
@@ -388,4 +391,5 @@ class Toplevel(Gtk.Window, LoggingMixin):
     def destroy(self, *args, **kwargs):
         """Destroy toplevel window and quit the application."""
         Gtk.Window.destroy(self)
+        self.logger.debug(_('Window destroyed.'))
 

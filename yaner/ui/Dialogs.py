@@ -37,8 +37,9 @@ from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Presentable
 from yaner.ui.Widgets import AlignedExpander, URIsView, MetafileChooserButton
 from yaner.ui.PoolTree import PoolModel
+from yaner.utils.Logging import LoggingMixin
 
-class TaskNewDialog(Gtk.Dialog):
+class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Base class for all new task dialogs."""
 
     settings = Gio.Settings('com.kissuki.yaner.task')
@@ -52,6 +53,7 @@ class TaskNewDialog(Gtk.Dialog):
                                      Gtk.STOCK_OK, Gtk.ResponseType.OK
                                     )
                            )
+        LoggingMixin.__init__(self)
 
         self.task_options = {}
 
@@ -153,6 +155,7 @@ class TaskNewDialog(Gtk.Dialog):
         else:
             self.task_options['category'] = presentable
             dir_entry.set_text(presentable.directory)
+            self.logger.debug(_('Category is changed to {}.').format(presentable))
 
     def _on_dir_choosing(self, button, entry):
         """When directory chooser button clicked, popup the dialog, and update
@@ -177,7 +180,9 @@ class TaskNewDialog(Gtk.Dialog):
 
         def property_changed(widget, property_spec=None):
             """When widget changed, add new value to the task opti)ns."""
-            self.task_options[name] = widget.get_property(property)
+            value = widget.get_property(property)
+            self.task_options[name] = value
+            self.logger.debug(_('Property changed: {} {}').format(name, value))
 
         if bind_settings:
             self.settings.bind(name, widget, property, bind_flags)
@@ -192,6 +197,10 @@ class TaskNewDialog(Gtk.Dialog):
             del self.task_options['header']
         if options is not None:
             self.task_options.update(options)
+
+        self.logger.info(_('Running new task dialog...'))
+        self.logger.debug(_('Task options: {}').format(self.task_options))
+
         Gtk.Dialog.run(self)
 
 class NormalTaskNewDialog(TaskNewDialog):
