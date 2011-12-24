@@ -202,7 +202,7 @@ class PoolView(Gtk.TreeView):
 
         tasks = list(presentable.tasks)
         total_length = sum(task.total_length for task in tasks)
-        description = '{} Task(s) {}'.format(len(tasks), psize(total_length))
+        description = _('{} Task(s) {}').format(len(tasks), psize(total_length))
         markup = '<small>' \
                      '<b>{}</b>\n' \
                      '<span fgcolor="{}">{}</span>' \

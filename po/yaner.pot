@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-12-23 14:52+0800\n"
+"POT-Creation-Date: 2011-12-24 23:44+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,63 +17,59 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: scripts/../yaner/Application.py:88
-msgid "Reading global configuration file..."
-msgstr ""
-
-#: scripts/../yaner/Application.py:106
+#: scripts/../yaner/Application.py:93
 msgid "Logging system initialized, start logging..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:111
+#: scripts/../yaner/Application.py:98
 msgid "Connecting to global database file..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:118
+#: scripts/../yaner/Application.py:105
 msgid "Initializing database for first start..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:122
+#: scripts/../yaner/Application.py:109
 msgid "My Computer"
 msgstr ""
 
-#: scripts/../yaner/Application.py:125
+#: scripts/../yaner/Application.py:112
 msgid "My Downloads"
 msgstr ""
 
-#: scripts/../yaner/Application.py:128
+#: scripts/../yaner/Application.py:115
 msgid "Documents"
 msgstr ""
 
-#: scripts/../yaner/Application.py:131
+#: scripts/../yaner/Application.py:118
 msgid "Videos"
 msgstr ""
 
-#: scripts/../yaner/Application.py:134
+#: scripts/../yaner/Application.py:121
 msgid "Music"
 msgstr ""
 
-#: scripts/../yaner/Application.py:136
+#: scripts/../yaner/Application.py:123
 msgid "Database initialized."
 msgstr ""
 
-#: scripts/../yaner/Application.py:138
+#: scripts/../yaner/Application.py:125
 msgid "Global database file connected."
 msgstr ""
 
-#: scripts/../yaner/Application.py:154
+#: scripts/../yaner/Application.py:141
 msgid "Received task options from command line arguments."
 msgstr ""
 
-#: scripts/../yaner/Application.py:162
+#: scripts/../yaner/Application.py:149
 msgid "Activating toplevel window..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:176
+#: scripts/../yaner/Application.py:163
 msgid "Shutting down database..."
 msgstr ""
 
-#: scripts/../yaner/Application.py:180
+#: scripts/../yaner/Application.py:167
 msgid "Application quit normally."
 msgstr ""
 
@@ -97,11 +93,11 @@ msgstr ""
 msgid "<Pool {}>"
 msgstr ""
 
-#: scripts/../yaner/Presentable.py:137
+#: scripts/../yaner/Presentable.py:140
 msgid "<Category {}>"
 msgstr ""
 
-#: scripts/../yaner/Presentable.py:170
+#: scripts/../yaner/Presentable.py:176
 msgid "Dustbin"
 msgstr ""
 
@@ -286,6 +282,10 @@ msgstr ""
 msgid "No parent presentable for {0}."
 msgstr ""
 
+#: scripts/../yaner/ui/PoolTree.py:205
+msgid "{} Task(s) {}"
+msgstr ""
+
 #: scripts/../yaner/ui/TaskListTree.py:148
 msgid "Tasks"
 msgstr ""
@@ -306,102 +306,102 @@ msgstr ""
 msgid "Initializing toplevel window..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:148
+#: scripts/../yaner/ui/Toplevel.py:147
 msgid "Toplevel window initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:154
+#: scripts/../yaner/ui/Toplevel.py:153
 msgid "Initializing UI Manager..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:161
+#: scripts/../yaner/ui/Toplevel.py:160
 msgid "Failed to add ui file to UIManager."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:166
+#: scripts/../yaner/ui/Toplevel.py:165
 msgid "UI Manager initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:174
+#: scripts/../yaner/ui/Toplevel.py:173
 msgid "Initializing action group..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:179
+#: scripts/../yaner/ui/Toplevel.py:178
 msgid "HTTP/FTP/BT Magnet"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:181
+#: scripts/../yaner/ui/Toplevel.py:180
 msgid "BitTorrent"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:183
+#: scripts/../yaner/ui/Toplevel.py:182
 msgid "Metalink"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:185
+#: scripts/../yaner/ui/Toplevel.py:184
 msgid "Start"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:187
+#: scripts/../yaner/ui/Toplevel.py:186
 msgid "Pause"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:189
+#: scripts/../yaner/ui/Toplevel.py:188
 msgid "Start All"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:191
+#: scripts/../yaner/ui/Toplevel.py:190
 msgid "Pause All"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:193
+#: scripts/../yaner/ui/Toplevel.py:192
 msgid "Remove"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:195
+#: scripts/../yaner/ui/Toplevel.py:194
 msgid "Restore"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:197
+#: scripts/../yaner/ui/Toplevel.py:196
 msgid "Show / Hide"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:206
+#: scripts/../yaner/ui/Toplevel.py:205
 msgid "Action group initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:215
+#: scripts/../yaner/ui/Toplevel.py:214
 msgid "Initializing popup menus..."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:222
+#: scripts/../yaner/ui/Toplevel.py:221
 msgid "Popup menus initialized."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:256
+#: scripts/../yaner/ui/Toplevel.py:255
 msgid "Yaner"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:272
+#: scripts/../yaner/ui/Toplevel.py:266
 msgid "Status icon activated."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:277
+#: scripts/../yaner/ui/Toplevel.py:271
 msgid "Status icon menu popuped."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:284 scripts/../yaner/ui/Toplevel.py:295
+#: scripts/../yaner/ui/Toplevel.py:278 scripts/../yaner/ui/Toplevel.py:289
 msgid "Toplevel window hidden."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:287
+#: scripts/../yaner/ui/Toplevel.py:281
 msgid "Toplevel window shown."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:374
+#: scripts/../yaner/ui/Toplevel.py:368
 msgid "Are you sure to remove these tasks?"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:398
+#: scripts/../yaner/ui/Toplevel.py:392
 msgid "Window destroyed."
 msgstr ""

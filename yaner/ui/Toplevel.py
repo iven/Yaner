@@ -84,9 +84,14 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         # Right pane
         task_vbox = Gtk.VBox(False, 12)
-        hpaned.add2(task_vbox)
+        hpaned.pack2(task_vbox, True, False)
 
         self._task_list_model = TaskListModel()
+
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
+        scrolled_window.set_size_request(400, -1)
+        task_vbox.pack_start(scrolled_window, True, True, 0)
 
         task_list_view = TaskListView(self._task_list_model)
         task_list_view.set_show_expanders(False)
@@ -95,26 +100,25 @@ class Toplevel(Gtk.Window, LoggingMixin):
         task_list_view.selection.set_mode(Gtk.SelectionMode.MULTIPLE)
         task_list_view.connect('button-press-event',
                                self._on_task_list_view_button_pressed)
+        scrolled_window.add(task_list_view)
 
         self._task_list_view = task_list_view
-
-        task_vbox.pack_start(self._task_list_view, True, True, 0)
 
         # Left pane
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC,
                                    Gtk.PolicyType.NEVER)
         scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
-        scrolled_window.set_size_request(80, -1)
-        hpaned.pack1(scrolled_window, True, True)
+        scrolled_window.set_size_request(180, -1)
+        hpaned.pack1(scrolled_window, False, False)
 
         self._pool_model = PoolModel()
 
         pool_view = PoolView(self._pool_model)
-        pool_view.set_size_request(200, -1)
         pool_view.set_headers_visible(False)
         pool_view.set_show_expanders(False)
         pool_view.set_level_indentation(16)
+        scrolled_window.add(pool_view)
 
         self._pool_view = pool_view
 
@@ -128,8 +132,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
         pool_view.expand_all()
         # Select first iter
         pool_view.selection.select_iter(self._pool_model.get_iter_first())
-
-        scrolled_window.add(self._pool_view)
 
         # Dialogs
         self._normal_task_new_dialog = None

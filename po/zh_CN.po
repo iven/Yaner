@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: yaner 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-12-23 14:52+0800\n"
+"POT-Creation-Date: 2011-12-24 23:44+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -17,63 +17,59 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: scripts/../yaner/Application.py:88
-msgid "Reading global configuration file..."
-msgstr "全局配置文件读取中……"
-
-#: scripts/../yaner/Application.py:106
+#: scripts/../yaner/Application.py:93
 msgid "Logging system initialized, start logging..."
 msgstr "日志系统初始化完毕，开始记录……"
 
-#: scripts/../yaner/Application.py:111
+#: scripts/../yaner/Application.py:98
 msgid "Connecting to global database file..."
 msgstr "全局数据库文件连接中……"
 
-#: scripts/../yaner/Application.py:118
+#: scripts/../yaner/Application.py:105
 msgid "Initializing database for first start..."
 msgstr "为首次启动初始化数据库中……"
 
-#: scripts/../yaner/Application.py:122
+#: scripts/../yaner/Application.py:109
 msgid "My Computer"
 msgstr "我的电脑"
 
-#: scripts/../yaner/Application.py:125
+#: scripts/../yaner/Application.py:112
 msgid "My Downloads"
 msgstr "我的下载"
 
-#: scripts/../yaner/Application.py:128
+#: scripts/../yaner/Application.py:115
 msgid "Documents"
 msgstr "文档"
 
-#: scripts/../yaner/Application.py:131
+#: scripts/../yaner/Application.py:118
 msgid "Videos"
 msgstr "视频"
 
-#: scripts/../yaner/Application.py:134
+#: scripts/../yaner/Application.py:121
 msgid "Music"
 msgstr "音乐"
 
-#: scripts/../yaner/Application.py:136
+#: scripts/../yaner/Application.py:123
 msgid "Database initialized."
 msgstr "数据库初始化完毕。"
 
-#: scripts/../yaner/Application.py:138
+#: scripts/../yaner/Application.py:125
 msgid "Global database file connected."
 msgstr "已连接全局数据库文件。"
 
-#: scripts/../yaner/Application.py:154
+#: scripts/../yaner/Application.py:141
 msgid "Received task options from command line arguments."
 msgstr "从命令行接收到人物选项。"
 
-#: scripts/../yaner/Application.py:162
+#: scripts/../yaner/Application.py:149
 msgid "Activating toplevel window..."
 msgstr "激活主窗口中……"
 
-#: scripts/../yaner/Application.py:176
+#: scripts/../yaner/Application.py:163
 msgid "Shutting down database..."
 msgstr "关闭数据库中……"
 
-#: scripts/../yaner/Application.py:180
+#: scripts/../yaner/Application.py:167
 msgid "Application quit normally."
 msgstr "程序正常退出。"
 
@@ -97,11 +93,11 @@ msgstr "在法律范围内没有其他保证。"
 msgid "<Pool {}>"
 msgstr "<池 {}>"
 
-#: scripts/../yaner/Presentable.py:137
+#: scripts/../yaner/Presentable.py:140
 msgid "<Category {}>"
 msgstr "<分类 {}>"
 
-#: scripts/../yaner/Presentable.py:170
+#: scripts/../yaner/Presentable.py:176
 msgid "Dustbin"
 msgstr "回收站"
 
@@ -289,6 +285,10 @@ msgstr "添加 {} 中……"
 msgid "No parent presentable for {0}."
 msgstr "{0} 无父呈现器。"
 
+#: scripts/../yaner/ui/PoolTree.py:205
+msgid "{} Task(s) {}"
+msgstr "{} 个任务 {}"
+
 #: scripts/../yaner/ui/TaskListTree.py:148
 msgid "Tasks"
 msgstr "任务"
@@ -309,105 +309,108 @@ msgstr "连接"
 msgid "Initializing toplevel window..."
 msgstr "初始化主窗口中……"
 
-#: scripts/../yaner/ui/Toplevel.py:148
+#: scripts/../yaner/ui/Toplevel.py:147
 msgid "Toplevel window initialized."
 msgstr "主窗口初始化完毕。"
 
-#: scripts/../yaner/ui/Toplevel.py:154
+#: scripts/../yaner/ui/Toplevel.py:153
 msgid "Initializing UI Manager..."
 msgstr "初始化 UI 管理器中……"
 
-#: scripts/../yaner/ui/Toplevel.py:161
+#: scripts/../yaner/ui/Toplevel.py:160
 msgid "Failed to add ui file to UIManager."
 msgstr "添加 ui 文件到 UI 管理器失败。"
 
-#: scripts/../yaner/ui/Toplevel.py:166
+#: scripts/../yaner/ui/Toplevel.py:165
 msgid "UI Manager initialized."
 msgstr "UI 管理器初始化完毕。"
 
-#: scripts/../yaner/ui/Toplevel.py:174
+#: scripts/../yaner/ui/Toplevel.py:173
 msgid "Initializing action group..."
 msgstr "初始化动作组中……"
 
-#: scripts/../yaner/ui/Toplevel.py:179
+#: scripts/../yaner/ui/Toplevel.py:178
 msgid "HTTP/FTP/BT Magnet"
 msgstr "HTTP/FTP/磁力链接"
 
-#: scripts/../yaner/ui/Toplevel.py:181
+#: scripts/../yaner/ui/Toplevel.py:180
 msgid "BitTorrent"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:183
+#: scripts/../yaner/ui/Toplevel.py:182
 msgid "Metalink"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:185
+#: scripts/../yaner/ui/Toplevel.py:184
 msgid "Start"
 msgstr "开始"
 
-#: scripts/../yaner/ui/Toplevel.py:187
+#: scripts/../yaner/ui/Toplevel.py:186
 msgid "Pause"
 msgstr "暂停"
 
-#: scripts/../yaner/ui/Toplevel.py:189
+#: scripts/../yaner/ui/Toplevel.py:188
 msgid "Start All"
 msgstr "全部开始"
 
-#: scripts/../yaner/ui/Toplevel.py:191
+#: scripts/../yaner/ui/Toplevel.py:190
 msgid "Pause All"
 msgstr "全部暂停"
 
-#: scripts/../yaner/ui/Toplevel.py:193
+#: scripts/../yaner/ui/Toplevel.py:192
 msgid "Remove"
 msgstr "删除"
 
-#: scripts/../yaner/ui/Toplevel.py:195
+#: scripts/../yaner/ui/Toplevel.py:194
 msgid "Restore"
 msgstr "还原"
 
-#: scripts/../yaner/ui/Toplevel.py:197
+#: scripts/../yaner/ui/Toplevel.py:196
 msgid "Show / Hide"
 msgstr "显示/隐藏"
 
-#: scripts/../yaner/ui/Toplevel.py:206
+#: scripts/../yaner/ui/Toplevel.py:205
 msgid "Action group initialized."
 msgstr "动作组初始化完毕。"
 
-#: scripts/../yaner/ui/Toplevel.py:215
+#: scripts/../yaner/ui/Toplevel.py:214
 msgid "Initializing popup menus..."
 msgstr "初始化弹出菜单中……"
 
-#: scripts/../yaner/ui/Toplevel.py:222
+#: scripts/../yaner/ui/Toplevel.py:221
 msgid "Popup menus initialized."
 msgstr "弹出菜单初始化完毕。"
 
-#: scripts/../yaner/ui/Toplevel.py:256
+#: scripts/../yaner/ui/Toplevel.py:255
 msgid "Yaner"
 msgstr "掩耳"
 
-#: scripts/../yaner/ui/Toplevel.py:272
+#: scripts/../yaner/ui/Toplevel.py:266
 msgid "Status icon activated."
 msgstr "状态图标被激活。"
 
-#: scripts/../yaner/ui/Toplevel.py:277
+#: scripts/../yaner/ui/Toplevel.py:271
 msgid "Status icon menu popuped."
 msgstr "状态图标菜单弹出。"
 
-#: scripts/../yaner/ui/Toplevel.py:284 scripts/../yaner/ui/Toplevel.py:295
+#: scripts/../yaner/ui/Toplevel.py:278 scripts/../yaner/ui/Toplevel.py:289
 msgid "Toplevel window hidden."
 msgstr "主窗口隐藏。"
 
-#: scripts/../yaner/ui/Toplevel.py:287
+#: scripts/../yaner/ui/Toplevel.py:281
 msgid "Toplevel window shown."
 msgstr "主窗口显示。"
 
-#: scripts/../yaner/ui/Toplevel.py:374
+#: scripts/../yaner/ui/Toplevel.py:368
 msgid "Are you sure to remove these tasks?"
 msgstr "确定删除这些任务？"
 
-#: scripts/../yaner/ui/Toplevel.py:398
+#: scripts/../yaner/ui/Toplevel.py:392
 msgid "Window destroyed."
 msgstr "窗口被摧毁。"
+
+#~ msgid "Reading global configuration file..."
+#~ msgstr "全局配置文件读取中……"
 
 #~ msgid "Adding {}."
 #~ msgstr "添加 {} 中……"
