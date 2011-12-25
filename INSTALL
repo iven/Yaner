@@ -1,39 +1,45 @@
 Dependences
-======
-Python >= 3.2.0
-PyGObject
-GTK3
-libnotify
-SQLAlchemy >= 0.7.0
-python-chardet
-dconf
+===========
+
+* Python >= 3.2.0
+* PyGObject
+* GTK3
+* libnotify
+* SQLAlchemy >= 0.7.0
+* python-chardet
+* dconf
 
 Install
-======
-Run the setup.py script to install, e.g.:
-    python setup.py install (as root, or with root rights using sudo)
+=======
 
-To install it to /usr (or any other prefix) use:
-    python setup.py install --prefix=/usr
-(specify --prefix _after_ install or it won't work)
+Run the setup.py script as root to install, e.g.::
 
-If you use Debian / Ubuntu, you should install like this:
-    python setup.py install --prefix=/usr --install-layout=deb
+    python3 setup.py install --prefix=/usr
 
-After that, run this as root:
+If you use Debian/Ubuntu based distributions, you should install like this::
+
+    python3 setup.py install --prefix=/usr --install-layout=deb
+
+After that, run this as root::
+
     glib-compile-schemas /usr/share/glib-2.0/schemas/
 
 Uninstall
-======
-To uninstall, use:
-    python setup.py uninstall (also as root, or with root rights using sudo)
+=========
 
-Don't remove the file "installed_files", it's used for uninstallation.
+To uninstall, run this as root:
+
+    python3 setup.py uninstall
+
+Don't remove the file ``installed_files``, it's used for uninstallation.
 
 Browser support
-======
-For Firefox, install FlashGot, add a new DM in the preferences dialog:
-Executable path: /usr/bin/yaner (Or /usr/local/bin/yaner, etc.)
-Command line:    [URL] [--referer REFERER] [--rename FNAME] [--cookie COOKIE]
+===============
+
+For Firefox, install FlashGot, add a new DM in the preferences dialog::
+
+    Executable path: /usr/bin/yaner
+    Command line:    [URL] [--referer REFERER] [--rename FNAME] [--cookie COOKIE]
 
 Other browers are currently not supported.
+
