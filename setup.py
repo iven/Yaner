@@ -101,6 +101,9 @@ for po_file in glob('po/*.po'):
 data_files.append(('share/applications/', ['yaner.desktop']))
 data_files.append(('share/glib-2.0/schemas/', ['data/com.kissuki.yaner.gschema.xml']))
 
+xdg_config_dir = os.environ.get('XDG_CONFIG_DIRS', '/etc/xdg/').split(':')[0]
+data_files.append((os.path.join(xdg_config_dir, 'autostart/'), ['yaner-daemon.desktop']))
+
 setup (
     name             = "yaner",
     version          = __version__,
