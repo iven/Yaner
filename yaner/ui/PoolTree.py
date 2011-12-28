@@ -163,7 +163,10 @@ class PoolView(Gtk.TreeView):
     def selected_presentable(self):
         """Get selected presentable."""
         (model, iter_) = self.selection.get_selected()
-        return model.get_presentable(iter_)
+        if iter_ is None:
+            return None
+        else:
+            return model.get_presentable(iter_)
 
     def _pixbuf_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""

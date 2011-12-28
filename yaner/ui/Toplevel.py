@@ -126,6 +126,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         pool_view.set_headers_visible(False)
         pool_view.set_show_expanders(False)
         pool_view.set_level_indentation(16)
+        pool_view.connect('button-press-event', self._on_pool_view_button_pressed)
         scrolled_window.add(pool_view)
 
         self._pool_view = pool_view
@@ -226,8 +227,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
             self.logger.info(_('Initializing popup menus...'))
             get_widget = self.ui_manager.get_widget
             popups = {}
-            for popup_name in ('tray', 'queuing_task', 'category_task',
-                               'dustbin_task', 'task_new'):
+            for popup_name in ('tray', 'task_new', 'queuing', 'category', 'dustbin',
+                               'queuing_task', 'category_task', 'dustbin_task'):
                 popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
             self._popups = popups
             self.logger.info(_('Popup menus initialized.'))
@@ -305,7 +306,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
     def _on_task_list_view_button_pressed(self, treeview, event):
         """Popup menu when necessary."""
-        # If the clicked row is not selected, select it only
         selection = treeview.get_selection()
         (model, paths) = selection.get_selected_rows()
         current_path = treeview.get_path_at_pos(event.x, event.y)
@@ -314,6 +314,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             return True
 
         if event.button == 3:
+            # If the clicked row is not selected, select it only
             if current_path is not None and current_path[0] not in paths:
                 selection.unselect_all()
                 selection.select_path(current_path[0])
@@ -323,6 +324,30 @@ class Toplevel(Gtk.Window, LoggingMixin):
                           Presentable.TYPES.DUSTBIN: 'dustbin_task',
                          }
             popup_menu = self.popups[popup_dict[model.presentable.TYPE]]
+            popup_menu.popup(None, None, None, None, event.button, event.time)
+            return True
+        return False
+
+    def _on_pool_view_button_pressed(self, treeview, event):
+        """Popup menu when necessary."""
+        selection = treeview.get_selection()
+        (model, iter_) = selection.get_selected()
+        current_path = treeview.get_path_at_pos(event.x, event.y)
+        if current_path is None:
+            selection.unselect_all()
+            return True
+
+        if event.button == 3:
+            # If the clicked row is not selected, select it only
+            if current_path[0] != model.get_path(iter_):
+                selection.unselect_all()
+                selection.select_path(current_path[0])
+
+            popup_dict = {Presentable.TYPES.QUEUING: 'queuing',
+                          Presentable.TYPES.CATEGORY: 'category',
+                          Presentable.TYPES.DUSTBIN: 'dustbin',
+                         }
+            popup_menu = self.popups[popup_dict[treeview.selected_presentable.TYPE]]
             popup_menu.popup(None, None, None, None, event.button, event.time)
             return True
         return False
@@ -357,14 +382,26 @@ class Toplevel(Gtk.Window, LoggingMixin):
             task.pause()
 
     def on_task_start_all(self, action, user_data):
-        """Start or unpause all the tasks."""
-        for pool in SQLSession.query(Pool):
+        """Start or unpause all the tasks in the selected pool."""
+        presentable = self._pool_view.selected_presentable
+        if presentable is None or presentable.TYPE != Presentable.TYPES.QUEUING:
+            pools = SQLSession.query(Pool)
+        else:
+            pools = [presentable.pool]
+
+        for pool in pools:
             for task in pool.queuing.tasks:
                 task.start()
 
     def on_task_pause_all(self, action, user_data):
-        """Pause all the tasks."""
-        for pool in SQLSession.query(Pool):
+        """Pause all the tasks in the selected pool."""
+        presentable = self._pool_view.selected_presentable
+        if presentable is None or presentable.TYPE != Presentable.TYPES.QUEUING:
+            pools = SQLSession.query(Pool)
+        else:
+            pools = [presentable.pool]
+
+        for pool in pools:
             for task in pool.queuing.tasks:
                 task.pause()
 
