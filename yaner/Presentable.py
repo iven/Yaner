@@ -25,7 +25,7 @@ This module contains the L{Presentable} class of L{yaner}.
 """
 
 from gi.repository import GObject
-from sqlalchemy import Column, Integer, Unicode, ForeignKey
+from sqlalchemy import Column, Integer, Unicode, Boolean, ForeignKey
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -117,13 +117,16 @@ class Category(SQLBase, Presentable):
 
     _name_ = Column(Unicode)
     directory = Column(Unicode)
+    default = Column(Boolean)
+
     _tasks = relationship(Task, backref='category')
     pool_id = Column(Integer, ForeignKey('pool.id'))
 
-    def __init__(self, name, directory, pool):
+    def __init__(self, name, directory, pool, default=False):
         self.name = name
         self.directory = directory
         self.pool = pool
+        self.default = default
 
         SQLSession.add(self)
         SQLSession.commit()

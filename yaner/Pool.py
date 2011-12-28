@@ -26,7 +26,7 @@ This module contains the L{Pool} class of L{yaner}.
 
 from gi.repository import GLib
 from gi.repository import GObject
-from sqlalchemy import Column, Integer, Unicode
+from sqlalchemy import Column, Integer, Unicode, Boolean
 from sqlalchemy.orm import reconstructor, relationship
 
 from yaner import SQLSession, SQLBase
@@ -63,15 +63,17 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     passwd = Column(Unicode)
     host = Column(Unicode)
     port = Column(Integer)
+    local = Column(Boolean)
     categories = relationship(Category, backref='pool')
     tasks = relationship(Task, backref='pool')
 
-    def __init__(self, name, host, user='', passwd='', port=6800):
+    def __init__(self, name, host, user='', passwd='', port=6800, local=False):
         self.name = name
         self.user = user
         self.passwd = passwd
         self.host = host
         self.port = port
+        self.local = local
 
         SQLSession.add(self)
         SQLSession.commit()
