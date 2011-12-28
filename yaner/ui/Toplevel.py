@@ -311,6 +311,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         current_path = treeview.get_path_at_pos(event.x, event.y)
         if current_path is None:
             selection.unselect_all()
+            return True
 
         if event.button == 3:
             if current_path is not None and current_path[0] not in paths:
