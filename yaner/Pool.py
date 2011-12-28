@@ -28,6 +28,7 @@ from gi.repository import GLib
 from gi.repository import GObject
 from sqlalchemy import Column, Integer, Unicode, Boolean
 from sqlalchemy.orm import reconstructor, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from yaner import SQLSession, SQLBase
 from yaner.Task import Task
@@ -65,7 +66,6 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     port = Column(Integer)
     local = Column(Boolean)
     categories = relationship(Category, backref='pool')
-    tasks = relationship(Task, backref='pool')
 
     def __init__(self, name, host, user='', passwd='', port=6800, local=False):
         self.name = name
@@ -124,6 +124,12 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     def presentables(self):
         """Get the presentables of the pool."""
         return [self.queuing] + self.categories + [self.dustbin]
+
+    @hybrid_property
+    def tasks(self):
+        for category in self.categories:
+            for task in category._tasks:
+                yield task
 
     @property
     def connected(self):

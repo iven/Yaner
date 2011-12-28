@@ -91,11 +91,10 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     options = Column(PickleType)
     session_id = Column(Unicode, default='')
     category_id = Column(Integer, ForeignKey('category.id'))
-    pool_id = Column(Integer, ForeignKey('pool.id'))
 
     __mapper_args__ = {'polymorphic_on': type}
 
-    def __init__(self, name, type, pool, category, options,
+    def __init__(self, name, type, category, options,
             status=STATUSES.INACTIVE, uris=[], completed_length=0,
             total_length=0, gid='', metafile=None, session_id=''):
         self.name = name
@@ -108,7 +107,6 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         self.metafile = metafile
         self.options = options
         self.session_id = session_id
-        self.pool = pool
         self.category = category
 
         LoggingMixin.__init__(self)
@@ -140,6 +138,10 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     @hybrid_property
     def status(self):
         return self._status
+
+    @hybrid_property
+    def pool(self):
+        return self.category.pool
 
     @status.setter
     def status(self, status):

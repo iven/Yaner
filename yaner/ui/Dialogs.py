@@ -295,8 +295,7 @@ class NormalTaskNewDialog(TaskNewDialog):
         options['split'] = int(options['split'])
 
         NormalTask(name=name, type=Task.TYPES.NORMAL, uris=uris,
-                   options=options, category=category,
-                   pool=category.pool).start()
+                   options=options, category=category).start()
 
         self.hide()
 
@@ -425,8 +424,7 @@ class BTTaskNewDialog(TaskNewDialog):
             options[key] = int(options[key])
 
         BTTask(name=name, type=Task.TYPES.BT, metafile=metafile, uris=uris,
-               options=options, category=category,
-               pool=category.pool).start()
+               options=options, category=category).start()
 
         self.hide()
 
@@ -523,8 +521,7 @@ class MLTaskNewDialog(TaskNewDialog):
         options['metalink-servers'] = int(options['metalink-servers'])
 
         MLTask(name=name, type=Task.TYPES.ML, metafile=metafile,
-               options=options, category=category,
-               pool=category.pool).start()
+               options=options, category=category).start()
 
         self.hide()
 
