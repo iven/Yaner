@@ -98,3 +98,28 @@ class MetafileChooserButton(Gtk.FileChooserButton):
         """When the file selected, update filename property."""
         self.notify('filename')
 
+class FileChooserEntry(Gtk.Entry):
+    """An Entry with a activatable icon that popups FileChooserDialog."""
+
+    def __init__(self, title, parent, file_chooser_action):
+        Gtk.Entry.__init__(self)
+
+        self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-directory')
+        self.connect('icon-press', self._on_icon_press)
+
+        dialog = Gtk.FileChooserDialog(
+            title, parent, file_chooser_action,
+            [Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+             Gtk.STOCK_OPEN, Gtk.ResponseType.ACCEPT]
+            )
+        dialog.set_transient_for(parent)
+        self._file_chooser_dialog = dialog
+
+    def _on_icon_press(self, entry, icon_pos, event):
+        """When icon activated, popup file chooser dialog."""
+        if icon_pos == Gtk.EntryIconPosition.SECONDARY:
+            dialog = self._file_chooser_dialog
+            if dialog.run() == Gtk.ResponseType.ACCEPT:
+                self.set_text(dialog.get_filename())
+            dialog.hide()
+

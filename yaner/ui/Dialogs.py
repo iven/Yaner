@@ -35,7 +35,8 @@ from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Presentable
-from yaner.ui.Widgets import AlignedExpander, URIsView, MetafileChooserButton
+from yaner.ui.Widgets import AlignedExpander, URIsView
+from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
 from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
 
@@ -96,13 +97,10 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         category_cb.set_cell_data_func(renderer, self._markup_data_func, None)
 
         # Directory
-        dir_entry = Gtk.Entry()
+        dir_entry = FileChooserEntry(_('Select download directory'), self,
+                                     Gtk.FileChooserAction.SELECT_FOLDER)
         hbox.pack_start(dir_entry, expand=True, fill=True, padding=0)
         self.bind('dir', dir_entry, 'text')
-
-        dir_chooser_button = Gtk.Button(label=_('_Browse...'), use_underline=True)
-        dir_chooser_button.connect('clicked', self._on_dir_choosing, dir_entry)
-        hbox.pack_start(dir_chooser_button, expand=False, fill=True, padding=0)
 
         # Connect signal and select the first pool
         category_cb.connect('changed', self._on_category_cb_changed, dir_entry)
@@ -156,22 +154,6 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             self.task_options['category'] = presentable
             dir_entry.set_text(presentable.directory)
             self.logger.debug(_('Category is changed to {}.').format(presentable))
-
-    def _on_dir_choosing(self, button, entry):
-        """When directory chooser button clicked, popup the dialog, and update
-        the directory entry.
-        """
-        dialog = Gtk.FileChooserDialog(_('Select download directory'),
-                                       self,
-                                       Gtk.FileChooserAction.SELECT_FOLDER,
-                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                                        Gtk.STOCK_OPEN, Gtk.ResponseType.ACCEPT
-                                       )
-                                      )
-        dialog.set_transient_for(self.get_parent())
-        if dialog.run() == Gtk.ResponseType.ACCEPT:
-            entry.set_text(dialog.get_filename())
-        dialog.destroy()
 
     def bind(self, name, widget, property,
              bind_settings=True, bind_flags=BindFlags.GET,
