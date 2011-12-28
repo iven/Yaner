@@ -75,8 +75,16 @@ class Toplevel(Gtk.Window, LoggingMixin):
         vbox = Gtk.VBox(False, 0)
         self.add(vbox)
 
+        # Toolbar
         toolbar = self.ui_manager.get_widget('/toolbar')
+        #toolbar.set_style(Gtk.ToolbarStyle.BOTH)
         vbox.pack_start(toolbar, False, False, 0)
+
+        action = self._action_group.get_action('task_new')
+        menu_tool_button = Gtk.MenuToolButton()
+        menu_tool_button.set_menu(self.popups['task_new'])
+        menu_tool_button.set_related_action(action)
+        toolbar.insert(menu_tool_button, 0)
 
         # HPaned: PoolView as left, TaskVBox as right
         hpaned = Gtk.HPaned()
@@ -177,6 +185,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
             # The actions used by L{action_group}. The members are:
             # name, stock-id, label, accelerator, tooltip, callback
             action_entries = (
+                ("task_new", 'gtk-new', None, None, None, self.on_normal_task_new),
+                ("task_new_menu", 'gtk-new'),
                 ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None, None,
                     self.on_normal_task_new),
                 ("task_new_bt", 'gtk-add', _("BitTorrent"), None, None,
@@ -191,9 +201,9 @@ class Toplevel(Gtk.Window, LoggingMixin):
                     self.on_task_start_all),
                 ("task_pause_all", 'gtk-media-pause', _("Pause All"), None, None,
                     self.on_task_pause_all),
-                ("task_remove", 'gtk-delete', _("Remove"), None, None,
+                ("task_remove", 'gtk-delete', None, None, None,
                     self.on_task_remove),
-                ("task_restore", 'gtk-undelete', _("Restore"), None, None,
+                ("task_restore", 'gtk-undelete', None, None, None,
                     self.on_task_restore),
                 ("toggle_hidden", None, _("Show / Hide"), None, None,
                     self._on_toggle_hidden),
@@ -217,7 +227,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             get_widget = self.ui_manager.get_widget
             popups = {}
             for popup_name in ('tray', 'queuing_task', 'category_task',
-                               'dustbin_task'):
+                               'dustbin_task', 'task_new'):
                 popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
             self._popups = popups
             self.logger.info(_('Popup menus initialized.'))
