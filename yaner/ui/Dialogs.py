@@ -34,7 +34,7 @@ from gi.repository import Pango
 from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner.Task import Task, NormalTask, BTTask, MLTask
-from yaner.Presentable import Presentable
+from yaner.Presentable import Presentable, Category
 from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView, Box
 from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
 from yaner.ui.Widgets import HORIZONTAL, VERTICAL
@@ -525,3 +525,60 @@ class MLTaskNewDialog(TaskNewDialog):
 
         self.hide()
 
+class CategoryBar(Gtk.InfoBar):
+    """A InfoBar used to adding or editing categories."""
+    def __init__(self, category, pool, parent):
+        Gtk.InfoBar.__init__(self, message_type=Gtk.MessageType.INFO)
+
+        self.category = category
+        self.pool = pool
+
+        content_area = self.get_content_area()
+
+        table = Gtk.Table(2, 2, False, row_spacing=5, column_spacing=5)
+        content_area.pack_start(table, True, True, 0)
+
+        label = LeftAlignedLabel(_('Category Name:'))
+        table.attach_defaults(label, 0, 1, 0, 1)
+
+        text = category.name if category is not None else ''
+        name_entry = Gtk.Entry(text=text)
+        table.attach_defaults(name_entry, 1, 2, 0, 1)
+
+        label = LeftAlignedLabel(_('Default directory:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        text = category.directory if category is not None else ''
+        dir_entry = FileChooserEntry(_('Select default directory'), parent,
+                                     Gtk.FileChooserAction.SELECT_FOLDER)
+        table.attach_defaults(dir_entry, 1, 2, 1, 2)
+
+        self.add_button(Gtk.STOCK_OK, Gtk.ResponseType.OK)
+        self.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+
+        self.connect('response', self._on_response, name_entry, dir_entry)
+
+    def _on_response(self, info_bar, response_id, name_entry, dir_entry):
+        """When responsed, create or edit category."""
+        if response_id != Gtk.ResponseType.OK:
+            self.destroy()
+            return
+
+        category = self.category
+        pool = self.pool
+        name = name_entry.get_text()
+        directory = dir_entry.get_text()
+
+        if not name:
+            return
+        if not directory:
+            return
+
+        if category is None:
+            category = Category(name=name, directory=directory, pool=pool)
+            pool.emit('presentable-added', category)
+        else:
+            category.name=name
+            category.directory=directory
+
+        self.destroy()

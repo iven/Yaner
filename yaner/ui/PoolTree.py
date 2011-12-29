@@ -70,7 +70,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
 
     def on_presentable_added(self, pool, presentable):
         """When new presentable appears in one of the pools, add it to the model."""
-        self.add_presentable(presentable)
+        self.add_presentable(presentable, insert=True)
 
     def on_presentable_removed(self, pool, presentable):
         """
@@ -90,7 +90,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         if iter_:
             self.row_changed(self.get_path(iter_), iter_)
 
-    def add_presentable(self, presentable):
+    def add_presentable(self, presentable, insert=False):
         """Add a presentable to the model."""
         if self.get_iter_for_presentable(presentable):
             return
@@ -105,7 +105,12 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
                     presentable.name))
                 self.add_presentable(parent)
                 parent_iter = self.get_iter_for_presentable(parent)
-        iter_ = self.append(parent_iter)
+        if insert:
+            dustbin = presentable.pool.dustbin
+            dustbin_iter = self.get_iter_for_presentable(dustbin)
+            iter_ = self.insert_before(parent_iter, dustbin_iter)
+        else:
+            iter_ = self.append(parent_iter)
         self.set(iter_, self.COLUMNS.PRESENTABLE, presentable)
 
         handler = presentable.connect('changed', self.on_presentable_changed)

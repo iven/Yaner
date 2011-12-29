@@ -35,6 +35,7 @@ from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Presentable import Presentable
 from yaner.ui.Dialogs import NormalTaskNewDialog, BTTaskNewDialog, MLTaskNewDialog
+from yaner.ui.Dialogs import CategoryBar
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.ui.Misc import load_ui_file
@@ -91,15 +92,16 @@ class Toplevel(Gtk.Window, LoggingMixin):
         vbox.pack_start(hpaned, True, True, 0)
 
         # Right pane
-        task_vbox = Gtk.VBox(False, 12)
-        hpaned.pack2(task_vbox, True, False)
+        vbox = Gtk.VBox(False, 12)
+        hpaned.pack2(vbox, True, False)
+        self.task_box = vbox
 
         self._task_list_model = TaskListModel()
 
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
         scrolled_window.set_size_request(400, -1)
-        task_vbox.pack_start(scrolled_window, True, True, 0)
+        vbox.pack_start(scrolled_window, True, True, 0)
 
         task_list_view = TaskListView(self._task_list_model)
         task_list_view.set_show_expanders(False)
@@ -208,6 +210,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
                 ("task_restore", 'gtk-undelete', None, None,
                  None, self._on_task_restore),
 
+                ('category_add', 'gtk-add', _('Add Category'), None,
+                 None, self._on_category_add),
                 ('dustbin_empty', 'gtk-delete', _('Empty Dustbin'), None,
                  None, self._on_dustbin_empty),
 
@@ -439,6 +443,14 @@ class Toplevel(Gtk.Window, LoggingMixin):
         if self._pool_view.selected_presentable.TYPE == Presentable.TYPES.DUSTBIN:
             self._task_list_view.get_selection().select_all()
             self.action_group.get_action('task_remove').activate()
+
+    def _on_category_add(self, action, data):
+        """Add category."""
+        category_bar = CategoryBar(None,
+                                   self._pool_view.selected_presentable.pool, self)
+        self.task_box.pack_start(category_bar, False, True, 0)
+        self.task_box.reorder_child(category_bar, 0)
+        category_bar.show_all()
 
     def about(self, *args, **kwargs):
         """Show about dialog."""
