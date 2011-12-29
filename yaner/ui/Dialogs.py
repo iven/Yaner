@@ -35,7 +35,7 @@ from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Presentable
-from yaner.ui.Widgets import AlignedExpander, URIsView
+from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView
 from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
 from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
@@ -207,7 +207,7 @@ class NormalTaskNewDialog(TaskNewDialog):
         vbox.pack_start(hbox, expand=True, fill=True, padding=0)
 
         # Rename
-        rename_label = Gtk.Label(_('Rename:'), xalign=0)
+        rename_label = LeftAlignedLabel(_('Rename:'))
         hbox.pack_start(rename_label, expand=False, fill=True, padding=0)
 
         rename_entry = Gtk.Entry(activates_default=True)
@@ -216,7 +216,7 @@ class NormalTaskNewDialog(TaskNewDialog):
         self.rename_entry = rename_entry
 
         # Connections
-        split_label = Gtk.Label(_('Connections:'), xalign=0)
+        split_label = LeftAlignedLabel(_('Connections:'))
         hbox.pack_start(split_label, expand=False, fill=True, padding=0)
 
         split_adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
@@ -231,7 +231,7 @@ class NormalTaskNewDialog(TaskNewDialog):
         self.advanced_box.pack_start(hbox, expand=True, fill=True, padding=0)
 
         # Referer
-        referer_label = Gtk.Label(_('Referer:'), xalign=0)
+        referer_label = LeftAlignedLabel(_('Referer:'))
         hbox.pack_start(referer_label, expand=False, fill=True, padding=0)
 
         referer_entry = Gtk.Entry(activates_default=True)
@@ -247,16 +247,16 @@ class NormalTaskNewDialog(TaskNewDialog):
         auth_table = Gtk.Table(3, 3, False, row_spacing=5, column_spacing=5)
         auth_expander.add(auth_table)
 
-        http_label = Gtk.Label(_('HTTP:'), xalign=0)
+        http_label = LeftAlignedLabel(_('HTTP:'))
         auth_table.attach_defaults(http_label, 0, 1, 1, 2)
 
-        ftp_label = Gtk.Label(_('FTP:'), xalign=0)
+        ftp_label = LeftAlignedLabel(_('FTP:'))
         auth_table.attach_defaults(ftp_label, 0, 1, 2, 3)
 
-        user_label = Gtk.Label(_('User'), xalign=0)
+        user_label = LeftAlignedLabel(_('User'))
         auth_table.attach_defaults(user_label, 1, 2, 0, 1)
 
-        passwd_label = Gtk.Label(_('Password'), xalign=0)
+        passwd_label = LeftAlignedLabel(_('Password'))
         auth_table.attach_defaults(passwd_label, 2, 3, 0, 1)
 
         http_user_entry = Gtk.Entry(activates_default=True)
@@ -342,7 +342,7 @@ class BTTaskNewDialog(TaskNewDialog):
         settings_table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
         vbox.pack_start(settings_table, expand=True, fill=True, padding=0)
 
-        label = Gtk.Label(_('Max open files:'), xalign=0)
+        label = LeftAlignedLabel(_('Max open files:'))
         settings_table.attach_defaults(label, 0, 1, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
@@ -350,7 +350,7 @@ class BTTaskNewDialog(TaskNewDialog):
         settings_table.attach_defaults(spin_button, 1, 2, 0, 1)
         self.bind('bt-max-open-files', spin_button, 'value')
 
-        label = Gtk.Label(_('Max peers:'), xalign=0)
+        label = LeftAlignedLabel(_('Max peers:'))
         settings_table.attach_defaults(label, 2, 3, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
@@ -358,7 +358,7 @@ class BTTaskNewDialog(TaskNewDialog):
         settings_table.attach_defaults(spin_button, 3, 4, 0, 1)
         self.bind('bt-max-peers', spin_button, 'value')
 
-        label = Gtk.Label(_('Seed time(min):'), xalign=0)
+        label = LeftAlignedLabel(_('Seed time(min):'))
         settings_table.attach_defaults(label, 0, 1, 1, 2)
 
         adjustment = Gtk.Adjustment(lower=0, upper=7200, step_increment=1)
@@ -366,7 +366,7 @@ class BTTaskNewDialog(TaskNewDialog):
         settings_table.attach_defaults(spin_button, 1, 2, 1, 2)
         self.bind('seed-time', spin_button, 'value')
 
-        label = Gtk.Label(_('Seed ratio:'), xalign=0)
+        label = LeftAlignedLabel(_('Seed ratio:'))
         settings_table.attach_defaults(label, 2, 3, 1, 2)
 
         adjustment = Gtk.Adjustment(lower=0, upper=20, step_increment=.1)
@@ -463,7 +463,7 @@ class MLTaskNewDialog(TaskNewDialog):
         settings_table = Gtk.Table(5, 2, False, row_spacing=5, column_spacing=5)
         vbox.pack_start(settings_table, expand=True, fill=True, padding=0)
 
-        label = Gtk.Label(_('Download Servers:'), xalign=0)
+        label = LeftAlignedLabel(_('Download Servers:'))
         settings_table.attach_defaults(label, 0, 1, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
@@ -471,28 +471,28 @@ class MLTaskNewDialog(TaskNewDialog):
         settings_table.attach_defaults(spin_button, 1, 2, 0, 1)
         self.bind('metalink-servers', spin_button, 'value')
 
-        label = Gtk.Label(_('Preferred locations:'), xalign=0)
+        label = LeftAlignedLabel(_('Preferred locations:'))
         settings_table.attach_defaults(label, 0, 1, 1, 2)
 
         entry = Gtk.Entry()
         settings_table.attach_defaults(entry, 1, 2, 1, 2)
         self.bind('metalink-location', entry, 'text')
 
-        label = Gtk.Label(_('Language:'), xalign=0)
+        label = LeftAlignedLabel(_('Language:'))
         settings_table.attach_defaults(label, 0, 1, 2, 3)
 
         entry = Gtk.Entry()
         settings_table.attach_defaults(entry, 1, 2, 2, 3)
         self.bind('metalink-language', entry, 'text')
 
-        label = Gtk.Label(_('Version:'), xalign=0)
+        label = LeftAlignedLabel(_('Version:'))
         settings_table.attach_defaults(label, 0, 1, 3, 4)
 
         entry = Gtk.Entry()
         settings_table.attach_defaults(entry, 1, 2, 3, 4)
         self.bind('metalink-version', entry, 'text')
 
-        label = Gtk.Label(_('OS:'), xalign=0)
+        label = LeftAlignedLabel(_('OS:'))
         settings_table.attach_defaults(label, 0, 1, 4, 5)
 
         entry = Gtk.Entry()

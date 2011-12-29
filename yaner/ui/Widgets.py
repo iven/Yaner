@@ -22,9 +22,12 @@
 
 """This module contains some widgets for common use."""
 
+import functools
 import collections
 
 from gi.repository import Gtk, GObject
+
+LeftAlignedLabel = functools.partial(Gtk.Label, xalign=0)
 
 class AlignedExpander(Gtk.Expander):
     """A L{Gtk.Expander} with an alignment that can place its children nicely."""
