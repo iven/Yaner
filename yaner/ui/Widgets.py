@@ -27,7 +27,19 @@ import collections
 
 from gi.repository import Gtk, GObject
 
+HORIZONTAL, VERTICAL = Gtk.Orientation.HORIZONTAL, Gtk.Orientation.VERTICAL
+
 LeftAlignedLabel = functools.partial(Gtk.Label, xalign=0)
+
+class Box(Gtk.Box):
+    """Simplified Gtk.Box."""
+    def __init__(self, orientation, spacing=5):
+        Gtk.Box.__init__(self, orientation=orientation, spacing=spacing)
+
+        self.pack_start = functools.partial(self.pack_start,
+                                            expand=True, fill=True, padding=0)
+        self.pack_end = functools.partial(self.pack_end,
+                                          expand=True, fill=True, padding=0)
 
 class AlignedExpander(Gtk.Expander):
     """A L{Gtk.Expander} with an alignment that can place its children nicely."""

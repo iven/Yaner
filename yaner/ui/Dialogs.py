@@ -35,8 +35,9 @@ from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Presentable
-from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView
+from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView, Box
 from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
+from yaner.ui.Widgets import HORIZONTAL, VERTICAL
 from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
 
@@ -61,32 +62,32 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         ### Content Area
         content_area = self.get_content_area()
 
-        vbox = Gtk.VBox(spacing=5)
+        vbox = Box(VERTICAL)
         vbox.set_border_width(5)
         content_area.add(vbox)
         self.main_vbox = vbox
 
         ## Advanced
         expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
-        vbox.pack_end(expander, expand=True, fill=True, padding=0)
+        vbox.pack_end(expander)
 
-        advanced_box = Gtk.VBox(spacing=5)
+        advanced_box = Box(VERTICAL)
         expander.add(advanced_box)
         self.advanced_box = advanced_box
 
         ## Save to
         expander = AlignedExpander(_('<b>Save to...</b>'))
-        vbox.pack_end(expander, expand=True, fill=True, padding=0)
+        vbox.pack_end(expander)
 
         # Category
-        hbox = Gtk.HBox(spacing=5)
+        hbox = Box(HORIZONTAL)
         expander.add(hbox)
 
         category_model = Gtk.TreeModelFilter(child_model=pool_model)
         category_model.set_visible_func(self._category_visible_func, None)
 
         category_cb = Gtk.ComboBox(model=category_model)
-        hbox.pack_start(category_cb, expand=False, fill=True, padding=0)
+        hbox.pack_start(category_cb)
 
         renderer = Gtk.CellRendererPixbuf()
         category_cb.pack_start(renderer, False)
@@ -99,7 +100,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         # Directory
         dir_entry = FileChooserEntry(_('Select download directory'), self,
                                      Gtk.FileChooserAction.SELECT_FOLDER)
-        hbox.pack_start(dir_entry, expand=True, fill=True, padding=0)
+        hbox.pack_start(dir_entry)
         self.bind('dir', dir_entry, 'text')
 
         # Connect signal and select the first pool
@@ -193,56 +194,55 @@ class NormalTaskNewDialog(TaskNewDialog):
         ## Main Box
         expander = AlignedExpander(
             _('<b>Mirrors</b> - one or more URI(s) for <b>one</b> task'))
-        self.main_vbox.pack_start(expander, expand=True, fill=True, padding=0)
+        self.main_vbox.pack_start(expander)
 
-        vbox = Gtk.VBox(spacing=5)
+        vbox = Box(VERTICAL)
         expander.add(vbox)
 
         uris_view = URIsView()
-        vbox.pack_start(uris_view, expand=True, fill=True, padding=0)
+        vbox.pack_start(uris_view)
         self.bind('uris', uris_view, 'uris', bind_settings=False)
         self.uris_view = uris_view
 
-        hbox = Gtk.HBox(spacing=5)
-        vbox.pack_start(hbox, expand=True, fill=True, padding=0)
+        hbox = Box(HORIZONTAL)
+        vbox.pack_start(hbox)
 
         # Rename
         rename_label = LeftAlignedLabel(_('Rename:'))
-        hbox.pack_start(rename_label, expand=False, fill=True, padding=0)
+        hbox.pack_start(rename_label, expand=False)
 
         rename_entry = Gtk.Entry(activates_default=True)
-        hbox.pack_start(rename_entry, expand=True, fill=True, padding=0)
+        hbox.pack_start(rename_entry)
         self.bind('out', rename_entry, 'text', bind_settings=False)
         self.rename_entry = rename_entry
 
         # Connections
         split_label = LeftAlignedLabel(_('Connections:'))
-        hbox.pack_start(split_label, expand=False, fill=True, padding=0)
+        hbox.pack_start(split_label, expand=False)
 
         split_adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         split_button = Gtk.SpinButton(adjustment=split_adjustment, numeric=True)
-        hbox.pack_start(split_button, expand=True, fill=True, padding=0)
+        hbox.pack_start(split_button)
         self.bind('split', split_button, 'value')
 
         self.main_vbox.show_all()
 
         ## Advanced
-        hbox = Gtk.HBox(spacing=5)
-        self.advanced_box.pack_start(hbox, expand=True, fill=True, padding=0)
+        hbox = Box(HORIZONTAL)
+        self.advanced_box.pack_start(hbox)
 
         # Referer
         referer_label = LeftAlignedLabel(_('Referer:'))
-        hbox.pack_start(referer_label, expand=False, fill=True, padding=0)
+        hbox.pack_start(referer_label, expand=False)
 
         referer_entry = Gtk.Entry(activates_default=True)
-        hbox.pack_start(referer_entry, expand=True, fill=True, padding=0)
+        hbox.pack_start(referer_entry)
         self.bind('referer', referer_entry, 'text')
         self.referer_entry = referer_entry
 
         # Authorization
         auth_expander = AlignedExpander(_('Authorization'), expanded=False)
-        self.advanced_box.pack_start(auth_expander, expand=True,
-                                     fill=True, padding=0)
+        self.advanced_box.pack_start(auth_expander)
 
         auth_table = Gtk.Table(3, 3, False, row_spacing=5, column_spacing=5)
         auth_expander.add(auth_table)
@@ -321,7 +321,7 @@ class BTTaskNewDialog(TaskNewDialog):
 
         ## Main Box
         expander = AlignedExpander(_('<b>Torrent file</b>'))
-        self.main_vbox.pack_start(expander, expand=True, fill=True, padding=0)
+        self.main_vbox.pack_start(expander)
 
         button = MetafileChooserButton(title=_('Select torrent file'),
                                        mime_types=['application/x-bittorrent']
@@ -334,13 +334,13 @@ class BTTaskNewDialog(TaskNewDialog):
         ## Advanced
         # Settings
         expander = AlignedExpander(_('Settings'))
-        self.advanced_box.pack_start(expander, expand=True, fill=True, padding=0)
+        self.advanced_box.pack_start(expander)
 
-        vbox = Gtk.VBox(spacing=5)
+        vbox = Box(VERTICAL)
         expander.add(vbox)
 
         settings_table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
-        vbox.pack_start(settings_table, expand=True, fill=True, padding=0)
+        vbox.pack_start(settings_table)
 
         label = LeftAlignedLabel(_('Max open files:'))
         settings_table.attach_defaults(label, 0, 1, 0, 1)
@@ -377,7 +377,7 @@ class BTTaskNewDialog(TaskNewDialog):
         check_button = Gtk.CheckButton(
             label=_('Preview mode'),
             tooltip_text=_('Try to download first and last pieces first'))
-        vbox.pack_start(check_button, expand=True, fill=True, padding=0)
+        vbox.pack_start(check_button)
         self.bind('bt-prioritize', check_button, 'active')
 
         # Mirrors
@@ -388,13 +388,13 @@ class BTTaskNewDialog(TaskNewDialog):
               'ends with /, name in torrent file is added. For ' \
               'multi-file torrents, name and path in torrent are ' \
               'added to form a URI for each file.'))
-        self.advanced_box.pack_start(expander, expand=True, fill=True, padding=0)
+        self.advanced_box.pack_start(expander)
 
-        vbox = Gtk.VBox(spacing=5)
+        vbox = Box(VERTICAL)
         expander.add(vbox)
 
         uris_view = URIsView()
-        vbox.pack_start(uris_view, expand=True, fill=True, padding=0)
+        vbox.pack_start(uris_view)
         self.bind('uris', uris_view, 'uris', bind_settings=False)
         self.uris_view = uris_view
 
@@ -441,7 +441,7 @@ class MLTaskNewDialog(TaskNewDialog):
 
         ## Main Box
         expander = AlignedExpander(_('<b>Metalink file</b>'))
-        self.main_vbox.pack_start(expander, expand=True, fill=True, padding=0)
+        self.main_vbox.pack_start(expander)
 
         button = MetafileChooserButton(title=_('Select metalink file'),
                                        mime_types=['application/metalink4+xml',
@@ -455,13 +455,13 @@ class MLTaskNewDialog(TaskNewDialog):
         ## Advanced
         # Settings
         expander = AlignedExpander(_('Settings'))
-        self.advanced_box.pack_start(expander, expand=True, fill=True, padding=0)
+        self.advanced_box.pack_start(expander)
 
-        vbox = Gtk.VBox(spacing=5)
+        vbox = Box(VERTICAL)
         expander.add(vbox)
 
         settings_table = Gtk.Table(5, 2, False, row_spacing=5, column_spacing=5)
-        vbox.pack_start(settings_table, expand=True, fill=True, padding=0)
+        vbox.pack_start(settings_table)
 
         label = LeftAlignedLabel(_('Download Servers:'))
         settings_table.attach_defaults(label, 0, 1, 0, 1)
