@@ -133,7 +133,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         pool_view.selection.set_mode(Gtk.SelectionMode.SINGLE)
         pool_view.selection.connect("changed",
-                                    self.on_pool_view_selection_changed)
+                                    self._on_pool_view_selection_changed)
 
         # Add Pools to the PoolModel
         for pool in SQLSession.query(Pool):
@@ -186,28 +186,29 @@ class Toplevel(Gtk.Window, LoggingMixin):
             # The actions used by L{action_group}. The members are:
             # name, stock-id, label, accelerator, tooltip, callback
             action_entries = (
-                ("task_new", 'gtk-new', None, None, None, self.on_normal_task_new),
+                ("task_new", 'gtk-new', None, None,
+                 None, self._on_normal_task_new),
                 ("task_new_menu", 'gtk-new'),
-                ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None, None,
-                    self.on_normal_task_new),
-                ("task_new_bt", 'gtk-add', _("BitTorrent"), None, None,
-                    self.on_bt_task_new),
-                ("task_new_ml", 'gtk-add', _("Metalink"), None, None,
-                    self.on_ml_task_new),
-                ("task_start", 'gtk-media-play', _("Start"), None, None,
-                    self.on_task_start),
-                ("task_pause", 'gtk-media-pause', _("Pause"), None, None,
-                    self.on_task_pause),
-                ("task_start_all", 'gtk-media-play', _("Start All"), None, None,
-                    self.on_task_start_all),
-                ("task_pause_all", 'gtk-media-pause', _("Pause All"), None, None,
-                    self.on_task_pause_all),
-                ("task_remove", 'gtk-delete', None, None, None,
-                    self.on_task_remove),
-                ("task_restore", 'gtk-undelete', None, None, None,
-                    self.on_task_restore),
-                ("toggle_hidden", None, _("Show / Hide"), None, None,
-                    self._on_toggle_hidden),
+                ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None,
+                 None, self._on_normal_task_new),
+                ("task_new_bt", 'gtk-add', _("BitTorrent"), None,
+                 None, self._on_bt_task_new),
+                ("task_new_ml", 'gtk-add', _("Metalink"), None,
+                 None, self._on_ml_task_new),
+                ("task_start", 'gtk-media-play', _("Start"), None,
+                 None, self._on_task_start),
+                ("task_pause", 'gtk-media-pause', _("Pause"), None,
+                 None, self._on_task_pause),
+                ("task_start_all", 'gtk-media-play', _("Start All"), None,
+                 None, self._on_task_start_all),
+                ("task_pause_all", 'gtk-media-pause', _("Pause All"), None,
+                 None, self._on_task_pause_all),
+                ("task_remove", 'gtk-delete', None, None,
+                 None, self._on_task_remove),
+                ("task_restore", 'gtk-undelete', None, None,
+                 None, self._on_task_restore),
+                ("toggle_hidden", None, _("Show / Hide"), None,
+                 None, self._on_toggle_hidden),
                 ("about", "gtk-about", None, None, None, self.about),
                 ("quit", "gtk-quit", None, None, None, self.destroy),
             )
@@ -284,7 +285,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self.logger.debug(_('Status icon menu popuped.'))
         self.popups['tray'].popup(None, None, None, None, button, activate_time)
 
-    def _on_toggle_hidden(self, action, user_data):
+    def _on_toggle_hidden(self, action, data):
         """Toggle the toplevel window shown or hidden."""
         if self.get_property('visible'):
             self.hide()
@@ -350,36 +351,36 @@ class Toplevel(Gtk.Window, LoggingMixin):
             return True
         return False
 
-    def on_pool_view_selection_changed(self, selection):
+    def _on_pool_view_selection_changed(self, selection):
         """
         Pool view tree selection changed signal callback.
         Update the task list model.
         """
         self._task_list_model.presentable = self._pool_view.selected_presentable
 
-    def on_normal_task_new(self, action, data):
+    def _on_normal_task_new(self, action, data):
         """When normal task new action is activated, call the task new dialog."""
         self.normal_task_new_dialog.run()
 
-    def on_bt_task_new(self, action, data):
+    def _on_bt_task_new(self, action, data):
         """When bt task new action is activated, call the task new dialog."""
         self.bt_task_new_dialog.run()
 
-    def on_ml_task_new(self, action, data):
+    def _on_ml_task_new(self, action, data):
         """When ml task new action is activated, call the task new dialog."""
         self.ml_task_new_dialog.run()
 
-    def on_task_start(self, action, user_data):
+    def _on_task_start(self, action, data):
         """When task start button clicked, start or unpause the task."""
         for task in self._task_list_view.selected_tasks:
             task.start()
 
-    def on_task_pause(self, action, user_data):
+    def _on_task_pause(self, action, data):
         """When task pause button clicked, pause the task."""
         for task in self._task_list_view.selected_tasks:
             task.pause()
 
-    def on_task_start_all(self, action, user_data):
+    def _on_task_start_all(self, action, data):
         """Start or unpause all the tasks in the selected pool."""
         presentable = self._pool_view.selected_presentable
         if presentable is None or presentable.TYPE != Presentable.TYPES.QUEUING:
@@ -391,7 +392,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             for task in pool.queuing.tasks:
                 task.start()
 
-    def on_task_pause_all(self, action, user_data):
+    def _on_task_pause_all(self, action, data):
         """Pause all the tasks in the selected pool."""
         presentable = self._pool_view.selected_presentable
         if presentable is None or presentable.TYPE != Presentable.TYPES.QUEUING:
@@ -403,7 +404,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             for task in pool.queuing.tasks:
                 task.pause()
 
-    def on_task_remove(self, action, user_data):
+    def _on_task_remove(self, action, data):
         """When task remove button clicked, remove the task."""
         tasks = self._task_list_view.selected_tasks
         if not tasks:
@@ -424,7 +425,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             for task in tasks:
                 task.trash()
 
-    def on_task_restore(self, action, user_data):
+    def _on_task_restore(self, action, data):
         """When task is removed, restore the task."""
         for task in self._task_list_view.selected_tasks:
             task.restore()
