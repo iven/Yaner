@@ -334,13 +334,11 @@ class Toplevel(Gtk.Window, LoggingMixin):
         (model, iter_) = selection.get_selected()
         current_path = treeview.get_path_at_pos(event.x, event.y)
         if current_path is None:
-            selection.unselect_all()
             return True
 
         if event.button == 3:
             # If the clicked row is not selected, select it only
             if current_path[0] != model.get_path(iter_):
-                selection.unselect_all()
                 selection.select_path(current_path[0])
 
             popup_dict = {Presentable.TYPES.QUEUING: 'queuing',
