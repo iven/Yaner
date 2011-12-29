@@ -207,6 +207,10 @@ class Toplevel(Gtk.Window, LoggingMixin):
                  None, self._on_task_remove),
                 ("task_restore", 'gtk-undelete', None, None,
                  None, self._on_task_restore),
+
+                ('dustbin_empty', 'gtk-delete', _('Empty Dustbin'), None,
+                 None, self._on_dustbin_empty),
+
                 ("toggle_hidden", None, _("Show / Hide"), None,
                  None, self._on_toggle_hidden),
                 ("about", "gtk-about", None, None, None, self.about),
@@ -429,6 +433,12 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """When task is removed, restore the task."""
         for task in self._task_list_view.selected_tasks:
             task.restore()
+
+    def _on_dustbin_empty(self, action, data):
+        """Empty dustbin."""
+        if self._pool_view.selected_presentable.TYPE == Presentable.TYPES.DUSTBIN:
+            self._task_list_view.get_selection().select_all()
+            self.action_group.get_action('task_remove').activate()
 
     def about(self, *args, **kwargs):
         """Show about dialog."""

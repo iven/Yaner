@@ -53,9 +53,7 @@
         -->
     </popup>
     <popup name='dustbin_popup'>
-        <!--
-             <menuitem action='dustbin_empty' />
-        -->
+        <menuitem action='dustbin_empty' />
     </popup>
 </ui>
 
