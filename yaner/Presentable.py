@@ -117,16 +117,14 @@ class Category(SQLBase, Presentable):
 
     _name_ = Column(Unicode)
     directory = Column(Unicode)
-    default = Column(Boolean)
 
     _tasks = relationship(Task, backref='category')
     pool_id = Column(Integer, ForeignKey('pool.id'))
 
-    def __init__(self, name, directory, pool, default=False):
+    def __init__(self, name, directory, pool):
         self.name = name
         self.directory = directory
         self.pool = pool
-        self.default = default
 
         SQLSession.add(self)
         SQLSession.commit()

@@ -24,6 +24,8 @@
 This module contains the L{Pool} class of L{yaner}.
 """
 
+import os
+
 from gi.repository import GLib
 from gi.repository import GObject
 from sqlalchemy import Column, Integer, Unicode, Boolean
@@ -66,6 +68,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     port = Column(Integer)
     local = Column(Boolean)
     categories = relationship(Category, backref='pool')
+    default_category = relationship(Category, uselist=False)
 
     def __init__(self, name, host, user='', passwd='', port=6800, local=False):
         self.name = name
@@ -91,6 +94,14 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
 
         self._connected = False
         self._proxy = None
+
+        if self.default_category is None:
+            self.logger.info(_('Creating default category for {}.').format(self))
+            down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
+            self.default_category = Category(name=_('My Downloads'),
+                                             directory= down_dir,
+                                             pool=self)
+            SQLSession.commit()
 
         self.do_disconnected()
         self._keep_connection()
@@ -148,7 +159,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
 
     def do_connected(self):
         """When pool connected, try to resume last session."""
-        self.logger.info('{}: connected.'.format(self))
+        self.logger.info(_('{}: connected.').format(self))
         self._resume_session()
 
     def do_disconnected(self):
@@ -158,7 +169,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         call C{aria2.unpause} method, while inactive tasks will call
         C{aria2.addUri}, or other method to add them as new tasks.
         """
-        self.logger.info('{}: disconnected.'.format(self))
+        self.logger.info(_('{}: disconnected.').format(self))
         for task in self.queuing.tasks:
             task.status = Task.STATUSES.INACTIVE
             task.end_update_status()

@@ -112,10 +112,6 @@ class Application(Gtk.Application, LoggingMixin):
 
             pool = Pool(name=_('My Computer'), host='localhost', local=True)
 
-            down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
-            Category(name=_('My Downloads'), directory=down_dir,
-                     pool=pool, default=True)
-
             docs_dir = os.environ.get('XDG_DOCUMENTS_DIR', os.path.expanduser('~'))
             Category(name=_('Documents'), directory=docs_dir, pool=pool)
 
