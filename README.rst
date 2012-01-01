@@ -25,10 +25,3 @@ Usage
 
 For installation instructions, see ``INSTALL``.
 
-If you want to download files locally(don't you?), you should start the *aria2*
-server yourself, by running::
-
-    aria2c --enable-rpc
-
-Normally you may want to add this as your startup application.
-
