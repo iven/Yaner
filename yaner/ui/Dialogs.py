@@ -528,7 +528,7 @@ class MLTaskNewDialog(TaskNewDialog):
 class CategoryBar(Gtk.InfoBar):
     """A InfoBar used to adding or editing categories."""
     def __init__(self, category, pool, parent):
-        Gtk.InfoBar.__init__(self, message_type=Gtk.MessageType.INFO)
+        Gtk.InfoBar.__init__(self, message_type=Gtk.MessageType.OTHER)
 
         self.category = category
         self.pool = pool
@@ -570,8 +570,10 @@ class CategoryBar(Gtk.InfoBar):
         directory = dir_entry.get_text()
 
         if not name:
+            name_entry.set_placeholder_text(_('Required'))
             return
         if not directory:
+            dir_entry.set_placeholder_text(_('Required'))
             return
 
         if category is None:
@@ -582,3 +584,4 @@ class CategoryBar(Gtk.InfoBar):
             category.directory=directory
 
         self.destroy()
+
