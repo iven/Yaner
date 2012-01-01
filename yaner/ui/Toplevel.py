@@ -212,6 +212,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
                 ('category_add', 'gtk-add', _('Add Category'), None,
                  None, self._on_category_add),
+                ('category_edit', 'gtk-edit', _('Edit Category'), None,
+                 None, self._on_category_edit),
                 ('dustbin_empty', 'gtk-delete', _('Empty Dustbin'), None,
                  None, self._on_dustbin_empty),
 
@@ -450,6 +452,13 @@ class Toplevel(Gtk.Window, LoggingMixin):
                                    self._pool_view.selected_presentable.pool, self)
         self.task_box.pack_start(category_bar, False, True, 0)
         self.task_box.reorder_child(category_bar, 0)
+        category_bar.show_all()
+
+    def _on_category_edit(self, action, data):
+        """Edit category."""
+        category_bar = CategoryBar(self._pool_view.selected_presentable,
+                                   self._pool_view.selected_presentable.pool, self)
+        self.task_box.pack_end(category_bar, False, True, 0)
         category_bar.show_all()
 
     def about(self, *args, **kwargs):

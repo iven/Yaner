@@ -116,8 +116,8 @@ class MetafileChooserButton(Gtk.FileChooserButton):
 class FileChooserEntry(Gtk.Entry):
     """An Entry with a activatable icon that popups FileChooserDialog."""
 
-    def __init__(self, title, parent, file_chooser_action):
-        Gtk.Entry.__init__(self)
+    def __init__(self, title, parent, file_chooser_action, text=''):
+        Gtk.Entry.__init__(self, text=text)
 
         self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-directory')
         self.connect('icon-press', self._on_icon_press)

@@ -33,6 +33,7 @@ from gi.repository import Gio
 from gi.repository import Pango
 from gi.repository.Gio import SettingsBindFlags as BindFlags
 
+from yaner import SQLSession
 from yaner.Task import Task, NormalTask, BTTask, MLTask
 from yaner.Presentable import Presentable, Category
 from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView, Box
@@ -550,7 +551,8 @@ class CategoryBar(Gtk.InfoBar):
 
         text = category.directory if category is not None else ''
         dir_entry = FileChooserEntry(_('Select default directory'), parent,
-                                     Gtk.FileChooserAction.SELECT_FOLDER)
+                                     Gtk.FileChooserAction.SELECT_FOLDER,
+                                     text=text)
         table.attach_defaults(dir_entry, 1, 2, 1, 2)
 
         self.add_button(Gtk.STOCK_OK, Gtk.ResponseType.OK)
@@ -583,5 +585,6 @@ class CategoryBar(Gtk.InfoBar):
             category.name=name
             category.directory=directory
 
+        SQLSession.commit()
         self.destroy()
 
