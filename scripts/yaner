@@ -27,9 +27,14 @@ placed under a directory in $PATH.
 window of the application.
 """
 
+import os
 import sys
 import gettext
 import argparse
+
+os.chdir(os.path.dirname(__file__))
+if os.path.isdir('../yaner'):
+    sys.path.insert(0, '..')
 
 from yaner import __package__
 from yaner.Misc import _VERSION
