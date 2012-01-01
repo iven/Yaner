@@ -39,6 +39,7 @@ from yaner.ui.Dialogs import CategoryBar
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.ui.Misc import load_ui_file
+from yaner.ui.Widgets import Box, VERTICAL
 from yaner.utils.Logging import LoggingMixin
 
 class Toplevel(Gtk.Window, LoggingMixin):
@@ -73,13 +74,13 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self.set_default_size(650, 450)
 
         # The toplevel vbox
-        vbox = Gtk.VBox(False, 0)
+        vbox = Box(VERTICAL, 0)
         self.add(vbox)
 
         # Toolbar
         toolbar = self.ui_manager.get_widget('/toolbar')
         #toolbar.set_style(Gtk.ToolbarStyle.BOTH)
-        vbox.pack_start(toolbar, False, False, 0)
+        vbox.pack_start(toolbar, expand=False)
 
         action = self._action_group.get_action('task_new')
         menu_tool_button = Gtk.MenuToolButton()
@@ -89,10 +90,10 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         # HPaned: PoolView as left, TaskVBox as right
         hpaned = Gtk.HPaned()
-        vbox.pack_start(hpaned, True, True, 0)
+        vbox.pack_start(hpaned)
 
         # Right pane
-        vbox = Gtk.VBox(False, 12)
+        vbox = Box(VERTICAL)
         hpaned.pack2(vbox, True, False)
         self.task_box = vbox
 
@@ -101,7 +102,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
         scrolled_window.set_size_request(400, -1)
-        vbox.pack_start(scrolled_window, True, True, 0)
+        vbox.pack_end(scrolled_window)
 
         task_list_view = TaskListView(self._task_list_model)
         task_list_view.set_show_expanders(False)
@@ -214,6 +215,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
                  None, self._on_category_add),
                 ('category_edit', 'gtk-edit', _('Edit Category'), None,
                  None, self._on_category_edit),
+                ('category_remove', 'gtk-delete', _('Remove Category'), None,
+                 None, self._on_category_remove),
                 ('dustbin_empty', 'gtk-delete', _('Empty Dustbin'), None,
                  None, self._on_dustbin_empty),
 
@@ -450,16 +453,47 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """Add category."""
         category_bar = CategoryBar(None,
                                    self._pool_view.selected_presentable.pool, self)
-        self.task_box.pack_start(category_bar, False, True, 0)
-        self.task_box.reorder_child(category_bar, 0)
+        self.task_box.pack_end(category_bar, expand=False)
         category_bar.show_all()
 
     def _on_category_edit(self, action, data):
         """Edit category."""
         category_bar = CategoryBar(self._pool_view.selected_presentable,
                                    self._pool_view.selected_presentable.pool, self)
-        self.task_box.pack_end(category_bar, False, True, 0)
+        self.task_box.pack_end(category_bar, expand=False)
         category_bar.show_all()
+
+    def _on_category_remove(self, action, data):
+        """Remove category."""
+        category = self._pool_view.selected_presentable
+        pool = category.pool
+        if category is pool.default_category:
+            dialog = Gtk.MessageDialog(
+                self, Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.CLOSE,
+                _('The default category should not be removed.'),
+                )
+        else:
+            dialog = Gtk.MessageDialog(
+                self, Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.WARNING,
+                Gtk.ButtonsType.YES_NO,
+                _('Are you sure to remove the category "{}"?\nAll tasks '
+                  'in the category will be moved to the default category.'
+                 ).format(category.name),
+                )
+        response = dialog.run()
+        dialog.destroy()
+        if response == Gtk.ResponseType.YES:
+            # Move all tasks to default category
+            queuing_iter = self._pool_model.get_iter_for_presentable(pool.queuing)
+            # Select the queuing iter, in order to remove the category iter
+            self._pool_view.selection.select_iter(queuing_iter)
+            # Remove the category iter
+            pool.emit('presentable-removed', category)
+            SQLSession.delete(category)
+            SQLSession.commit()
 
     def about(self, *args, **kwargs):
         """Show about dialog."""

@@ -51,6 +51,7 @@
     </popup>
     <popup name='category_popup'>
         <menuitem action='category_edit' />
+        <menuitem action='category_remove' />
     </popup>
     <popup name='dustbin_popup'>
         <menuitem action='dustbin_empty' />
