@@ -25,7 +25,7 @@ This module contains the L{Presentable} class of L{yaner}.
 """
 
 from gi.repository import GObject
-from sqlalchemy import Column, Integer, Unicode, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, Unicode, ForeignKey
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 

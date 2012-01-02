@@ -110,7 +110,7 @@ class Application(Gtk.Application, LoggingMixin):
 
             SQLBase.metadata.create_all(engine)
 
-            pool = Pool(name=_('My Computer'), host='localhost', local=True)
+            pool = Pool(name=_('My Computer'), host='localhost', is_local=True)
 
             docs_dir = os.environ.get('XDG_DOCUMENTS_DIR', os.path.expanduser('~'))
             Category(name=_('Documents'), directory=docs_dir, pool=pool)
