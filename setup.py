@@ -100,6 +100,7 @@ for po_file in glob('po/*.po'):
         glob('build/locale/%s/yaner.mo' % po_name)))
 data_files.append(('share/applications/', ['yaner.desktop']))
 data_files.append(('share/glib-2.0/schemas/', ['data/com.kissuki.yaner.gschema.xml']))
+data_files.append(('share/icons/hicolor/scalable/apps/', ['data/yaner.svg']))
 
 xdg_config_dir = os.environ.get('XDG_CONFIG_DIRS', '/etc/xdg/').split(':')[0]
 data_files.append((os.path.join(xdg_config_dir, 'autostart/'), ['yaner-daemon.desktop']))

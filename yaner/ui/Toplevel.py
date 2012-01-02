@@ -72,6 +72,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self._ui_manager = None
 
         self.set_default_size(650, 450)
+        self.set_default_icon_name('yaner')
 
         # The toplevel vbox
         vbox = Box(VERTICAL, 0)
@@ -154,7 +155,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self._pool_bar = None
 
         # Status icon
-        status_icon = Gtk.StatusIcon(stock='gtk-apply')
+        status_icon = Gtk.StatusIcon(icon_name='yaner')
         status_icon.connect('activate', self._on_status_icon_activated)
         status_icon.connect('popup-menu', self._on_status_icon_popup)
 
@@ -290,6 +291,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             about_dialog = Gtk.AboutDialog()
             about_dialog.set_program_name(_('Yaner'))
             about_dialog.set_version(__version__)
+            about_dialog.set_logo_icon_name('yaner')
             about_dialog.set_authors((__author__,))
             about_dialog.set_website('https://github.com/iven/Yaner')
             about_dialog.set_copyright('Copyright \u00a9 2010-2011 Iven Hsu')
