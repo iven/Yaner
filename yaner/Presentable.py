@@ -118,7 +118,7 @@ class Category(SQLBase, Presentable):
     _name_ = Column(Unicode)
     directory = Column(Unicode)
 
-    _tasks = relationship(Task, backref='category')
+    _tasks = relationship(Task, backref='category', cascade='all, delete-orphan')
     pool_id = Column(Integer, ForeignKey('pool.id'))
 
     def __init__(self, name, directory, pool):

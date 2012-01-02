@@ -43,11 +43,11 @@
         <menuitem action='task_pause_all' />
         <separator />
         <menuitem action='category_add' />
-        <!--
         <separator />
+        <!--
         <menuitem action='pool_edit' />
-        <menuitem action='pool_remove' />
         -->
+        <menuitem action='pool_remove' />
     </popup>
     <popup name='category_popup'>
         <menuitem action='category_edit' />

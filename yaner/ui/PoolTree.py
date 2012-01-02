@@ -68,6 +68,16 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         for presentable in pool.presentables:
             self.add_presentable(presentable)
 
+    def remove_pool(self, pool):
+        """Removed the pool and presentables, disconnect signals."""
+        self.logger.debug(_('Removing {}...').format(pool))
+        for presentable in pool.presentables:
+            self.remove_presentable(presentable)
+        if pool in self._pool_handlers:
+            for handler in self._pool_handlers[pool]:
+                pool.disconnect(handler)
+            del self._pool_handlers[pool]
+
     def on_presentable_added(self, pool, presentable):
         """When new presentable appears in one of the pools, add it to the model."""
         self.add_presentable(presentable, insert=True)
@@ -76,13 +86,8 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         """
         When a presentable removed from one of the pools, remove it from
         the model.
-        @TODO: Test this.
         """
-        iter_ = self.get_iter_for_presentable(presentable)
-        if iter_ is not None:
-            self.remove(iter_)
-        if presentable in self._presentable_handlers:
-            presentable.disconnect(self._presentable_handlers.pop(presentable))
+        self.remove_presentable(presentable)
 
     def on_presentable_changed(self, presentable):
         """When a presentable changed, update the iter of the model."""
@@ -115,6 +120,14 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
 
         handler = presentable.connect('changed', self.on_presentable_changed)
         self._presentable_handlers[presentable] = handler
+
+    def remove_presentable(self, presentable):
+        """Remove a presentable from the model."""
+        iter_ = self.get_iter_for_presentable(presentable)
+        if iter_ is not None:
+            self.remove(iter_)
+        if presentable in self._presentable_handlers:
+            presentable.disconnect(self._presentable_handlers.pop(presentable))
 
     def get_iter_for_presentable(self, presentable, parent=None):
         """Get the TreeIter according to the presentable."""

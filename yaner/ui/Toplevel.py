@@ -217,6 +217,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
                  None, self._on_category_edit),
                 ('category_remove', 'gtk-delete', _('Remove Category'), None,
                  None, self._on_category_remove),
+                ('pool_remove', 'gtk-delete', _('Remove Server'), None,
+                 None, self._on_pool_remove),
                 ('dustbin_empty', 'gtk-delete', _('Empty Dustbin'), None,
                  None, self._on_dustbin_empty),
 
@@ -493,6 +495,39 @@ class Toplevel(Gtk.Window, LoggingMixin):
             # Remove the category iter
             pool.emit('presentable-removed', category)
             SQLSession.delete(category)
+            SQLSession.commit()
+
+    def _on_pool_remove(self, action, data):
+        """Remove pool."""
+        queuing = self._pool_view.selected_presentable
+        pool = queuing.pool
+        if pool.is_local:
+            dialog = Gtk.MessageDialog(
+                self, Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.CLOSE,
+                _('The local server should not be removed.'),
+                )
+        else:
+            dialog = Gtk.MessageDialog(
+                self, Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.WARNING,
+                Gtk.ButtonsType.YES_NO,
+                _('Are you sure to remove the server "{}"?\nAll tasks '
+                  'in the server will be <b>removed!</b>'
+                 ).format(pool.name),
+                use_markup=True
+                )
+        response = dialog.run()
+        dialog.destroy()
+        if response == Gtk.ResponseType.YES:
+            # Select the local pool, in order to remove the selected pool
+            local_pool = SQLSession.query(Pool).filter(Pool.is_local == True)[0]
+            iter_ = self._pool_model.get_iter_for_presentable(local_pool.queuing)
+            self._pool_view.selection.select_iter(iter_)
+            # Remove the category iter
+            self._pool_model.remove_pool(pool)
+            SQLSession.delete(pool)
             SQLSession.commit()
 
     def about(self, *args, **kwargs):

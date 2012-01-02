@@ -67,7 +67,8 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     host = Column(Unicode)
     port = Column(Integer)
     is_local = Column(Boolean)
-    categories = relationship(Category, backref='pool')
+    categories = relationship(Category, backref='pool',
+                              cascade='all, delete-orphan')
     default_category = relationship(Category, uselist=False)
 
     def __init__(self, name, host, user='', passwd='', port=6800, is_local=False):
