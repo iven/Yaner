@@ -33,7 +33,7 @@ from gi.repository import GObject
 from yaner import SQLSession
 from yaner import __version__, __author__
 from yaner.Pool import Pool
-from yaner.Presentable import Presentable
+from yaner.Presentable import Presentable, Category
 from yaner.ui.Dialogs import NormalTaskNewDialog, BTTaskNewDialog, MLTaskNewDialog
 from yaner.ui.Dialogs import CategoryBar
 from yaner.ui.PoolTree import PoolModel, PoolView
@@ -150,6 +150,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self._bt_task_new_dialog = None
         self._ml_task_new_dialog = None
         self._about_dialog = None
+        self._category_bar = None
 
         # Status icon
         status_icon = Gtk.StatusIcon(stock='gtk-apply')
@@ -289,6 +290,17 @@ class Toplevel(Gtk.Window, LoggingMixin):
             about_dialog.set_transient_for(self)
             self._about_dialog = about_dialog
         return self._about_dialog
+
+    @property
+    def category_bar(self):
+        """The info bar for adding or editing categories."""
+        if self._category_bar is None:
+            category_bar = CategoryBar(self._pool_view.selected_presentable.pool,
+                                       self)
+            category_bar.connect('response', self._on_category_bar_response)
+            self.task_box.pack_end(category_bar, expand=False)
+            self._category_bar = category_bar
+        return self._category_bar
 
     def _on_status_icon_activated(self, status_icon):
         """When status icon clicked, switch the window visible or hidden."""
@@ -453,17 +465,15 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
     def _on_category_add(self, action, data):
         """Add category."""
-        category_bar = CategoryBar(None,
-                                   self._pool_view.selected_presentable.pool, self)
-        self.task_box.pack_end(category_bar, expand=False)
-        category_bar.show_all()
+        presentable = self._pool_view.selected_presentable
+        self.category_bar.update(presentable.pool)
+        self.category_bar.show_all()
 
     def _on_category_edit(self, action, data):
         """Edit category."""
-        category_bar = CategoryBar(self._pool_view.selected_presentable,
-                                   self._pool_view.selected_presentable.pool, self)
-        self.task_box.pack_end(category_bar, expand=False)
-        category_bar.show_all()
+        presentable = self._pool_view.selected_presentable
+        self.category_bar.update(presentable.pool, presentable)
+        self.category_bar.show_all()
 
     def _on_category_remove(self, action, data):
         """Remove category."""
@@ -493,9 +503,38 @@ class Toplevel(Gtk.Window, LoggingMixin):
             # Select the queuing iter, in order to remove the category iter
             self._pool_view.selection.select_iter(queuing_iter)
             # Remove the category iter
-            pool.emit('presentable-removed', category)
+            self._pool_model.remove_presentable(category)
             SQLSession.delete(category)
             SQLSession.commit()
+
+    def _on_category_bar_response(self, info_bar, response_id):
+        """When category_bar responsed, create or edit category."""
+        if response_id != Gtk.ResponseType.OK:
+            info_bar.hide()
+            return
+
+        category = info_bar.category
+        pool = info_bar.pool
+        widgets = info_bar.widgets
+
+        name = widgets['name'].get_text().strip()
+        directory = widgets['directory'].get_text().strip()
+
+        if not name:
+            widgets['name'].set_placeholder_text(_('Required'))
+            return
+        if not directory:
+            widgets['directory'].set_placeholder_text(_('Required'))
+            return
+
+        if category is None:
+            category = Category(name=name, directory=directory, pool=pool)
+            self._pool_model.add_presentable(category, insert=True)
+        else:
+            category.name=name
+            category.directory=directory
+            SQLSession.commit()
+        info_bar.hide()
 
     def _on_pool_remove(self, action, data):
         """Remove pool."""
