@@ -35,7 +35,7 @@ from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Presentable import Presentable, Category
 from yaner.ui.Dialogs import NormalTaskNewDialog, BTTaskNewDialog, MLTaskNewDialog
-from yaner.ui.Dialogs import CategoryBar
+from yaner.ui.Dialogs import CategoryBar, PoolBar
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.ui.Misc import load_ui_file
@@ -151,6 +151,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self._ml_task_new_dialog = None
         self._about_dialog = None
         self._category_bar = None
+        self._pool_bar = None
 
         # Status icon
         status_icon = Gtk.StatusIcon(stock='gtk-apply')
@@ -218,6 +219,10 @@ class Toplevel(Gtk.Window, LoggingMixin):
                  None, self._on_category_edit),
                 ('category_remove', 'gtk-delete', _('Remove Category'), None,
                  None, self._on_category_remove),
+                ('pool_add', 'gtk-add', _('Add Server'), None,
+                 None, self._on_pool_add),
+                ('pool_edit', 'gtk-edit', _('Edit Server'), None,
+                 None, self._on_pool_edit),
                 ('pool_remove', 'gtk-delete', _('Remove Server'), None,
                  None, self._on_pool_remove),
                 ('dustbin_empty', 'gtk-delete', _('Empty Dustbin'), None,
@@ -244,7 +249,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
             self.logger.info(_('Initializing popup menus...'))
             get_widget = self.ui_manager.get_widget
             popups = {}
-            for popup_name in ('tray', 'task_new', 'queuing', 'category', 'dustbin',
+            for popup_name in ('tray', 'task_new', 'pool',
+                               'queuing', 'category', 'dustbin',
                                'queuing_task', 'category_task', 'dustbin_task'):
                 popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
             self._popups = popups
@@ -301,6 +307,16 @@ class Toplevel(Gtk.Window, LoggingMixin):
             self.task_box.pack_end(category_bar, expand=False)
             self._category_bar = category_bar
         return self._category_bar
+
+    @property
+    def pool_bar(self):
+        """The info bar for adding or editing pools."""
+        if self._pool_bar is None:
+            pool_bar = PoolBar()
+            pool_bar.connect('response', self._on_pool_bar_response)
+            self.task_box.pack_end(pool_bar, expand=False)
+            self._pool_bar = pool_bar
+        return self._pool_bar
 
     def _on_status_icon_activated(self, status_icon):
         """When status icon clicked, switch the window visible or hidden."""
@@ -362,6 +378,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
         (model, iter_) = selection.get_selected()
         current_path = treeview.get_path_at_pos(event.x, event.y)
         if current_path is None:
+            self.popups['pool'].popup(None, None, None, None,
+                                      event.button, event.time)
             return True
 
         if event.button == 3:
@@ -536,6 +554,17 @@ class Toplevel(Gtk.Window, LoggingMixin):
             SQLSession.commit()
         info_bar.hide()
 
+    def _on_pool_add(self, action, data):
+        """Add pool."""
+        self.pool_bar.update(None)
+        self.pool_bar.show_all()
+
+    def _on_pool_edit(self, action, data):
+        """Edit pool."""
+        presentable = self._pool_view.selected_presentable
+        self.pool_bar.update(presentable.pool)
+        self.pool_bar.show_all()
+
     def _on_pool_remove(self, action, data):
         """Remove pool."""
         queuing = self._pool_view.selected_presentable
@@ -568,6 +597,38 @@ class Toplevel(Gtk.Window, LoggingMixin):
             self._pool_model.remove_pool(pool)
             SQLSession.delete(pool)
             SQLSession.commit()
+
+    def _on_pool_bar_response(self, info_bar, response_id):
+        """When pool bar responsed, create or edit pool."""
+        if response_id != Gtk.ResponseType.OK:
+            info_bar.hide()
+            return
+
+        pool = info_bar.pool
+        widgets = info_bar.widgets
+        props = {}
+
+        for (prop, widget) in widgets.items():
+            props[prop] = widget.get_text().strip()
+
+        for prop in ('name', 'host', 'port'):
+            if not props[prop]:
+                widgets[prop].set_placeholder_text(_('Required'))
+                return
+
+        if pool is None:
+            pool = Pool(**props)
+            self._pool_model.add_pool(pool)
+            self._pool_view.expand_all()
+        else:
+            pool.name = props['name']
+            pool.host = props['host']
+            pool.port = props['port']
+            pool.user = props['user']
+            pool.passwd = props['passwd']
+            SQLSession.commit()
+
+        info_bar.hide()
 
     def about(self, *args, **kwargs):
         """Show about dialog."""
