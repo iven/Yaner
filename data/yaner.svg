@@ -121,11 +121,11 @@
        id="linearGradient3707-319-631-407-324">
       <stop
          offset="0"
-         style="stop-color:#8c1532;stop-opacity:1;"
+         style="stop-color:#151e8c;stop-opacity:1;"
          id="stop3760" />
       <stop
          offset="1"
-         style="stop-color:#c95993;stop-opacity:1;"
+         style="stop-color:#5979c9;stop-opacity:1;"
          id="stop3762" />
     </linearGradient>
     <linearGradient
@@ -142,19 +142,19 @@
        id="linearGradient2867-449-88-871-390-598-476-591-434-148-57-177">
       <stop
          offset="0"
-         style="stop-color:#ec9b90;stop-opacity:1;"
+         style="stop-color:#90beec;stop-opacity:1;"
          id="stop3750" />
       <stop
          offset="0.26238"
-         style="stop-color:#ec5582;stop-opacity:1;"
+         style="stop-color:#55a8ec;stop-opacity:1;"
          id="stop3752" />
       <stop
          offset="0.704952"
-         style="stop-color:#e6367a;stop-opacity:1;"
+         style="stop-color:#3684e6;stop-opacity:1;"
          id="stop3754" />
       <stop
          offset="1"
-         style="stop-color:#a02b35;stop-opacity:1;"
+         style="stop-color:#312ba0;stop-opacity:1;"
          id="stop3756" />
     </linearGradient>
     <radialGradient
@@ -244,11 +244,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="-70.506662"
-     inkscape:cy="40.033624"
+     inkscape:zoom="1.4"
+     inkscape:cx="20.571623"
+     inkscape:cy="-108.01149"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer1-3"
      showgrid="false"
      inkscape:object-paths="false"
      inkscape:object-nodes="false"
@@ -276,8 +276,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-1004.3622)"
-     style="display:inline">
+     transform="translate(0,-1004.3622)">
     <g
        inkscape:label="Layer 1"
        id="layer1-3"
@@ -335,18 +334,18 @@
          inkscape:connector-curvature="0" />
       <path
          d="m 9.6705003,11.75577 9.0280797,-0.01574 5.135367,7.800788 5.213323,-7.800788 9.114554,0.140177 -9.895379,15.775754 -0.109435,11.367204 -8.793522,-0.09369 0,-11.273508 L 9.6547609,11.97316"
-         style="font-size:49.67585372999999294px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:0.27427185;stroke:none;filter:url(#filter4320);font-family:Sans;-inkscape-font-specification:WenQuanYi Bitmap Song Bold"
+         style="font-size:49.67585373px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#6b6caa;fill-opacity:0.28398061;stroke:none;filter:url(#filter4320);font-family:Sans;-inkscape-font-specification:WenQuanYi Bitmap Song Bold"
          id="path4262-8"
          inkscape:connector-curvature="0"
          sodipodi:nodetypes="cccccccccc"
          transform="matrix(0.17990133,0,0,0.17990133,1.5908705,38.846113)" />
       <g
-         style="font-size:9.93516922px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:0.20279721;stroke:none;font-family:Sans"
+         style="font-size:9.93516922px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
          id="text4071-4"
          transform="matrix(0.16957427,0,0,0.16957427,1.837452,39.107426)">
         <path
            d="m 8.7350221,11.054162 9.6517319,0.06222 5.447193,8.424439 5.447193,-8.424439 9.738206,0.06222 -10.752901,16.477362 0.124435,11.834943 -9.027392,0.06222 0,-11.89716 L 8.7972393,11.427465"
-           style="font-size:49.67585372999999294px;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:0.09951457;filter:url(#filter4284);font-family:Sans;-inkscape-font-specification:WenQuanYi Bitmap Song Bold"
+           style="font-size:49.67585373px;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#6b6caa;fill-opacity:0.28398061;filter:url(#filter4284);font-family:Sans;-inkscape-font-specification:WenQuanYi Bitmap Song Bold"
            id="path4262"
            inkscape:connector-curvature="0"
            sodipodi:nodetypes="cccccccccc" />
