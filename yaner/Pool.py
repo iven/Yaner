@@ -65,13 +65,13 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     user = Column(Unicode)
     passwd = Column(Unicode)
     host = Column(Unicode)
-    port = Column(Integer)
+    port = Column(Unicode)
     is_local = Column(Boolean)
     categories = relationship(Category, backref='pool',
                               cascade='all, delete-orphan')
     default_category = relationship(Category, uselist=False)
 
-    def __init__(self, name, host, user='', passwd='', port=6800, is_local=False):
+    def __init__(self, name, host, user='', passwd='', port='6800', is_local=False):
         self.name = name
         self.user = user
         self.passwd = passwd
