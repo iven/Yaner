@@ -154,24 +154,51 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
             self._status = status
 
     @property
-    def completed(self):
+    def is_completed(self):
         """Check if task is completed, useful for task undelete."""
-        return self.total_length and (self.total_length == self.completed_length)
+        return (self.status == Task.STATUSES.COMPLETE) or \
+                (self.total_length and (self.total_length == self.completed_length))
+
+    @property
+    def is_running(self):
+        """Check if task is running."""
+        return self.status in [self.STATUSES.ACTIVE, self.STATUSES.WAITING,
+                               self.STATUSES.PAUSED]
+
+    @property
+    def is_trashed(self):
+        """Check if task is removable."""
+        return self.status == self.STATUSES.TRASHED
+
+    @property
+    def is_addable(self):
+        """Check if task is addable."""
+        return self.status in [self.STATUSES.INACTIVE, self.STATUSES.ERROR]
+
+    @property
+    def is_pausable(self):
+        """Check if task is pausable."""
+        return self.status in [self.STATUSES.ACTIVE, self.STATUSES.WAITING]
+
+    @property
+    def is_unpausable(self):
+        """Check if task is unpausable."""
+        return self.status == self.STATUSES.PAUSED
 
     def start(self):
         """Unpause task if it's paused, otherwise add it (again)."""
-        if self.status == self.STATUSES.PAUSED:
+        if self.is_unpausable:
             deferred = self.pool.proxy.call('aria2.unpause', self.gid)
             deferred.add_callback(self._on_unpaused)
             deferred.add_errback(self._on_xmlrpc_error)
             deferred.start()
-        elif self.status in [self.STATUSES.INACTIVE, self.STATUSES.ERROR]:
+        elif self.is_addable:
             self.add()
             self.pool.queuing.add_task(self)
 
     def pause(self):
         """Pause task if it's running."""
-        if self.status in [self.STATUSES.ACTIVE, self.STATUSES.WAITING]:
+        if self.is_pausable:
             deferred = self.pool.proxy.call('aria2.pause', self.gid)
             deferred.add_callback(self._on_paused)
             deferred.add_errback(self._on_xmlrpc_error)
@@ -179,21 +206,20 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
 
     def trash(self):
         """Move task to dustbin."""
-        if self.status in (self.STATUSES.COMPLETE, self.STATUSES. ERROR,
-                           self.STATUSES.INACTIVE):
-            self._on_trashed()
-        elif self.status in (self.STATUSES.WAITING, self.STATUSES.ACTIVE,
-                             self.STATUSES.PAUSED):
-            deferred = self.pool.proxy.call('aria2.remove', self.gid)
-            deferred.add_callback(self._on_trashed)
-            deferred.add_errback(self._on_xmlrpc_error)
-            deferred.start()
+        if not self.is_trashed:
+            if self.is_running:
+                deferred = self.pool.proxy.call('aria2.remove', self.gid)
+                deferred.add_callback(self._on_trashed)
+                deferred.add_errback(self._on_xmlrpc_error)
+                deferred.start()
+            else:
+                self._on_trashed()
 
     def restore(self):
         """Restore task."""
-        if self.status == self.STATUSES.TRASHED:
+        if self.is_trashed:
             self.pool.dustbin.remove_task(self)
-            if self.completed:
+            if self.is_completed:
                 self.category.add_task(self)
                 self.status = self.STATUSES.COMPLETE
             else:
@@ -202,7 +228,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
 
     def remove(self):
         """Remove task."""
-        if self.status == self.STATUSES.TRASHED:
+        if self.is_trashed:
             self.pool.dustbin.remove_task(self)
             SQLSession.delete(self)
             self._sync_update()
@@ -284,16 +310,15 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         Return True to keep calling this when timeout else stop.
 
         """
-        if self.status in (self.STATUSES.COMPLETE, self.STATUSES.ERROR,
-                self.STATUSES.TRASHED, self.STATUSES.INACTIVE):
-            self.end_update_status()
-            return False
-        else:
+        if self.is_running:
             deferred = self.pool.proxy.call('aria2.tellStatus', self.gid)
             deferred.add_callback(self._update_status)
             deferred.add_errback(self._on_xmlrpc_error)
             deferred.start()
             return True
+        else:
+            self.end_update_status()
+            return False
 
     def _update_status(self, deferred):
         """Update data fields of the task."""
@@ -313,10 +338,10 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
                 }
         self.status = statuses[status['status']]
 
-        if self.status == self.STATUSES.COMPLETE:
+        if self.is_completed:
             self.pool.queuing.remove_task(self)
             self.category.add_task(self)
-        elif self.status == self.STATUSES.TRASHED:
+        elif self.is_trashed:
             return self._on_trashed()
         else:
             self.changed()
