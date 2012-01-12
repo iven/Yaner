@@ -403,7 +403,9 @@ class Toplevel(Gtk.Window, LoggingMixin):
         Pool view tree selection changed signal callback.
         Update the task list model.
         """
-        self._task_list_model.presentable = self._pool_view.selected_presentable
+        presentable = self._pool_view.selected_presentable
+        if presentable is not None:
+            self._task_list_model.presentable = presentable
 
     def _on_normal_task_new(self, action, data):
         """When normal task new action is activated, call the task new dialog."""
@@ -519,9 +521,9 @@ class Toplevel(Gtk.Window, LoggingMixin):
         dialog.destroy()
         if response == Gtk.ResponseType.YES:
             # Move all tasks to default category
-            queuing_iter = self._pool_model.get_iter_for_presentable(pool.queuing)
-            # Select the queuing iter, in order to remove the category iter
-            self._pool_view.selection.select_iter(queuing_iter)
+            for task in category.tasks:
+                task.category = pool.default_category
+                pool.default_category.add_task(task)
             # Remove the category iter
             self._pool_model.remove_presentable(category)
             SQLSession.delete(category)

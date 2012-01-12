@@ -148,6 +148,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         """When category combobox changed, update the directory entry."""
         iter_ = category_cb.get_active_iter()
         model = category_cb.get_model()
+
+        if iter_ is None:
+            category_cb.set_active_iter(model.iter_children(iter_))
+            return
+
         presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
         if presentable.TYPE == Presentable.TYPES.QUEUING:
             category_cb.set_active_iter(model.iter_children(iter_))

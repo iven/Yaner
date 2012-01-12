@@ -160,6 +160,8 @@ class PoolView(Gtk.TreeView):
         """
         Gtk.TreeView.__init__(self, model)
 
+        model.connect('row-deleted', self._on_row_deleted)
+
         # Set up TreeViewColumn
         column = Gtk.TreeViewColumn()
         self.append_column(column)
@@ -185,6 +187,12 @@ class PoolView(Gtk.TreeView):
             return None
         else:
             return model.get_presentable(iter_)
+
+    def _on_row_deleted(self, model, path):
+        """If the row deleted is selected, reset the selection."""
+        (model, iter_) = self.selection.get_selected()
+        if iter_ is None or model.get_path(iter_) is None:
+            self.selection.select_iter(model.iter_children(None))
 
     def _pixbuf_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""
