@@ -35,7 +35,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from yaner import SQLBase, SQLSession
 from yaner.Misc import unquote
 from yaner.utils.Logging import LoggingMixin
-from yaner.utils.Enum import Enum
+from yaner.utils.MutationDict import MutationDict
 from yaner.utils.Notification import Notification
 
 class Task(SQLBase, GObject.GObject, LoggingMixin):
@@ -46,33 +46,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     __gsignals__ = {
             'changed': (GObject.SignalFlags.RUN_LAST, None, ()),
             }
-    """
-    GObject signals of this class.
-    """
-
-    TYPES = Enum((
-        'NORMAL',
-        'BT',
-        'ML',
-        ))
-    """
-    The types of the task, which is a L{Enum<yaner.utils.Enum>}.
-    C{TYPES.NAME} will return the type number of C{NAME}.
-    """
-
-    STATUSES = Enum((
-        'INACTIVE',
-        'ACTIVE',
-        'WAITING',
-        'PAUSED',
-        'COMPLETE',
-        'ERROR',
-        'TRASHED',
-        ))
-    """
-    The statuses of the task, which is a L{Enum<yaner.utils.Enum>}.
-    C{STATUSES.NAME} will return the type number of C{NAME}.
-    """
+    """GObject signals of this class."""
 
     _UPDATE_INTERVAL = 1
     """Interval for status updating, in second(s)."""
@@ -81,32 +55,34 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     """Interval for database sync, in second(s)."""
 
     name = Column(Unicode)
-    _status = Column(Integer, default=STATUSES.INACTIVE)
-    type = Column(Integer, nullable=False)
+    status = Column(MutationDict.as_mutable(PickleType))
+
     uris = Column(PickleType, default=[])
-    completed_length = Column(Integer, default=0)
-    total_length = Column(Integer, default=0)
-    gid = Column(Unicode, default='')
+    torrent = deferred(Column(PickleType, default=None))
     metafile = deferred(Column(PickleType, default=None))
-    options = Column(PickleType)
+
+    options = Column(MutationDict.as_mutable(PickleType))
     session_id = Column(Unicode, default='')
     category_id = Column(Integer, ForeignKey('category.id'))
 
-    __mapper_args__ = {'polymorphic_on': type}
-
-    def __init__(self, name, type, category, options,
-            status=STATUSES.INACTIVE, uris=[], completed_length=0,
-            total_length=0, gid='', metafile=None, session_id=''):
+    def __init__(self, name, category, options, uris=[],
+                 torrent=None, metafile=None):
         self.name = name
-        self.status = status
-        self.type = type
+        self.status = {
+            'completedLength': '0',
+            'totalLength': '0',
+            'downloadSpeed': '0',
+            'uploadSpeed': '0',
+            'connections': '0',
+            'gid': '',
+            'status': 'inactive',
+        }
+
         self.uris = uris
-        self.completed_length = completed_length
-        self.total_length = total_length
-        self.gid = gid
+        self.torrent = torrent
         self.metafile = metafile
+
         self.options = options
-        self.session_id = session_id
         self.category = category
 
         LoggingMixin.__init__(self)
@@ -123,67 +99,131 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         LoggingMixin.__init__(self)
         GObject.GObject.__init__(self)
 
-        self.upload_speed = 0
-        self.download_speed = 0
-        self.connections = 0
-
         self._status_update_handle = None
         self._database_sync_handle = None
 
-        self._renamed = False
+        self._name_fixed = False
 
     def __repr__(self):
         return _("<Task {}>").format(self.name)
 
     @hybrid_property
-    def status(self):
-        return self._status
-
-    @hybrid_property
     def pool(self):
         return self.category.pool
 
-    @status.setter
-    def status(self, status):
-        """Always sync when task status changes."""
-        if hash(self) and self.status != status:
-            self._status = status
-            self._sync_update()
-            self.changed()
+    @hybrid_property
+    def state(self):
+        """Download status of the task, must be one of: 'inactive', 'active',
+        'paused', 'waiting', 'complete', 'removed', 'error'.
+        """
+        return self.status['status']
+
+    @state.setter
+    def state(self, state):
+        """Always sync when task state changes."""
+        if hash(self) and self.state != state:
+            self.status['status'] = state
+            SQLSession.commit()
+            self.emit('changed')
         else:
-            self._status = status
+            self.status['status'] = state
+
+    @hybrid_property
+    def in_queuing(self):
+        return self.state not in ['complete', 'removed']
+
+    @hybrid_property
+    def in_category(self):
+        return self.state == 'complete'
+
+    @hybrid_property
+    def in_dustbin(self):
+        return self.state == 'removed'
+
+    @property
+    def gid(self):
+        return self.status['gid']
+
+    @gid.setter
+    def gid(self, gid):
+        self.status['gid'] = gid
+
+    @property
+    def total_length(self):
+        return int(self.status['totalLength'])
+
+    @property
+    def completed_length(self):
+        return int(self.status['completedLength'])
+
+    @property
+    def download_speed(self):
+        return int(self.status['downloadSpeed'])
+
+    @property
+    def upload_speed(self):
+        return int(self.status['uploadSpeed'])
+
+    @property
+    def connections(self):
+        return int(self.status['connections'])
+
+    @property
+    def has_bittorrent(self):
+        """Check if task use bittorrent protocol."""
+        return 'bittorrent' in self.status
 
     @property
     def is_completed(self):
         """Check if task is completed, useful for task undelete."""
-        return (self.status == Task.STATUSES.COMPLETE) or \
+        return (self.state == 'complete') or \
                 (self.total_length and (self.total_length == self.completed_length))
+
+    @property
+    def is_active(self):
+        """Check if task is active."""
+        return self.state == 'active'
 
     @property
     def is_running(self):
         """Check if task is running."""
-        return self.status in [self.STATUSES.ACTIVE, self.STATUSES.WAITING,
-                               self.STATUSES.PAUSED]
+        return self.state in ['active', 'waiting', 'paused']
 
     @property
     def is_trashed(self):
         """Check if task is removable."""
-        return self.status == self.STATUSES.TRASHED
+        return self.state == 'removed'
 
     @property
     def is_addable(self):
         """Check if task is addable."""
-        return self.status in [self.STATUSES.INACTIVE, self.STATUSES.ERROR]
+        return self.state in ['inactive', 'error']
 
     @property
     def is_pausable(self):
         """Check if task is pausable."""
-        return self.status in [self.STATUSES.ACTIVE, self.STATUSES.WAITING]
+        return self.state in ['active', 'waiting']
 
     @property
     def is_unpausable(self):
         """Check if task is unpausable."""
-        return self.status == self.STATUSES.PAUSED
+        return self.state == 'paused'
+
+    def add(self):
+        """Add the task to pool."""
+        proxy = self.pool.proxy
+        options = dict(self.options)
+        if self.metafile:
+            deferred = proxy.call('aria2.addMetalink', self.metafile, options)
+        elif self.torrent:
+            deferred = proxy.call('aria2.addTorrent', self.torrent,
+                                  self.uris, options)
+        else:
+            deferred = proxy.call('aria2.addUri', self.uris, options)
+
+        deferred.add_callback(self._on_started)
+        deferred.add_errback(self._on_xmlrpc_error)
+        deferred.start()
 
     def start(self):
         """Unpause task if it's paused, otherwise add it (again)."""
@@ -221,21 +261,17 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
             self.pool.dustbin.remove_task(self)
             if self.is_completed:
                 self.category.add_task(self)
-                self.status = self.STATUSES.COMPLETE
+                self.state = 'complete'
             else:
                 self.pool.queuing.add_task(self)
-                self.status = self.STATUSES.INACTIVE
+                self.state = 'inactive'
 
     def remove(self):
         """Remove task."""
         if self.is_trashed:
             self.pool.dustbin.remove_task(self)
             SQLSession.delete(self)
-            self._sync_update()
-
-    def changed(self):
-        """Emit signal "changed"."""
-        self.emit('changed')
+            SQLSession.commit()
 
     def begin_update_status(self):
         """Begin to update status every second. Task must be marked
@@ -246,7 +282,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
             self._status_update_handle = GLib.timeout_add_seconds(
                     self._UPDATE_INTERVAL, self._call_tell_status)
             self._database_sync_handle = GLib.timeout_add_seconds(
-                    self._SYNC_INTERVAL, self._sync_update)
+                    self._SYNC_INTERVAL, SQLSession.commit)
 
     def end_update_status(self):
         """Stop updating status every second."""
@@ -258,16 +294,12 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
             GLib.source_remove(self._database_sync_handle)
             self._database_sync_handle = None
 
-    def _sync_update(self):
-        SQLSession.commit()
-        return True
-
     def _update_session_id(self):
         """Get session id of the pool and store it in task."""
         def on_got_session_info(deferred):
             """Set session id the task belongs to."""
             self.session_id = deferred.result['sessionId']
-            self._sync_update()
+            SQLSession.commit()
 
         deferred = self.pool.proxy.call('aria2.getSessionInfo', self.gid)
         deferred.add_callback(on_got_session_info)
@@ -279,26 +311,26 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
 
         gid = deferred.result
         self.gid = gid[-1] if isinstance(gid, list) else gid
-        self.status = self.STATUSES.ACTIVE
+        self.state = 'active'
 
         self._update_session_id()
         self.begin_update_status()
 
     def _on_paused(self, deferred):
-        """Task paused callback, update status."""
-        self.status = self.STATUSES.PAUSED
+        """Task paused callback, update state."""
+        self.state = 'paused'
 
     def _on_unpaused(self, deferred):
-        """Task unpaused callback, update status."""
-        self.status = self.STATUSES.ACTIVE
+        """Task unpaused callback, update state."""
+        self.state = 'active'
 
     def _on_trashed(self, deferred=None):
         """Task removed callback, remove task from previous presentable and
         move it to dustbin.
         """
-        completed = (self.status == self.STATUSES.COMPLETE)
-        self.status = self.STATUSES.TRASHED
-        if completed:
+        in_category = self.in_category
+        self.state = 'removed'
+        if in_category:
             self.category.remove_task(self)
         else:
             self.pool.queuing.remove_task(self)
@@ -323,105 +355,42 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     def _update_status(self, deferred):
         """Update data fields of the task."""
         status = deferred.result
-        self.total_length = int(status['totalLength'])
-        self.completed_length = int(status['completedLength'])
-        self.download_speed = int(status['downloadSpeed'])
-        self.upload_speed = int(status['uploadSpeed'])
-        self.connections = int(status['connections'])
 
-        statuses = {'active': self.STATUSES.ACTIVE,
-                'waiting': self.STATUSES.WAITING,
-                'paused': self.STATUSES.PAUSED,
-                'complete': self.STATUSES.COMPLETE,
-                'error': self.STATUSES.ERROR,
-                'removed': self.STATUSES.TRASHED,
-                }
-        self.status = statuses[status['status']]
+        # Choose the best task name
+        if not self._name_fixed:
+            if self.has_bittorrent:
+                name = unquote(status['bittorrent']['info']['name'])
+                if name != '':
+                    self.name = name
+                    self._name_fixed = True
+            else:
+                files = status['files']
+                if len(files) == 1:
+                    name = unquote(os.path.basename(files[0]['path']))
+                    if name != '':
+                        self.name = name
+                        self._name_fixed = True
+
+        # If state changed, set task changed and commit to database
+        self.state = status['status']
+        self.status = status
 
         if self.is_completed:
             self.pool.queuing.remove_task(self)
             self.category.add_task(self)
         elif self.is_trashed:
+            # Necessary?
             return self._on_trashed()
         else:
-            self.changed()
+            self.emit('changed')
 
         self.pool.connected = True
 
     def _on_xmlrpc_error(self, deferred):
         """Handle errors occured when calling some function via xmlrpc."""
-        self.status = self.STATUSES.ERROR
+        self.state = 'error'
         message = getattr(deferred.error, 'message', str(deferred.error))
         Notification(_('Network Error'), message).show()
-
-class NormalTask(Task):
-    """Normal Task."""
-
-    __mapper_args__ = {'polymorphic_identity': Task.TYPES.NORMAL}
-
-    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
-
-    def add(self):
-        """Add the task to pool."""
-        deferred = self.pool.proxy.call('aria2.addUri',
-                self.uris, self.options)
-        deferred.add_callback(self._on_started)
-        deferred.add_errback(self._on_xmlrpc_error)
-        deferred.start()
-
-    def _update_status(self, deferred):
-        """For normal task, if there is only one task(magnet may have more than
-        one), use it's name for task name.
-        """
-        if not self._renamed:
-            files = deferred.result['files']
-            if len(files) == 1:
-                name = unquote(os.path.basename(files[0]['path']))
-                if name != '':
-                    self.name = name
-                    self._renamed = True
-        Task._update_status(self, deferred)
-
-class BTTask(Task):
-    """BitTorrent Task."""
-
-    __mapper_args__ = {'polymorphic_identity': Task.TYPES.BT}
-
-    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
-
-    def add(self):
-        """Add the task to pool."""
-        deferred = self.pool.proxy.call('aria2.addTorrent',
-                self.metafile, self.uris, self.options)
-        deferred.add_callback(self._on_started)
-        deferred.add_errback(self._on_xmlrpc_error)
-        deferred.start()
-
-    def _update_status(self, deferred):
-        """For BT task, use internal name of the torrent if possible.
-        """
-        if not self._renamed:
-            if 'bittorrent' in deferred.result:
-                name = unquote(deferred.result['bittorrent']['info']['name'])
-                if name != '':
-                    self.name = name
-                    self._renamed = True
-        Task._update_status(self, deferred)
-
-class MLTask(Task):
-    """Metalink Task."""
-
-    __mapper_args__ = {'polymorphic_identity': Task.TYPES.ML}
-
-    id = Column(Integer, ForeignKey('task.id'), primary_key=True)
-
-    def add(self):
-        """Add the task to pool."""
-        deferred = self.pool.proxy.call('aria2.addMetalink',
-                self.metafile, self.options)
-        deferred.add_callback(self._on_started)
-        deferred.add_errback(self._on_xmlrpc_error)
-        deferred.start()
 
 GObject.type_register(Task)
 

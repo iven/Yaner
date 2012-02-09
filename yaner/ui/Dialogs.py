@@ -33,7 +33,7 @@ from gi.repository import Gio
 from gi.repository import Pango
 from gi.repository.Gio import SettingsBindFlags as BindFlags
 
-from yaner.Task import Task, NormalTask, BTTask, MLTask
+from yaner.Task import Task
 from yaner.Presentable import Presentable
 from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView, Box
 from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
@@ -299,8 +299,7 @@ class NormalTaskNewDialog(TaskNewDialog):
         # SpinButton returns double, but aria2 expects integer
         options['split'] = int(options['split'])
 
-        NormalTask(name=name, type=Task.TYPES.NORMAL, uris=uris,
-                   options=options, category=category).start()
+        Task(name=name, uris=uris, options=options, category=category).start()
 
         self.hide()
 
@@ -419,7 +418,7 @@ class BTTaskNewDialog(TaskNewDialog):
         else:
             name = os.path.basename(torrent_filename)
             with open(torrent_filename, 'br') as torrent_file:
-                metafile = xmlrpc.client.Binary(torrent_file.read())
+                torrent = xmlrpc.client.Binary(torrent_file.read())
 
         uris = options.pop('uris')
         category = options.pop('category')
@@ -428,8 +427,8 @@ class BTTaskNewDialog(TaskNewDialog):
         for key in ('seed-time', 'bt-max-open-files', 'bt-max-peers'):
             options[key] = int(options[key])
 
-        BTTask(name=name, type=Task.TYPES.BT, metafile=metafile, uris=uris,
-               options=options, category=category).start()
+        Task(name=name, torrent=torrent, uris=uris,
+             options=options, category=category).start()
 
         self.hide()
 
@@ -525,8 +524,8 @@ class MLTaskNewDialog(TaskNewDialog):
         category = options.pop('category')
         options['metalink-servers'] = int(options['metalink-servers'])
 
-        MLTask(name=name, type=Task.TYPES.ML, metafile=metafile,
-               options=options, category=category).start()
+        Task(name=name, metafile=metafile, options=options,
+             category=category).start()
 
         self.hide()
 

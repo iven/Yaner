@@ -28,7 +28,7 @@ import os
 
 from gi.repository import GLib
 from gi.repository import GObject
-from sqlalchemy import Column, Integer, Unicode, Boolean
+from sqlalchemy import Column, Unicode, Boolean
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -172,9 +172,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         """
         self.logger.info(_('{}: disconnected.').format(self))
         for task in self.queuing.tasks:
-            task.status = Task.STATUSES.INACTIVE
-            task.end_update_status()
-            task.changed()
+            task.state = 'inactive'
 
     def _keep_connection(self):
         """Keep calling C{aria2.getVersion} and mark pool as connected."""
@@ -202,7 +200,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
             session_info = deferred.result
             for task in self.queuing.tasks:
                 if task.session_id == session_info['sessionId']:
-                    task.status = Task.STATUSES.WAITING
+                    task.state = 'waiting'
                     task.begin_update_status()
 
         deferred = self.proxy.call('aria2.getSessionInfo')
