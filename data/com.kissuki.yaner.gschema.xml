@@ -110,14 +110,14 @@
             </description>
         </key>
         <key type='b' name='follow-torrent'>
-            <default>false</default>
+            <default>true</default>
             <summary>Follow torrent</summary>
             <description>
                 If true is specified, when a file whose suffix is ".torrent" or content type is "application/x-bittorrent" is downloaded, aria2 parses it as a torrent file and downloads files mentioned in it. If false is specified, the action mentioned above is not taken. Default: true
             </description>
         </key>
         <key type='b' name='follow-metalink'>
-            <default>false</default>
+            <default>true</default>
             <summary>Follow metalink</summary>
             <description>
                 If true is specified, when a file whose suffix is ".meta4" or ".metalink" or content type of "application/metalink4+xml" or "application/metalink+xml" is downloaded, aria2 parses it as a metalink file and downloads files mentioned in it. If false is specified, the action mentioned above is not taken. Default: true

@@ -54,6 +54,17 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     _SYNC_INTERVAL = 60
     """Interval for database sync, in second(s)."""
 
+    _DEFAULT_STATUS = {
+        'completedLength': '0',
+        'totalLength': '0',
+        'downloadSpeed': '0',
+        'uploadSpeed': '0',
+        'connections': '0',
+        'gid': '',
+        'status': 'inactive',
+    }
+    """Default task status."""
+
     name = Column(Unicode)
     status = Column(MutationDict.as_mutable(PickleType))
 
@@ -68,15 +79,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     def __init__(self, name, category, options, uris=[],
                  torrent=None, metafile=None):
         self.name = name
-        self.status = {
-            'completedLength': '0',
-            'totalLength': '0',
-            'downloadSpeed': '0',
-            'uploadSpeed': '0',
-            'connections': '0',
-            'gid': '',
-            'status': 'inactive',
-        }
+        self.status = Task._DEFAULT_STATUS
 
         self.uris = uris
         self.torrent = torrent
@@ -358,26 +361,37 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
 
         # Choose the best task name
         if not self._name_fixed:
+            self._name_fixed = True
             if self.has_bittorrent:
                 name = unquote(status['bittorrent']['info']['name'])
                 if name != '':
                     self.name = name
-                    self._name_fixed = True
             else:
                 files = status['files']
                 if len(files) == 1:
                     name = unquote(os.path.basename(files[0]['path']))
                     if name != '':
                         self.name = name
-                        self._name_fixed = True
 
+        self.status = status
         # If state changed, set task changed and commit to database
         self.state = status['status']
-        self.status = status
 
         if self.is_completed:
-            self.pool.queuing.remove_task(self)
-            self.category.add_task(self)
+            # If we are following a torrent or a metafile
+            followedBy = status.get('followedBy', None)
+            belongsTo = status.get('belongsTo', None)
+            if followedBy or belongsTo:
+                self.status = Task._DEFAULT_STATUS
+                # The metafile task is followed by the torrent task and the
+                # metalink task, and the torrent task belongs to the metalink task
+                self.gid = followedBy[0] if followedBy else belongsTo
+                self.state = 'waiting'
+                self._name_fixed = False
+                self.begin_update_status()
+            else:
+                self.pool.queuing.remove_task(self)
+                self.category.add_task(self)
         elif self.is_trashed:
             # Necessary?
             return self._on_trashed()
