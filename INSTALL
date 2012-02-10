@@ -23,6 +23,7 @@ If you use Debian/Ubuntu based distributions, you should install like this::
 After that, run this as root::
 
     glib-compile-schemas /usr/share/glib-2.0/schemas/
+    gtk-update-icon-cache -qtf /usr/share/icons/hicolor/
 
 Uninstall
 =========

@@ -68,21 +68,26 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         for presentable in pool.presentables:
             self.add_presentable(presentable)
 
+    def remove_pool(self, pool):
+        """Removed the pool and presentables, disconnect signals."""
+        self.logger.debug(_('Removing {}...').format(pool))
+        for presentable in pool.presentables:
+            self.remove_presentable(presentable)
+        if pool in self._pool_handlers:
+            for handler in self._pool_handlers[pool]:
+                pool.disconnect(handler)
+            del self._pool_handlers[pool]
+
     def on_presentable_added(self, pool, presentable):
         """When new presentable appears in one of the pools, add it to the model."""
-        self.add_presentable(presentable)
+        self.add_presentable(presentable, insert=True)
 
     def on_presentable_removed(self, pool, presentable):
         """
         When a presentable removed from one of the pools, remove it from
         the model.
-        @TODO: Test this.
         """
-        iter_ = self.get_iter_for_presentable(presentable)
-        if iter_ is not None:
-            self.remove(iter_)
-        if presentable in self._presentable_handlers:
-            presentable.disconnect(self._presentable_handlers.pop(presentable))
+        self.remove_presentable(presentable)
 
     def on_presentable_changed(self, presentable):
         """When a presentable changed, update the iter of the model."""
@@ -90,7 +95,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         if iter_:
             self.row_changed(self.get_path(iter_), iter_)
 
-    def add_presentable(self, presentable):
+    def add_presentable(self, presentable, insert=False):
         """Add a presentable to the model."""
         if self.get_iter_for_presentable(presentable):
             return
@@ -105,11 +110,24 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
                     presentable.name))
                 self.add_presentable(parent)
                 parent_iter = self.get_iter_for_presentable(parent)
-        iter_ = self.append(parent_iter)
+        if insert:
+            dustbin = presentable.pool.dustbin
+            dustbin_iter = self.get_iter_for_presentable(dustbin)
+            iter_ = self.insert_before(parent_iter, dustbin_iter)
+        else:
+            iter_ = self.append(parent_iter)
         self.set(iter_, self.COLUMNS.PRESENTABLE, presentable)
 
         handler = presentable.connect('changed', self.on_presentable_changed)
         self._presentable_handlers[presentable] = handler
+
+    def remove_presentable(self, presentable):
+        """Remove a presentable from the model."""
+        iter_ = self.get_iter_for_presentable(presentable)
+        if iter_ is not None:
+            self.remove(iter_)
+        if presentable in self._presentable_handlers:
+            presentable.disconnect(self._presentable_handlers.pop(presentable))
 
     def get_iter_for_presentable(self, presentable, parent=None):
         """Get the TreeIter according to the presentable."""
@@ -142,6 +160,8 @@ class PoolView(Gtk.TreeView):
         """
         Gtk.TreeView.__init__(self, model)
 
+        model.connect('row-deleted', self._on_row_deleted)
+
         # Set up TreeViewColumn
         column = Gtk.TreeViewColumn()
         self.append_column(column)
@@ -163,7 +183,16 @@ class PoolView(Gtk.TreeView):
     def selected_presentable(self):
         """Get selected presentable."""
         (model, iter_) = self.selection.get_selected()
-        return model.get_presentable(iter_)
+        if iter_ is None:
+            return None
+        else:
+            return model.get_presentable(iter_)
+
+    def _on_row_deleted(self, model, path):
+        """If the row deleted is selected, reset the selection."""
+        (model, iter_) = self.selection.get_selected()
+        if iter_ is None or model.get_path(iter_) is None:
+            self.selection.select_iter(model.iter_children(None))
 
     def _pixbuf_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""

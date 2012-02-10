@@ -48,9 +48,6 @@ class Application(Gtk.Application, LoggingMixin):
     _LOG_FILE = '{0}.log'.format(_NAME)
     """The logging file of the application."""
 
-    _CONFIG_FILE = '{0}.conf'.format(_NAME)
-    """The global configuration file of the application."""
-
     _DATA_FILE = '{}.db'.format(_NAME)
     """The global database file of the application."""
 
@@ -65,7 +62,7 @@ class Application(Gtk.Application, LoggingMixin):
         LoggingMixin.__init__(self)
 
         self._toplevel = None
-        self._config = None
+        self._settings = None
 
         self._init_action_group()
 
@@ -75,6 +72,13 @@ class Application(Gtk.Application, LoggingMixin):
         if self._toplevel is None:
             self._toplevel = Toplevel()
         return self._toplevel
+
+    @property
+    def settings(self):
+        """Get the GSettings object."""
+        if self._settings is None:
+            self._settings = Gio.Settings('com.kissuki.yaner')
+        return self._settings
 
     def _init_logging(self):
         """Set up basic config for logging."""
@@ -106,10 +110,7 @@ class Application(Gtk.Application, LoggingMixin):
 
             SQLBase.metadata.create_all(engine)
 
-            pool = Pool(name=_('My Computer'), host='localhost')
-
-            down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
-            Category(name=_('My Downloads'), directory=down_dir, pool=pool)
+            pool = Pool(name=_('My Computer'), host='localhost', is_local=True)
 
             docs_dir = os.environ.get('XDG_DOCUMENTS_DIR', os.path.expanduser('~'))
             Category(name=_('Documents'), directory=docs_dir, pool=pool)
@@ -133,6 +134,37 @@ class Application(Gtk.Application, LoggingMixin):
         action_group.insert(action)
         self.set_action_group(action_group)
 
+    def _init_first_start(self):
+        """If it's first start, ask for starting daemon on system startup."""
+        if self.settings.get_boolean('first-start'):
+            message = _("It seems it's the first time you run Yaner. "
+                        "Yaner requires a daemon to run background, which is "
+                        "highly recommended to be started on system startup.\n\n"
+                        "Do you want to run it on system startup?\n"
+                        "(Or run it everytime yourself: $ aria2c --enable-rpc)")
+            dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.QUESTION,
+                                       Gtk.ButtonsType.YES_NO, message,
+                                       title=_('Welcome to Yaner!'))
+            response = dialog.run()
+            dialog.destroy()
+
+            if response == Gtk.ResponseType.YES:
+                import subprocess
+                from yaner.utils.XDG import load_first_config, save_config_path
+
+                in_path = load_first_config('autostart/yaner-daemon.desktop')
+                out_path = os.path.join(save_config_path('autostart'),
+                                        'yaner-daemon.desktop')
+                if in_path != out_path:
+                    with open(in_path) as f_in, open(out_path, 'w') as f_out:
+                        lines = [line for line in f_in
+                                 if not line.startswith('Hidden')]
+                        f_out.writelines(lines)
+                    subprocess.Popen(['aria2c', '--enable-rpc'],
+                                     stdout=subprocess.PIPE)
+
+            self.settings.set_boolean('first-start', False)
+
     def on_cmdline(self, action, data):
         """When application started with command line arguments, open new
         task dialog.
@@ -154,6 +186,7 @@ class Application(Gtk.Application, LoggingMixin):
         show the toplevel window.
         """
         self._init_logging()
+        self._init_first_start()
         self._init_database()
         self.toplevel.set_application(self)
         self.toplevel.show_all()

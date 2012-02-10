@@ -1,8 +1,5 @@
 <ui>
     <toolbar>
-        <toolitem action='task_new_normal' />
-        <toolitem action='task_new_bt' />
-        <toolitem action='task_new_ml' />
         <separator />
         <toolitem action='task_start' />
         <toolitem action='task_pause' />
@@ -11,12 +8,19 @@
         <toolitem action='about' />
         <toolitem action='quit' />
     </toolbar>
-    <popup name='tray_popup'>
-        <menuitem action='toggle_hidden' />
-        <separator />
+    <popup name='task_new_popup'>
         <menuitem action='task_new_normal' />
         <menuitem action='task_new_bt' />
         <menuitem action='task_new_ml' />
+    </popup>
+    <popup name='tray_popup'>
+        <menuitem action='toggle_hidden' />
+        <separator />
+        <menu action='task_new_menu'>
+            <menuitem action='task_new_normal' />
+            <menuitem action='task_new_bt' />
+            <menuitem action='task_new_ml' />
+        </menu>
         <menuitem action='task_start_all' />
         <menuitem action='task_pause_all' />
         <separator />
@@ -33,6 +37,27 @@
     <popup name='dustbin_task_popup'>
         <menuitem action='task_restore' />
         <menuitem action='task_remove' />
+    </popup>
+    <popup name='pool_popup'>
+        <menuitem action='pool_add' />
+    </popup>
+    <popup name='queuing_popup'>
+        <menuitem action='task_start_all' />
+        <menuitem action='task_pause_all' />
+        <separator />
+        <menuitem action='pool_add' />
+        <menuitem action='pool_edit' />
+        <menuitem action='pool_remove' />
+        <separator />
+        <menuitem action='category_add' />
+    </popup>
+    <popup name='category_popup'>
+        <menuitem action='category_add' />
+        <menuitem action='category_edit' />
+        <menuitem action='category_remove' />
+    </popup>
+    <popup name='dustbin_popup'>
+        <menuitem action='dustbin_empty' />
     </popup>
 </ui>
 

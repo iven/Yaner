@@ -104,8 +104,7 @@ class Queuing(Presentable):
     @property
     def tasks(self):
         """Get the running tasks of the pool."""
-        return (task for task in self.pool.tasks if task.status not in \
-                {Task.STATUSES.TRASHED, Task.STATUSES.COMPLETE})
+        return (task for task in self.pool.tasks if task.in_queuing)
 
 class Category(SQLBase, Presentable):
     """
@@ -117,7 +116,8 @@ class Category(SQLBase, Presentable):
 
     _name_ = Column(Unicode)
     directory = Column(Unicode)
-    _tasks = relationship(Task, backref='category')
+
+    _tasks = relationship(Task, backref='category', cascade='all, delete-orphan')
     pool_id = Column(Integer, ForeignKey('pool.id'))
 
     def __init__(self, name, directory, pool):
@@ -152,7 +152,7 @@ class Category(SQLBase, Presentable):
 
     @hybrid_property
     def tasks(self):
-        return (task for task in self._tasks if task.status == Task.STATUSES.COMPLETE)
+        return (task for task in self._tasks if task.in_category)
 
 class Dustbin(Presentable):
     """
@@ -183,6 +183,5 @@ class Dustbin(Presentable):
     @property
     def tasks(self):
         """Get the removed tasks of the pool."""
-        return (task for task in self.pool.tasks \
-                if task.status == Task.STATUSES.TRASHED)
+        return (task for task in self.pool.tasks if task.in_dustbin)
 

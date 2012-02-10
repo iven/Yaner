@@ -33,11 +33,13 @@ from gi.repository import GObject
 from yaner import SQLSession
 from yaner import __version__, __author__
 from yaner.Pool import Pool
-from yaner.Presentable import Presentable
+from yaner.Presentable import Presentable, Category
 from yaner.ui.Dialogs import NormalTaskNewDialog, BTTaskNewDialog, MLTaskNewDialog
+from yaner.ui.Dialogs import CategoryBar, PoolBar
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.ui.Misc import load_ui_file
+from yaner.ui.Widgets import Box, VERTICAL
 from yaner.utils.Logging import LoggingMixin
 
 class Toplevel(Gtk.Window, LoggingMixin):
@@ -70,28 +72,38 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self._ui_manager = None
 
         self.set_default_size(650, 450)
+        self.set_default_icon_name('yaner')
 
         # The toplevel vbox
-        vbox = Gtk.VBox(False, 0)
+        vbox = Box(VERTICAL, 0)
         self.add(vbox)
 
+        # Toolbar
         toolbar = self.ui_manager.get_widget('/toolbar')
-        vbox.pack_start(toolbar, False, False, 0)
+        #toolbar.set_style(Gtk.ToolbarStyle.BOTH)
+        vbox.pack_start(toolbar, expand=False)
+
+        action = self._action_group.get_action('task_new')
+        menu_tool_button = Gtk.MenuToolButton()
+        menu_tool_button.set_menu(self.popups['task_new'])
+        menu_tool_button.set_related_action(action)
+        toolbar.insert(menu_tool_button, 0)
 
         # HPaned: PoolView as left, TaskVBox as right
         hpaned = Gtk.HPaned()
-        vbox.pack_start(hpaned, True, True, 0)
+        vbox.pack_start(hpaned)
 
         # Right pane
-        task_vbox = Gtk.VBox(False, 12)
-        hpaned.pack2(task_vbox, True, False)
+        vbox = Box(VERTICAL)
+        hpaned.pack2(vbox, True, False)
+        self.task_box = vbox
 
         self._task_list_model = TaskListModel()
 
         scrolled_window = Gtk.ScrolledWindow()
         scrolled_window.set_shadow_type(Gtk.ShadowType.IN)
         scrolled_window.set_size_request(400, -1)
-        task_vbox.pack_start(scrolled_window, True, True, 0)
+        vbox.pack_end(scrolled_window)
 
         task_list_view = TaskListView(self._task_list_model)
         task_list_view.set_show_expanders(False)
@@ -118,13 +130,14 @@ class Toplevel(Gtk.Window, LoggingMixin):
         pool_view.set_headers_visible(False)
         pool_view.set_show_expanders(False)
         pool_view.set_level_indentation(16)
+        pool_view.connect('button-press-event', self._on_pool_view_button_pressed)
         scrolled_window.add(pool_view)
 
         self._pool_view = pool_view
 
         pool_view.selection.set_mode(Gtk.SelectionMode.SINGLE)
         pool_view.selection.connect("changed",
-                                    self.on_pool_view_selection_changed)
+                                    self._on_pool_view_selection_changed)
 
         # Add Pools to the PoolModel
         for pool in SQLSession.query(Pool):
@@ -138,9 +151,11 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self._bt_task_new_dialog = None
         self._ml_task_new_dialog = None
         self._about_dialog = None
+        self._category_bar = None
+        self._pool_bar = None
 
         # Status icon
-        status_icon = Gtk.StatusIcon(stock='gtk-apply')
+        status_icon = Gtk.StatusIcon(icon_name='yaner')
         status_icon.connect('activate', self._on_status_icon_activated)
         status_icon.connect('popup-menu', self._on_status_icon_popup)
 
@@ -177,26 +192,45 @@ class Toplevel(Gtk.Window, LoggingMixin):
             # The actions used by L{action_group}. The members are:
             # name, stock-id, label, accelerator, tooltip, callback
             action_entries = (
-                ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None, None,
-                    self.on_normal_task_new),
-                ("task_new_bt", 'gtk-add', _("BitTorrent"), None, None,
-                    self.on_bt_task_new),
-                ("task_new_ml", 'gtk-add', _("Metalink"), None, None,
-                    self.on_ml_task_new),
-                ("task_start", 'gtk-media-play', _("Start"), None, None,
-                    self.on_task_start),
-                ("task_pause", 'gtk-media-pause', _("Pause"), None, None,
-                    self.on_task_pause),
-                ("task_start_all", 'gtk-media-play', _("Start All"), None, None,
-                    self.on_task_start_all),
-                ("task_pause_all", 'gtk-media-pause', _("Pause All"), None, None,
-                    self.on_task_pause_all),
-                ("task_remove", 'gtk-delete', _("Remove"), None, None,
-                    self.on_task_remove),
-                ("task_restore", 'gtk-undelete', _("Restore"), None, None,
-                    self.on_task_restore),
-                ("toggle_hidden", None, _("Show / Hide"), None, None,
-                    self._on_toggle_hidden),
+                ("task_new", 'gtk-new', None, None,
+                 None, self._on_normal_task_new),
+                ("task_new_menu", 'gtk-new'),
+                ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None,
+                 None, self._on_normal_task_new),
+                ("task_new_bt", 'gtk-add', _("BitTorrent"), None,
+                 None, self._on_bt_task_new),
+                ("task_new_ml", 'gtk-add', _("Metalink"), None,
+                 None, self._on_ml_task_new),
+                ("task_start", 'gtk-media-play', _("Start"), None,
+                 None, self._on_task_start),
+                ("task_pause", 'gtk-media-pause', _("Pause"), None,
+                 None, self._on_task_pause),
+                ("task_start_all", 'gtk-media-play', _("Start All"), None,
+                 None, self._on_task_start_all),
+                ("task_pause_all", 'gtk-media-pause', _("Pause All"), None,
+                 None, self._on_task_pause_all),
+                ("task_remove", 'gtk-delete', None, None,
+                 None, self._on_task_remove),
+                ("task_restore", 'gtk-undelete', None, None,
+                 None, self._on_task_restore),
+
+                ('category_add', 'gtk-add', _('Add Category'), None,
+                 None, self._on_category_add),
+                ('category_edit', 'gtk-edit', _('Edit Category'), None,
+                 None, self._on_category_edit),
+                ('category_remove', 'gtk-delete', _('Remove Category'), None,
+                 None, self._on_category_remove),
+                ('pool_add', 'gtk-add', _('Add Server'), None,
+                 None, self._on_pool_add),
+                ('pool_edit', 'gtk-edit', _('Edit Server'), None,
+                 None, self._on_pool_edit),
+                ('pool_remove', 'gtk-delete', _('Remove Server'), None,
+                 None, self._on_pool_remove),
+                ('dustbin_empty', 'gtk-delete', _('Empty Dustbin'), None,
+                 None, self._on_dustbin_empty),
+
+                ("toggle_hidden", None, _("Show / Hide"), None,
+                 None, self._on_toggle_hidden),
                 ("about", "gtk-about", None, None, None, self.about),
                 ("quit", "gtk-quit", None, None, None, self.destroy),
             )
@@ -216,8 +250,9 @@ class Toplevel(Gtk.Window, LoggingMixin):
             self.logger.info(_('Initializing popup menus...'))
             get_widget = self.ui_manager.get_widget
             popups = {}
-            for popup_name in ('tray', 'queuing_task', 'category_task',
-                               'dustbin_task'):
+            for popup_name in ('tray', 'task_new', 'pool',
+                               'queuing', 'category', 'dustbin',
+                               'queuing_task', 'category_task', 'dustbin_task'):
                 popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
             self._popups = popups
             self.logger.info(_('Popup menus initialized.'))
@@ -256,12 +291,34 @@ class Toplevel(Gtk.Window, LoggingMixin):
             about_dialog = Gtk.AboutDialog()
             about_dialog.set_program_name(_('Yaner'))
             about_dialog.set_version(__version__)
+            about_dialog.set_logo_icon_name('yaner')
             about_dialog.set_authors((__author__,))
             about_dialog.set_website('https://github.com/iven/Yaner')
             about_dialog.set_copyright('Copyright \u00a9 2010-2011 Iven Hsu')
             about_dialog.set_transient_for(self)
             self._about_dialog = about_dialog
         return self._about_dialog
+
+    @property
+    def category_bar(self):
+        """The info bar for adding or editing categories."""
+        if self._category_bar is None:
+            category_bar = CategoryBar(self._pool_view.selected_presentable.pool,
+                                       self)
+            category_bar.connect('response', self._on_category_bar_response)
+            self.task_box.pack_end(category_bar, expand=False)
+            self._category_bar = category_bar
+        return self._category_bar
+
+    @property
+    def pool_bar(self):
+        """The info bar for adding or editing pools."""
+        if self._pool_bar is None:
+            pool_bar = PoolBar()
+            pool_bar.connect('response', self._on_pool_bar_response)
+            self.task_box.pack_end(pool_bar, expand=False)
+            self._pool_bar = pool_bar
+        return self._pool_bar
 
     def _on_status_icon_activated(self, status_icon):
         """When status icon clicked, switch the window visible or hidden."""
@@ -273,7 +330,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self.logger.debug(_('Status icon menu popuped.'))
         self.popups['tray'].popup(None, None, None, None, button, activate_time)
 
-    def _on_toggle_hidden(self, action, user_data):
+    def _on_toggle_hidden(self, action, data):
         """Toggle the toplevel window shown or hidden."""
         if self.get_property('visible'):
             self.hide()
@@ -295,14 +352,15 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
     def _on_task_list_view_button_pressed(self, treeview, event):
         """Popup menu when necessary."""
-        # If the clicked row is not selected, select it only
         selection = treeview.get_selection()
         (model, paths) = selection.get_selected_rows()
         current_path = treeview.get_path_at_pos(event.x, event.y)
         if current_path is None:
             selection.unselect_all()
+            return True
 
         if event.button == 3:
+            # If the clicked row is not selected, select it only
             if current_path is not None and current_path[0] not in paths:
                 selection.unselect_all()
                 selection.select_path(current_path[0])
@@ -316,48 +374,86 @@ class Toplevel(Gtk.Window, LoggingMixin):
             return True
         return False
 
-    def on_pool_view_selection_changed(self, selection):
+    def _on_pool_view_button_pressed(self, treeview, event):
+        """Popup menu when necessary."""
+        selection = treeview.get_selection()
+        (model, iter_) = selection.get_selected()
+        current_path = treeview.get_path_at_pos(event.x, event.y)
+        if current_path is None:
+            self.popups['pool'].popup(None, None, None, None,
+                                      event.button, event.time)
+            return True
+
+        if event.button == 3:
+            # If the clicked row is not selected, select it only
+            if current_path[0] != model.get_path(iter_):
+                selection.select_path(current_path[0])
+
+            popup_dict = {Presentable.TYPES.QUEUING: 'queuing',
+                          Presentable.TYPES.CATEGORY: 'category',
+                          Presentable.TYPES.DUSTBIN: 'dustbin',
+                         }
+            popup_menu = self.popups[popup_dict[treeview.selected_presentable.TYPE]]
+            popup_menu.popup(None, None, None, None, event.button, event.time)
+            return True
+        return False
+
+    def _on_pool_view_selection_changed(self, selection):
         """
         Pool view tree selection changed signal callback.
         Update the task list model.
         """
-        self._task_list_model.presentable = self._pool_view.selected_presentable
+        presentable = self._pool_view.selected_presentable
+        if presentable is not None:
+            self._task_list_model.presentable = presentable
 
-    def on_normal_task_new(self, action, data):
+    def _on_normal_task_new(self, action, data):
         """When normal task new action is activated, call the task new dialog."""
         self.normal_task_new_dialog.run()
 
-    def on_bt_task_new(self, action, data):
+    def _on_bt_task_new(self, action, data):
         """When bt task new action is activated, call the task new dialog."""
         self.bt_task_new_dialog.run()
 
-    def on_ml_task_new(self, action, data):
+    def _on_ml_task_new(self, action, data):
         """When ml task new action is activated, call the task new dialog."""
         self.ml_task_new_dialog.run()
 
-    def on_task_start(self, action, user_data):
+    def _on_task_start(self, action, data):
         """When task start button clicked, start or unpause the task."""
         for task in self._task_list_view.selected_tasks:
             task.start()
 
-    def on_task_pause(self, action, user_data):
+    def _on_task_pause(self, action, data):
         """When task pause button clicked, pause the task."""
         for task in self._task_list_view.selected_tasks:
             task.pause()
 
-    def on_task_start_all(self, action, user_data):
-        """Start or unpause all the tasks."""
-        for pool in SQLSession.query(Pool):
+    def _on_task_start_all(self, action, data):
+        """Start or unpause all the tasks in the selected pool."""
+        presentable = self._pool_view.selected_presentable
+        if presentable is None or presentable.TYPE != Presentable.TYPES.QUEUING:
+            pools = SQLSession.query(Pool)
+        else:
+            pools = [presentable.pool]
+
+        for pool in pools:
             for task in pool.queuing.tasks:
                 task.start()
 
-    def on_task_pause_all(self, action, user_data):
-        """Pause all the tasks."""
-        for pool in SQLSession.query(Pool):
+    def _on_task_pause_all(self, action, data):
+        """Pause all the tasks in the selected pool."""
+        presentable = self._pool_view.selected_presentable
+        if presentable is None or presentable.TYPE != Presentable.TYPES.QUEUING:
+            pools = SQLSession.query(Pool)
+        else:
+            pools = [presentable.pool]
+
+        for pool in pools:
             for task in pool.queuing.tasks:
                 task.pause()
 
-    def on_task_remove(self, action, user_data):
+    def _on_task_remove(self, action, data):
         """When task remove button clicked, remove the task."""
         tasks = self._task_list_view.selected_tasks
         if not tasks:
@@ -378,10 +474,165 @@ class Toplevel(Gtk.Window, LoggingMixin):
             for task in tasks:
                 task.trash()
 
-    def on_task_restore(self, action, user_data):
+    def _on_task_restore(self, action, data):
         """When task is removed, restore the task."""
         for task in self._task_list_view.selected_tasks:
             task.restore()
+
+    def _on_dustbin_empty(self, action, data):
+        """Empty dustbin."""
+        if self._pool_view.selected_presentable.TYPE == Presentable.TYPES.DUSTBIN:
+            self._task_list_view.get_selection().select_all()
+            self.action_group.get_action('task_remove').activate()
+
+    def _on_category_add(self, action, data):
+        """Add category."""
+        presentable = self._pool_view.selected_presentable
+        self.category_bar.update(presentable.pool)
+        self.category_bar.show_all()
+
+    def _on_category_edit(self, action, data):
+        """Edit category."""
+        presentable = self._pool_view.selected_presentable
+        self.category_bar.update(presentable.pool, presentable)
+        self.category_bar.show_all()
+
+    def _on_category_remove(self, action, data):
+        """Remove category."""
+        category = self._pool_view.selected_presentable
+        pool = category.pool
+        if category is pool.default_category:
+            dialog = Gtk.MessageDialog(
+                self, Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.CLOSE,
+                _('The default category should not be removed.'),
+                )
+        else:
+            dialog = Gtk.MessageDialog(
+                self, Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.WARNING,
+                Gtk.ButtonsType.YES_NO,
+                _('Are you sure to remove the category "{}"?\nAll tasks '
+                  'in the category will be moved to the default category.'
+                 ).format(category.name),
+                )
+        response = dialog.run()
+        dialog.destroy()
+        if response == Gtk.ResponseType.YES:
+            # Move all tasks to default category
+            for task in category.tasks:
+                task.category = pool.default_category
+                pool.default_category.add_task(task)
+            # Remove the category iter
+            self._pool_model.remove_presentable(category)
+            SQLSession.delete(category)
+            SQLSession.commit()
+
+    def _on_category_bar_response(self, info_bar, response_id):
+        """When category_bar responsed, create or edit category."""
+        if response_id != Gtk.ResponseType.OK:
+            info_bar.hide()
+            return
+
+        category = info_bar.category
+        pool = info_bar.pool
+        widgets = info_bar.widgets
+
+        name = widgets['name'].get_text().strip()
+        directory = widgets['directory'].get_text().strip()
+
+        if not name:
+            widgets['name'].set_placeholder_text(_('Required'))
+            return
+        if not directory:
+            widgets['directory'].set_placeholder_text(_('Required'))
+            return
+
+        if category is None:
+            category = Category(name=name, directory=directory, pool=pool)
+            self._pool_model.add_presentable(category, insert=True)
+        else:
+            category.name=name
+            category.directory=directory
+            SQLSession.commit()
+        info_bar.hide()
+
+    def _on_pool_add(self, action, data):
+        """Add pool."""
+        self.pool_bar.update(None)
+        self.pool_bar.show_all()
+
+    def _on_pool_edit(self, action, data):
+        """Edit pool."""
+        presentable = self._pool_view.selected_presentable
+        self.pool_bar.update(presentable.pool)
+        self.pool_bar.show_all()
+
+    def _on_pool_remove(self, action, data):
+        """Remove pool."""
+        queuing = self._pool_view.selected_presentable
+        pool = queuing.pool
+        if pool.is_local:
+            dialog = Gtk.MessageDialog(
+                self, Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.CLOSE,
+                _('The local server should not be removed.'),
+                )
+        else:
+            dialog = Gtk.MessageDialog(
+                self, Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.WARNING,
+                Gtk.ButtonsType.YES_NO,
+                _('Are you sure to remove the server "{}"?\nAll tasks '
+                  'in the server will be <b>removed!</b>'
+                 ).format(pool.name),
+                use_markup=True
+                )
+        response = dialog.run()
+        dialog.destroy()
+        if response == Gtk.ResponseType.YES:
+            # Select the local pool, in order to remove the selected pool
+            local_pool = SQLSession.query(Pool).filter(Pool.is_local == True)[0]
+            iter_ = self._pool_model.get_iter_for_presentable(local_pool.queuing)
+            self._pool_view.selection.select_iter(iter_)
+            # Remove the category iter
+            self._pool_model.remove_pool(pool)
+            SQLSession.delete(pool)
+            SQLSession.commit()
+
+    def _on_pool_bar_response(self, info_bar, response_id):
+        """When pool bar responsed, create or edit pool."""
+        if response_id != Gtk.ResponseType.OK:
+            info_bar.hide()
+            return
+
+        pool = info_bar.pool
+        widgets = info_bar.widgets
+        props = {}
+
+        for (prop, widget) in widgets.items():
+            props[prop] = widget.get_text().strip()
+
+        for prop in ('name', 'host', 'port'):
+            if not props[prop]:
+                widgets[prop].set_placeholder_text(_('Required'))
+                return
+
+        if pool is None:
+            pool = Pool(**props)
+            self._pool_model.add_pool(pool)
+            self._pool_view.expand_all()
+        else:
+            pool.name = props['name']
+            pool.host = props['host']
+            pool.port = props['port']
+            pool.user = props['user']
+            pool.passwd = props['passwd']
+            SQLSession.commit()
+
+        info_bar.hide()
 
     def about(self, *args, **kwargs):
         """Show about dialog."""
