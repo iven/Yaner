@@ -141,7 +141,8 @@ class Application(Gtk.Application, LoggingMixin):
                         "Yaner requires a daemon to run background, which is "
                         "highly recommended to be started on system startup.\n\n"
                         "Do you want to run it on system startup?\n"
-                        "(Or run it everytime yourself: $ aria2c --enable-rpc)")
+                        "(Or run it everytime yourself: "
+                        "$ aria2c --enable-rpc --allow-overwrite)")
             dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.QUESTION,
                                        Gtk.ButtonsType.YES_NO, message,
                                        title=_('Welcome to Yaner!'))
@@ -160,7 +161,7 @@ class Application(Gtk.Application, LoggingMixin):
                         lines = [line for line in f_in
                                  if not line.startswith('Hidden')]
                         f_out.writelines(lines)
-                    subprocess.Popen(['aria2c', '--enable-rpc'],
+                    subprocess.Popen(['aria2c', '--enable-rpc', '--allow-overwrite'],
                                      stdout=subprocess.PIPE)
 
             self.settings.set_boolean('first-start', False)
