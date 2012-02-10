@@ -1,8 +1,10 @@
-0.4.0
-=====
+0.4.0   <2012-02-10>
+====================
 
  * Added a simple dialog to ask user to start yaner daemon on startup.
  * Added Pool, Category related UI.
+ * Added application icon.
+ * Added follow-torrent and follow-metalink support.
  * UI ajustments.
 
 0.3.1   <2011-12-25>
