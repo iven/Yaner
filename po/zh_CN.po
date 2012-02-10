@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: yaner 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-02-10 10:39+0800\n"
+"POT-Creation-Date: 2012-02-10 12:12+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -59,30 +59,30 @@ msgid ""
 "background, which is highly recommended to be started on system startup.\n"
 "\n"
 "Do you want to run it on system startup?\n"
-"(Or run it everytime yourself: $ aria2c --enable-rpc)"
+"(Or run it everytime yourself: $ aria2c --enable-rpc --allow-overwrite)"
 msgstr ""
 "似乎掩耳第一次运行。掩耳需要在后台运行一个守护程序，推荐让其开机启动。\n"
 "\n"
 "是否希望其开机启动？\n"
-"（否则必须每次手动启动它： $aria2c --enable-rpc）"
+"（否则必须每次手动启动它： $aria2c --enable-rpc --allow-overwrite）"
 
-#: scripts/../yaner/Application.py:147
+#: scripts/../yaner/Application.py:148
 msgid "Welcome to Yaner!"
 msgstr "欢迎来到掩耳！"
 
-#: scripts/../yaner/Application.py:173
+#: scripts/../yaner/Application.py:174
 msgid "Received task options from command line arguments."
 msgstr "从命令行接收到人物选项。"
 
-#: scripts/../yaner/Application.py:181
+#: scripts/../yaner/Application.py:182
 msgid "Activating toplevel window..."
 msgstr "激活主窗口中……"
 
-#: scripts/../yaner/Application.py:196
+#: scripts/../yaner/Application.py:197
 msgid "Shutting down database..."
 msgstr "关闭数据库中……"
 
-#: scripts/../yaner/Application.py:200
+#: scripts/../yaner/Application.py:201
 msgid "Application quit normally."
 msgstr "程序正常退出。"
 
