@@ -1,3 +1,8 @@
+0.4.1   <2012-02-10>
+====================
+
+ * Always use --allow-overwrite, so that follow-torrent and follow-metalink works.
+
 0.4.0   <2012-02-10>
 ====================
 
