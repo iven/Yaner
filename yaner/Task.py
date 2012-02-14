@@ -51,9 +51,6 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     _UPDATE_INTERVAL = 1
     """Interval for status updating, in second(s)."""
 
-    _SYNC_INTERVAL = 60
-    """Interval for database sync, in second(s)."""
-
     _DEFAULT_STATUS = {
         'completedLength': '0',
         'totalLength': '0',
@@ -284,8 +281,6 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
             self.logger.info(_('{}: begin updating status.').format(self))
             self._status_update_handle = GLib.timeout_add_seconds(
                     self._UPDATE_INTERVAL, self._call_tell_status)
-            self._database_sync_handle = GLib.timeout_add_seconds(
-                    self._SYNC_INTERVAL, SQLSession.commit)
 
     def end_update_status(self):
         """Stop updating status every second."""
@@ -293,9 +288,6 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
             self.logger.info(_('{}: end updating status.').format(self))
             GLib.source_remove(self._status_update_handle)
             self._status_update_handle = None
-        if self._database_sync_handle:
-            GLib.source_remove(self._database_sync_handle)
-            self._database_sync_handle = None
 
     def _update_session_id(self):
         """Get session id of the pool and store it in task."""
