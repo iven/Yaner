@@ -101,7 +101,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         dir_entry = FileChooserEntry(_('Select download directory'), self,
                                      Gtk.FileChooserAction.SELECT_FOLDER)
         hbox.pack_start(dir_entry)
-        self.bind('dir', dir_entry, 'text')
+        self.bind('dir', dir_entry, 'text', bind_settings=False)
 
         # Connect signal and select the first pool
         category_cb.connect('changed', self._on_category_cb_changed, dir_entry)
@@ -141,8 +141,10 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     def _category_visible_func(self, model, iter_, data):
         """Show categorys of the selected pool in the combobox."""
         presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
-        return presentable.TYPE in (Presentable.TYPES.CATEGORY,
-                                    Presentable.TYPES.QUEUING)
+        return (presentable is not None and 
+                presentable.TYPE in (Presentable.TYPES.CATEGORY,
+                                     Presentable.TYPES.QUEUING)
+               )
 
     def _on_category_cb_changed(self, category_cb, dir_entry):
         """When category combobox changed, update the directory entry."""
@@ -167,7 +169,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         """Bind property to settings and task options."""
 
         def property_changed(widget, property_spec=None):
-            """When widget changed, add new value to the task opti)ns."""
+            """When widget changed, add new value to the task options."""
             value = widget.get_property(property)
             self.task_options[name] = value
             self.logger.debug(_('Property changed: {} {}').format(name, value))

@@ -242,25 +242,11 @@
                 Set FTP password. This affects all URIs. If user name is embedded but password is missing in URI, aria2 tries to resolve password using .netrc. If password is found in .netrc, then use it as password. If not, use the password specified in this option. Default: YanerUser@
             </description>
         </key>
-        <key type='s' name='dir'>
-            <default>''</default>
-            <summary>Directory</summary>
-            <description>
-                The directory to store the downloaded file.
-            </description>
-        </key>
         <key type='s' name='referer'>
             <default>''</default>
             <summary>Referer</summary>
             <description>
                 Set Referer. This affects all URIs.
-            </description>
-        </key>
-        <key type='s' name='out'>
-            <default>''</default>
-            <summary>Output filename</summary>
-            <description>
-                The file name of the downloaded file.
             </description>
         </key>
     </schema>
