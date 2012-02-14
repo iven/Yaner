@@ -51,6 +51,9 @@ class Application(Gtk.Application, LoggingMixin):
     _DATA_FILE = '{}.db'.format(_NAME)
     """The global database file of the application."""
 
+    _SYNC_INTERVAL = 60
+    """Interval for database sync, in second(s)."""
+
     def __init__(self):
         """
         The init methed of L{Application} class.
@@ -122,6 +125,9 @@ class Application(Gtk.Application, LoggingMixin):
             Category(name=_('Music'), directory=music_dir, pool=pool)
 
             self.logger.info(_('Database initialized.'))
+
+        # Auto commit to database
+        GLib.timeout_add_seconds(self._SYNC_INTERVAL, SQLSession.commit)
 
         self.logger.info(_('Global database file connected.'))
 
