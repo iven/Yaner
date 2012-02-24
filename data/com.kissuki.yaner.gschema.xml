@@ -2,6 +2,7 @@
 <schemalist>
     <schema id='com.kissuki.yaner' path='/com/kissuki/yaner/'>
         <child schema='com.kissuki.yaner.task' name='task' />
+        <child schema='com.kissuki.yaner.global' name='global' />
         <key type='b' name='first-start'>
             <default>true</default>
             <summary>First start</summary>
@@ -10,33 +11,35 @@
             </description>
         </key>
     </schema>
-    <schema id='com.kissuki.yaner.task' path='/com/kissuki/yaner/task/'>
+    <schema id='com.kissuki.yaner.global' path='/com/kissuki/yaner/global/'>
         <key type='u' name='max-concurrent-downloads'>
             <default>5</default>
             <summary>Max concurrent downloads</summary>
             <description>
-                Set maximum number of parallel downloads for every static (HTTP/FTP) URI, torrent and metalink. Default: 5
+                Set maximum number of parallel downloads for every static (HTTP/FTP) URI, torrent and metalink.
             </description>
         </key>
+        <key type='u' name='max-overall-download-limit'>
+            <default>0</default>
+            <summary>Max overall download speed</summary>
+            <description>
+                Set max overall download speed in bytes/sec. 0 means unrestricted.
+            </description>
+        </key>
+        <key type='u' name='max-overall-upload-limit'>
+            <default>0</default>
+            <summary>Max overall upload speed</summary>
+            <description>
+                Set max overall upload speed in bytes/sec. 0 means unrestricted.
+            </description>
+        </key>
+    </schema>
+    <schema id='com.kissuki.yaner.task' path='/com/kissuki/yaner/task/'>
         <key type='u' name='max-connection-per-server'>
             <default>1</default>
             <summary>Max connection per server</summary>
             <description>
-                The maximum number of connections to one server for each download. Default: 1
-            </description>
-        </key>
-        <key type='s' name='max-overall-download-limit'>
-            <default>'0'</default>
-            <summary>Max overall download speed</summary>
-            <description>
-                Set max overall download speed in bytes/sec. You can append K or M(1K = 1024, 1M = 1024K). 0 means unrestricted. Default: 0
-            </description>
-        </key>
-        <key type='s' name='max-overall-upload-limit'>
-            <default>'0'</default>
-            <summary>Max overall upload speed</summary>
-            <description>
-                Set max overall upload speed in bytes/sec. You can append K or M(1K = 1024, 1M = 1024K). 0 means unrestricted. Default: 0
+                The maximum number of connections to one server for each download.
             </description>
         </key>
         <key type='s' name='all-proxy'>
@@ -46,123 +49,81 @@
                 Use this proxy server for all protocols. To erase previously defined proxy, use "". You can override this setting and specify a proxy server for a particular protocol using http-proxy, https-proxy and ftp-proxy options. This affects all URIs. The format of PROXY is [http://][USER:PASSWORD@]HOST[:PORT].
             </description>
         </key>
-        <key type='s' name='http-proxy'>
-            <default>''</default>
-            <summary>Proxy for HTTP</summary>
-            <description>
-                Use this proxy server for HTTP. To erase previously defined proxy, use "". This affects all URIs. The format of PROXY is [http://][USER:PASSWORD@]HOST[:PORT]
-            </description>
-        </key>
-        <key type='s' name='https-proxy'>
-            <default>''</default>
-            <summary>Proxy for HTTPS</summary>
-            <description>
-                Use this proxy server for HTTPS. To erase previously defined proxy, use "". This affects all URIs. The format of PROXY is [http://][USER:PASSWORD@]HOST[:PORT]
-            </description>
-        </key>
-        <key type='s' name='ftp-proxy'>
-            <default>''</default>
-            <summary>Proxy for FTP</summary>
-            <description>
-                Use this proxy server for FTP. To erase previously defined proxy, use "". This affects all URIs. The format of PROXY is [http://][USER:PASSWORD@]HOST[:PORT]
-            </description>
-        </key>
         <key type='u' name='connect-timeout'>
             <default>60</default>
             <summary>Connect timeout</summary>
             <description>
-                Set the connect timeout in seconds to establish connection to HTTP/FTP/proxy server. After the connection is established, this option makes no effect and timeout option is used instead. Default: 60
+                Set the connect timeout in seconds to establish connection to HTTP/FTP/proxy server. After the connection is established, this option makes no effect and timeout option is used instead.
             </description>
         </key>
         <key type='u' name='timeout'>
             <default>60</default>
             <summary>Timeout</summary>
             <description>
-                Set timeout in seconds. Default: 60
-            </description>
-        </key>
-        <key type='u' name='max-file-not-found'>
-            <default>0</default>
-            <summary>Max file not found</summary>
-            <description>
-                If aria2 receives ‘file not found’ status from the remote HTTP/FTP servers NUM times without getting a single byte, then force the download to fail. Specify 0 to disable this option. This options is effective only when using HTTP/FTP servers. Default: 0
+                Set timeout in seconds.
             </description>
         </key>
         <key type='u' name='split'>
             <default>5</default>
             <summary>Max tries</summary>
             <description>
-                Download a file using N connections. If more than N URIs are given, first N URIs are used and remaining URIs are used for backup. If less than N URIs are given, those URIs are used more than once so that N connections total are made simultaneously. The number of connections to the same host is restricted by max-connection-per-server option. Please see min-split-size option too. Please note that in Metalink download, this option has no effect and use -C option instead. Default: 5
+                Download a file using N connections. If more than N URIs are given, first N URIs are used and remaining URIs are used for backup. If less than N URIs are given, those URIs are used more than once so that N connections total are made simultaneously. The number of connections to the same host is restricted by max-connection-per-server option. Please see min-split-size option too. Please note that in Metalink download, this option has no effect and use -C option instead.
             </description>
         </key>
-        <key type='s' name='min-split-size'>
-            <default>'20M'</default>
+        <key type='u' name='min-split-size'>
+            <default>20000</default>
             <summary>Min split size</summary>
             <description>
-                aria2 does not split less than 2*SIZE byte range. For example, let’s consider downloading 20MiB file. If SIZE is 10M, aria2 can split file into 2 range [0-10MiB) and [10MiB-20MiB) and download it using 2 sources(if split >= 2, of course). If SIZE is 15M, since 2*15M > 20MiB, aria2 does not split file and download it using 1 source. You can append K or M(1K = 1024, 1M = 1024K). Possible Values: 1M-1024M Default: 20M]]
+                Yaner does not split less than 2*SIZE byte range. For example, let’s consider downloading 20MiB file. If SIZE is 10M, Yaner can split file into 2 range [0-10MiB) and [10MiB-20MiB) and download it using 2 sources(if split >= 2, of course). If SIZE is 15M, since 2*15M > 20MiB, Yaner does not split file and download it using 1 source. You can append K or M(1K = 1024, 1M = 1024K). Possible Values: 1M-1024M
             </description>
         </key>
         <key type='b' name='auto-file-renaming'>
-            <default>true</default>
+            <default>false</default>
             <summary>Auto file renaming</summary>
             <description>
-                Rename file name if the same file already exists. This option works only in HTTP(S)/FTP download. The new file name has a dot and a number(1..9999) appended. Default: true
-            </description>
-        </key>
-        <key type='b' name='follow-torrent'>
-            <default>true</default>
-            <summary>Follow torrent</summary>
-            <description>
-                If true is specified, when a file whose suffix is ".torrent" or content type is "application/x-bittorrent" is downloaded, aria2 parses it as a torrent file and downloads files mentioned in it. If false is specified, the action mentioned above is not taken. Default: true
-            </description>
-        </key>
-        <key type='b' name='follow-metalink'>
-            <default>true</default>
-            <summary>Follow metalink</summary>
-            <description>
-                If true is specified, when a file whose suffix is ".meta4" or ".metalink" or content type of "application/metalink4+xml" or "application/metalink+xml" is downloaded, aria2 parses it as a metalink file and downloads files mentioned in it. If false is specified, the action mentioned above is not taken. Default: true
+                Rename file name if the same file already exists. This option works only in HTTP(S)/FTP download. The new file name has a dot and a number(1..9999) appended.
             </description>
         </key>
         <key type='u' name='seed-time'>
             <default>120</default>
             <summary>Seed time</summary>
             <description>
-                Specify seeding time in minutes. Also see the seed-ratio option. Specifying seed-time=0 disables seeding after download completed. Default: 120
+                Specify seeding time in minutes. Also see the seed-ratio option. Specifying seed-time=0 disables seeding after download completed.
             </description>
         </key>
         <key type='d' name='seed-ratio'>
             <default>1.0</default>
             <summary>Seed ratio</summary>
             <description>
-                Specify share ratio. Seed completed torrents until share ratio reaches RATIO. You are strongly encouraged to specify equals or more than 1.0 here. Specify 0.0 if you intend to do seeding regardless of share ratio. If --seed-time option is specified along with this option, seeding ends when at least one of the conditions is satisfied. Default: 1.0
+                Specify share ratio. Seed completed torrents until share ratio reaches RATIO. You are strongly encouraged to specify equals or more than 1.0 here. Specify 0.0 if you intend to do seeding regardless of share ratio. If --seed-time option is specified along with this option, seeding ends when at least one of the conditions is satisfied.
             </description>
         </key>
         <key type='u' name='bt-max-open-files'>
             <default>100</default>
             <summary>Max open files in BT</summary>
             <description>
-                Specify maximum number of files to open in each BitTorrent download. Default: 100
+                Specify maximum number of files to open in each BitTorrent download.
             </description>
         </key>
         <key type='u' name='bt-max-peers'>
             <default>55</default>
             <summary>Max peers in BT</summary>
             <description>
-                 Specify the maximum number of peers per torrent.  0 means unlimited. Default: 55
+                 Specify the maximum number of peers per torrent.  0 means unlimited.
             </description>
         </key>
         <key type='u' name='bt-tracker-connect-timeout'>
             <default>60</default>
             <summary>BT tracker connect timeout</summary>
             <description>
-                Set the connect timeout in seconds to establish connection to tracker. After the connection is established, this option makes no effect and bt-tracker-timeout option is used instead. Default: 60
+                Set the connect timeout in seconds to establish connection to tracker. After the connection is established, this option makes no effect and bt-tracker-timeout option is used instead.
             </description>
         </key>
         <key type='u' name='bt-tracker-timeout'>
             <default>60</default>
             <summary>BT tracker timeout</summary>
             <description>
-                Set timeout in seconds. Default: 60
+                Set timeout in seconds.
             </description>
         </key>
         <key type='s' name='bt-prioritize-piece'>
@@ -172,6 +133,7 @@
                 Try to download first and last pieces of each file first. This is useful for previewing files. The argument can contain 2 keywords: head and tail. To include both keywords, they must be separated by comma. These keywords can take one parameter, SIZE. For example, if head=SIZE is specified, pieces in the range of first SIZE bytes of each file get higher priority. tail=SIZE means the range of last SIZE bytes of each file. SIZE can include K or M(1K = 1024, 1M = 1024K). If SIZE is omitted, SIZE=1M is used.
             </description>
         </key>
+        <!--
         <key type='b' name='bt-prioritize'>
             <default>false</default>
             <summary>BT prioritize</summary>
@@ -179,13 +141,7 @@
                 Enable BT prioritize, wrapper of 'bt-prioritize-piece' for conveniece.
             </description>
         </key>
-        <key type='u' name='metalink-servers'>
-            <default>5</default>
-            <summary>Metalink servers</summary>
-            <description>
-                The number of servers to connect to simultaneously. Some Metalinks regulate the number of servers to connect. aria2 strictly respects them. This means that if Metalink defines the maxconnections attribute lower than NUM_SERVERS, then aria2 uses the value of maxconnections attribute instead of NUM_SERVERS. See also -s and -j options. Default: 5
-            </description>
-        </key>
+        -->
         <key type='s' name='metalink-language'>
             <default>''</default>
             <summary>Metalink language</summary>
@@ -232,14 +188,14 @@
             <default>'anonymous'</default>
             <summary>FTP user</summary>
             <description>
-                Set FTP user. This affects all URIs. Default: anonymous
+                Set FTP user. This affects all URIs.
             </description>
         </key>
         <key type='s' name='ftp-passwd'>
             <default>'YanerUser@'</default>
             <summary>FTP password</summary>
             <description>
-                Set FTP password. This affects all URIs. If user name is embedded but password is missing in URI, aria2 tries to resolve password using .netrc. If password is found in .netrc, then use it as password. If not, use the password specified in this option. Default: YanerUser@
+                Set FTP password. This affects all URIs. If user name is embedded but password is missing in URI, Yaner tries to resolve password using .netrc. If password is found in .netrc, then use it as password. If not, use the password specified in this option.
             </description>
         </key>
         <key type='s' name='referer'>
@@ -247,6 +203,62 @@
             <summary>Referer</summary>
             <description>
                 Set Referer. This affects all URIs.
+            </description>
+        </key>
+        <key type='b' name='allow-overwrite'>
+            <default>true</default>
+            <summary>Allow overwrite</summary>
+            <description>
+                Restart download from scratch if the corresponding control file doesn’t exist.
+            </description>
+        </key>
+        <key type='s' name='header'>
+            <default>''</default>
+            <summary>Header</summary>
+            <description>
+                Append HEADER to HTTP request header.
+            </description>
+        </key>
+        <key type='s' name='user-agent'>
+            <default>''</default>
+            <summary>User agent</summary>
+            <description>
+                Set user agent for HTTP(S) downloads.
+            </description>
+        </key>
+        <key type='u' name='max-download-limit'>
+            <default>0</default>
+            <summary>Max download limit</summary>
+            <description>
+                Set max download speed per each download in bytes/sec. 0 means unrestricted.
+            </description>
+        </key>
+        <key type='u' name='max-upload-limit'>
+            <default>0</default>
+            <summary>Max upload limit</summary>
+            <description>
+                Set max upload speed per each upload in bytes/sec. 0 means unrestricted.
+            </description>
+        </key>
+        <key type='u' name='max-tries'>
+            <default>5</default>
+            <summary>Max tries</summary>
+            <description>
+                Set number of tries. 0 means unlimited.
+            </description>
+        </key>
+        <key type='u' name='bt-tracker-interval'>
+            <default>0</default>
+            <summary>BT tracker interval</summary>
+            <description>
+                Set the interval in seconds between tracker requests. This completely overrides interval value and Yaner just uses this value and ignores the min interval and interval value in the response of tracker. If 0 is set, Yaner determines interval based on the response of tracker and the download progress.
+            </description>
+        </key>
+        <key type='b' name='retry-wait'>
+            <default>true</default>
+            <summary>Retry wait</summary>
+            <description>
+                Set the seconds to wait between retries. With SEC > 0, Yaner will retry download when the HTTP server returns 503 response.
             </description>
         </key>
     </schema>
