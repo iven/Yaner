@@ -111,12 +111,18 @@ class _SettingDirBox(Box, _SettingWidget):
         # Directory
         dir_entry = FileChooserEntry(_('Select download directory'), parent,
                                      Gtk.FileChooserAction.SELECT_FOLDER)
+        dir_entry.connect('response', self._update_directory_path, dir_entry)
         self.pack_start(dir_entry)
         self._dir_entry = dir_entry
 
         # Connect signal and select the first pool
         category_cb.connect('changed', self._on_category_cb_changed, dir_entry)
         category_cb.set_active(0)
+
+    def _update_directory_path(self, dialog, response_id, entry):
+        """When default directory choosed, update the entry text."""
+        if response_id == Gtk.ResponseType.ACCEPT:
+            entry.set_text(dialog.get_filename())
 
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""
@@ -256,11 +262,17 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                      truncate_multiline=True,
                                      width_chars=50,
                                     )
-
+            entry.connect('response', self._on_metafile_selected)
             content_box.pack_start(entry)
 
             self._default_content_box = content_box
         return self._default_content_box
+
+    def _on_metafile_selected(self, dialog, response_id):
+        """When meta file chooser dialog responsed, switch to torrent or metalink
+        mode."""
+        if response_id == Gtk.ResponseType.ACCEPT:
+            pass
 
     def run(self, options=None):
         """Popup new task dialog."""
@@ -635,6 +647,7 @@ class CategoryBar(Gtk.InfoBar):
 
         entry = FileChooserEntry(_('Select default directory'), parent,
                                  Gtk.FileChooserAction.SELECT_FOLDER)
+        entry.connect('response', self._update_directory_path, entry)
         table.attach_defaults(entry, 1, 2, 1, 2)
         widgets['directory'] = entry
 
@@ -644,6 +657,11 @@ class CategoryBar(Gtk.InfoBar):
         self.pool = pool
         self.category = None
         self.widgets = widgets
+
+    def _update_directory_path(self, dialog, response_id, entry):
+        """When default directory choosed, update the entry text."""
+        if response_id == Gtk.ResponseType.ACCEPT:
+            entry.set_text(dialog.get_filename())
 
     def update(self, pool, category=None):
         """Update the category bar using the given pool and category. If category

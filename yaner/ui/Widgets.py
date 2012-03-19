@@ -141,7 +141,12 @@ class FileChooserEntry(Gtk.Entry):
         """When icon activated, popup file chooser dialog."""
         if icon_pos == Gtk.EntryIconPosition.SECONDARY:
             dialog = self._file_chooser_dialog
-            if dialog.run() == Gtk.ResponseType.ACCEPT:
-                self.set_text(dialog.get_filename())
+            dialog.run()
             dialog.hide()
+
+    def connect(self, signal_name, *args, **kwargs):
+        if signal_name in ('response'):
+            self._file_chooser_dialog.connect(signal_name, *args, **kwargs)
+        else:
+            Gtk.Entry.connect(self, signal_name, *args, **kwargs)
 
