@@ -31,7 +31,6 @@ from gi.repository import Gtk
 from gi.repository import GLib
 from gi.repository import Gio
 from gi.repository import Pango
-from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner.Task import Task
 from yaner.Presentable import Presentable
@@ -41,53 +40,65 @@ from yaner.ui.Widgets import HORIZONTAL, VERTICAL
 from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
 
-class TaskNewDialog(Gtk.Dialog, LoggingMixin):
-    """Base class for all new task dialogs."""
-
-    settings = Gio.Settings('com.kissuki.yaner.task')
-    """GSettings instance for task configurations."""
-
-    def __init__(self, parent, pool_model):
-        Gtk.Dialog.__init__(self, title=_('New Task'), parent=parent,
-                            flags=(Gtk.DialogFlags.DESTROY_WITH_PARENT |
-                                   Gtk.DialogFlags.MODAL),
-                            buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                                     Gtk.STOCK_OK, Gtk.ResponseType.OK
-                                    )
-                           )
+class _SettingWidget(LoggingMixin):
+    """A widget for communicate with GSettings."""
+    def __init__(self, settings):
         LoggingMixin.__init__(self)
 
-        self.task_options = {}
+        self.settings = settings
 
-        ### Content Area
-        content_area = self.get_content_area()
+    def get(self):
+        """Get the task options to be used for aria2 from the widget status."""
+        return {}
 
-        vbox = Box(VERTICAL)
-        vbox.set_border_width(5)
-        content_area.add(vbox)
-        self.main_vbox = vbox
+    def set(self, options):
+        """Set the widget status according to the options provided."""
+        pass
 
-        ## Advanced
-        expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
-        vbox.pack_end(expander)
+    def load(self):
+        """Load settings from GSettings and set the value of the widget."""
+        pass
 
-        advanced_box = Box(VERTICAL)
-        expander.add(advanced_box)
-        self.advanced_box = advanced_box
+    def save(self):
+        """Save the value of the widget to GSettings."""
+        pass
 
-        ## Save to
-        expander = AlignedExpander(_('<b>Save to...</b>'))
-        vbox.pack_end(expander)
+class _SettingEntry(Gtk.Entry, _SettingWidget):
+    """An entry for communicate with GSettings."""
+    def __init__(self, settings, key):
+        Gtk.Entry.__init__(self)
+        _SettingWidget.__init__(self, settings)
 
-        # Category
-        hbox = Box(HORIZONTAL)
-        expander.add(hbox)
+        self._key = key
+
+    def get(self):
+        return {self._key: self.get_text()}
+
+    def set(self, options):
+        try:
+            self.set_text(options[self._key])
+        except KeyError:
+            pass
+
+    def load(self):
+        self.set_text(self.settings.get(self.key))
+
+    def save(self):
+        self.settings.set(self.key, self.get_text())
+
+class _SettingDirBox(Box, _SettingWidget):
+    """ComboBox and Entry for the directory option."""
+    def __init__(self, settings, pool_model, parent):
+        Box.__init__(self, HORIZONTAL)
+        _SettingWidget.__init__(self, settings)
+
+        self._active_category = None
 
         category_model = Gtk.TreeModelFilter(child_model=pool_model)
         category_model.set_visible_func(self._category_visible_func, None)
 
         category_cb = Gtk.ComboBox(model=category_model)
-        hbox.pack_start(category_cb)
+        self.pack_start(category_cb)
 
         renderer = Gtk.CellRendererPixbuf()
         category_cb.pack_start(renderer, False)
@@ -98,16 +109,14 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         category_cb.set_cell_data_func(renderer, self._markup_data_func, None)
 
         # Directory
-        dir_entry = FileChooserEntry(_('Select download directory'), self,
+        dir_entry = FileChooserEntry(_('Select download directory'), parent,
                                      Gtk.FileChooserAction.SELECT_FOLDER)
-        hbox.pack_start(dir_entry)
-        self.bind('dir', dir_entry, 'text', bind_settings=False)
+        self.pack_start(dir_entry)
+        self._dir_entry = dir_entry
 
         # Connect signal and select the first pool
         category_cb.connect('changed', self._on_category_cb_changed, dir_entry)
         category_cb.set_active(0)
-
-        content_area.show_all()
 
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""
@@ -159,27 +168,99 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         if presentable.TYPE == Presentable.TYPES.QUEUING:
             category_cb.set_active_iter(model.iter_children(iter_))
         else:
-            self.task_options['category'] = presentable
+            self._active_category = presentable
             dir_entry.set_text(presentable.directory)
             self.logger.debug(_('Category is changed to {}.').format(presentable))
 
-    def bind(self, name, widget, property,
-             bind_settings=True, bind_flags=BindFlags.GET,
-             bind_signal=True):
-        """Bind property to settings and task options."""
+    def get(self):
+        return {
+            'dir': self._dir_entry.get_text(),
+            'category': self._active_category,
+        }
 
-        def property_changed(widget, property_spec=None):
-            """When widget changed, add new value to the task options."""
-            value = widget.get_property(property)
-            self.task_options[name] = value
-            self.logger.debug(_('Property changed: {} {}').format(name, value))
+    def set(self, options):
+        try:
+            self._dir_entry.set_text(options[self._key])
+        except KeyError:
+            pass
 
-        if bind_settings:
-            self.settings.bind(name, widget, property, bind_flags)
-        if bind_signal:
-            signal_name = 'notify::{}'.format(property)
-            widget.connect(signal_name, property_changed)
-            widget.notify(property)
+class TaskNewDialog(Gtk.Dialog, LoggingMixin):
+    """Dialog for creating new tasks."""
+
+    settings = Gio.Settings('com.kissuki.yaner.task')
+    """GSettings instance for task configurations."""
+
+    def __init__(self, parent, pool_model):
+        """"""
+        Gtk.Dialog.__init__(self, title=_('New Task'), parent=parent,
+                            flags=(Gtk.DialogFlags.DESTROY_WITH_PARENT |
+                                   Gtk.DialogFlags.MODAL),
+                            buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                     Gtk.STOCK_OK, Gtk.ResponseType.OK
+                                    )
+                           )
+        LoggingMixin.__init__(self)
+
+        self.task_options = {}
+        self._default_content_box = None
+
+        ### Content Area
+        content_area = self.get_content_area()
+
+        vbox = Box(VERTICAL)
+        vbox.set_border_width(5)
+        content_area.add(vbox)
+        self.main_vbox = vbox
+
+        ## Advanced
+        expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
+        vbox.pack_end(expander)
+
+        advanced_box = Box(VERTICAL)
+        expander.add(advanced_box)
+        self.advanced_box = advanced_box
+
+        ## Save to
+        expander = AlignedExpander(_('<b>Save to...</b>'))
+        vbox.pack_end(expander)
+
+        dir_box = _SettingDirBox(self.settings, pool_model, self)
+        expander.add(dir_box)
+        
+        vbox.pack_end(self.default_content_box)
+
+        self.default_content_box.show_all()
+        vbox.show()
+        self.show()
+
+    @property
+    def default_content_box(self):
+        """Get the default content box."""
+        if self._default_content_box is None:
+            content_box = Box(HORIZONTAL)
+
+            label = LeftAlignedLabel(_('URI(s):'))
+            content_box.pack_start(label)
+
+            entry = FileChooserEntry(_('Select Torrent/Metalink Files'),
+                                     self,
+                                     Gtk.FileChooserAction.OPEN,
+                                     {
+                                         'name': _('Torrent/Metalink Files'),
+                                         'types':(
+                                             'application/x-bittorrent',
+                                             'application/metalink4+xml',
+                                             'application/metalink+xml',
+                                         ),
+                                     },
+                                     truncate_multiline=True,
+                                     width_chars=50,
+                                    )
+
+            content_box.pack_start(entry)
+
+            self._default_content_box = content_box
+        return self._default_content_box
 
     def run(self, options=None):
         """Popup new task dialog."""
@@ -593,8 +674,6 @@ class PoolBar(Gtk.InfoBar):
         table.attach_defaults(entry, 1, 2, 0, 1)
         widgets['name'] = entry
 
-        label = LeftAlignedLabel(_('IP Address:'))
-        table.attach_defaults(label, 0, 1, 1, 2)
 
         entry = Gtk.Entry()
         table.attach_defaults(entry, 1, 2, 1, 2)

@@ -116,8 +116,8 @@ class MetafileChooserButton(Gtk.FileChooserButton):
 class FileChooserEntry(Gtk.Entry):
     """An Entry with a activatable icon that popups FileChooserDialog."""
 
-    def __init__(self, title, parent, file_chooser_action, text=''):
-        Gtk.Entry.__init__(self, text=text)
+    def __init__(self, title, parent, file_chooser_action, mime_types=None, **kwargs):
+        Gtk.Entry.__init__(self, **kwargs)
 
         self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-directory')
         self.connect('icon-press', self._on_icon_press)
@@ -129,6 +129,13 @@ class FileChooserEntry(Gtk.Entry):
             )
         dialog.set_transient_for(parent)
         self._file_chooser_dialog = dialog
+
+        file_filter = Gtk.FileFilter()
+        if mime_types is not None:
+            file_filter.set_name(mime_types['name'])
+            for mime_type in mime_types['types']:
+                file_filter.add_mime_type(mime_type)
+        dialog.add_filter(file_filter)
 
     def _on_icon_press(self, entry, icon_pos, event):
         """When icon activated, popup file chooser dialog."""
