@@ -39,6 +39,7 @@ from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
 from yaner.ui.Widgets import HORIZONTAL, VERTICAL
 from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
+from yaner.utils.Enum import Enum
 
 class _SettingWidget(LoggingMixin):
     """A widget for communicate with GSettings."""
@@ -196,6 +197,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     settings = Gio.Settings('com.kissuki.yaner.task')
     """GSettings instance for task configurations."""
 
+    STATES = Enum(('DEFAULT', 'NORMAL', 'BT', 'ML'))
+
     def __init__(self, parent, pool_model):
         """"""
         Gtk.Dialog.__init__(self, title=_('New Task'), parent=parent,
@@ -207,8 +210,9 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                            )
         LoggingMixin.__init__(self)
 
-        self.task_options = {}
+        self._task_options = {}
         self._default_content_box = None
+        self._state = None
 
         ### Content Area
         content_area = self.get_content_area()
@@ -225,8 +229,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         ## Advanced
         expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
-        expander.set_no_show_all(True)
         vbox.pack_end(expander)
+        self.advanced_expander = expander
 
         ## Save to
         expander = AlignedExpander(_('<b>Save to...</b>'))
@@ -237,9 +241,31 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         self.show_all()
 
-        return state
-    def state(
-        if
+    @property
+    def state(self):
+        """Get the state of the dialog."""
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        """Set the state of the dialog."""
+        if self._state == state:
+            return
+
+        # Remove current child of uris_expander
+        uris_expander = self.uris_expander
+        try:
+            uris_expander.remove(uris_expander.get_child())
+        except TypeError:
+            pass
+
+        # TODO: Add more states
+        if state == TaskNewDialog.STATES.DEFAULT:
+            self.uris_expander.add(self.default_content_box)
+            print(111)
+            self.advanced_expander.hide()
+        self._state = state
+
     @property
     def default_content_box(self):
         """Get the default content box."""
@@ -275,23 +301,18 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         if response_id == Gtk.ResponseType.ACCEPT:
             pass
 
-    def _uris_expander_set_child(self, child):
-        """Set L{child} as the only child of L{self.uris_expander}."""
-        uris_expander = self.uris_expander
-        uris_expander.remove(uris_expander.get_child())
-        uris_expander.add(child)
-        if 'header' in self.task_options:
-            del self.task_options['header']
+    def run(self, options=None):
         """Popup new task dialog."""
-            self.task_options.update(options)
+        if 'header' in self._task_options:
             del self._task_options['header']
         if options is not None:
             self._task_options.update(options)
 
         self.logger.info(_('Running new task dialog...'))
-        self.logger.debug(_('Task options: {}').format(self.task_options))
+        self.logger.debug(_('Task options: {}').format(self._task_options))
 
-        self._uris_expander_set_child(self.default_content_box)
+        self.state = TaskNewDialog.STATES.DEFAULT
+
         Gtk.Dialog.run(self)
 
 class NormalTaskNewDialog(TaskNewDialog):
