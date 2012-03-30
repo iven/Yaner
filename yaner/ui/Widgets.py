@@ -47,13 +47,13 @@ class AlignedExpander(Gtk.Expander):
         Gtk.Expander.__init__(self, label=markup, use_markup=True,
                               resize_toplevel=True, expanded=expanded)
 
-        self.alignment = Gtk.Alignment()
-        self.alignment.set_padding(0, 0, 12, 5)
-        Gtk.Expander.add(self, self.alignment)
+        alignment = Gtk.Alignment()
+        alignment.set_padding(0, 0, 12, 5)
+        Gtk.Expander.add(self, alignment)
 
-    def add(self, child):
-        """Add child to alignment."""
-        self.alignment.add(child)
+        self.add = alignment.add
+        self.remove = alignment.remove
+        self.get_child = alignment.get_child
 
 class URIsView(Gtk.ScrolledWindow):
     """ScrolledWindow with a text view for getting/setting URIs."""
@@ -119,7 +119,7 @@ class FileChooserEntry(Gtk.Entry):
     def __init__(self, title, parent, file_chooser_action, mime_types=None, **kwargs):
         Gtk.Entry.__init__(self, **kwargs)
 
-        self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-directory')
+        self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-open')
         self.connect('icon-press', self._on_icon_press)
 
         dialog = Gtk.FileChooserDialog(

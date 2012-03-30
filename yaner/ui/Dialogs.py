@@ -218,13 +218,15 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         content_area.add(vbox)
         self.main_vbox = vbox
 
+        # Mirrors/Files
+        expander = AlignedExpander(_('<b>URIs/Torrent/Metalink File</b>'))
+        vbox.pack_start(expander)
+        self.uris_expander = expander
+
         ## Advanced
         expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
+        expander.set_no_show_all(True)
         vbox.pack_end(expander)
-
-        advanced_box = Box(VERTICAL)
-        expander.add(advanced_box)
-        self.advanced_box = advanced_box
 
         ## Save to
         expander = AlignedExpander(_('<b>Save to...</b>'))
@@ -232,23 +234,20 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         dir_box = _SettingDirBox(self.settings, pool_model, self)
         expander.add(dir_box)
-        
-        vbox.pack_end(self.default_content_box)
 
-        self.default_content_box.show_all()
-        vbox.show()
-        self.show()
+        self.show_all()
 
+        return state
+    def state(
+        if
     @property
     def default_content_box(self):
         """Get the default content box."""
         if self._default_content_box is None:
-            content_box = Box(HORIZONTAL)
+            content_box = Box(VERTICAL)
 
-            label = LeftAlignedLabel(_('URI(s):'))
-            content_box.pack_start(label)
-
-            entry = FileChooserEntry(_('Select Torrent/Metalink Files'),
+            text = _('Select Torrent/Metalink Files')
+            entry = FileChooserEntry(text,
                                      self,
                                      Gtk.FileChooserAction.OPEN,
                                      {
@@ -260,10 +259,12 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                          ),
                                      },
                                      truncate_multiline=True,
-                                     width_chars=50,
+                                     width_chars=45,
+                                     secondary_icon_tooltip_text=text
                                     )
             entry.connect('response', self._on_metafile_selected)
             content_box.pack_start(entry)
+            content_box.show_all()
 
             self._default_content_box = content_box
         return self._default_content_box
@@ -274,16 +275,23 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         if response_id == Gtk.ResponseType.ACCEPT:
             pass
 
-    def run(self, options=None):
-        """Popup new task dialog."""
+    def _uris_expander_set_child(self, child):
+        """Set L{child} as the only child of L{self.uris_expander}."""
+        uris_expander = self.uris_expander
+        uris_expander.remove(uris_expander.get_child())
+        uris_expander.add(child)
         if 'header' in self.task_options:
             del self.task_options['header']
-        if options is not None:
+        """Popup new task dialog."""
             self.task_options.update(options)
+            del self._task_options['header']
+        if options is not None:
+            self._task_options.update(options)
 
         self.logger.info(_('Running new task dialog...'))
         self.logger.debug(_('Task options: {}').format(self.task_options))
 
+        self._uris_expander_set_child(self.default_content_box)
         Gtk.Dialog.run(self)
 
 class NormalTaskNewDialog(TaskNewDialog):
