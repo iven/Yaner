@@ -40,7 +40,7 @@ class TaskListModel(Gtk.TreeStore, LoggingMixin):
     The tree interface used by task list treeviews.
     """
 
-    COLUMNS = Enum(('TASK', ))
+    COLUMNS = Enum('TASK')
     """
     The column names of the tree model, which is a L{Enum<yaner.utils.Enum>}.
     C{COLUMNS.NAME} will return the column number of C{NAME}.

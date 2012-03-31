@@ -197,7 +197,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     settings = Gio.Settings('com.kissuki.yaner.task')
     """GSettings instance for task configurations."""
 
-    STATES = Enum(('DEFAULT', 'NORMAL', 'BT', 'ML'))
+    STATES = Enum('DEFAULT', 'NORMAL', 'BT', 'ML')
 
     def __init__(self, parent, pool_model):
         """"""
