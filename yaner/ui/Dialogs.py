@@ -262,7 +262,6 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         # TODO: Add more states
         if state == TaskNewDialog.STATES.DEFAULT:
             self.uris_expander.add(self.default_content_box)
-            print(111)
             self.advanced_expander.hide()
         self._state = state
 
@@ -307,11 +306,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             del self._task_options['header']
         if options is not None:
             self._task_options.update(options)
+        else:
+            self.state = TaskNewDialog.STATES.DEFAULT
 
         self.logger.info(_('Running new task dialog...'))
         self.logger.debug(_('Task options: {}').format(self._task_options))
-
-        self.state = TaskNewDialog.STATES.DEFAULT
 
         Gtk.Dialog.run(self)
 
