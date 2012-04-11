@@ -288,6 +288,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                      secondary_icon_tooltip_text=text
                                     )
             entry.connect('response', self._on_metafile_selected)
+            entry.connect('changed', self._on_default_entry_changed)
             content_box.pack_start(entry)
             content_box.show_all()
 
@@ -299,6 +300,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         mode."""
         if response_id == Gtk.ResponseType.ACCEPT:
             pass
+
+    def _on_default_entry_changed(self, entry):
+        """When the entry in the default content box changed, switch to normal
+        mode."""
+        self.state = TaskNewDialog.STATES.NORMAL
 
     def run(self, options=None):
         """Popup new task dialog."""
