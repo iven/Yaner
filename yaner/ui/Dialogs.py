@@ -242,30 +242,6 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self.show_all()
 
     @property
-    def state(self):
-        """Get the state of the dialog."""
-        return self._state
-
-    @state.setter
-    def state(self, state):
-        """Set the state of the dialog."""
-        if self._state == state:
-            return
-
-        # Remove current child of uris_expander
-        uris_expander = self.uris_expander
-        try:
-            uris_expander.remove(uris_expander.get_child())
-        except TypeError:
-            pass
-
-        # TODO: Add more states
-        if state == TaskNewDialog.STATES.DEFAULT:
-            self.uris_expander.add(self.default_content_box)
-            self.advanced_expander.hide()
-        self._state = state
-
-    @property
     def default_content_box(self):
         """Get the default content box."""
         if self._default_content_box is None:
@@ -304,7 +280,27 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     def _on_default_entry_changed(self, entry):
         """When the entry in the default content box changed, switch to normal
         mode."""
-        self.state = TaskNewDialog.STATES.NORMAL
+        self._set_state(TaskNewDialog.STATES.NORMAL, entry.get_text())
+
+    def _set_state(self, state, data=None):
+        """Set the state of the dialog."""
+        if self._state == state:
+            return
+
+        # Remove current child of uris_expander
+        uris_expander = self.uris_expander
+        try:
+            uris_expander.remove(uris_expander.get_child())
+        except TypeError:
+            pass
+
+        # TODO: Add more states
+        if state == TaskNewDialog.STATES.DEFAULT:
+            self.uris_expander.add(self.default_content_box)
+            self.advanced_expander.hide()
+        elif state == TaskNewDialog.STATES.NORMAL:
+            self.uris_expander.add(self.normal_content_box)
+        self._state = state
 
     def run(self, options=None):
         """Popup new task dialog."""
@@ -313,7 +309,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         if options is not None:
             self._task_options.update(options)
         else:
-            self.state = TaskNewDialog.STATES.DEFAULT
+            self._set_state(TaskNewDialog.STATES.DEFAULT)
 
         self.logger.info(_('Running new task dialog...'))
         self.logger.debug(_('Task options: {}').format(self._task_options))
