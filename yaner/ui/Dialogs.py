@@ -213,6 +213,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options = {}
         self._default_content_box = None
         self._normal_content_box = None
+        self._bt_content_box = None
+        self._ml_content_box = None
         self._state = None
 
         ### Content Area
@@ -287,16 +289,38 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             self._normal_content_box = content_box
         return self._normal_content_box
 
-    def _on_metafile_selected(self, dialog, response_id):
-        """When meta file chooser dialog responsed, switch to torrent or metalink
-        mode."""
-        if response_id == Gtk.ResponseType.ACCEPT:
-            pass
+    @property
+    def bt_content_box(self):
+        """Get the BT content box."""
+        if self._bt_content_box is None:
+            content_box = Box(VERTICAL)
 
-    def _on_default_entry_changed(self, entry):
-        """When the entry in the default content box changed, switch to normal
-        mode."""
-        self._set_state(TaskNewDialog.STATES.NORMAL, entry.get_text())
+            button = MetafileChooserButton(title=_('Select torrent file'),
+                                           mime_types=['application/x-bittorrent']
+                                          )
+            content_box.pack_start(button)
+            content_box.show_all()
+
+            self._bt_file_button = button
+            self._bt_content_box = content_box
+        return self._bt_content_box
+
+    @property
+    def ml_content_box(self):
+        """Get the ML content box."""
+        if self._ml_content_box is None:
+            content_box = Box(VERTICAL)
+
+            button = MetafileChooserButton(title=_('Select metalink file'),
+                                           mime_types=['application/metalink4+xml',
+                                                       'application/metalink+xml']
+                                          )
+            content_box.pack_start(button)
+            content_box.show_all()
+
+            self._ml_file_button = button
+            self._ml_content_box = content_box
+        return self._ml_content_box
 
     def _set_state(self, state, data=None):
         """Set the state of the dialog."""
@@ -322,6 +346,17 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             self._normal_uris_view.set_uris(data)
             self._normal_uris_view.text_view.grab_focus()
         self._state = state
+
+    def _on_metafile_selected(self, dialog, response_id):
+        """When meta file chooser dialog responsed, switch to torrent or metalink
+        mode."""
+        if response_id == Gtk.ResponseType.ACCEPT:
+            pass
+
+    def _on_default_entry_changed(self, entry):
+        """When the entry in the default content box changed, switch to normal
+        mode."""
+        self._set_state(TaskNewDialog.STATES.NORMAL, entry.get_text())
 
     def run(self, options=None):
         """Popup new task dialog."""
