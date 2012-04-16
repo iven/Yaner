@@ -345,6 +345,12 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             self.uris_expander.add(self.normal_content_box)
             self._normal_uris_view.set_uris(data)
             self._normal_uris_view.text_view.grab_focus()
+        elif state == TaskNewDialog.STATES.BT:
+            self.uris_expander.add(self.bt_content_box)
+            self._bt_file_button.set_filename(data)
+        elif state == TaskNewDialog.STATES.ML:
+            self.uris_expander.add(self.ml_content_box)
+            self._ml_file_button.set_filename(data)
         self._state = state
 
     def _on_metafile_selected(self, dialog, response_id):
