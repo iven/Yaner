@@ -67,6 +67,7 @@ class URIsView(Gtk.ScrolledWindow):
 
         text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
         self.add(text_view)
+        self.text_view = text_view
 
         text_buffer = text_view.get_buffer()
         text_buffer.connect('changed', self._text_changed)

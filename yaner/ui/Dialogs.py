@@ -212,6 +212,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         self._task_options = {}
         self._default_content_box = None
+        self._normal_content_box = None
         self._state = None
 
         ### Content Area
@@ -268,8 +269,23 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             content_box.pack_start(entry)
             content_box.show_all()
 
+            self._default_entry = entry
             self._default_content_box = content_box
         return self._default_content_box
+
+    @property
+    def normal_content_box(self):
+        """Get the normal content box."""
+        if self._normal_content_box is None:
+            content_box = Box(VERTICAL)
+
+            uris_view = URIsView()
+            content_box.pack_start(uris_view)
+            content_box.show_all()
+
+            self._normal_uris_view = uris_view
+            self._normal_content_box = content_box
+        return self._normal_content_box
 
     def _on_metafile_selected(self, dialog, response_id):
         """When meta file chooser dialog responsed, switch to torrent or metalink
@@ -294,12 +310,17 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         except TypeError:
             pass
 
+        self.advanced_expander.show()
+
         # TODO: Add more states
         if state == TaskNewDialog.STATES.DEFAULT:
             self.uris_expander.add(self.default_content_box)
+            self._default_entry.grab_focus()
             self.advanced_expander.hide()
         elif state == TaskNewDialog.STATES.NORMAL:
             self.uris_expander.add(self.normal_content_box)
+            self._normal_uris_view.set_uris(data)
+            self._normal_uris_view.text_view.grab_focus()
         self._state = state
 
     def run(self, options=None):
