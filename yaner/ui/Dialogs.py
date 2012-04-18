@@ -41,6 +41,9 @@ from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 
+_BT_MIME_TYPES = {'application/x-bittorrent'}
+_ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
+
 class _SettingWidget(LoggingMixin):
     """A widget for communicate with GSettings."""
     def __init__(self, settings):
@@ -254,14 +257,10 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             entry = FileChooserEntry(text,
                                      self,
                                      Gtk.FileChooserAction.OPEN,
-                                     {
-                                         'name': _('Torrent/Metalink Files'),
-                                         'types':(
-                                             'application/x-bittorrent',
-                                             'application/metalink4+xml',
-                                             'application/metalink+xml',
-                                         ),
-                                     },
+                                     (
+                                         ('Torrent Files', _BT_MIME_TYPES),
+                                         ('Metalink Files', _ML_MIME_TYPES),
+                                     ),
                                      truncate_multiline=True,
                                      width_chars=45,
                                      secondary_icon_tooltip_text=text
@@ -296,7 +295,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             content_box = Box(VERTICAL)
 
             button = MetafileChooserButton(title=_('Select torrent file'),
-                                           mime_types=['application/x-bittorrent']
+                                           mime_types=_BT_MIME_TYPES,
                                           )
             content_box.pack_start(button)
             content_box.show_all()
@@ -312,8 +311,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             content_box = Box(VERTICAL)
 
             button = MetafileChooserButton(title=_('Select metalink file'),
-                                           mime_types=['application/metalink4+xml',
-                                                       'application/metalink+xml']
+                                           mime_types=_ML_MIME_TYPES,
                                           )
             content_box.pack_start(button)
             content_box.show_all()
@@ -515,7 +513,7 @@ class BTTaskNewDialog(TaskNewDialog):
         self.main_vbox.pack_start(expander)
 
         button = MetafileChooserButton(title=_('Select torrent file'),
-                                       mime_types=['application/x-bittorrent']
+                                       mime_types=_BT_MIME_TYPES,
                                       )
         expander.add(button)
         self.bind('torrent_filename', button, 'filename', bind_settings=False)
@@ -635,8 +633,7 @@ class MLTaskNewDialog(TaskNewDialog):
         self.main_vbox.pack_start(expander)
 
         button = MetafileChooserButton(title=_('Select metalink file'),
-                                       mime_types=['application/metalink4+xml',
-                                                   'application/metalink+xml']
+                                       mime_types=_ML_MIME_TYPES,
                                       )
         expander.add(button)
         self.bind('metalink_filename', button, 'filename', bind_settings=False)
