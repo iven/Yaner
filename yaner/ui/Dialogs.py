@@ -41,6 +41,8 @@ from yaner.ui.PoolTree import PoolModel
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 
+_BT_FILTER_NAME = _('Torrent Files')
+_ML_FILTER_NAME = _('Metalink Files')
 _BT_MIME_TYPES = {'application/x-bittorrent'}
 _ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
 
@@ -194,6 +196,89 @@ class _SettingDirBox(Box, _SettingWidget):
         except KeyError:
             pass
 
+class _TaskNewDefaultUI(object):
+    """Default UI of the new task dialog."""
+    def __init__(self, parent):
+        box = Box(VERTICAL)
+
+        text = _('Select Torrent/Metalink Files')
+        entry = FileChooserEntry(text,
+                                 parent,
+                                 Gtk.FileChooserAction.OPEN,
+                                 (
+                                     (_BT_FILTER_NAME, _BT_MIME_TYPES),
+                                     (_ML_FILTER_NAME, _ML_MIME_TYPES),
+                                 ),
+                                 truncate_multiline=True,
+                                 secondary_icon_tooltip_text=text
+                                )
+        entry.set_size_request(300, -1)
+        box.pack_start(entry)
+        box.show_all()
+
+        self.uri_entry = entry
+        self.content_box = box
+
+    def activate(self, data):
+        self.uri_entry.set_text('')
+        self.uri_entry.grab_focus()
+
+class _TaskNewNormalUI(object):
+    """Normal UI of the new task dialog."""
+    def __init__(self):
+        box = Box(VERTICAL)
+
+        uris_view = URIsView()
+        uris_view.set_size_request(300, 70)
+        box.pack_start(uris_view)
+        box.show_all()
+
+        self._uris_view = uris_view
+        self.content_box = box
+
+    def activate(self, data):
+        if data is not None:
+            self._uris_view.set_uris(data)
+        self._uris_view.grab_focus()
+
+class _TaskNewBTUI(object):
+    """BT UI of the new task dialog."""
+    def __init__(self):
+        box = Box(VERTICAL)
+
+        button = MetafileChooserButton(title=_('Select torrent file'),
+                                       mime_types=_BT_MIME_TYPES,
+                                      )
+        button.set_size_request(300, -1)
+        box.pack_start(button)
+        box.show_all()
+
+        self._bt_file_button = button
+        self.content_box = box
+
+    def activate(self, data):
+        if data is not None:
+            self._bt_file_button.set_filename(data)
+
+class _TaskNewMLUI(object):
+    """Metalink UI of the new task dialog."""
+    def __init__(self):
+        box = Box(VERTICAL)
+
+        button = MetafileChooserButton(title=_('Select metalink file'),
+                                       mime_types=_ML_MIME_TYPES,
+                                      )
+        button.set_size_request(300, -1)
+        box.pack_start(button)
+        box.show_all()
+
+        self._ml_file_button = button
+        self.content_box = box
+
+    def activate(self, data):
+        if data is not None:
+            self._ml_file_button.set_filename(data)
+
 class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for creating new tasks."""
 
@@ -214,11 +299,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         LoggingMixin.__init__(self)
 
         self._task_options = {}
-        self._default_content_box = None
-        self._normal_content_box = None
-        self._bt_content_box = None
-        self._ml_content_box = None
-        self._state = None
+        self._ui = None
+        self._default_ui = None
+        self._normal_ui = None
+        self._bt_ui = None
+        self._ml_ui = None
 
         ### Content Area
         content_area = self.get_content_area()
@@ -248,119 +333,82 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self.show_all()
 
     @property
-    def default_content_box(self):
-        """Get the default content box."""
-        if self._default_content_box is None:
-            content_box = Box(VERTICAL)
-
-            text = _('Select Torrent/Metalink Files')
-            entry = FileChooserEntry(text,
-                                     self,
-                                     Gtk.FileChooserAction.OPEN,
-                                     (
-                                         ('Torrent Files', _BT_MIME_TYPES),
-                                         ('Metalink Files', _ML_MIME_TYPES),
-                                     ),
-                                     truncate_multiline=True,
-                                     width_chars=45,
-                                     secondary_icon_tooltip_text=text
-                                    )
-            entry.connect('response', self._on_metafile_selected)
-            entry.connect('changed', self._on_default_entry_changed)
-            content_box.pack_start(entry)
-            content_box.show_all()
-
-            self._default_entry = entry
-            self._default_content_box = content_box
-        return self._default_content_box
+    def default_ui(self):
+        """Get the default UI."""
+        if self._default_ui is None:
+            ui = _TaskNewDefaultUI(self)
+            ui.uri_entry.connect('response', self._on_metafile_selected)
+            ui.uri_entry.connect('changed', self._on_default_entry_changed)
+            self._default_ui = ui
+        return self._default_ui
 
     @property
-    def normal_content_box(self):
-        """Get the normal content box."""
-        if self._normal_content_box is None:
-            content_box = Box(VERTICAL)
-
-            uris_view = URIsView()
-            content_box.pack_start(uris_view)
-            content_box.show_all()
-
-            self._normal_uris_view = uris_view
-            self._normal_content_box = content_box
-        return self._normal_content_box
+    def normal_ui(self):
+        """Get the normal UI."""
+        if self._normal_ui is None:
+            self._normal_ui = _TaskNewNormalUI()
+        return self._normal_ui
 
     @property
-    def bt_content_box(self):
-        """Get the BT content box."""
-        if self._bt_content_box is None:
-            content_box = Box(VERTICAL)
-
-            button = MetafileChooserButton(title=_('Select torrent file'),
-                                           mime_types=_BT_MIME_TYPES,
-                                          )
-            content_box.pack_start(button)
-            content_box.show_all()
-
-            self._bt_file_button = button
-            self._bt_content_box = content_box
-        return self._bt_content_box
+    def bt_ui(self):
+        """Get the BT UI."""
+        if self._bt_ui is None:
+            self._bt_ui = _TaskNewBTUI()
+        return self._bt_ui
 
     @property
-    def ml_content_box(self):
-        """Get the ML content box."""
-        if self._ml_content_box is None:
-            content_box = Box(VERTICAL)
+    def ml_ui(self):
+        """Get the ML UI."""
+        if self._ml_ui is None:
+            self._ml_ui = _TaskNewMLUI()
+        return self._ml_ui
 
-            button = MetafileChooserButton(title=_('Select metalink file'),
-                                           mime_types=_ML_MIME_TYPES,
-                                          )
-            content_box.pack_start(button)
-            content_box.show_all()
-
-            self._ml_file_button = button
-            self._ml_content_box = content_box
-        return self._ml_content_box
-
-    def _set_state(self, state, data=None):
-        """Set the state of the dialog."""
-        if self._state == state:
-            return
-
+    def set_ui(self, new_ui, data=None):
+        """Set the UI of the dialog."""
         # Remove current child of uris_expander
-        uris_expander = self.uris_expander
-        try:
-            uris_expander.remove(uris_expander.get_child())
-        except TypeError:
-            pass
+        if not self._ui is new_ui:
+            uris_expander = self.uris_expander
+            try:
+                uris_expander.remove(uris_expander.get_child())
+            except TypeError:
+                pass
+            uris_expander.add(new_ui.content_box)
 
-        self.advanced_expander.show()
+        new_ui.activate(data)
 
-        # TODO: Add more states
-        if state == TaskNewDialog.STATES.DEFAULT:
-            self.uris_expander.add(self.default_content_box)
-            self._default_entry.grab_focus()
+        # Don't show advanced expander in default UI
+        if new_ui is self.default_ui:
             self.advanced_expander.hide()
-        elif state == TaskNewDialog.STATES.NORMAL:
-            self.uris_expander.add(self.normal_content_box)
-            self._normal_uris_view.set_uris(data)
-            self._normal_uris_view.text_view.grab_focus()
-        elif state == TaskNewDialog.STATES.BT:
-            self.uris_expander.add(self.bt_content_box)
-            self._bt_file_button.set_filename(data)
-        elif state == TaskNewDialog.STATES.ML:
-            self.uris_expander.add(self.ml_content_box)
-            self._ml_file_button.set_filename(data)
-        self._state = state
+        else:
+            self.advanced_expander.show()
+
+        self.update_size()
+
+        self._ui = new_ui
+
+    def update_size(self):
+        """Update the size of the dialog."""
+        content_area = self.get_content_area()
+        size = content_area.get_preferred_size()[0]
+        self.resize(size.width, size.height)
 
     def _on_metafile_selected(self, dialog, response_id):
         """When meta file chooser dialog responsed, switch to torrent or metalink
         mode."""
         if response_id == Gtk.ResponseType.ACCEPT:
-            pass
+            filename = dialog.get_filename()
+            current_filter = dialog.get_filter().get_name()
+            if current_filter == _BT_FILTER_NAME:
+                self.set_ui(self.bt_ui, filename)
+            elif current_filter == _ML_FILTER_NAME:
+                self.set_ui(self.ml_ui, filename)
+            else:
+                raise RuntimeError('No such filter' + current_filter)
 
     def _on_default_entry_changed(self, entry):
         """When the entry in the default content box changed, switch to normal
         mode."""
-        self._set_state(TaskNewDialog.STATES.NORMAL, entry.get_text())
+        self.set_ui(self.normal_ui, entry.get_text())
 
     def run(self, options=None):
         """Popup new task dialog."""
@@ -369,7 +417,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         if options is not None:
             self._task_options.update(options)
         else:
-            self._set_state(TaskNewDialog.STATES.DEFAULT)
+            self.set_ui(self.default_ui)
 
         self.logger.info(_('Running new task dialog...'))
         self.logger.debug(_('Task options: {}').format(self._task_options))

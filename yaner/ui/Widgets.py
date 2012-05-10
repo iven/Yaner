@@ -63,7 +63,6 @@ class URIsView(Gtk.ScrolledWindow):
             self, None, None, shadow_type=Gtk.ShadowType.IN,
             hscrollbar_policy=Gtk.PolicyType.NEVER,
             vscrollbar_policy=Gtk.PolicyType.AUTOMATIC)
-        self.set_size_request(-1, 70)
 
         text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
         self.add(text_view)
@@ -76,6 +75,9 @@ class URIsView(Gtk.ScrolledWindow):
     def _text_changed(self, text_buffer):
         """When text in the buffer changed, update uris property."""
         self.notify('uris')
+
+    def grab_focus(self):
+        self.text_view.grab_focus()
 
     def get_uris(self):
         tbuffer = self.text_buffer
