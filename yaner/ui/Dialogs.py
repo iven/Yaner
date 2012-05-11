@@ -297,14 +297,6 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         self.show_all()
 
-    def _on_category_cb_changed(self, category_cb, entry):
-        """When category combo box changed, update the directory entry."""
-        iter_ = category_cb.get_active_iter()
-        model = category_cb.get_model()
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
-        entry.set_text(presentable.directory)
-        self.logger.debug(_('Category is changed to {}.').format(presentable))
-
     @property
     def default_ui(self):
         """Get the default UI."""
@@ -336,6 +328,32 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             self._ml_ui = _TaskNewMLUI()
         return self._ml_ui
 
+    def _on_category_cb_changed(self, category_cb, entry):
+        """When category combo box changed, update the directory entry."""
+        iter_ = category_cb.get_active_iter()
+        model = category_cb.get_model()
+        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+        entry.set_text(presentable.directory)
+        self.logger.debug(_('Category is changed to {}.').format(presentable))
+
+    def _on_metafile_selected(self, dialog, response_id):
+        """When meta file chooser dialog responsed, switch to torrent or metalink
+        mode."""
+        if response_id == Gtk.ResponseType.ACCEPT:
+            filename = dialog.get_filename()
+            current_filter = dialog.get_filter().get_name()
+            if current_filter == _BT_FILTER_NAME:
+                self.set_ui(self.bt_ui, filename)
+            elif current_filter == _ML_FILTER_NAME:
+                self.set_ui(self.ml_ui, filename)
+            else:
+                raise RuntimeError('No such filter' + current_filter)
+
+    def _on_default_entry_changed(self, entry):
+        """When the entry in the default content box changed, switch to normal
+        mode."""
+        self.set_ui(self.normal_ui, entry.get_text())
+
     def set_ui(self, new_ui, data=None):
         """Set the UI of the dialog."""
         # Remove current child of uris_expander
@@ -364,24 +382,6 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         content_area = self.get_content_area()
         size = content_area.get_preferred_size()[0]
         self.resize(size.width, size.height)
-
-    def _on_metafile_selected(self, dialog, response_id):
-        """When meta file chooser dialog responsed, switch to torrent or metalink
-        mode."""
-        if response_id == Gtk.ResponseType.ACCEPT:
-            filename = dialog.get_filename()
-            current_filter = dialog.get_filter().get_name()
-            if current_filter == _BT_FILTER_NAME:
-                self.set_ui(self.bt_ui, filename)
-            elif current_filter == _ML_FILTER_NAME:
-                self.set_ui(self.ml_ui, filename)
-            else:
-                raise RuntimeError('No such filter' + current_filter)
-
-    def _on_default_entry_changed(self, entry):
-        """When the entry in the default content box changed, switch to normal
-        mode."""
-        self.set_ui(self.normal_ui, entry.get_text())
 
     def run(self, options=None):
         """Popup new task dialog."""
