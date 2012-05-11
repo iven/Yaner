@@ -31,7 +31,8 @@ from gi.repository import Gtk
 from gi.repository import Gio
 
 from yaner.Task import Task
-from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView, Box
+from yaner.ui.Widgets import Box, Entry, SpinButton
+from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView
 from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
 from yaner.ui.Widgets import HORIZONTAL, VERTICAL
 from yaner.ui.PoolTree import PoolModel
@@ -44,89 +45,24 @@ _ML_FILTER_NAME = _('Metalink Files')
 _BT_MIME_TYPES = {'application/x-bittorrent'}
 _ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
 
-class _SettingEntry(Gtk.Entry):
-    """An entry for communicate with GSettings."""
-    def __init__(self, key, *args, **kwargs):
-        Gtk.Entry.__init__(self, *args, **kwargs)
-        self._key = key
+class _TaskNewUI(object):
+    """Base class for the UIs of the new task dialog."""
+    def __init__(self):
+        self._setting_widgets = {}
 
-    @property
-    def value(self):
-        return self.get_text()
+    def activate(self, options):
+        """When the UI changed to this one, update the setting widgets."""
+        for key, widget in self._setting_widgets.items():
+            try:
+                widget.value = options[key]
+            except KeyError:
+                pass
 
-    @value.setter
-    def value(self, value):
-        self.set_text(value)
-
-class _SettingSpinButton(Gtk.SpinButton):
-    """An spin button for communicate with GSettings."""
-    def __init__(self, key, *args, **kwargs):
-        Gtk.SpinButton.__init__(self, *args, **kwargs)
-        self._key = key
-
-    @property
-    def value(self):
-        return self.get_value()
-
-    @value.setter
-    def value(self, value):
-        self.set_value(value)
-
-class _SettingURIsView(URIsView):
-    """URI TextView for communicate with GSettings."""
-    def __init__(self, key, *args, **kwargs):
-        URIsView.__init__(self, *args, **kwargs)
-        self._key = key
-
-    @property
-    def value(self):
-        return self.uris
-
-    @value.setter
-    def value(self, value):
-        self.uris = value
-
-class _SettingMetafileChooserButton(MetafileChooserButton):
-    """MetafileChooserButton for communicate with GSettings."""
-    def __init__(self, key, *args, **kwargs):
-        MetafileChooserButton.__init__(self, *args, **kwargs)
-        self._key = key
-
-    @property
-    def value(self):
-        return self.get_filename()
-
-    @value.setter
-    def value(self, value):
-        self.set_filename(value)
-
-class _SettingFileChooserEntry(FileChooserEntry):
-    """FileChooserEntry for communicate with GSettings."""
-    def __init__(self, key, *args, **kwargs):
-        FileChooserEntry.__init__(self, *args, **kwargs)
-        self._key = key
-
-    @property
-    def value(self):
-        return self.get_text()
-
-    @value.setter
-    def value(self, value):
-        self.set_text(value)
-
-class _SettingCategoryComboBox(CategoryComboBox):
-    """CategoryComboBox for communicate with GSettings."""
-    def __init__(self, key, *args, **kwargs):
-        CategoryComboBox.__init__(self, *args, **kwargs)
-        self._key = key
-
-    @property
-    def value(self):
-        return self.active_category
-
-class _TaskNewDefaultUI(object):
+class _TaskNewDefaultUI(_TaskNewUI):
     """Default UI of the new task dialog."""
     def __init__(self, parent):
+        _TaskNewUI.__init__(self)
+
         box = Box(VERTICAL)
 
         text = _('Select Torrent/Metalink Files')
@@ -143,24 +79,29 @@ class _TaskNewDefaultUI(object):
                                 )
         entry.set_size_request(300, -1)
         box.pack_start(entry)
+        self._setting_widgets['uris'] = entry
+
         box.show_all()
 
         self.uri_entry = entry
         self.content_box = box
 
-    def activate(self, data):
-        self.uri_entry.set_text('')
+    def activate(self, options):
+        _TaskNewUI.activate(self, options)
         self.uri_entry.grab_focus()
 
-class _TaskNewNormalUI(object):
+class _TaskNewNormalUI(_TaskNewUI):
     """Normal UI of the new task dialog."""
     def __init__(self):
+        _TaskNewUI.__init__(self)
+
         ## Content Box
         box = Box(VERTICAL)
 
-        uris_view = _SettingURIsView('uris')
+        uris_view = URIsView()
         uris_view.set_size_request(300, 70)
         box.pack_start(uris_view)
+        self._setting_widgets['uris'] = uris_view
 
         hbox = Box(HORIZONTAL)
         box.pack_start(hbox)
@@ -169,66 +110,65 @@ class _TaskNewNormalUI(object):
         label = LeftAlignedLabel(_('Rename:'))
         hbox.pack_start(label, expand=False)
 
-        entry = _SettingEntry('out', activates_default=True)
+        entry = Entry(activates_default=True)
         hbox.pack_start(entry)
+        self._setting_widgets['out'] = entry
 
         # Connections
         label = LeftAlignedLabel(_('Connections:'))
         hbox.pack_start(label, expand=False)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
-        spin_button = _SettingSpinButton('split', adjustment=adjustment, numeric=True)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
         hbox.pack_start(spin_button)
+        self._setting_widgets['split'] = spin_button
 
         box.show_all()
 
         self._uris_view = uris_view
         self.content_box = box
 
-    def activate(self, data):
-        if data is not None:
-            self._uris_view.value = data
+    def activate(self, options):
+        _TaskNewUI.activate(self, options)
         self._uris_view.grab_focus()
 
-class _TaskNewBTUI(object):
+class _TaskNewBTUI(_TaskNewUI):
     """BT UI of the new task dialog."""
     def __init__(self):
+        _TaskNewUI.__init__(self)
+
         box = Box(VERTICAL)
 
-        button = _SettingMetafileChooserButton('torrent_filename',
-                                               title=_('Select torrent file'),
-                                               mime_types=_BT_MIME_TYPES,
-                                              )
+        button = MetafileChooserButton(title=_('Select torrent file'),
+                                       mime_types=_BT_MIME_TYPES,
+                                      )
         button.set_size_request(300, -1)
         box.pack_start(button)
+        self._setting_widgets['torrent_filename'] = button
+
         box.show_all()
 
         self._bt_file_button = button
         self.content_box = box
 
-    def activate(self, data):
-        if data is not None:
-            self._bt_file_button.value = data
-
-class _TaskNewMLUI(object):
+class _TaskNewMLUI(_TaskNewUI):
     """Metalink UI of the new task dialog."""
     def __init__(self):
+        _TaskNewUI.__init__(self)
+
         box = Box(VERTICAL)
 
-        button = _SettingMetafileChooserButton('metalink_filename',
-                                               title=_('Select metalink file'),
-                                               mime_types=_ML_MIME_TYPES,
-                                              )
+        button = MetafileChooserButton(title=_('Select metalink file'),
+                                       mime_types=_ML_MIME_TYPES,
+                                      )
         button.set_size_request(300, -1)
         box.pack_start(button)
+        self._setting_widgets['metalink_filename'] = button
+
         box.show_all()
 
         self._ml_file_button = button
         self.content_box = box
-
-    def activate(self, data):
-        if data is not None:
-            self._ml_file_button.value = data
 
 class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for creating new tasks."""
@@ -249,7 +189,6 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                            )
         LoggingMixin.__init__(self)
 
-        self._task_options = {}
         self._ui = None
         self._default_ui = None
         self._normal_ui = None
@@ -282,15 +221,14 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         expander.add(hbox)
 
         # Directory
-        entry = _SettingFileChooserEntry('dir',
-                                         _('Select download directory'),
-                                         self,
-                                         Gtk.FileChooserAction.SELECT_FOLDER
-                                        )
+        entry = FileChooserEntry(_('Select download directory'),
+                                 self,
+                                 Gtk.FileChooserAction.SELECT_FOLDER
+                                )
         hbox.pack_end(entry)
 
         model = CategoryFilterModel(pool_model)
-        combo_box = _SettingCategoryComboBox('category', model, self)
+        combo_box = CategoryComboBox(model, self)
         combo_box.connect('changed', self._on_category_cb_changed, entry)
         combo_box.set_active(0)
         hbox.pack_start(combo_box)
@@ -343,18 +281,18 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             filename = dialog.get_filename()
             current_filter = dialog.get_filter().get_name()
             if current_filter == _BT_FILTER_NAME:
-                self.set_ui(self.bt_ui, filename)
+                self.set_ui(self.bt_ui, {'torrent_filename': filename})
             elif current_filter == _ML_FILTER_NAME:
-                self.set_ui(self.ml_ui, filename)
+                self.set_ui(self.ml_ui, {'metalink_filename': filename})
             else:
                 raise RuntimeError('No such filter' + current_filter)
 
     def _on_default_entry_changed(self, entry):
         """When the entry in the default content box changed, switch to normal
         mode."""
-        self.set_ui(self.normal_ui, entry.get_text())
+        self.set_ui(self.normal_ui, {'uris': entry.get_text()})
 
-    def set_ui(self, new_ui, data=None):
+    def set_ui(self, new_ui, options=None):
         """Set the UI of the dialog."""
         # Remove current child of uris_expander
         if not self._ui is new_ui:
@@ -365,7 +303,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                 pass
             uris_expander.add(new_ui.content_box)
 
-        new_ui.activate(data)
+        new_ui.activate(options)
 
         # Don't show advanced expander in default UI
         if new_ui is self.default_ui:
@@ -385,15 +323,19 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
     def run(self, options=None):
         """Popup new task dialog."""
-        if 'header' in self._task_options:
-            del self._task_options['header']
-        if options is not None:
-            self._task_options.update(options)
+        #if 'header' in self._task_options:
+        #    del self._task_options['header']
+
+        if options is None:
+            self.set_ui(self.default_ui, {'uris': ''})
+        elif 'torrent_filename' in options:
+            self.set_ui(self.bt_ui, options)
+        elif 'metalink_filename' in options:
+            self.set_ui(self.ml_ui, options)
         else:
-            self.set_ui(self.default_ui)
+            self.set_ui(self.normal_ui, options)
 
         self.logger.info(_('Running new task dialog...'))
-        self.logger.debug(_('Task options: {}').format(self._task_options))
 
         Gtk.Dialog.run(self)
 

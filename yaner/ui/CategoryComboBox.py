@@ -66,6 +66,10 @@ class CategoryComboBox(Gtk.ComboBox):
 
         self.connect('changed', self._on_changed)
 
+    @property
+    def value(self):
+        return self.active_category
+
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""
         presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)

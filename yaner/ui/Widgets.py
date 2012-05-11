@@ -55,6 +55,26 @@ class AlignedExpander(Gtk.Expander):
         self.remove = alignment.remove
         self.get_child = alignment.get_child
 
+class Entry(Gtk.Entry):
+    """An entry for using to store settings."""
+    @property
+    def value(self):
+        return self.get_text()
+
+    @value.setter
+    def value(self, value):
+        self.set_text(value)
+
+class SpinButton(Gtk.SpinButton):
+    """An spin button for using to store settings."""
+    @property
+    def value(self):
+        return self.get_value()
+
+    @value.setter
+    def value(self, value):
+        self.set_value(value)
+
 class URIsView(Gtk.ScrolledWindow):
     """ScrolledWindow with a text view for getting/setting URIs."""
 
@@ -72,7 +92,7 @@ class URIsView(Gtk.ScrolledWindow):
         self.text_buffer = text_buffer
 
     @property
-    def uris(self):
+    def value(self):
         tbuffer = self.text_buffer
         return tbuffer.get_text(
             tbuffer.get_start_iter(),
@@ -80,8 +100,8 @@ class URIsView(Gtk.ScrolledWindow):
             False
             ).split()
 
-    @uris.setter
-    def uris(self, uris):
+    @value.setter
+    def value(self, uris):
         tbuffer = self.text_buffer
         if isinstance(uris, str):
             tbuffer.set_text(uris)
@@ -105,12 +125,20 @@ class MetafileChooserButton(Gtk.FileChooserButton):
 
         self.set_filter(file_filter)
 
-class FileChooserEntry(Gtk.Entry):
+    @property
+    def value(self):
+        return self.get_filename()
+
+    @value.setter
+    def value(self, value):
+        self.set_filename(value)
+
+class FileChooserEntry(Entry):
     """An Entry with a activatable icon that popups FileChooserDialog."""
 
     def __init__(self, title, parent, file_chooser_action, update_entry=True,
                  mime_list=None, **kwargs):
-        Gtk.Entry.__init__(self, **kwargs)
+        Entry.__init__(self, **kwargs)
 
         self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-open')
         self.connect('icon-press', self._on_icon_press)
