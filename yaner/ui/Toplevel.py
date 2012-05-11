@@ -83,12 +83,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
         #toolbar.set_style(Gtk.ToolbarStyle.BOTH)
         vbox.pack_start(toolbar, expand=False)
 
-        action = self._action_group.get_action('task_new')
-        menu_tool_button = Gtk.MenuToolButton()
-        menu_tool_button.set_menu(self.popups['task_new'])
-        menu_tool_button.set_related_action(action)
-        toolbar.insert(menu_tool_button, 0)
-
         # HPaned: PoolView as left, TaskVBox as right
         hpaned = Gtk.HPaned()
         vbox.pack_start(hpaned)
@@ -190,15 +184,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
             # The actions used by L{action_group}. The members are:
             # name, stock-id, label, accelerator, tooltip, callback
             action_entries = (
-                ("task_new", 'gtk-new', None, None,
+                ("task_new", 'gtk-new', _("New Task"), None,
                  None, self._on_task_new),
-                ("task_new_menu", 'gtk-new'),
-                ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None,
-                 None, self._on_normal_task_new),
-                ("task_new_bt", 'gtk-add', _("BitTorrent"), None,
-                 None, self._on_bt_task_new),
-                ("task_new_ml", 'gtk-add', _("Metalink"), None,
-                 None, self._on_ml_task_new),
                 ("task_start", 'gtk-media-play', _("Start"), None,
                  None, self._on_task_start),
                 ("task_pause", 'gtk-media-pause', _("Pause"), None,
@@ -248,7 +235,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             self.logger.info(_('Initializing popup menus...'))
             get_widget = self.ui_manager.get_widget
             popups = {}
-            for popup_name in ('tray', 'task_new', 'pool',
+            for popup_name in ('tray', 'pool',
                                'queuing', 'category', 'dustbin',
                                'queuing_task', 'category_task', 'dustbin_task'):
                 popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
@@ -390,18 +377,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """When task new action is activated, call the task new dialog."""
         self.task_new_dialog.run()
         self.task_new_dialog.hide()
-
-    def _on_normal_task_new(self, action, data):
-        """When normal task new action is activated, call the task new dialog."""
-        self.task_new_dialog.run()
-
-    def _on_bt_task_new(self, action, data):
-        """When bt task new action is activated, call the task new dialog."""
-        self.task_new_dialog.run()
-
-    def _on_ml_task_new(self, action, data):
-        """When ml task new action is activated, call the task new dialog."""
-        self.task_new_dialog.run()
 
     def _on_task_start(self, action, data):
         """When task start button clicked, start or unpause the task."""
