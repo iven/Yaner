@@ -43,8 +43,8 @@ class Box(Gtk.Box):
 
 class AlignedExpander(Gtk.Expander):
     """A L{Gtk.Expander} with an alignment that can place its children nicely."""
-    def __init__(self, markup, expanded=True):
-        Gtk.Expander.__init__(self, label=markup, use_markup=True,
+    def __init__(self, label='', expanded=True):
+        Gtk.Expander.__init__(self, label=label, use_markup=True,
                               resize_toplevel=True, expanded=expanded)
 
         alignment = Gtk.Alignment()

@@ -47,9 +47,19 @@ _ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
 
 class _TaskNewUI(object):
     """Base class for the UIs of the new task dialog."""
-    def __init__(self):
-        self._setting_widgets = {}
-        self._content_box = Box(VERTICAL)
+    def __init__(self, setting_widgets, expander_label):
+        self._setting_widgets = setting_widgets.copy()
+
+        expander = AlignedExpander(expander_label)
+        self._uris_expander = expander
+
+        vbox = Box(VERTICAL)
+        expander.add(vbox)
+        self._content_box = vbox
+
+    @property
+    def uris_expander(self):
+        return self._uris_expander
 
     def activate(self, options):
         """When the UI changed to this one, update the setting widgets."""
@@ -58,11 +68,14 @@ class _TaskNewUI(object):
                 widget.value = options[key]
             except KeyError:
                 pass
+        self._uris_expander.show_all()
 
 class _TaskNewDefaultUI(_TaskNewUI):
     """Default UI of the new task dialog."""
-    def __init__(self, parent):
-        _TaskNewUI.__init__(self)
+    def __init__(self, setting_widgets, parent):
+        _TaskNewUI.__init__(self, setting_widgets,
+                            expander_label= _('<b>URIs/Torrent/Metalink File</b>')
+                           )
 
         box = self._content_box
 
@@ -90,8 +103,10 @@ class _TaskNewDefaultUI(_TaskNewUI):
 
 class _TaskNewNormalUI(_TaskNewUI):
     """Normal UI of the new task dialog."""
-    def __init__(self):
-        _TaskNewUI.__init__(self)
+    def __init__(self, setting_widgets):
+        _TaskNewUI.__init__(self, setting_widgets,
+                            expander_label=_('<b>Mirrors</b> - one or more URI(s) for <b>one</b> task')
+                           )
 
         box = self._content_box
 
@@ -128,8 +143,10 @@ class _TaskNewNormalUI(_TaskNewUI):
 
 class _TaskNewBTUI(_TaskNewUI):
     """BT UI of the new task dialog."""
-    def __init__(self):
-        _TaskNewUI.__init__(self)
+    def __init__(self, setting_widgets):
+        _TaskNewUI.__init__(self, setting_widgets,
+                            expander_label=_('<b>Torrent File</b>')
+                           )
 
         box = self._content_box
 
@@ -142,8 +159,10 @@ class _TaskNewBTUI(_TaskNewUI):
 
 class _TaskNewMLUI(_TaskNewUI):
     """Metalink UI of the new task dialog."""
-    def __init__(self):
-        _TaskNewUI.__init__(self)
+    def __init__(self, setting_widgets):
+        _TaskNewUI.__init__(self, setting_widgets,
+                            expander_label=_('<b>Metalink File</b>')
+                           )
 
         box = self._content_box
 
@@ -179,23 +198,15 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._bt_ui = None
         self._ml_ui = None
 
+        self._setting_widgets = {}
+
         ### Content Area
         content_area = self.get_content_area()
 
         vbox = Box(VERTICAL)
         vbox.set_border_width(5)
         content_area.add(vbox)
-        self.main_vbox = vbox
-
-        # Mirrors/Files
-        expander = AlignedExpander(_('<b>URIs/Torrent/Metalink File</b>'))
-        vbox.pack_start(expander)
-        self.uris_expander = expander
-
-        ## Advanced
-        expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
-        vbox.pack_end(expander)
-        self.advanced_expander = expander
+        self._main_vbox = vbox
 
         ## Save to
         expander = AlignedExpander(_('<b>Save to...</b>'))
@@ -210,12 +221,14 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                  Gtk.FileChooserAction.SELECT_FOLDER
                                 )
         hbox.pack_end(entry)
+        self._setting_widgets['dir'] = entry
 
         model = CategoryFilterModel(pool_model)
         combo_box = CategoryComboBox(model, self)
         combo_box.connect('changed', self._on_category_cb_changed, entry)
         combo_box.set_active(0)
         hbox.pack_start(combo_box)
+        self._setting_widgets['category'] = combo_box
 
         self.show_all()
 
@@ -223,7 +236,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     def default_ui(self):
         """Get the default UI."""
         if self._default_ui is None:
-            ui = _TaskNewDefaultUI(self)
+            ui = _TaskNewDefaultUI(self._setting_widgets, self)
             ui.uri_entry.connect('response', self._on_metafile_selected)
             ui.uri_entry.connect('changed', self._on_default_entry_changed)
             self._default_ui = ui
@@ -233,21 +246,21 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     def normal_ui(self):
         """Get the normal UI."""
         if self._normal_ui is None:
-            self._normal_ui = _TaskNewNormalUI()
+            self._normal_ui = _TaskNewNormalUI(self._setting_widgets)
         return self._normal_ui
 
     @property
     def bt_ui(self):
         """Get the BT UI."""
         if self._bt_ui is None:
-            self._bt_ui = _TaskNewBTUI()
+            self._bt_ui = _TaskNewBTUI(self._setting_widgets)
         return self._bt_ui
 
     @property
     def ml_ui(self):
         """Get the ML UI."""
         if self._ml_ui is None:
-            self._ml_ui = _TaskNewMLUI()
+            self._ml_ui = _TaskNewMLUI(self._setting_widgets)
         return self._ml_ui
 
     def _on_category_cb_changed(self, category_cb, entry):
@@ -279,21 +292,13 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     def set_ui(self, new_ui, options=None):
         """Set the UI of the dialog."""
         # Remove current child of uris_expander
-        if not self._ui is new_ui:
-            uris_expander = self.uris_expander
-            try:
-                uris_expander.remove(uris_expander.get_child())
-            except TypeError:
-                pass
-            uris_expander.add(new_ui.content_box)
+        if self._ui is not new_ui:
+            main_vbox = self._main_vbox
+            if self._ui is not None:
+                main_vbox.remove(self._ui.uris_expander)
+            main_vbox.pack_start(new_ui.uris_expander)
 
         new_ui.activate(options)
-
-        # Don't show advanced expander in default UI
-        if new_ui is self.default_ui:
-            self.advanced_expander.hide()
-        else:
-            self.advanced_expander.show()
 
         self.update_size()
 
