@@ -49,6 +49,7 @@ class _TaskNewUI(object):
     """Base class for the UIs of the new task dialog."""
     def __init__(self):
         self._setting_widgets = {}
+        self._content_box = Box(VERTICAL)
 
     def activate(self, options):
         """When the UI changed to this one, update the setting widgets."""
@@ -63,7 +64,7 @@ class _TaskNewDefaultUI(_TaskNewUI):
     def __init__(self, parent):
         _TaskNewUI.__init__(self)
 
-        box = Box(VERTICAL)
+        box = self._content_box
 
         text = _('Select Torrent/Metalink Files')
         entry = FileChooserEntry(text,
@@ -81,10 +82,7 @@ class _TaskNewDefaultUI(_TaskNewUI):
         box.pack_start(entry)
         self._setting_widgets['uris'] = entry
 
-        box.show_all()
-
         self.uri_entry = entry
-        self.content_box = box
 
     def activate(self, options):
         _TaskNewUI.activate(self, options)
@@ -95,8 +93,7 @@ class _TaskNewNormalUI(_TaskNewUI):
     def __init__(self):
         _TaskNewUI.__init__(self)
 
-        ## Content Box
-        box = Box(VERTICAL)
+        box = self._content_box
 
         uris_view = URIsView()
         uris_view.set_size_request(300, 70)
@@ -123,10 +120,7 @@ class _TaskNewNormalUI(_TaskNewUI):
         hbox.pack_start(spin_button)
         self._setting_widgets['split'] = spin_button
 
-        box.show_all()
-
         self._uris_view = uris_view
-        self.content_box = box
 
     def activate(self, options):
         _TaskNewUI.activate(self, options)
@@ -137,7 +131,7 @@ class _TaskNewBTUI(_TaskNewUI):
     def __init__(self):
         _TaskNewUI.__init__(self)
 
-        box = Box(VERTICAL)
+        box = self._content_box
 
         button = MetafileChooserButton(title=_('Select torrent file'),
                                        mime_types=_BT_MIME_TYPES,
@@ -146,17 +140,12 @@ class _TaskNewBTUI(_TaskNewUI):
         box.pack_start(button)
         self._setting_widgets['torrent_filename'] = button
 
-        box.show_all()
-
-        self._bt_file_button = button
-        self.content_box = box
-
 class _TaskNewMLUI(_TaskNewUI):
     """Metalink UI of the new task dialog."""
     def __init__(self):
         _TaskNewUI.__init__(self)
 
-        box = Box(VERTICAL)
+        box = self._content_box
 
         button = MetafileChooserButton(title=_('Select metalink file'),
                                        mime_types=_ML_MIME_TYPES,
@@ -164,11 +153,6 @@ class _TaskNewMLUI(_TaskNewUI):
         button.set_size_request(300, -1)
         box.pack_start(button)
         self._setting_widgets['metalink_filename'] = button
-
-        box.show_all()
-
-        self._ml_file_button = button
-        self.content_box = box
 
 class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for creating new tasks."""
