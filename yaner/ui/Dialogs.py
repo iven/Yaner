@@ -38,7 +38,6 @@ from yaner.ui.Widgets import HORIZONTAL, VERTICAL
 from yaner.ui.PoolTree import PoolModel
 from yaner.ui.CategoryComboBox import CategoryFilterModel, CategoryComboBox
 from yaner.utils.Logging import LoggingMixin
-from yaner.utils.Enum import Enum
 
 _BT_FILTER_NAME = _('Torrent Files')
 _ML_FILTER_NAME = _('Metalink Files')
@@ -47,6 +46,10 @@ _ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
 
 class _TaskNewUI(object):
     """Base class for the UIs of the new task dialog."""
+
+    settings = Gio.Settings('com.kissuki.yaner.task')
+    """GSettings instance for task configurations."""
+
     def __init__(self, setting_widgets, expander_label):
         self._setting_widgets = setting_widgets.copy()
 
@@ -175,12 +178,6 @@ class _TaskNewMLUI(_TaskNewUI):
 
 class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for creating new tasks."""
-
-    settings = Gio.Settings('com.kissuki.yaner.task')
-    """GSettings instance for task configurations."""
-
-    STATES = Enum('DEFAULT', 'NORMAL', 'BT', 'ML')
-
     def __init__(self, parent, pool_model):
         """"""
         Gtk.Dialog.__init__(self, title=_('New Task'), parent=parent,
