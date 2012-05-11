@@ -25,7 +25,7 @@
 import functools
 import collections
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk
 
 HORIZONTAL, VERTICAL = Gtk.Orientation.HORIZONTAL, Gtk.Orientation.VERTICAL
 
@@ -69,17 +69,10 @@ class URIsView(Gtk.ScrolledWindow):
         self.text_view = text_view
 
         text_buffer = text_view.get_buffer()
-        text_buffer.connect('changed', self._text_changed)
         self.text_buffer = text_buffer
 
-    def _text_changed(self, text_buffer):
-        """When text in the buffer changed, update uris property."""
-        self.notify('uris')
-
-    def grab_focus(self):
-        self.text_view.grab_focus()
-
-    def get_uris(self):
+    @property
+    def uris(self):
         tbuffer = self.text_buffer
         return tbuffer.get_text(
             tbuffer.get_start_iter(),
@@ -87,7 +80,8 @@ class URIsView(Gtk.ScrolledWindow):
             False
             ).split()
 
-    def set_uris(self, uris):
+    @uris.setter
+    def uris(self, uris):
         tbuffer = self.text_buffer
         if isinstance(uris, str):
             tbuffer.set_text(uris)
@@ -96,12 +90,11 @@ class URIsView(Gtk.ScrolledWindow):
         else:
             raise TypeError('URIs should be a string or sequence.')
 
-    uris = GObject.property(getter=get_uris, setter=set_uris)
+    def grab_focus(self):
+        self.text_view.grab_focus()
 
 class MetafileChooserButton(Gtk.FileChooserButton):
     """A single file chooser button with a file filter."""
-
-    filename = GObject.property(getter=Gtk.FileChooserButton.get_filename)
 
     def __init__(self, title, mime_types):
         Gtk.FileChooserButton.__init__(self, title=title)
@@ -112,14 +105,11 @@ class MetafileChooserButton(Gtk.FileChooserButton):
 
         self.set_filter(file_filter)
 
-    def do_file_set(self):
-        """When the file selected, update filename property."""
-        self.notify('filename')
-
 class FileChooserEntry(Gtk.Entry):
     """An Entry with a activatable icon that popups FileChooserDialog."""
 
-    def __init__(self, title, parent, file_chooser_action, mime_list=None, **kwargs):
+    def __init__(self, title, parent, file_chooser_action, update_entry=True,
+                 mime_list=None, **kwargs):
         Gtk.Entry.__init__(self, **kwargs)
 
         self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-open')
@@ -141,12 +131,21 @@ class FileChooserEntry(Gtk.Entry):
                     file_filter.add_mime_type(mime_type)
                 dialog.add_filter(file_filter)
 
+        # Update the entry text when file choosed?
+        if update_entry:
+            dialog.connect('response', self._update_directory_path)
+
     def _on_icon_press(self, entry, icon_pos, event):
         """When icon activated, popup file chooser dialog."""
         if icon_pos == Gtk.EntryIconPosition.SECONDARY:
             dialog = self._file_chooser_dialog
             dialog.run()
             dialog.hide()
+
+    def _update_directory_path(self, dialog, response_id):
+        """When file choosed, update the entry text."""
+        if response_id == Gtk.ResponseType.ACCEPT:
+            self.set_text(dialog.get_filename())
 
     def connect(self, signal_name, *args, **kwargs):
         if signal_name in ('response'):

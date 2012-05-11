@@ -28,16 +28,14 @@ import os
 import xmlrpc.client
 
 from gi.repository import Gtk
-from gi.repository import GLib
 from gi.repository import Gio
-from gi.repository import Pango
 
 from yaner.Task import Task
-from yaner.Presentable import Presentable
 from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView, Box
 from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
 from yaner.ui.Widgets import HORIZONTAL, VERTICAL
 from yaner.ui.PoolTree import PoolModel
+from yaner.ui.CategoryComboBox import CategoryFilterModel, CategoryComboBox
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.Enum import Enum
 
@@ -46,155 +44,85 @@ _ML_FILTER_NAME = _('Metalink Files')
 _BT_MIME_TYPES = {'application/x-bittorrent'}
 _ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
 
-class _SettingWidget(LoggingMixin):
-    """A widget for communicate with GSettings."""
-    def __init__(self, settings):
-        LoggingMixin.__init__(self)
-
-        self.settings = settings
-
-    def get(self):
-        """Get the task options to be used for aria2 from the widget status."""
-        return {}
-
-    def set(self, options):
-        """Set the widget status according to the options provided."""
-        pass
-
-    def load(self):
-        """Load settings from GSettings and set the value of the widget."""
-        pass
-
-    def save(self):
-        """Save the value of the widget to GSettings."""
-        pass
-
-class _SettingEntry(Gtk.Entry, _SettingWidget):
+class _SettingEntry(Gtk.Entry):
     """An entry for communicate with GSettings."""
-    def __init__(self, settings, key):
-        Gtk.Entry.__init__(self)
-        _SettingWidget.__init__(self, settings)
-
+    def __init__(self, key, *args, **kwargs):
+        Gtk.Entry.__init__(self, *args, **kwargs)
         self._key = key
 
-    def get(self):
-        return {self._key: self.get_text()}
+    @property
+    def value(self):
+        return self.get_text()
 
-    def set(self, options):
-        try:
-            self.set_text(options[self._key])
-        except KeyError:
-            pass
+    @value.setter
+    def value(self, value):
+        self.set_text(value)
 
-    def load(self):
-        self.set_text(self.settings.get(self.key))
+class _SettingSpinButton(Gtk.SpinButton):
+    """An spin button for communicate with GSettings."""
+    def __init__(self, key, *args, **kwargs):
+        Gtk.SpinButton.__init__(self, *args, **kwargs)
+        self._key = key
 
-    def save(self):
-        self.settings.set(self.key, self.get_text())
+    @property
+    def value(self):
+        return self.get_value()
 
-class _SettingDirBox(Box, _SettingWidget):
-    """ComboBox and Entry for the directory option."""
-    def __init__(self, settings, pool_model, parent):
-        Box.__init__(self, HORIZONTAL)
-        _SettingWidget.__init__(self, settings)
+    @value.setter
+    def value(self, value):
+        self.set_value(value)
 
-        self._active_category = None
+class _SettingURIsView(URIsView):
+    """URI TextView for communicate with GSettings."""
+    def __init__(self, key, *args, **kwargs):
+        URIsView.__init__(self, *args, **kwargs)
+        self._key = key
 
-        category_model = Gtk.TreeModelFilter(child_model=pool_model)
-        category_model.set_visible_func(self._category_visible_func, None)
+    @property
+    def value(self):
+        return self.uris
 
-        category_cb = Gtk.ComboBox(model=category_model)
-        self.pack_start(category_cb)
+    @value.setter
+    def value(self, value):
+        self.uris = value
 
-        renderer = Gtk.CellRendererPixbuf()
-        category_cb.pack_start(renderer, False)
-        category_cb.set_cell_data_func(renderer, self._pixbuf_data_func, None)
+class _SettingMetafileChooserButton(MetafileChooserButton):
+    """MetafileChooserButton for communicate with GSettings."""
+    def __init__(self, key, *args, **kwargs):
+        MetafileChooserButton.__init__(self, *args, **kwargs)
+        self._key = key
 
-        renderer = Gtk.CellRendererText()
-        category_cb.pack_start(renderer, True)
-        category_cb.set_cell_data_func(renderer, self._markup_data_func, None)
+    @property
+    def value(self):
+        return self.get_filename()
 
-        # Directory
-        dir_entry = FileChooserEntry(_('Select download directory'), parent,
-                                     Gtk.FileChooserAction.SELECT_FOLDER)
-        dir_entry.connect('response', self._update_directory_path, dir_entry)
-        self.pack_start(dir_entry)
-        self._dir_entry = dir_entry
+    @value.setter
+    def value(self, value):
+        self.set_filename(value)
 
-        # Connect signal and select the first pool
-        category_cb.connect('changed', self._on_category_cb_changed, dir_entry)
-        category_cb.set_active(0)
+class _SettingFileChooserEntry(FileChooserEntry):
+    """FileChooserEntry for communicate with GSettings."""
+    def __init__(self, key, *args, **kwargs):
+        FileChooserEntry.__init__(self, *args, **kwargs)
+        self._key = key
 
-    def _update_directory_path(self, dialog, response_id, entry):
-        """When default directory choosed, update the entry text."""
-        if response_id == Gtk.ResponseType.ACCEPT:
-            entry.set_text(dialog.get_filename())
+    @property
+    def value(self):
+        return self.get_text()
 
-    def _pixbuf_data_func(self, cell_layout, renderer, model, iter_, data=None):
-        """Method for set the icon and its size in the column."""
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+    @value.setter
+    def value(self, value):
+        self.set_text(value)
 
-        if presentable.TYPE == Presentable.TYPES.QUEUING:
-            if presentable.pool.connected:
-                icon = 'gtk-connect'
-            else:
-                icon = 'gtk-disconnect'
-        elif presentable.TYPE == Presentable.TYPES.CATEGORY:
-            icon = 'gtk-directory'
+class _SettingCategoryComboBox(CategoryComboBox):
+    """CategoryComboBox for communicate with GSettings."""
+    def __init__(self, key, *args, **kwargs):
+        CategoryComboBox.__init__(self, *args, **kwargs)
+        self._key = key
 
-        renderer.set_properties(
-                stock_id = icon,
-                stock_size = Gtk.IconSize.LARGE_TOOLBAR,
-                )
-
-    def _markup_data_func(self, cell_layout, renderer, model, iter_, data=None):
-        """
-        Method for format the text in the column.
-        """
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
-
-        renderer.set_properties(
-                markup = GLib.markup_escape_text(presentable.name),
-                ellipsize_set = True,
-                ellipsize = Pango.EllipsizeMode.MIDDLE,
-                )
-
-    def _category_visible_func(self, model, iter_, data):
-        """Show categorys of the selected pool in the combobox."""
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
-        return (presentable is not None and 
-                presentable.TYPE in (Presentable.TYPES.CATEGORY,
-                                     Presentable.TYPES.QUEUING)
-               )
-
-    def _on_category_cb_changed(self, category_cb, dir_entry):
-        """When category combobox changed, update the directory entry."""
-        iter_ = category_cb.get_active_iter()
-        model = category_cb.get_model()
-
-        if iter_ is None:
-            category_cb.set_active_iter(model.iter_children(iter_))
-            return
-
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
-        if presentable.TYPE == Presentable.TYPES.QUEUING:
-            category_cb.set_active_iter(model.iter_children(iter_))
-        else:
-            self._active_category = presentable
-            dir_entry.set_text(presentable.directory)
-            self.logger.debug(_('Category is changed to {}.').format(presentable))
-
-    def get(self):
-        return {
-            'dir': self._dir_entry.get_text(),
-            'category': self._active_category,
-        }
-
-    def set(self, options):
-        try:
-            self._dir_entry.set_text(options[self._key])
-        except KeyError:
-            pass
+    @property
+    def value(self):
+        return self.active_category
 
 class _TaskNewDefaultUI(object):
     """Default UI of the new task dialog."""
@@ -205,7 +133,8 @@ class _TaskNewDefaultUI(object):
         entry = FileChooserEntry(text,
                                  parent,
                                  Gtk.FileChooserAction.OPEN,
-                                 (
+                                 update_entry=False,
+                                 mime_list=(
                                      (_BT_FILTER_NAME, _BT_MIME_TYPES),
                                      (_ML_FILTER_NAME, _ML_MIME_TYPES),
                                  ),
@@ -226,11 +155,31 @@ class _TaskNewDefaultUI(object):
 class _TaskNewNormalUI(object):
     """Normal UI of the new task dialog."""
     def __init__(self):
+        ## Content Box
         box = Box(VERTICAL)
 
-        uris_view = URIsView()
+        uris_view = _SettingURIsView('uris')
         uris_view.set_size_request(300, 70)
         box.pack_start(uris_view)
+
+        hbox = Box(HORIZONTAL)
+        box.pack_start(hbox)
+
+        # Rename
+        label = LeftAlignedLabel(_('Rename:'))
+        hbox.pack_start(label, expand=False)
+
+        entry = _SettingEntry('out', activates_default=True)
+        hbox.pack_start(entry)
+
+        # Connections
+        label = LeftAlignedLabel(_('Connections:'))
+        hbox.pack_start(label, expand=False)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = _SettingSpinButton('split', adjustment=adjustment, numeric=True)
+        hbox.pack_start(spin_button)
+
         box.show_all()
 
         self._uris_view = uris_view
@@ -238,7 +187,7 @@ class _TaskNewNormalUI(object):
 
     def activate(self, data):
         if data is not None:
-            self._uris_view.set_uris(data)
+            self._uris_view.value = data
         self._uris_view.grab_focus()
 
 class _TaskNewBTUI(object):
@@ -246,9 +195,10 @@ class _TaskNewBTUI(object):
     def __init__(self):
         box = Box(VERTICAL)
 
-        button = MetafileChooserButton(title=_('Select torrent file'),
-                                       mime_types=_BT_MIME_TYPES,
-                                      )
+        button = _SettingMetafileChooserButton('torrent_filename',
+                                               title=_('Select torrent file'),
+                                               mime_types=_BT_MIME_TYPES,
+                                              )
         button.set_size_request(300, -1)
         box.pack_start(button)
         box.show_all()
@@ -258,16 +208,17 @@ class _TaskNewBTUI(object):
 
     def activate(self, data):
         if data is not None:
-            self._bt_file_button.set_filename(data)
+            self._bt_file_button.value = data
 
 class _TaskNewMLUI(object):
     """Metalink UI of the new task dialog."""
     def __init__(self):
         box = Box(VERTICAL)
 
-        button = MetafileChooserButton(title=_('Select metalink file'),
-                                       mime_types=_ML_MIME_TYPES,
-                                      )
+        button = _SettingMetafileChooserButton('metalink_filename',
+                                               title=_('Select metalink file'),
+                                               mime_types=_ML_MIME_TYPES,
+                                              )
         button.set_size_request(300, -1)
         box.pack_start(button)
         box.show_all()
@@ -277,7 +228,7 @@ class _TaskNewMLUI(object):
 
     def activate(self, data):
         if data is not None:
-            self._ml_file_button.set_filename(data)
+            self._ml_file_button.value = data
 
 class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for creating new tasks."""
@@ -327,10 +278,32 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         expander = AlignedExpander(_('<b>Save to...</b>'))
         vbox.pack_end(expander)
 
-        dir_box = _SettingDirBox(self.settings, pool_model, self)
-        expander.add(dir_box)
+        hbox = Box(HORIZONTAL)
+        expander.add(hbox)
+
+        # Directory
+        entry = _SettingFileChooserEntry('dir',
+                                         _('Select download directory'),
+                                         self,
+                                         Gtk.FileChooserAction.SELECT_FOLDER
+                                        )
+        hbox.pack_end(entry)
+
+        model = CategoryFilterModel(pool_model)
+        combo_box = _SettingCategoryComboBox('category', model, self)
+        combo_box.connect('changed', self._on_category_cb_changed, entry)
+        combo_box.set_active(0)
+        hbox.pack_start(combo_box)
 
         self.show_all()
+
+    def _on_category_cb_changed(self, category_cb, entry):
+        """When category combo box changed, update the directory entry."""
+        iter_ = category_cb.get_active_iter()
+        model = category_cb.get_model()
+        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+        entry.set_text(presentable.directory)
+        self.logger.debug(_('Category is changed to {}.').format(presentable))
 
     @property
     def default_ui(self):
@@ -784,7 +757,6 @@ class CategoryBar(Gtk.InfoBar):
 
         entry = FileChooserEntry(_('Select default directory'), parent,
                                  Gtk.FileChooserAction.SELECT_FOLDER)
-        entry.connect('response', self._update_directory_path, entry)
         table.attach_defaults(entry, 1, 2, 1, 2)
         widgets['directory'] = entry
 
@@ -794,11 +766,6 @@ class CategoryBar(Gtk.InfoBar):
         self.pool = pool
         self.category = None
         self.widgets = widgets
-
-    def _update_directory_path(self, dialog, response_id, entry):
-        """When default directory choosed, update the entry text."""
-        if response_id == Gtk.ResponseType.ACCEPT:
-            entry.set_text(dialog.get_filename())
 
     def update(self, pool, category=None):
         """Update the category bar using the given pool and category. If category
