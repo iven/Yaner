@@ -289,7 +289,10 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     def _on_default_entry_changed(self, entry):
         """When the entry in the default content box changed, switch to normal
         mode."""
-        self.set_ui(self.normal_ui, {'uris': entry.get_text()})
+        # When default UI activated, the entry text is cleared, we should
+        # ignore this.
+        if self._ui is not self.normal_ui:
+            self.set_ui(self.normal_ui, {'uris': entry.get_text()})
 
     def set_ui(self, new_ui, options=None):
         """Set the UI of the dialog."""
