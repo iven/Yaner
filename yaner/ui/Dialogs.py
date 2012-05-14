@@ -227,6 +227,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         hbox.pack_start(combo_box)
         self._setting_widgets['category'] = combo_box
 
+        ## Advanced
+        expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
+        vbox.pack_end(expander)
+        self.advanced_expander = expander
+
         self.show_all()
 
     @property
@@ -294,6 +299,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             if self._ui is not None:
                 main_vbox.remove(self._ui.uris_expander)
             main_vbox.pack_start(new_ui.uris_expander)
+
+        if new_ui is self.default_ui:
+            self.advanced_expander.hide()
+        else:
+            self.advanced_expander.show_all()
 
         new_ui.activate(options)
 
