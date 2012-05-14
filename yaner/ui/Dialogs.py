@@ -724,6 +724,8 @@ class PoolBar(Gtk.InfoBar):
         table.attach_defaults(entry, 1, 2, 0, 1)
         widgets['name'] = entry
 
+        label = LeftAlignedLabel(_('IP Address:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
 
         entry = Gtk.Entry()
         table.attach_defaults(entry, 1, 2, 1, 2)
