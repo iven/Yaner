@@ -33,8 +33,9 @@ LeftAlignedLabel = functools.partial(Gtk.Label, xalign=0)
 
 class Box(Gtk.Box):
     """Simplified Gtk.Box."""
-    def __init__(self, orientation, spacing=5):
-        Gtk.Box.__init__(self, orientation=orientation, spacing=spacing)
+    def __init__(self, orientation, spacing=5, *args, **kwargs):
+        Gtk.Box.__init__(self, orientation=orientation,
+                         spacing=spacing, *args, **kwargs)
 
         self.pack_start = functools.partial(self.pack_start,
                                             expand=True, fill=True, padding=0)

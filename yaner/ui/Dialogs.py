@@ -200,8 +200,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         ### Content Area
         content_area = self.get_content_area()
 
-        vbox = Box(VERTICAL)
-        vbox.set_border_width(5)
+        vbox = Box(VERTICAL, border_width=5)
         content_area.add(vbox)
         self._main_vbox = vbox
 
@@ -237,9 +236,54 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         # Normal Task Page
         label = Gtk.Label('Normal Task')
-        vbox = Box(VERTICAL)
+        vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
+        hbox = Box(HORIZONTAL)
+        vbox.pack_start(hbox)
+
+        # Referer
+        label = LeftAlignedLabel(_('Referer:'))
+        hbox.pack_start(label, expand=False)
+
+        entry = Entry(activates_default=True)
+        hbox.pack_start(entry)
+        self._setting_widgets['referer'] = entry
+
+        # Authorization
+        expander = AlignedExpander(_('Authorization'), expanded=False)
+        vbox.pack_start(expander)
+
+        table = Gtk.Table(3, 3, False, row_spacing=5, column_spacing=5)
+        expander.add(table)
+
+        label = LeftAlignedLabel(_('HTTP:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        label = LeftAlignedLabel(_('FTP:'))
+        table.attach_defaults(label, 0, 1, 2, 3)
+
+        label = LeftAlignedLabel(_('User'))
+        table.attach_defaults(label, 1, 2, 0, 1)
+
+        label = LeftAlignedLabel(_('Password'))
+        table.attach_defaults(label, 2, 3, 0, 1)
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 1, 2, 1, 2)
+        self._setting_widgets['http-user'] = entry
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 2, 3, 1, 2)
+        self._setting_widgets['http-passwd'] = entry
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 1, 2, 2, 3)
+        self._setting_widgets['ftp-user'] = entry
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 2, 3, 2, 3)
+        self._setting_widgets['ftp-passwd'] = entry
 
         self.show_all()
 
