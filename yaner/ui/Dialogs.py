@@ -207,7 +207,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         ## Save to
         expander = AlignedExpander(_('<b>Save to...</b>'))
-        vbox.pack_end(expander)
+        vbox.pack_start(expander)
 
         hbox = Box(HORIZONTAL)
         expander.add(hbox)
@@ -231,6 +231,15 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
         vbox.pack_end(expander)
         self.advanced_expander = expander
+
+        notebook = Gtk.Notebook()
+        expander.add(notebook)
+
+        # Normal Task Page
+        label = Gtk.Label('Normal Task')
+        vbox = Box(VERTICAL)
+        notebook.append_page(vbox, label)
+
 
         self.show_all()
 
@@ -302,6 +311,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             if self._ui is not None:
                 main_vbox.remove(self._ui.uris_expander)
             main_vbox.pack_start(new_ui.uris_expander)
+            main_vbox.reorder_child(new_ui.uris_expander, 0)
 
         if new_ui is self.default_ui:
             self.advanced_expander.hide()
