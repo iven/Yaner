@@ -31,7 +31,7 @@ from gi.repository import Gtk
 from gi.repository import Gio
 
 from yaner.Task import Task
-from yaner.ui.Widgets import Box, Entry, SpinButton
+from yaner.ui.Widgets import Box, Entry, SpinButton, Switch
 from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView
 from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
 from yaner.ui.Widgets import HORIZONTAL, VERTICAL
@@ -240,7 +240,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         notebook.append_page(vbox, label)
 
         hbox = Box(HORIZONTAL)
-        vbox.pack_start(hbox)
+        vbox.pack_start(hbox, expand=False)
 
         # Referer
         label = LeftAlignedLabel(_('Referer:'))
@@ -252,7 +252,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         # Authorization
         expander = AlignedExpander(_('Authorization'), expanded=False)
-        vbox.pack_start(expander)
+        vbox.pack_start(expander, expand=False)
 
         table = Gtk.Table(3, 3, False, row_spacing=5, column_spacing=5)
         expander.add(table)
@@ -292,13 +292,13 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         # Settings
         expander = AlignedExpander(_('Settings'))
-        vbox.pack_start(expander)
+        vbox.pack_start(expander, expand=False)
 
         vbox2 = Box(VERTICAL)
         expander.add(vbox2)
 
         table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
-        vbox2.pack_start(table)
+        vbox2.pack_start(table, expand=False)
 
         label = LeftAlignedLabel(_('Max open files:'))
         table.attach_defaults(label, 0, 1, 0, 1)
@@ -332,29 +332,32 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         table.attach_defaults(spin_button, 3, 4, 1, 2)
         self._setting_widgets['seed-ratio'] = spin_button
 
-#        switch = Gtk.Switch(
-#            label=_('Preview mode'),
-#            tooltip_text=_('Try to download first and last pieces first'))
-#        vbox.pack_start(check_button)
-#        self._setting_widgets['bt-prioritize', check_button, 'active')
-#
-#        # Mirrors
-#        expander = AlignedExpander(_('Mirrors'), expanded=False)
-#        expander.set_tooltip_text(
-#            _('For single file torrents, a mirror can be a ' \
-#              'complete URI pointing to the resource or if the mirror ' \
-#              'ends with /, name in torrent file is added. For ' \
-#              'multi-file torrents, name and path in torrent are ' \
-#              'added to form a URI for each file.'))
-#        vbox.pack_start(expander)
-#
-#        vbox = Box(VERTICAL)
-#        expander.add(vbox)
-#
-#        uris_view = URIsView()
-#        vbox.pack_start(uris_view)
-#        self._setting_widgets['uris', uris_view, 'uris', bind_settings=False)
-#        self.uris_view = uris_view
+        hbox = Box(HORIZONTAL)
+        vbox2.pack_start(hbox, expand=False)
+
+        label = LeftAlignedLabel(_('Try to download first and last pieces first'))
+        hbox.pack_start(label)
+        switch = Gtk.Switch()
+        hbox.pack_start(switch, expand=False)
+        self._setting_widgets['bt-prioritize'] = switch
+
+        # Mirrors
+        expander = AlignedExpander(_('Mirrors'), expanded=False)
+        expander.set_tooltip_text(
+            _('For single file torrents, a mirror can be a ' \
+              'complete URI pointing to the resource or if the mirror ' \
+              'ends with /, name in torrent file is added. For ' \
+              'multi-file torrents, name and path in torrent are ' \
+              'added to form a URI for each file.'))
+        vbox.pack_start(expander, expand=False)
+
+        vbox3 = Box(VERTICAL)
+        expander.add(vbox3)
+
+        uris_view = URIsView()
+        uris_view.set_size_request(-1, 70)
+        vbox3.pack_start(uris_view)
+        self._setting_widgets['uris'] = uris_view
 
         self.show_all()
 
