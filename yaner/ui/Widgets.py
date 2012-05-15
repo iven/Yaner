@@ -75,6 +75,16 @@ class SpinButton(Gtk.SpinButton):
     def value(self, value):
         self.set_value(value)
 
+class Switch(Gtk.Switch):
+    """An switch for using to store settings."""
+    @property
+    def value(self):
+        return self.get_active()
+
+    @value.setter
+    def value(self, value):
+        self.set_active(value)
+
 class URIsView(Gtk.ScrolledWindow):
     """ScrolledWindow with a text view for getting/setting URIs."""
 

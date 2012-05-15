@@ -236,10 +236,80 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         expander.add(notebook)
 
         # Normal Task Page
-        label = Gtk.Label('Normal Task')
+        label = Gtk.Label(_('Normal Task'))
         vbox = Box(VERTICAL)
         notebook.append_page(vbox, label)
 
+        # BT Task Page
+        label = Gtk.Label(_('BitTorrent'))
+        vbox = Box(VERTICAL)
+        notebook.append_page(vbox, label)
+
+        # Settings
+        expander = AlignedExpander(_('Settings'))
+        vbox.pack_start(expander)
+
+        vbox2 = Box(VERTICAL)
+        expander.add(vbox2)
+
+        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
+        vbox2.pack_start(table)
+
+        label = LeftAlignedLabel(_('Max open files:'))
+        table.attach_defaults(label, 0, 1, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 0, 1)
+        self._setting_widgets['bt-max-open-files'] = spin_button
+
+        label = LeftAlignedLabel(_('Max peers:'))
+        table.attach_defaults(label, 2, 3, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 0, 1)
+        self._setting_widgets['bt-max-peers'] = spin_button
+
+        label = LeftAlignedLabel(_('Seed time(min):'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=7200, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 1, 2)
+        self._setting_widgets['seed-time'] = spin_button
+
+        label = LeftAlignedLabel(_('Seed ratio:'))
+        table.attach_defaults(label, 2, 3, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=20, step_increment=.1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True, digits=1)
+        table.attach_defaults(spin_button, 3, 4, 1, 2)
+        self._setting_widgets['seed-ratio'] = spin_button
+
+#        switch = Gtk.Switch(
+#            label=_('Preview mode'),
+#            tooltip_text=_('Try to download first and last pieces first'))
+#        vbox.pack_start(check_button)
+#        self._setting_widgets['bt-prioritize', check_button, 'active')
+#
+#        # Mirrors
+#        expander = AlignedExpander(_('Mirrors'), expanded=False)
+#        expander.set_tooltip_text(
+#            _('For single file torrents, a mirror can be a ' \
+#              'complete URI pointing to the resource or if the mirror ' \
+#              'ends with /, name in torrent file is added. For ' \
+#              'multi-file torrents, name and path in torrent are ' \
+#              'added to form a URI for each file.'))
+#        vbox.pack_start(expander)
+#
+#        vbox = Box(VERTICAL)
+#        expander.add(vbox)
+#
+#        uris_view = URIsView()
+#        vbox.pack_start(uris_view)
+#        self._setting_widgets['uris', uris_view, 'uris', bind_settings=False)
+#        self.uris_view = uris_view
 
         self.show_all()
 
