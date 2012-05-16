@@ -235,7 +235,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         expander.add(notebook)
 
         ## Normal Task Page
-        label = Gtk.Label('Normal Task')
+        label = Gtk.Label(_('Normal Task'))
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
@@ -361,6 +361,50 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         uris_view.set_size_request(-1, 70)
         vbox3.pack_start(uris_view)
         self._setting_widgets['uris'] = uris_view
+
+        ## Metalink Page
+        label = Gtk.Label(_('Metalink'))
+        vbox = Box(VERTICAL, border_width=5)
+        notebook.append_page(vbox, label)
+
+        table = Gtk.Table(5, 2, False, row_spacing=5, column_spacing=5)
+        vbox.pack_start(table, expand=False)
+
+        label = LeftAlignedLabel(_('Download Servers:'))
+        table.attach_defaults(label, 0, 1, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 0, 1)
+        self._setting_widgets['metalink-servers'] = spin_button
+
+        label = LeftAlignedLabel(_('Preferred locations:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        entry = Entry()
+        table.attach_defaults(entry, 1, 2, 1, 2)
+        self._setting_widgets['metalink-location'] = entry
+
+        label = LeftAlignedLabel(_('Language:'))
+        table.attach_defaults(label, 0, 1, 2, 3)
+
+        entry = Entry()
+        table.attach_defaults(entry, 1, 2, 2, 3)
+        self._setting_widgets['metalink-language'] = entry
+
+        label = LeftAlignedLabel(_('Version:'))
+        table.attach_defaults(label, 0, 1, 3, 4)
+
+        entry = Entry()
+        table.attach_defaults(entry, 1, 2, 3, 4)
+        self._setting_widgets['metalink-version'] = entry
+
+        label = LeftAlignedLabel(_('OS:'))
+        table.attach_defaults(label, 0, 1, 4, 5)
+
+        entry = Entry()
+        table.attach_defaults(entry, 1, 2, 4, 5)
+        self._setting_widgets['metalink-os'] = entry
 
         self.show_all()
 
