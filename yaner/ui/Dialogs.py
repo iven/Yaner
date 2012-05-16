@@ -288,19 +288,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         ## BT Task Page
         label = Gtk.Label(_('BitTorrent'))
-        vbox = Box(VERTICAL)
+        vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        # Settings
-        expander = AlignedExpander(_('Settings'))
-        expander.connect_after('activate', self.update_size)
-        vbox.pack_start(expander, expand=False)
-
-        vbox2 = Box(VERTICAL)
-        expander.add(vbox2)
-
         table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
-        vbox2.pack_start(table, expand=False)
+        vbox.pack_start(table, expand=False)
 
         label = LeftAlignedLabel(_('Max open files:'))
         table.attach_defaults(label, 0, 1, 0, 1)
@@ -335,11 +327,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._setting_widgets['seed-ratio'] = spin_button
 
         hbox = Box(HORIZONTAL)
-        vbox2.pack_start(hbox, expand=False)
+        vbox.pack_start(hbox, expand=False)
 
         label = LeftAlignedLabel(_('Try to download first and last pieces first'))
         hbox.pack_start(label)
-        switch = Gtk.Switch()
+        switch = Switch()
         hbox.pack_start(switch, expand=False)
         self._setting_widgets['bt-prioritize'] = switch
 
@@ -354,12 +346,12 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         expander.connect_after('activate', self.update_size)
         vbox.pack_start(expander, expand=False)
 
-        vbox3 = Box(VERTICAL)
-        expander.add(vbox3)
+        vbox = Box(VERTICAL)
+        expander.add(vbox)
 
         uris_view = URIsView()
         uris_view.set_size_request(-1, 70)
-        vbox3.pack_start(uris_view)
+        vbox.pack_start(uris_view)
         self._setting_widgets['uris'] = uris_view
 
         ## Metalink Page
