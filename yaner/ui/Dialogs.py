@@ -206,6 +206,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         ## Save to
         expander = AlignedExpander(_('<b>Save to...</b>'))
+        expander.connect_after('activate', self.update_size)
         vbox.pack_start(expander)
 
         hbox = Box(HORIZONTAL)
@@ -228,6 +229,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         ## Advanced
         expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
+        expander.connect_after('activate', self.update_size)
         vbox.pack_end(expander)
         self.advanced_expander = expander
 
@@ -239,16 +241,96 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
+        table = Gtk.Table(4, 4, False, row_spacing=5, column_spacing=5)
+        vbox.pack_start(table, expand=False)
+
+        # Speed Limit
+        label = LeftAlignedLabel(_('Upload Limit(KiB/s):'))
+        table.attach_defaults(label, 0, 1, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 0, 1)
+        self._setting_widgets['max-upload-limit'] = spin_button
+
+        label = LeftAlignedLabel(_('Download Limit(KiB/s):'))
+        table.attach_defaults(label, 2, 3, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 0, 1)
+        self._setting_widgets['max-download-limit'] = spin_button
+
+        # Retry
+        label = LeftAlignedLabel(_('Max Retries:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 1, 2)
+        self._setting_widgets['max-tries'] = spin_button
+
+        label = LeftAlignedLabel(_('Retry Interval(sec):'))
+        table.attach_defaults(label, 2, 3, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 1, 2)
+        self._setting_widgets['retry-wait'] = spin_button
+
+        # Timeout
+        label = LeftAlignedLabel(_('Timeout(sec):'))
+        table.attach_defaults(label, 0, 1, 2, 3)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 2, 3)
+        self._setting_widgets['timeout'] = spin_button
+
+        label = LeftAlignedLabel(_('Connect Timeout(sec):'))
+        table.attach_defaults(label, 2, 3, 2, 3)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 2, 3)
+        self._setting_widgets['connect-timeout'] = spin_button
+
+        # Overwrite and Rename
+        label = LeftAlignedLabel(_('Allow Overwrite:'))
+        table.attach_defaults(label, 0, 1, 3, 4)
+
+        switch = Switch()
+        table.attach_defaults(switch, 1, 2, 3, 4)
+        self._setting_widgets['allow-overwrite'] = switch
+
+        label = LeftAlignedLabel(_('Auto Rename Files:'))
+        table.attach_defaults(label, 2, 3, 3, 4)
+
+        switch = Switch()
+        table.attach_defaults(switch, 3, 4, 3, 4)
+        self._setting_widgets['auto-file-renaming'] = switch
+
+        # Referer
         hbox = Box(HORIZONTAL)
         vbox.pack_start(hbox, expand=False)
 
-        # Referer
         label = LeftAlignedLabel(_('Referer:'))
         hbox.pack_start(label, expand=False)
 
         entry = Entry(activates_default=True)
         hbox.pack_start(entry)
         self._setting_widgets['referer'] = entry
+
+        # Header
+        hbox = Box(HORIZONTAL)
+        vbox.pack_start(hbox, expand=False)
+
+        label = LeftAlignedLabel(_('Header:'))
+        hbox.pack_start(label, expand=False)
+
+        entry = Entry(activates_default=True)
+        hbox.pack_start(entry)
+        self._setting_widgets['header'] = entry
 
         # Authorization
         expander = AlignedExpander(_('Authorization'), expanded=False)
@@ -294,6 +376,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
         vbox.pack_start(table, expand=False)
 
+        # Limit
         label = LeftAlignedLabel(_('Max open files:'))
         table.attach_defaults(label, 0, 1, 0, 1)
 
@@ -310,6 +393,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         table.attach_defaults(spin_button, 3, 4, 0, 1)
         self._setting_widgets['bt-max-peers'] = spin_button
 
+        # Seed
         label = LeftAlignedLabel(_('Seed time(min):'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
@@ -325,6 +409,23 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         spin_button = SpinButton(adjustment=adjustment, numeric=True, digits=1)
         table.attach_defaults(spin_button, 3, 4, 1, 2)
         self._setting_widgets['seed-ratio'] = spin_button
+
+        # Timeout
+        label = LeftAlignedLabel(_('Timeout(sec):'))
+        table.attach_defaults(label, 0, 1, 2, 3)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 2, 3)
+        self._setting_widgets['bt-tracker-timeout'] = spin_button
+
+        label = LeftAlignedLabel(_('Connect Timeout(sec):'))
+        table.attach_defaults(label, 2, 3, 2, 3)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 2, 3)
+        self._setting_widgets['bt-tracker-connect-timeout'] = spin_button
 
         hbox = Box(HORIZONTAL)
         vbox.pack_start(hbox, expand=False)
