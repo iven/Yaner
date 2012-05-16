@@ -252,6 +252,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         # Authorization
         expander = AlignedExpander(_('Authorization'), expanded=False)
+        expander.connect_after('activate', self.update_size)
         vbox.pack_start(expander, expand=False)
 
         table = Gtk.Table(3, 3, False, row_spacing=5, column_spacing=5)
@@ -292,6 +293,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         # Settings
         expander = AlignedExpander(_('Settings'))
+        expander.connect_after('activate', self.update_size)
         vbox.pack_start(expander, expand=False)
 
         vbox2 = Box(VERTICAL)
@@ -349,6 +351,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
               'ends with /, name in torrent file is added. For ' \
               'multi-file torrents, name and path in torrent are ' \
               'added to form a URI for each file.'))
+        expander.connect_after('activate', self.update_size)
         vbox.pack_start(expander, expand=False)
 
         vbox3 = Box(VERTICAL)
@@ -442,7 +445,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         self._ui = new_ui
 
-    def update_size(self):
+    def update_size(self, widget=None):
         """Update the size of the dialog."""
         content_area = self.get_content_area()
         size = content_area.get_preferred_size()[0]
