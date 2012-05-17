@@ -67,6 +67,10 @@ class _TaskNewUI(object):
     def uris_expander(self):
         return self._uris_expander
 
+    @property
+    def task_options(self):
+        return {key: widget.value for (key, widget) in self._setting_widgets.items()}
+
     def activate(self, options):
         """When the UI changed to this one, bind and update the setting widgets."""
         keys = self.settings.list_keys()
@@ -82,6 +86,10 @@ class _TaskNewUI(object):
     def deactivate(self):
         """When the UI changed from this one, unbind the properties."""
         self.settings.revert()
+
+    def response(self):
+        """When dialog responsed, create new task."""
+        return True
 
 class _TaskNewDefaultUI(_TaskNewUI):
     """Default UI of the new task dialog."""
@@ -587,6 +595,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         # ignore this.
         if self._ui is not self.normal_ui:
             self.set_ui(self.normal_ui, {'uris': entry.get_text()})
+
+    def do_response(self, response):
+        """Create a new download task if uris are provided."""
+        if response != Gtk.ResponseType.OK or not self._ui.response():
+            self.hide()
 
     def set_ui(self, new_ui, options=None):
         """Set the UI of the dialog."""

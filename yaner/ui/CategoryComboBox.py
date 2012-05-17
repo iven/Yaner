@@ -68,7 +68,7 @@ class CategoryComboBox(Gtk.ComboBox):
 
     @property
     def value(self):
-        return self.active_category
+        return self._active_category
 
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""

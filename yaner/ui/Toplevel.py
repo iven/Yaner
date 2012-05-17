@@ -376,7 +376,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
     def _on_task_new(self, action, data):
         """When task new action is activated, call the task new dialog."""
         self.task_new_dialog.run()
-        self.task_new_dialog.hide()
 
     def _on_task_start(self, action, data):
         """When task start button clicked, start or unpause the task."""
