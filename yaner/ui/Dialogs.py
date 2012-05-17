@@ -251,7 +251,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(4, 4, False, row_spacing=5, column_spacing=5)
+        table = Gtk.Table(5, 4, False, row_spacing=5, column_spacing=5)
         vbox.pack_start(table, expand=False)
 
         # Speed Limit
@@ -305,19 +305,36 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         table.attach_defaults(spin_button, 3, 4, 2, 3)
         self._setting_widgets['connect-timeout'] = spin_button
 
-        # Overwrite and Rename
-        label = LeftAlignedLabel(_('Allow Overwrite:'))
+        # Split and Connections
+        label = LeftAlignedLabel(_('Split Size(MiB):'))
         table.attach_defaults(label, 0, 1, 3, 4)
 
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 3, 4)
+        self._setting_widgets['min-split-size'] = spin_button
+
+        label = LeftAlignedLabel(_('Per Server Connections:'))
+        table.attach_defaults(label, 2, 3, 3, 4)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=10, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 3, 4)
+        self._setting_widgets['max-connection-per-server'] = spin_button
+
+        # Overwrite and Rename
+        label = LeftAlignedLabel(_('Allow Overwrite:'))
+        table.attach_defaults(label, 0, 1, 4, 5)
+
         switch = Switch()
-        table.attach_defaults(switch, 1, 2, 3, 4)
+        table.attach_defaults(switch, 1, 2, 4, 5)
         self._setting_widgets['allow-overwrite'] = switch
 
         label = LeftAlignedLabel(_('Auto Rename Files:'))
-        table.attach_defaults(label, 2, 3, 3, 4)
+        table.attach_defaults(label, 2, 3, 4, 5)
 
         switch = Switch()
-        table.attach_defaults(switch, 3, 4, 3, 4)
+        table.attach_defaults(switch, 3, 4, 4, 5)
         self._setting_widgets['auto-file-renaming'] = switch
 
         # Referer
