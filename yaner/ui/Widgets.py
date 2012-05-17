@@ -25,11 +25,33 @@
 import functools
 import collections
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
 HORIZONTAL, VERTICAL = Gtk.Orientation.HORIZONTAL, Gtk.Orientation.VERTICAL
 
 LeftAlignedLabel = functools.partial(Gtk.Label, xalign=0)
+
+class _ValueMixin(object):
+    """A mixin class that adds a property `value` to the instance."""
+    @property
+    def value(self):
+        return self.get_value()
+
+    @value.setter
+    def value(self, value):
+        self.set_value(value)
+
+    def do_get_property(self, prop):
+        if prop.name == 'value':
+            return self.value
+        else:
+            raise AttributeError('unknown property %s' % prop.name)
+
+    def do_set_property(self, prop, value):
+        if prop.name == 'value':
+            self.value = value
+        else:
+            raise AttributeError('unknown property %s' % prop.name)
 
 class Box(Gtk.Box):
     """Simplified Gtk.Box."""
@@ -56,8 +78,17 @@ class AlignedExpander(Gtk.Expander):
         self.remove = alignment.remove
         self.get_child = alignment.get_child
 
-class Entry(Gtk.Entry):
+class Entry(Gtk.Entry, _ValueMixin):
     """An entry for using to store settings."""
+    __gproperties__ = {
+        "value": (str, # type
+                  "Value", # nick
+                  "Reads the current value, or sets a new value.",
+                  '',
+                  GObject.PARAM_READWRITE
+                 ),
+    }
+
     @property
     def value(self):
         return self.get_text()
@@ -66,18 +97,21 @@ class Entry(Gtk.Entry):
     def value(self, value):
         self.set_text(value)
 
-class SpinButton(Gtk.SpinButton):
+class SpinButton(Gtk.SpinButton, _ValueMixin):
     """An spin button for using to store settings."""
-    @property
-    def value(self):
-        return self.get_value()
+    pass
 
-    @value.setter
-    def value(self, value):
-        self.set_value(value)
-
-class Switch(Gtk.Switch):
+class Switch(Gtk.Switch, _ValueMixin):
     """An switch for using to store settings."""
+    __gproperties__ = {
+        "value": (bool, # type
+                  "Value", # nick
+                  "Reads the current value, or sets a new value.",
+                  False,
+                  GObject.PARAM_READWRITE
+                 ),
+    }
+
     @property
     def value(self):
         return self.get_active()
@@ -86,8 +120,16 @@ class Switch(Gtk.Switch):
     def value(self, value):
         self.set_active(value)
 
-class URIsView(Gtk.ScrolledWindow):
+class URIsView(Gtk.ScrolledWindow, _ValueMixin):
     """ScrolledWindow with a text view for getting/setting URIs."""
+    __gproperties__ = {
+        "value": (str, # type
+                  "Value", # nick
+                  "Reads the current value, or sets a new value.",
+                  '',
+                  GObject.PARAM_READWRITE
+                 ),
+    }
 
     def __init__(self):
         Gtk.ScrolledWindow.__init__(
@@ -124,8 +166,16 @@ class URIsView(Gtk.ScrolledWindow):
     def grab_focus(self):
         self.text_view.grab_focus()
 
-class MetafileChooserButton(Gtk.FileChooserButton):
+class MetafileChooserButton(Gtk.FileChooserButton, _ValueMixin):
     """A single file chooser button with a file filter."""
+    __gproperties__ = {
+        "value": (str, # type
+                  "Value", # nick
+                  "Reads the current value, or sets a new value.",
+                  '',
+                  GObject.PARAM_READWRITE
+                 ),
+    }
 
     def __init__(self, title, mime_types):
         Gtk.FileChooserButton.__init__(self, title=title)

@@ -254,8 +254,8 @@
                 Set the interval in seconds between tracker requests. This completely overrides interval value and Yaner just uses this value and ignores the min interval and interval value in the response of tracker. If 0 is set, Yaner determines interval based on the response of tracker and the download progress.
             </description>
         </key>
-        <key type='b' name='retry-wait'>
-            <default>true</default>
+        <key type='u' name='retry-wait'>
+            <default>0</default>
             <summary>Retry wait</summary>
             <description>
                 Set the seconds to wait between retries. With SEC > 0, Yaner will retry download when the HTTP server returns 503 response.

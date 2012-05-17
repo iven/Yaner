@@ -29,6 +29,7 @@ import xmlrpc.client
 
 from gi.repository import Gtk
 from gi.repository import Gio
+from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner.Task import Task
 from yaner.ui.Widgets import Box, Entry, SpinButton, Switch
@@ -52,6 +53,8 @@ class _TaskNewUI(object):
 
     def __init__(self, setting_widgets, expander_label):
         self._setting_widgets = setting_widgets.copy()
+        # Don't apply changes to dconf until apply() is called
+        self.settings.delay()
 
         expander = AlignedExpander(expander_label)
         self._uris_expander = expander
@@ -65,13 +68,20 @@ class _TaskNewUI(object):
         return self._uris_expander
 
     def activate(self, options):
-        """When the UI changed to this one, update the setting widgets."""
+        """When the UI changed to this one, bind and update the setting widgets."""
+        keys = self.settings.list_keys()
         for key, widget in self._setting_widgets.items():
+            if key in keys:
+                self.settings.bind(key, widget, 'value', BindFlags.DEFAULT)
             try:
                 widget.value = options[key]
             except KeyError:
                 pass
         self._uris_expander.show_all()
+
+    def deactivate(self):
+        """When the UI changed from this one, unbind the properties."""
+        self.settings.revert()
 
 class _TaskNewDefaultUI(_TaskNewUI):
     """Default UI of the new task dialog."""
@@ -575,6 +585,9 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             self.advanced_expander.hide()
         else:
             self.advanced_expander.show_all()
+
+        if self._ui is not None:
+            self._ui.deactivate()
 
         new_ui.activate(options)
 
