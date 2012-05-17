@@ -190,6 +190,23 @@ class _TaskNewNormalUI(_TaskNewUI):
         _TaskNewUI.activate(self, options)
         self._uris_view.grab_focus()
 
+    def response(self):
+        options = self.aria2_options
+
+        # Workaround for aria2 bug#3527521
+        options.pop('bt-prioritize-piece')
+
+        category = options.pop('category')
+        uris = options.pop('uris')
+        if not uris:
+            return True
+
+        name = options['out'] if options['out'] else os.path.basename(uris[0])
+
+        Task(name=name, uris=uris, options=options, category=category).start()
+
+        return False
+
 class _TaskNewBTUI(_TaskNewUI):
     """BT UI of the new task dialog."""
     def __init__(self, task_options):
@@ -207,6 +224,25 @@ class _TaskNewBTUI(_TaskNewUI):
         self._task_options['torrent_filename'] = _TaskOption(
             button, _TaskOption.string_mapper)
 
+    def response(self):
+        options = self.aria2_options
+
+        torrent_filename = options.pop('torrent_filename')
+        if torrent_filename is None:
+            return
+        else:
+            name = os.path.basename(torrent_filename)
+            with open(torrent_filename, 'br') as torrent_file:
+                torrent = xmlrpc.client.Binary(torrent_file.read())
+
+        uris = options.pop('uris')
+        category = options.pop('category')
+
+        Task(name=name, torrent=torrent, uris=uris,
+             options=options, category=category).start()
+
+        return False
+
 class _TaskNewMLUI(_TaskNewUI):
     """Metalink UI of the new task dialog."""
     def __init__(self, task_options):
@@ -223,6 +259,25 @@ class _TaskNewMLUI(_TaskNewUI):
         box.pack_start(button)
         self._task_options['metalink_filename'] = _TaskOption(
             button, _TaskOption.string_mapper)
+
+    def response(self):
+        options = self.aria2_options
+
+        # Workaround for aria2 bug#3527521
+        options.pop('uris')
+
+        metalink_filename = options.pop('metalink_filename')
+        if metalink_filename is None:
+            return
+        else:
+            name = os.path.basename(metalink_filename)
+            with open(metalink_filename, 'br') as metalink_file:
+                metafile = xmlrpc.client.Binary(metalink_file.read())
+
+        category = options.pop('category')
+
+        Task(name=name, metafile=metafile, options=options,
+             category=category).start()
 
 class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for creating new tasks."""
