@@ -48,11 +48,7 @@ class Presentable(LoggingMixin, GObject.GObject):
     GObject signals of this class.
     """
 
-    TYPES = Enum((
-        'QUEUING',
-        'CATEGORY',
-        'DUSTBIN',
-        ))
+    TYPES = Enum('QUEUING', 'CATEGORY', 'DUSTBIN')
     """Presentable types."""
 
     def __init__(self):

@@ -28,26 +28,261 @@ import os
 import xmlrpc.client
 
 from gi.repository import Gtk
-from gi.repository import GLib
 from gi.repository import Gio
-from gi.repository import Pango
 from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner.Task import Task
-from yaner.Presentable import Presentable
-from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView, Box
+from yaner.ui.Widgets import Box, Entry, SpinButton, Switch
+from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView
 from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
 from yaner.ui.Widgets import HORIZONTAL, VERTICAL
 from yaner.ui.PoolTree import PoolModel
+from yaner.ui.CategoryComboBox import CategoryFilterModel, CategoryComboBox
 from yaner.utils.Logging import LoggingMixin
 
-class TaskNewDialog(Gtk.Dialog, LoggingMixin):
-    """Base class for all new task dialogs."""
+_BT_FILTER_NAME = _('Torrent Files')
+_ML_FILTER_NAME = _('Metalink Files')
+_BT_MIME_TYPES = {'application/x-bittorrent'}
+_ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
+
+class _TaskOption(object):
+    """An widget wrapper for convert between aria2c needed format and widget
+    values.
+    """
+    def __init__(self, widget, mapper):
+        self.widget = widget
+        self.mapper = mapper
+
+    @property
+    def value(self):
+        """Value for used in XML-RPC."""
+        return self.mapper(self.widget.value)
+
+    ## Mappers
+    default_mapper = lambda x: x
+    string_mapper = lambda x: x
+    bool_mapper = lambda x: 'true' if x else 'false'
+    int_mapper = lambda x: str(int(x))
+    float_mapper = lambda x: str(float(x))
+    kib_mapper = lambda x: str(int(x) * 1024)
+    mib_mapper = lambda x: str(int(x) * 1024 * 1024)
+    prioritize_mapper = lambda x: 'head, tail' if x else ''
+
+class _TaskNewUI(object):
+    """Base class for the UIs of the new task dialog."""
 
     settings = Gio.Settings('com.kissuki.yaner.task')
     """GSettings instance for task configurations."""
 
+    def __init__(self, task_options, expander_label):
+        self._task_options = task_options.copy()
+        # Don't apply changes to dconf until apply() is called
+        self.settings.delay()
+
+        expander = AlignedExpander(expander_label)
+        self._uris_expander = expander
+
+        vbox = Box(VERTICAL)
+        expander.add(vbox)
+        self._content_box = vbox
+
+    @property
+    def uris_expander(self):
+        return self._uris_expander
+
+    @property
+    def aria2_options(self):
+        return {key: option.value for (key, option) in self._task_options.items()}
+
+    def activate(self, new_options):
+        """When the UI changed to this one, bind and update the setting widgets."""
+        keys = self.settings.list_keys()
+        for key, option in self._task_options.items():
+            widget = option.widget
+            if key in keys:
+                self.settings.bind(key, widget, 'value', BindFlags.DEFAULT)
+            try:
+                widget.value = new_options[key]
+            except KeyError:
+                pass
+        self._uris_expander.show_all()
+
+    def deactivate(self):
+        """When the UI changed from this one, unbind the properties."""
+        self.settings.revert()
+
+    def response(self):
+        """When dialog responsed, create new task. Returning if the dialog should
+        be kept showing.
+        """
+        return True
+
+class _TaskNewDefaultUI(_TaskNewUI):
+    """Default UI of the new task dialog."""
+    def __init__(self, task_options, parent):
+        _TaskNewUI.__init__(self, task_options,
+                            expander_label= _('<b>URIs/Torrent/Metalink File</b>')
+                           )
+
+        box = self._content_box
+
+        text = _('Select Torrent/Metalink Files')
+        entry = FileChooserEntry(text,
+                                 parent,
+                                 Gtk.FileChooserAction.OPEN,
+                                 update_entry=False,
+                                 mime_list=(
+                                     (_BT_FILTER_NAME, _BT_MIME_TYPES),
+                                     (_ML_FILTER_NAME, _ML_MIME_TYPES),
+                                 ),
+                                 truncate_multiline=True,
+                                 secondary_icon_tooltip_text=text
+                                )
+        entry.set_size_request(300, -1)
+        box.pack_start(entry)
+        self._task_options['uris'] = _TaskOption(entry, _TaskOption.string_mapper)
+
+        self.uri_entry = entry
+
+    def activate(self, options):
+        _TaskNewUI.activate(self, options)
+        self.uri_entry.grab_focus()
+
+class _TaskNewNormalUI(_TaskNewUI):
+    """Normal UI of the new task dialog."""
+    def __init__(self, task_options):
+        _TaskNewUI.__init__(self, task_options,
+                            expander_label=_('<b>Mirrors</b> - one or more URI(s) for <b>one</b> task')
+                           )
+
+        box = self._content_box
+
+        uris_view = URIsView()
+        uris_view.set_size_request(300, 70)
+        box.pack_start(uris_view)
+        self._task_options['uris'] = _TaskOption(uris_view,
+                                                 _TaskOption.default_mapper)
+
+        hbox = Box(HORIZONTAL)
+        box.pack_start(hbox)
+
+        # Rename
+        label = LeftAlignedLabel(_('Rename:'))
+        hbox.pack_start(label, expand=False)
+
+        entry = Entry(activates_default=True)
+        hbox.pack_start(entry)
+        self._task_options['out'] = _TaskOption(entry,
+                                                _TaskOption.string_mapper)
+
+        # Connections
+        label = LeftAlignedLabel(_('Connections:'))
+        hbox.pack_start(label, expand=False)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        hbox.pack_start(spin_button)
+        self._task_options['split'] = _TaskOption(spin_button, _TaskOption.int_mapper)
+
+        self._uris_view = uris_view
+
+    def activate(self, options):
+        _TaskNewUI.activate(self, options)
+        self._uris_view.grab_focus()
+
+    def response(self):
+        options = self.aria2_options
+
+        # Workaround for aria2 bug#3527521
+        options.pop('bt-prioritize-piece')
+
+        category = options.pop('category')
+        uris = options.pop('uris')
+        if not uris:
+            return True
+
+        name = options['out'] if options['out'] else os.path.basename(uris[0])
+
+        Task(name=name, uris=uris, options=options, category=category).start()
+
+        return False
+
+class _TaskNewBTUI(_TaskNewUI):
+    """BT UI of the new task dialog."""
+    def __init__(self, task_options):
+        _TaskNewUI.__init__(self, task_options,
+                            expander_label=_('<b>Torrent File</b>')
+                           )
+
+        box = self._content_box
+
+        button = MetafileChooserButton(title=_('Select torrent file'),
+                                       mime_types=_BT_MIME_TYPES,
+                                      )
+        button.set_size_request(300, -1)
+        box.pack_start(button)
+        self._task_options['torrent_filename'] = _TaskOption(
+            button, _TaskOption.string_mapper)
+
+    def response(self):
+        options = self.aria2_options
+
+        torrent_filename = options.pop('torrent_filename')
+        if torrent_filename is None:
+            return
+        else:
+            name = os.path.basename(torrent_filename)
+            with open(torrent_filename, 'br') as torrent_file:
+                torrent = xmlrpc.client.Binary(torrent_file.read())
+
+        uris = options.pop('uris')
+        category = options.pop('category')
+
+        Task(name=name, torrent=torrent, uris=uris,
+             options=options, category=category).start()
+
+        return False
+
+class _TaskNewMLUI(_TaskNewUI):
+    """Metalink UI of the new task dialog."""
+    def __init__(self, task_options):
+        _TaskNewUI.__init__(self, task_options,
+                            expander_label=_('<b>Metalink File</b>')
+                           )
+
+        box = self._content_box
+
+        button = MetafileChooserButton(title=_('Select metalink file'),
+                                       mime_types=_ML_MIME_TYPES,
+                                      )
+        button.set_size_request(300, -1)
+        box.pack_start(button)
+        self._task_options['metalink_filename'] = _TaskOption(
+            button, _TaskOption.string_mapper)
+
+    def response(self):
+        options = self.aria2_options
+
+        # Workaround for aria2 bug#3527521
+        options.pop('uris')
+
+        metalink_filename = options.pop('metalink_filename')
+        if metalink_filename is None:
+            return
+        else:
+            name = os.path.basename(metalink_filename)
+            with open(metalink_filename, 'br') as metalink_file:
+                metafile = xmlrpc.client.Binary(metalink_file.read())
+
+        category = options.pop('category')
+
+        Task(name=name, metafile=metafile, options=options,
+             category=category).start()
+
+class TaskNewDialog(Gtk.Dialog, LoggingMixin):
+    """Dialog for creating new tasks."""
     def __init__(self, parent, pool_model):
+        """"""
         Gtk.Dialog.__init__(self, title=_('New Task'), parent=parent,
                             flags=(Gtk.DialogFlags.DESTROY_WITH_PARENT |
                                    Gtk.DialogFlags.MODAL),
@@ -57,139 +292,473 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                            )
         LoggingMixin.__init__(self)
 
-        self.task_options = {}
+        self._ui = None
+        self._default_ui = None
+        self._normal_ui = None
+        self._bt_ui = None
+        self._ml_ui = None
+
+        self._task_options = {}
 
         ### Content Area
         content_area = self.get_content_area()
 
-        vbox = Box(VERTICAL)
-        vbox.set_border_width(5)
+        vbox = Box(VERTICAL, border_width=5)
         content_area.add(vbox)
-        self.main_vbox = vbox
-
-        ## Advanced
-        expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
-        vbox.pack_end(expander)
-
-        advanced_box = Box(VERTICAL)
-        expander.add(advanced_box)
-        self.advanced_box = advanced_box
+        self._main_vbox = vbox
 
         ## Save to
         expander = AlignedExpander(_('<b>Save to...</b>'))
-        vbox.pack_end(expander)
+        expander.connect_after('activate', self.update_size)
+        vbox.pack_start(expander)
 
-        # Category
         hbox = Box(HORIZONTAL)
         expander.add(hbox)
 
-        category_model = Gtk.TreeModelFilter(child_model=pool_model)
-        category_model.set_visible_func(self._category_visible_func, None)
-
-        category_cb = Gtk.ComboBox(model=category_model)
-        hbox.pack_start(category_cb)
-
-        renderer = Gtk.CellRendererPixbuf()
-        category_cb.pack_start(renderer, False)
-        category_cb.set_cell_data_func(renderer, self._pixbuf_data_func, None)
-
-        renderer = Gtk.CellRendererText()
-        category_cb.pack_start(renderer, True)
-        category_cb.set_cell_data_func(renderer, self._markup_data_func, None)
-
         # Directory
-        dir_entry = FileChooserEntry(_('Select download directory'), self,
-                                     Gtk.FileChooserAction.SELECT_FOLDER)
-        hbox.pack_start(dir_entry)
-        self.bind('dir', dir_entry, 'text', bind_settings=False)
+        entry = FileChooserEntry(_('Select download directory'),
+                                 self,
+                                 Gtk.FileChooserAction.SELECT_FOLDER
+                                )
+        hbox.pack_end(entry)
+        self._task_options['dir'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
 
-        # Connect signal and select the first pool
-        category_cb.connect('changed', self._on_category_cb_changed, dir_entry)
-        category_cb.set_active(0)
+        model = CategoryFilterModel(pool_model)
+        combo_box = CategoryComboBox(model, self)
+        combo_box.connect('changed', self._on_category_cb_changed, entry)
+        combo_box.set_active(0)
+        hbox.pack_start(combo_box)
+        self._task_options['category'] = _TaskOption(
+            combo_box, _TaskOption.default_mapper)
 
-        content_area.show_all()
+        ## Advanced
+        expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
+        expander.connect_after('activate', self.update_size)
+        vbox.pack_end(expander)
+        self.advanced_expander = expander
 
-    def _pixbuf_data_func(self, cell_layout, renderer, model, iter_, data=None):
-        """Method for set the icon and its size in the column."""
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+        notebook = Gtk.Notebook()
+        expander.add(notebook)
 
-        if presentable.TYPE == Presentable.TYPES.QUEUING:
-            if presentable.pool.connected:
-                icon = 'gtk-connect'
-            else:
-                icon = 'gtk-disconnect'
-        elif presentable.TYPE == Presentable.TYPES.CATEGORY:
-            icon = 'gtk-directory'
+        ## Normal Task Page
+        label = Gtk.Label(_('Normal Task'))
+        vbox = Box(VERTICAL, border_width=5)
+        notebook.append_page(vbox, label)
 
-        renderer.set_properties(
-                stock_id = icon,
-                stock_size = Gtk.IconSize.LARGE_TOOLBAR,
-                )
+        table = Gtk.Table(5, 4, False, row_spacing=5, column_spacing=5)
+        vbox.pack_start(table, expand=False)
 
-    def _markup_data_func(self, cell_layout, renderer, model, iter_, data=None):
-        """
-        Method for format the text in the column.
-        """
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
+        # Speed Limit
+        label = LeftAlignedLabel(_('Upload Limit(KiB/s):'))
+        table.attach_defaults(label, 0, 1, 0, 1)
 
-        renderer.set_properties(
-                markup = GLib.markup_escape_text(presentable.name),
-                ellipsize_set = True,
-                ellipsize = Pango.EllipsizeMode.MIDDLE,
-                )
+        adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 0, 1)
+        self._task_options['max-upload-limit'] = _TaskOption(
+            spin_button, _TaskOption.kib_mapper)
 
-    def _category_visible_func(self, model, iter_, data):
-        """Show categorys of the selected pool in the combobox."""
-        presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
-        return (presentable is not None and 
-                presentable.TYPE in (Presentable.TYPES.CATEGORY,
-                                     Presentable.TYPES.QUEUING)
-               )
+        label = LeftAlignedLabel(_('Download Limit(KiB/s):'))
+        table.attach_defaults(label, 2, 3, 0, 1)
 
-    def _on_category_cb_changed(self, category_cb, dir_entry):
-        """When category combobox changed, update the directory entry."""
+        adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 0, 1)
+        self._task_options['max-download-limit'] = _TaskOption(
+            spin_button, _TaskOption.kib_mapper)
+
+        # Retry
+        label = LeftAlignedLabel(_('Max Retries:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 1, 2)
+        self._task_options['max-tries'] = _TaskOption(spin_button,
+                                                      _TaskOption.int_mapper)
+
+        label = LeftAlignedLabel(_('Retry Interval(sec):'))
+        table.attach_defaults(label, 2, 3, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 1, 2)
+        self._task_options['retry-wait'] = _TaskOption(spin_button,
+                                                       _TaskOption.int_mapper)
+
+        # Timeout
+        label = LeftAlignedLabel(_('Timeout(sec):'))
+        table.attach_defaults(label, 0, 1, 2, 3)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 2, 3)
+        self._task_options['timeout'] = _TaskOption(spin_button,
+                                                    _TaskOption.int_mapper)
+
+        label = LeftAlignedLabel(_('Connect Timeout(sec):'))
+        table.attach_defaults(label, 2, 3, 2, 3)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 2, 3)
+        self._task_options['connect-timeout'] = _TaskOption(spin_button,
+                                                            _TaskOption.int_mapper)
+
+        # Split and Connections
+        label = LeftAlignedLabel(_('Split Size(MiB):'))
+        table.attach_defaults(label, 0, 1, 3, 4)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 3, 4)
+        self._task_options['min-split-size'] = _TaskOption(spin_button,
+                                                           _TaskOption.mib_mapper)
+
+        label = LeftAlignedLabel(_('Per Server Connections:'))
+        table.attach_defaults(label, 2, 3, 3, 4)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=10, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 3, 4)
+        self._task_options['max-connection-per-server'] = _TaskOption(
+            spin_button, _TaskOption.int_mapper)
+
+        # Overwrite and Rename
+        label = LeftAlignedLabel(_('Allow Overwrite:'))
+        table.attach_defaults(label, 0, 1, 4, 5)
+
+        switch = Switch()
+        table.attach_defaults(switch, 1, 2, 4, 5)
+        self._task_options['allow-overwrite'] = _TaskOption(switch,
+                                                            _TaskOption.bool_mapper)
+
+        label = LeftAlignedLabel(_('Auto Rename Files:'))
+        table.attach_defaults(label, 2, 3, 4, 5)
+
+        switch = Switch()
+        table.attach_defaults(switch, 3, 4, 4, 5)
+        self._task_options['auto-file-renaming'] = _TaskOption(
+            switch, _TaskOption.bool_mapper)
+
+        # Referer
+        hbox = Box(HORIZONTAL)
+        vbox.pack_start(hbox, expand=False)
+
+        label = LeftAlignedLabel(_('Referer:'))
+        hbox.pack_start(label, expand=False)
+
+        entry = Entry(activates_default=True)
+        hbox.pack_start(entry)
+        self._task_options['referer'] = _TaskOption(entry,
+                                                    _TaskOption.string_mapper)
+
+        # Header
+        hbox = Box(HORIZONTAL)
+        vbox.pack_start(hbox, expand=False)
+
+        label = LeftAlignedLabel(_('Header:'))
+        hbox.pack_start(label, expand=False)
+
+        entry = Entry(activates_default=True)
+        hbox.pack_start(entry)
+        self._task_options['header'] = _TaskOption(entry,
+                                                   _TaskOption.string_mapper)
+
+        # Authorization
+        expander = AlignedExpander(_('Authorization'), expanded=False)
+        expander.connect_after('activate', self.update_size)
+        vbox.pack_start(expander, expand=False)
+
+        table = Gtk.Table(3, 3, False, row_spacing=5, column_spacing=5)
+        expander.add(table)
+
+        label = LeftAlignedLabel(_('HTTP:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        label = LeftAlignedLabel(_('FTP:'))
+        table.attach_defaults(label, 0, 1, 2, 3)
+
+        label = LeftAlignedLabel(_('User'))
+        table.attach_defaults(label, 1, 2, 0, 1)
+
+        label = LeftAlignedLabel(_('Password'))
+        table.attach_defaults(label, 2, 3, 0, 1)
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 1, 2, 1, 2)
+        self._task_options['http-user'] = _TaskOption(entry,
+                                                      _TaskOption.string_mapper)
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 2, 3, 1, 2)
+        self._task_options['http-passwd'] = _TaskOption(entry,
+                                                        _TaskOption.string_mapper)
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 1, 2, 2, 3)
+        self._task_options['ftp-user'] = _TaskOption(entry,
+                                                     _TaskOption.string_mapper)
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 2, 3, 2, 3)
+        self._task_options['ftp-passwd'] = _TaskOption(entry,
+                                                       _TaskOption.string_mapper)
+
+        ## BT Task Page
+        label = Gtk.Label(_('BitTorrent'))
+        vbox = Box(VERTICAL, border_width=5)
+        notebook.append_page(vbox, label)
+
+        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
+        vbox.pack_start(table, expand=False)
+
+        # Limit
+        label = LeftAlignedLabel(_('Max open files:'))
+        table.attach_defaults(label, 0, 1, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 0, 1)
+        self._task_options['bt-max-open-files'] = _TaskOption(
+            spin_button, _TaskOption.int_mapper)
+
+        label = LeftAlignedLabel(_('Max peers:'))
+        table.attach_defaults(label, 2, 3, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 0, 1)
+        self._task_options['bt-max-peers'] = _TaskOption(spin_button,
+                                                         _TaskOption.int_mapper)
+
+        # Seed
+        label = LeftAlignedLabel(_('Seed time(min):'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=7200, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 1, 2)
+        self._task_options['seed-time'] = _TaskOption(spin_button,
+                                                      _TaskOption.int_mapper)
+
+        label = LeftAlignedLabel(_('Seed ratio:'))
+        table.attach_defaults(label, 2, 3, 1, 2)
+
+        adjustment = Gtk.Adjustment(lower=0, upper=20, step_increment=.1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True, digits=1)
+        table.attach_defaults(spin_button, 3, 4, 1, 2)
+        self._task_options['seed-ratio'] = _TaskOption(spin_button,
+                                                       _TaskOption.float_mapper)
+
+        # Timeout
+        label = LeftAlignedLabel(_('Timeout(sec):'))
+        table.attach_defaults(label, 0, 1, 2, 3)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 2, 3)
+        self._task_options['bt-tracker-timeout'] = _TaskOption(
+            spin_button, _TaskOption.int_mapper)
+
+        label = LeftAlignedLabel(_('Connect Timeout(sec):'))
+        table.attach_defaults(label, 2, 3, 2, 3)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 3, 4, 2, 3)
+        self._task_options['bt-tracker-connect-timeout'] = _TaskOption(
+            spin_button, _TaskOption.int_mapper)
+
+        hbox = Box(HORIZONTAL)
+        vbox.pack_start(hbox, expand=False)
+
+        label = LeftAlignedLabel(_('Try to download first and last pieces first'))
+        hbox.pack_start(label)
+        switch = Switch()
+        hbox.pack_start(switch, expand=False)
+        self._task_options['bt-prioritize-piece'] = _TaskOption(
+            switch, _TaskOption.prioritize_mapper)
+
+        # Mirrors
+        expander = AlignedExpander(_('Mirrors'), expanded=False)
+        expander.set_tooltip_text(
+            _('For single file torrents, a mirror can be a ' \
+              'complete URI pointing to the resource or if the mirror ' \
+              'ends with /, name in torrent file is added. For ' \
+              'multi-file torrents, name and path in torrent are ' \
+              'added to form a URI for each file.'))
+        expander.connect_after('activate', self.update_size)
+        vbox.pack_start(expander, expand=False)
+
+        vbox = Box(VERTICAL)
+        expander.add(vbox)
+
+        uris_view = URIsView()
+        uris_view.set_size_request(-1, 70)
+        vbox.pack_start(uris_view)
+        self._task_options['uris'] = _TaskOption(uris_view,
+                                                 _TaskOption.default_mapper)
+
+        ## Metalink Page
+        label = Gtk.Label(_('Metalink'))
+        vbox = Box(VERTICAL, border_width=5)
+        notebook.append_page(vbox, label)
+
+        table = Gtk.Table(5, 2, False, row_spacing=5, column_spacing=5)
+        vbox.pack_start(table, expand=False)
+
+        label = LeftAlignedLabel(_('Download Servers:'))
+        table.attach_defaults(label, 0, 1, 0, 1)
+
+        adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
+        spin_button = SpinButton(adjustment=adjustment, numeric=True)
+        table.attach_defaults(spin_button, 1, 2, 0, 1)
+        self._task_options['split'] = _TaskOption(spin_button,
+                                                  _TaskOption.int_mapper)
+
+        label = LeftAlignedLabel(_('Preferred locations:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        entry = Entry()
+        table.attach_defaults(entry, 1, 2, 1, 2)
+        self._task_options['metalink-location'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
+
+        label = LeftAlignedLabel(_('Language:'))
+        table.attach_defaults(label, 0, 1, 2, 3)
+
+        entry = Entry()
+        table.attach_defaults(entry, 1, 2, 2, 3)
+        self._task_options['metalink-language'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
+
+        label = LeftAlignedLabel(_('Version:'))
+        table.attach_defaults(label, 0, 1, 3, 4)
+
+        entry = Entry()
+        table.attach_defaults(entry, 1, 2, 3, 4)
+        self._task_options['metalink-version'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
+
+        label = LeftAlignedLabel(_('OS:'))
+        table.attach_defaults(label, 0, 1, 4, 5)
+
+        entry = Entry()
+        table.attach_defaults(entry, 1, 2, 4, 5)
+        self._task_options['metalink-os'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
+
+        self.show_all()
+
+    @property
+    def default_ui(self):
+        """Get the default UI."""
+        if self._default_ui is None:
+            ui = _TaskNewDefaultUI(self._task_options, self)
+            ui.uri_entry.connect('response', self._on_metafile_selected)
+            ui.uri_entry.connect('changed', self._on_default_entry_changed)
+            self._default_ui = ui
+        return self._default_ui
+
+    @property
+    def normal_ui(self):
+        """Get the normal UI."""
+        if self._normal_ui is None:
+            self._normal_ui = _TaskNewNormalUI(self._task_options)
+        return self._normal_ui
+
+    @property
+    def bt_ui(self):
+        """Get the BT UI."""
+        if self._bt_ui is None:
+            self._bt_ui = _TaskNewBTUI(self._task_options)
+        return self._bt_ui
+
+    @property
+    def ml_ui(self):
+        """Get the ML UI."""
+        if self._ml_ui is None:
+            self._ml_ui = _TaskNewMLUI(self._task_options)
+        return self._ml_ui
+
+    def _on_category_cb_changed(self, category_cb, entry):
+        """When category combo box changed, update the directory entry."""
         iter_ = category_cb.get_active_iter()
         model = category_cb.get_model()
-
-        if iter_ is None:
-            category_cb.set_active_iter(model.iter_children(iter_))
-            return
-
         presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
-        if presentable.TYPE == Presentable.TYPES.QUEUING:
-            category_cb.set_active_iter(model.iter_children(iter_))
+        entry.set_text(presentable.directory)
+        self.logger.debug(_('Category is changed to {}.').format(presentable))
+
+    def _on_metafile_selected(self, dialog, response_id):
+        """When meta file chooser dialog responsed, switch to torrent or metalink
+        mode."""
+        if response_id == Gtk.ResponseType.ACCEPT:
+            filename = dialog.get_filename()
+            current_filter = dialog.get_filter().get_name()
+            if current_filter == _BT_FILTER_NAME:
+                self.set_ui(self.bt_ui, {'torrent_filename': filename})
+            elif current_filter == _ML_FILTER_NAME:
+                self.set_ui(self.ml_ui, {'metalink_filename': filename})
+            else:
+                raise RuntimeError('No such filter' + current_filter)
+
+    def _on_default_entry_changed(self, entry):
+        """When the entry in the default content box changed, switch to normal
+        mode."""
+        # When default UI activated, the entry text is cleared, we should
+        # ignore this.
+        if self._ui is not self.normal_ui:
+            self.set_ui(self.normal_ui, {'uris': entry.get_text()})
+
+    def do_response(self, response):
+        """Create a new download task if uris are provided."""
+        if response != Gtk.ResponseType.OK or not self._ui.response():
+            self.hide()
+
+    def set_ui(self, new_ui, options=None):
+        """Set the UI of the dialog."""
+        # Remove current child of uris_expander
+        if self._ui is not new_ui:
+            main_vbox = self._main_vbox
+            if self._ui is not None:
+                main_vbox.remove(self._ui.uris_expander)
+            main_vbox.pack_start(new_ui.uris_expander)
+            main_vbox.reorder_child(new_ui.uris_expander, 0)
+
+        if new_ui is self.default_ui:
+            self.advanced_expander.hide()
         else:
-            self.task_options['category'] = presentable
-            dir_entry.set_text(presentable.directory)
-            self.logger.debug(_('Category is changed to {}.').format(presentable))
+            self.advanced_expander.show_all()
 
-    def bind(self, name, widget, property,
-             bind_settings=True, bind_flags=BindFlags.GET,
-             bind_signal=True):
-        """Bind property to settings and task options."""
+        if self._ui is not None:
+            self._ui.deactivate()
 
-        def property_changed(widget, property_spec=None):
-            """When widget changed, add new value to the task options."""
-            value = widget.get_property(property)
-            self.task_options[name] = value
-            self.logger.debug(_('Property changed: {} {}').format(name, value))
+        new_ui.activate(options)
 
-        if bind_settings:
-            self.settings.bind(name, widget, property, bind_flags)
-        if bind_signal:
-            signal_name = 'notify::{}'.format(property)
-            widget.connect(signal_name, property_changed)
-            widget.notify(property)
+        self.update_size()
+
+        self._ui = new_ui
+
+    def update_size(self, widget=None):
+        """Update the size of the dialog."""
+        content_area = self.get_content_area()
+        size = content_area.get_preferred_size()[0]
+        self.resize(size.width, size.height)
 
     def run(self, options=None):
         """Popup new task dialog."""
-        if 'header' in self.task_options:
-            del self.task_options['header']
-        if options is not None:
-            self.task_options.update(options)
+        if options is None:
+            self.set_ui(self.default_ui, {'uris': ''})
+        elif 'torrent_filename' in options:
+            self.set_ui(self.bt_ui, options)
+        elif 'metalink_filename' in options:
+            self.set_ui(self.ml_ui, options)
+        else:
+            self.set_ui(self.normal_ui, options)
 
         self.logger.info(_('Running new task dialog...'))
-        self.logger.debug(_('Task options: {}').format(self.task_options))
 
         Gtk.Dialog.run(self)
 
@@ -330,7 +899,7 @@ class BTTaskNewDialog(TaskNewDialog):
         self.main_vbox.pack_start(expander)
 
         button = MetafileChooserButton(title=_('Select torrent file'),
-                                       mime_types=['application/x-bittorrent']
+                                       mime_types=_BT_MIME_TYPES,
                                       )
         expander.add(button)
         self.bind('torrent_filename', button, 'filename', bind_settings=False)
@@ -450,8 +1019,7 @@ class MLTaskNewDialog(TaskNewDialog):
         self.main_vbox.pack_start(expander)
 
         button = MetafileChooserButton(title=_('Select metalink file'),
-                                       mime_types=['application/metalink4+xml',
-                                                   'application/metalink+xml']
+                                       mime_types=_ML_MIME_TYPES,
                                       )
         expander.add(button)
         self.bind('metalink_filename', button, 'filename', bind_settings=False)

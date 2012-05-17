@@ -180,8 +180,7 @@ class Application(Gtk.Application, LoggingMixin):
         self.logger.info(_('Received task options from command line arguments.'))
         self.logger.debug(str(options))
 
-        dialog = self.toplevel.normal_task_new_dialog
-        dialog.run(options)
+        self.toplevel.task_new_dialog.run(options)
 
     def do_activate(self):
         """When Application activated, present the main window."""

@@ -34,7 +34,7 @@ from yaner import SQLSession
 from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Presentable import Presentable, Category
-from yaner.ui.Dialogs import NormalTaskNewDialog, BTTaskNewDialog, MLTaskNewDialog
+from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.Dialogs import CategoryBar, PoolBar
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
@@ -82,12 +82,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
         toolbar = self.ui_manager.get_widget('/toolbar')
         #toolbar.set_style(Gtk.ToolbarStyle.BOTH)
         vbox.pack_start(toolbar, expand=False)
-
-        action = self._action_group.get_action('task_new')
-        menu_tool_button = Gtk.MenuToolButton()
-        menu_tool_button.set_menu(self.popups['task_new'])
-        menu_tool_button.set_related_action(action)
-        toolbar.insert(menu_tool_button, 0)
 
         # HPaned: PoolView as left, TaskVBox as right
         hpaned = Gtk.HPaned()
@@ -147,9 +141,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         pool_view.selection.select_iter(self._pool_model.get_iter_first())
 
         # Dialogs
-        self._normal_task_new_dialog = None
-        self._bt_task_new_dialog = None
-        self._ml_task_new_dialog = None
+        self._task_new_dialog = None
         self._about_dialog = None
         self._category_bar = None
         self._pool_bar = None
@@ -192,15 +184,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
             # The actions used by L{action_group}. The members are:
             # name, stock-id, label, accelerator, tooltip, callback
             action_entries = (
-                ("task_new", 'gtk-new', None, None,
-                 None, self._on_normal_task_new),
-                ("task_new_menu", 'gtk-new'),
-                ("task_new_normal", 'gtk-add', _("HTTP/FTP/BT Magnet"), None,
-                 None, self._on_normal_task_new),
-                ("task_new_bt", 'gtk-add', _("BitTorrent"), None,
-                 None, self._on_bt_task_new),
-                ("task_new_ml", 'gtk-add', _("Metalink"), None,
-                 None, self._on_ml_task_new),
+                ("task_new", 'gtk-new', _("New Task"), None,
+                 None, self._on_task_new),
                 ("task_start", 'gtk-media-play', _("Start"), None,
                  None, self._on_task_start),
                 ("task_pause", 'gtk-media-pause', _("Pause"), None,
@@ -250,7 +235,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             self.logger.info(_('Initializing popup menus...'))
             get_widget = self.ui_manager.get_widget
             popups = {}
-            for popup_name in ('tray', 'task_new', 'pool',
+            for popup_name in ('tray', 'pool',
                                'queuing', 'category', 'dustbin',
                                'queuing_task', 'category_task', 'dustbin_task'):
                 popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
@@ -259,31 +244,12 @@ class Toplevel(Gtk.Window, LoggingMixin):
         return self._popups
 
     @property
-    def normal_task_new_dialog(self):
-        """Get the new normal task dialog of the window."""
-        if self._normal_task_new_dialog is None:
-            self._normal_task_new_dialog = NormalTaskNewDialog(self,
-                                                               self._pool_model)
-            self._normal_task_new_dialog.set_transient_for(self)
-        return self._normal_task_new_dialog
-
-    @property
-    def bt_task_new_dialog(self):
-        """Get the new bittorrent task dialog of the window."""
-        if self._bt_task_new_dialog is None:
-            self._bt_task_new_dialog = BTTaskNewDialog(self,
-                                                       self._pool_model)
-            self._bt_task_new_dialog.set_transient_for(self)
-        return self._bt_task_new_dialog
-
-    @property
-    def ml_task_new_dialog(self):
-        """Get the new metalink task dialog of the window."""
-        if self._ml_task_new_dialog is None:
-            self._ml_task_new_dialog = MLTaskNewDialog(self,
-                                                       self._pool_model)
-            self._ml_task_new_dialog.set_transient_for(self)
-        return self._ml_task_new_dialog
+    def task_new_dialog(self):
+        """Get the new task dialog of the window."""
+        if self._task_new_dialog is None:
+            self._task_new_dialog = TaskNewDialog(self, self._pool_model)
+            self._task_new_dialog.set_transient_for(self)
+        return self._task_new_dialog
 
     @property
     def about_dialog(self):
@@ -407,17 +373,9 @@ class Toplevel(Gtk.Window, LoggingMixin):
         if presentable is not None:
             self._task_list_model.presentable = presentable
 
-    def _on_normal_task_new(self, action, data):
-        """When normal task new action is activated, call the task new dialog."""
-        self.normal_task_new_dialog.run()
-
-    def _on_bt_task_new(self, action, data):
-        """When bt task new action is activated, call the task new dialog."""
-        self.bt_task_new_dialog.run()
-
-    def _on_ml_task_new(self, action, data):
-        """When ml task new action is activated, call the task new dialog."""
-        self.ml_task_new_dialog.run()
+    def _on_task_new(self, action, data):
+        """When task new action is activated, call the task new dialog."""
+        self.task_new_dialog.run()
 
     def _on_task_start(self, action, data):
         """When task start button clicked, start or unpause the task."""

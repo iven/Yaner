@@ -303,7 +303,7 @@ msgstr "分类名称："
 
 #: scripts/../yaner/ui/Dialogs.py:550
 msgid "Default directory:"
-msgstr "下载目录"
+msgstr "下载目录："
 
 #: scripts/../yaner/ui/Dialogs.py:553
 msgid "Select default directory"
@@ -315,7 +315,7 @@ msgstr "服务器名称："
 
 #: scripts/../yaner/ui/Dialogs.py:594
 msgid "IP Address:"
-msgstr "IP 地址"
+msgstr "IP 地址："
 
 #: scripts/../yaner/ui/Dialogs.py:601
 msgid "Port:"
