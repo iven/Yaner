@@ -45,14 +45,37 @@ _ML_FILTER_NAME = _('Metalink Files')
 _BT_MIME_TYPES = {'application/x-bittorrent'}
 _ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
 
+class _TaskOption(object):
+    """An widget wrapper for convert between aria2c needed format and widget
+    values.
+    """
+    def __init__(self, widget, mapper):
+        self.widget = widget
+        self.mapper = mapper
+
+    @property
+    def value(self):
+        """Value for used in XML-RPC."""
+        return self.mapper(self.widget.value)
+
+    ## Mappers
+    default_mapper = lambda x: x
+    string_mapper = lambda x: x
+    bool_mapper = lambda x: 'true' if x else 'false'
+    int_mapper = lambda x: str(int(x))
+    float_mapper = lambda x: str(float(x))
+    kib_mapper = lambda x: str(int(x) * 1024)
+    mib_mapper = lambda x: str(int(x) * 1024 * 1024)
+    prioritize_mapper = lambda x: 'head, tail' if x else ''
+
 class _TaskNewUI(object):
     """Base class for the UIs of the new task dialog."""
 
     settings = Gio.Settings('com.kissuki.yaner.task')
     """GSettings instance for task configurations."""
 
-    def __init__(self, setting_widgets, expander_label):
-        self._setting_widgets = setting_widgets.copy()
+    def __init__(self, task_options, expander_label):
+        self._task_options = task_options.copy()
         # Don't apply changes to dconf until apply() is called
         self.settings.delay()
 
@@ -68,17 +91,18 @@ class _TaskNewUI(object):
         return self._uris_expander
 
     @property
-    def task_options(self):
-        return {key: widget.value for (key, widget) in self._setting_widgets.items()}
+    def aria2_options(self):
+        return {key: option.value for (key, option) in self._task_options.items()}
 
-    def activate(self, options):
+    def activate(self, new_options):
         """When the UI changed to this one, bind and update the setting widgets."""
         keys = self.settings.list_keys()
-        for key, widget in self._setting_widgets.items():
+        for key, option in self._task_options.items():
+            widget = option.widget
             if key in keys:
                 self.settings.bind(key, widget, 'value', BindFlags.DEFAULT)
             try:
-                widget.value = options[key]
+                widget.value = new_options[key]
             except KeyError:
                 pass
         self._uris_expander.show_all()
@@ -88,13 +112,15 @@ class _TaskNewUI(object):
         self.settings.revert()
 
     def response(self):
-        """When dialog responsed, create new task."""
+        """When dialog responsed, create new task. Returning if the dialog should
+        be kept showing.
+        """
         return True
 
 class _TaskNewDefaultUI(_TaskNewUI):
     """Default UI of the new task dialog."""
-    def __init__(self, setting_widgets, parent):
-        _TaskNewUI.__init__(self, setting_widgets,
+    def __init__(self, task_options, parent):
+        _TaskNewUI.__init__(self, task_options,
                             expander_label= _('<b>URIs/Torrent/Metalink File</b>')
                            )
 
@@ -114,7 +140,7 @@ class _TaskNewDefaultUI(_TaskNewUI):
                                 )
         entry.set_size_request(300, -1)
         box.pack_start(entry)
-        self._setting_widgets['uris'] = entry
+        self._task_options['uris'] = _TaskOption(entry, _TaskOption.string_mapper)
 
         self.uri_entry = entry
 
@@ -124,8 +150,8 @@ class _TaskNewDefaultUI(_TaskNewUI):
 
 class _TaskNewNormalUI(_TaskNewUI):
     """Normal UI of the new task dialog."""
-    def __init__(self, setting_widgets):
-        _TaskNewUI.__init__(self, setting_widgets,
+    def __init__(self, task_options):
+        _TaskNewUI.__init__(self, task_options,
                             expander_label=_('<b>Mirrors</b> - one or more URI(s) for <b>one</b> task')
                            )
 
@@ -134,7 +160,8 @@ class _TaskNewNormalUI(_TaskNewUI):
         uris_view = URIsView()
         uris_view.set_size_request(300, 70)
         box.pack_start(uris_view)
-        self._setting_widgets['uris'] = uris_view
+        self._task_options['uris'] = _TaskOption(uris_view,
+                                                 _TaskOption.default_mapper)
 
         hbox = Box(HORIZONTAL)
         box.pack_start(hbox)
@@ -145,7 +172,8 @@ class _TaskNewNormalUI(_TaskNewUI):
 
         entry = Entry(activates_default=True)
         hbox.pack_start(entry)
-        self._setting_widgets['out'] = entry
+        self._task_options['out'] = _TaskOption(entry,
+                                                _TaskOption.string_mapper)
 
         # Connections
         label = LeftAlignedLabel(_('Connections:'))
@@ -154,7 +182,7 @@ class _TaskNewNormalUI(_TaskNewUI):
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         hbox.pack_start(spin_button)
-        self._setting_widgets['split'] = spin_button
+        self._task_options['split'] = _TaskOption(spin_button, _TaskOption.int_mapper)
 
         self._uris_view = uris_view
 
@@ -164,8 +192,8 @@ class _TaskNewNormalUI(_TaskNewUI):
 
 class _TaskNewBTUI(_TaskNewUI):
     """BT UI of the new task dialog."""
-    def __init__(self, setting_widgets):
-        _TaskNewUI.__init__(self, setting_widgets,
+    def __init__(self, task_options):
+        _TaskNewUI.__init__(self, task_options,
                             expander_label=_('<b>Torrent File</b>')
                            )
 
@@ -176,12 +204,13 @@ class _TaskNewBTUI(_TaskNewUI):
                                       )
         button.set_size_request(300, -1)
         box.pack_start(button)
-        self._setting_widgets['torrent_filename'] = button
+        self._task_options['torrent_filename'] = _TaskOption(
+            button, _TaskOption.string_mapper)
 
 class _TaskNewMLUI(_TaskNewUI):
     """Metalink UI of the new task dialog."""
-    def __init__(self, setting_widgets):
-        _TaskNewUI.__init__(self, setting_widgets,
+    def __init__(self, task_options):
+        _TaskNewUI.__init__(self, task_options,
                             expander_label=_('<b>Metalink File</b>')
                            )
 
@@ -192,7 +221,8 @@ class _TaskNewMLUI(_TaskNewUI):
                                       )
         button.set_size_request(300, -1)
         box.pack_start(button)
-        self._setting_widgets['metalink_filename'] = button
+        self._task_options['metalink_filename'] = _TaskOption(
+            button, _TaskOption.string_mapper)
 
 class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for creating new tasks."""
@@ -213,7 +243,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._bt_ui = None
         self._ml_ui = None
 
-        self._setting_widgets = {}
+        self._task_options = {}
 
         ### Content Area
         content_area = self.get_content_area()
@@ -236,14 +266,16 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                  Gtk.FileChooserAction.SELECT_FOLDER
                                 )
         hbox.pack_end(entry)
-        self._setting_widgets['dir'] = entry
+        self._task_options['dir'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
 
         model = CategoryFilterModel(pool_model)
         combo_box = CategoryComboBox(model, self)
         combo_box.connect('changed', self._on_category_cb_changed, entry)
         combo_box.set_active(0)
         hbox.pack_start(combo_box)
-        self._setting_widgets['category'] = combo_box
+        self._task_options['category'] = _TaskOption(
+            combo_box, _TaskOption.default_mapper)
 
         ## Advanced
         expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
@@ -269,7 +301,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 0, 1)
-        self._setting_widgets['max-upload-limit'] = spin_button
+        self._task_options['max-upload-limit'] = _TaskOption(
+            spin_button, _TaskOption.kib_mapper)
 
         label = LeftAlignedLabel(_('Download Limit(KiB/s):'))
         table.attach_defaults(label, 2, 3, 0, 1)
@@ -277,7 +310,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 0, 1)
-        self._setting_widgets['max-download-limit'] = spin_button
+        self._task_options['max-download-limit'] = _TaskOption(
+            spin_button, _TaskOption.kib_mapper)
 
         # Retry
         label = LeftAlignedLabel(_('Max Retries:'))
@@ -286,7 +320,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 1, 2)
-        self._setting_widgets['max-tries'] = spin_button
+        self._task_options['max-tries'] = _TaskOption(spin_button,
+                                                      _TaskOption.int_mapper)
 
         label = LeftAlignedLabel(_('Retry Interval(sec):'))
         table.attach_defaults(label, 2, 3, 1, 2)
@@ -294,7 +329,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 1, 2)
-        self._setting_widgets['retry-wait'] = spin_button
+        self._task_options['retry-wait'] = _TaskOption(spin_button,
+                                                       _TaskOption.int_mapper)
 
         # Timeout
         label = LeftAlignedLabel(_('Timeout(sec):'))
@@ -303,7 +339,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 2, 3)
-        self._setting_widgets['timeout'] = spin_button
+        self._task_options['timeout'] = _TaskOption(spin_button,
+                                                    _TaskOption.int_mapper)
 
         label = LeftAlignedLabel(_('Connect Timeout(sec):'))
         table.attach_defaults(label, 2, 3, 2, 3)
@@ -311,7 +348,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 2, 3)
-        self._setting_widgets['connect-timeout'] = spin_button
+        self._task_options['connect-timeout'] = _TaskOption(spin_button,
+                                                            _TaskOption.int_mapper)
 
         # Split and Connections
         label = LeftAlignedLabel(_('Split Size(MiB):'))
@@ -320,7 +358,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 3, 4)
-        self._setting_widgets['min-split-size'] = spin_button
+        self._task_options['min-split-size'] = _TaskOption(spin_button,
+                                                           _TaskOption.mib_mapper)
 
         label = LeftAlignedLabel(_('Per Server Connections:'))
         table.attach_defaults(label, 2, 3, 3, 4)
@@ -328,7 +367,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=10, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 3, 4)
-        self._setting_widgets['max-connection-per-server'] = spin_button
+        self._task_options['max-connection-per-server'] = _TaskOption(
+            spin_button, _TaskOption.int_mapper)
 
         # Overwrite and Rename
         label = LeftAlignedLabel(_('Allow Overwrite:'))
@@ -336,14 +376,16 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         switch = Switch()
         table.attach_defaults(switch, 1, 2, 4, 5)
-        self._setting_widgets['allow-overwrite'] = switch
+        self._task_options['allow-overwrite'] = _TaskOption(switch,
+                                                            _TaskOption.bool_mapper)
 
         label = LeftAlignedLabel(_('Auto Rename Files:'))
         table.attach_defaults(label, 2, 3, 4, 5)
 
         switch = Switch()
         table.attach_defaults(switch, 3, 4, 4, 5)
-        self._setting_widgets['auto-file-renaming'] = switch
+        self._task_options['auto-file-renaming'] = _TaskOption(
+            switch, _TaskOption.bool_mapper)
 
         # Referer
         hbox = Box(HORIZONTAL)
@@ -354,7 +396,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         entry = Entry(activates_default=True)
         hbox.pack_start(entry)
-        self._setting_widgets['referer'] = entry
+        self._task_options['referer'] = _TaskOption(entry,
+                                                    _TaskOption.string_mapper)
 
         # Header
         hbox = Box(HORIZONTAL)
@@ -365,7 +408,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         entry = Entry(activates_default=True)
         hbox.pack_start(entry)
-        self._setting_widgets['header'] = entry
+        self._task_options['header'] = _TaskOption(entry,
+                                                   _TaskOption.string_mapper)
 
         # Authorization
         expander = AlignedExpander(_('Authorization'), expanded=False)
@@ -389,19 +433,23 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         entry = Entry(activates_default=True)
         table.attach_defaults(entry, 1, 2, 1, 2)
-        self._setting_widgets['http-user'] = entry
+        self._task_options['http-user'] = _TaskOption(entry,
+                                                      _TaskOption.string_mapper)
 
         entry = Entry(activates_default=True)
         table.attach_defaults(entry, 2, 3, 1, 2)
-        self._setting_widgets['http-passwd'] = entry
+        self._task_options['http-passwd'] = _TaskOption(entry,
+                                                        _TaskOption.string_mapper)
 
         entry = Entry(activates_default=True)
         table.attach_defaults(entry, 1, 2, 2, 3)
-        self._setting_widgets['ftp-user'] = entry
+        self._task_options['ftp-user'] = _TaskOption(entry,
+                                                     _TaskOption.string_mapper)
 
         entry = Entry(activates_default=True)
         table.attach_defaults(entry, 2, 3, 2, 3)
-        self._setting_widgets['ftp-passwd'] = entry
+        self._task_options['ftp-passwd'] = _TaskOption(entry,
+                                                       _TaskOption.string_mapper)
 
         ## BT Task Page
         label = Gtk.Label(_('BitTorrent'))
@@ -418,7 +466,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 0, 1)
-        self._setting_widgets['bt-max-open-files'] = spin_button
+        self._task_options['bt-max-open-files'] = _TaskOption(
+            spin_button, _TaskOption.int_mapper)
 
         label = LeftAlignedLabel(_('Max peers:'))
         table.attach_defaults(label, 2, 3, 0, 1)
@@ -426,7 +475,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 0, 1)
-        self._setting_widgets['bt-max-peers'] = spin_button
+        self._task_options['bt-max-peers'] = _TaskOption(spin_button,
+                                                         _TaskOption.int_mapper)
 
         # Seed
         label = LeftAlignedLabel(_('Seed time(min):'))
@@ -435,7 +485,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=7200, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 1, 2)
-        self._setting_widgets['seed-time'] = spin_button
+        self._task_options['seed-time'] = _TaskOption(spin_button,
+                                                      _TaskOption.int_mapper)
 
         label = LeftAlignedLabel(_('Seed ratio:'))
         table.attach_defaults(label, 2, 3, 1, 2)
@@ -443,7 +494,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=20, step_increment=.1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True, digits=1)
         table.attach_defaults(spin_button, 3, 4, 1, 2)
-        self._setting_widgets['seed-ratio'] = spin_button
+        self._task_options['seed-ratio'] = _TaskOption(spin_button,
+                                                       _TaskOption.float_mapper)
 
         # Timeout
         label = LeftAlignedLabel(_('Timeout(sec):'))
@@ -452,7 +504,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 2, 3)
-        self._setting_widgets['bt-tracker-timeout'] = spin_button
+        self._task_options['bt-tracker-timeout'] = _TaskOption(
+            spin_button, _TaskOption.int_mapper)
 
         label = LeftAlignedLabel(_('Connect Timeout(sec):'))
         table.attach_defaults(label, 2, 3, 2, 3)
@@ -460,7 +513,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 2, 3)
-        self._setting_widgets['bt-tracker-connect-timeout'] = spin_button
+        self._task_options['bt-tracker-connect-timeout'] = _TaskOption(
+            spin_button, _TaskOption.int_mapper)
 
         hbox = Box(HORIZONTAL)
         vbox.pack_start(hbox, expand=False)
@@ -469,7 +523,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         hbox.pack_start(label)
         switch = Switch()
         hbox.pack_start(switch, expand=False)
-        self._setting_widgets['bt-prioritize'] = switch
+        self._task_options['bt-prioritize-piece'] = _TaskOption(
+            switch, _TaskOption.prioritize_mapper)
 
         # Mirrors
         expander = AlignedExpander(_('Mirrors'), expanded=False)
@@ -488,7 +543,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         uris_view = URIsView()
         uris_view.set_size_request(-1, 70)
         vbox.pack_start(uris_view)
-        self._setting_widgets['uris'] = uris_view
+        self._task_options['uris'] = _TaskOption(uris_view,
+                                                 _TaskOption.default_mapper)
 
         ## Metalink Page
         label = Gtk.Label(_('Metalink'))
@@ -504,35 +560,40 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
         spin_button = SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 0, 1)
-        self._setting_widgets['metalink-servers'] = spin_button
+        self._task_options['split'] = _TaskOption(spin_button,
+                                                  _TaskOption.int_mapper)
 
         label = LeftAlignedLabel(_('Preferred locations:'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
         entry = Entry()
         table.attach_defaults(entry, 1, 2, 1, 2)
-        self._setting_widgets['metalink-location'] = entry
+        self._task_options['metalink-location'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
 
         label = LeftAlignedLabel(_('Language:'))
         table.attach_defaults(label, 0, 1, 2, 3)
 
         entry = Entry()
         table.attach_defaults(entry, 1, 2, 2, 3)
-        self._setting_widgets['metalink-language'] = entry
+        self._task_options['metalink-language'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
 
         label = LeftAlignedLabel(_('Version:'))
         table.attach_defaults(label, 0, 1, 3, 4)
 
         entry = Entry()
         table.attach_defaults(entry, 1, 2, 3, 4)
-        self._setting_widgets['metalink-version'] = entry
+        self._task_options['metalink-version'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
 
         label = LeftAlignedLabel(_('OS:'))
         table.attach_defaults(label, 0, 1, 4, 5)
 
         entry = Entry()
         table.attach_defaults(entry, 1, 2, 4, 5)
-        self._setting_widgets['metalink-os'] = entry
+        self._task_options['metalink-os'] = _TaskOption(
+            entry, _TaskOption.string_mapper)
 
         self.show_all()
 
@@ -540,7 +601,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     def default_ui(self):
         """Get the default UI."""
         if self._default_ui is None:
-            ui = _TaskNewDefaultUI(self._setting_widgets, self)
+            ui = _TaskNewDefaultUI(self._task_options, self)
             ui.uri_entry.connect('response', self._on_metafile_selected)
             ui.uri_entry.connect('changed', self._on_default_entry_changed)
             self._default_ui = ui
@@ -550,21 +611,21 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     def normal_ui(self):
         """Get the normal UI."""
         if self._normal_ui is None:
-            self._normal_ui = _TaskNewNormalUI(self._setting_widgets)
+            self._normal_ui = _TaskNewNormalUI(self._task_options)
         return self._normal_ui
 
     @property
     def bt_ui(self):
         """Get the BT UI."""
         if self._bt_ui is None:
-            self._bt_ui = _TaskNewBTUI(self._setting_widgets)
+            self._bt_ui = _TaskNewBTUI(self._task_options)
         return self._bt_ui
 
     @property
     def ml_ui(self):
         """Get the ML UI."""
         if self._ml_ui is None:
-            self._ml_ui = _TaskNewMLUI(self._setting_widgets)
+            self._ml_ui = _TaskNewMLUI(self._task_options)
         return self._ml_ui
 
     def _on_category_cb_changed(self, category_cb, entry):
@@ -633,9 +694,6 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
     def run(self, options=None):
         """Popup new task dialog."""
-        #if 'header' in self._task_options:
-        #    del self._task_options['header']
-
         if options is None:
             self.set_ui(self.default_ui, {'uris': ''})
         elif 'torrent_filename' in options:
