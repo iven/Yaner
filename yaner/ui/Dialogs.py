@@ -569,7 +569,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
+        table = Gtk.Table(4, 4, False, row_spacing=5, column_spacing=5)
         vbox.pack_start(table, expand=False)
 
         # Limit
@@ -629,15 +629,19 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['bt-tracker-connect-timeout'] = _TaskOption(
             spin_button, _TaskOption.int_mapper)
 
-        hbox = Box(HORIZONTAL)
-        vbox.pack_start(hbox, expand=False)
-
         label = LeftAlignedLabel(_('Try to download first and last pieces first'))
-        hbox.pack_start(label)
+        table.attach_defaults(label, 0, 3, 3, 4)
         switch = Switch()
-        hbox.pack_start(switch, expand=False)
+        table.attach_defaults(switch, 3, 4, 3, 4)
         self._task_options['bt-prioritize-piece'] = _TaskOption(
             switch, _TaskOption.prioritize_mapper)
+
+        label = LeftAlignedLabel(_('Convert downloaded torrent files to BitTorrent tasks'))
+        table.attach_defaults(label, 0, 3, 4, 5)
+        switch = Switch()
+        table.attach_defaults(switch, 3, 4, 4, 5)
+        self._task_options['follow-torrent'] = _TaskOption(switch,
+                                                           _TaskOption.bool_mapper)
 
         # Mirrors
         expander = AlignedExpander(_('Mirrors'), expanded=False)
@@ -707,6 +711,16 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         table.attach_defaults(entry, 1, 2, 4, 5)
         self._task_options['metalink-os'] = _TaskOption(
             entry, _TaskOption.string_mapper)
+
+        hbox = Box(HORIZONTAL)
+        vbox.pack_start(hbox, expand=False)
+
+        label = LeftAlignedLabel(_('Convert downloaded metalink files to Metalink tasks'))
+        hbox.pack_start(label)
+        switch = Switch()
+        hbox.pack_start(switch, expand=False)
+        self._task_options['follow-metalink'] = _TaskOption(switch,
+                                                            _TaskOption.bool_mapper)
 
         self.show_all()
 

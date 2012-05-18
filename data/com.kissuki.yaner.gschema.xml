@@ -252,6 +252,20 @@
                 Set the seconds to wait between retries. With SEC > 0, Yaner will retry download when the HTTP server returns 503 response.
             </description>
         </key>
+        <key type='b' name='follow-torrent'>
+            <default>true</default>
+            <summary>Follow Torrent</summary>
+            <description>
+                If true is specified, when a file whose suffix is ".torrent" or content type is "application/x-bittorrent" is downloaded, aria2 parses it as a torrent file and downloads files mentioned in it.
+            </description>
+        </key>
+        <key type='b' name='follow-metalink'>
+            <default>true</default>
+            <summary>Follow Metalink</summary>
+            <description>
+                If true is specified, when a file whose suffix is ".meta4" or ".metalink" or content type of "application/metalink4+xml" or "application/metalink+xml" is downloaded, aria2 parses it as a metalink file and downloads files mentioned in it.
+            </description>
+        </key>
     </schema>
 </schemalist>
 
