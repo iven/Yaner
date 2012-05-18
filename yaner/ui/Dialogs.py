@@ -138,7 +138,7 @@ class _TaskNewDefaultUI(_TaskNewUI):
                                  truncate_multiline=True,
                                  secondary_icon_tooltip_text=text
                                 )
-        entry.set_size_request(300, -1)
+        entry.set_size_request(350, -1)
         box.pack_start(entry)
         self._task_options['uris'] = _TaskOption(entry, _TaskOption.string_mapper)
 
@@ -158,7 +158,7 @@ class _TaskNewNormalUI(_TaskNewUI):
         box = self._content_box
 
         uris_view = URIsView()
-        uris_view.set_size_request(300, 70)
+        uris_view.set_size_request(350, 70)
         box.pack_start(uris_view)
         self._task_options['uris'] = _TaskOption(uris_view,
                                                  _TaskOption.default_mapper)
@@ -219,7 +219,7 @@ class _TaskNewBTUI(_TaskNewUI):
         button = MetafileChooserButton(title=_('Select torrent file'),
                                        mime_types=_BT_MIME_TYPES,
                                       )
-        button.set_size_request(300, -1)
+        button.set_size_request(350, -1)
         box.pack_start(button)
         self._task_options['torrent_filename'] = _TaskOption(
             button, _TaskOption.string_mapper)
@@ -255,7 +255,7 @@ class _TaskNewMLUI(_TaskNewUI):
         button = MetafileChooserButton(title=_('Select metalink file'),
                                        mime_types=_ML_MIME_TYPES,
                                       )
-        button.set_size_request(300, -1)
+        button.set_size_request(350, -1)
         box.pack_start(button)
         self._task_options['metalink_filename'] = _TaskOption(
             button, _TaskOption.string_mapper)
@@ -286,9 +286,6 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         Gtk.Dialog.__init__(self, title=_('New Task'), parent=parent,
                             flags=(Gtk.DialogFlags.DESTROY_WITH_PARENT |
                                    Gtk.DialogFlags.MODAL),
-                            buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                                     Gtk.STOCK_OK, Gtk.ResponseType.OK
-                                    )
                            )
         LoggingMixin.__init__(self)
 
@@ -299,6 +296,35 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._ml_ui = None
 
         self._task_options = {}
+
+        ### Action Area
+        action_area = self.get_action_area()
+        action_area.set_layout(Gtk.ButtonBoxStyle.START)
+
+        button = Gtk.Button.new_from_stock(Gtk.STOCK_CANCEL)
+        self.add_action_widget(button, Gtk.ResponseType.CANCEL)
+        action_area.set_child_secondary(button, True)
+
+        image = Gtk.Image.new_from_stock(Gtk.STOCK_GO_DOWN, Gtk.IconSize.BUTTON)
+        button = Gtk.Button(_('Download'), image=image)
+        self.add_action_widget(button, Gtk.ResponseType.OK)
+        action_area.set_child_secondary(button, True)
+
+        advanced_buttons = []
+
+        image = Gtk.Image.new_from_stock(Gtk.STOCK_UNDO, Gtk.IconSize.BUTTON)
+        button = Gtk.Button(_('Reset Settings'), image=image)
+        button.set_no_show_all(True)
+        action_area.pack_start(button, True, True, 0)
+        action_area.set_child_non_homogeneous(button, True)
+        advanced_buttons.append(button)
+
+        image = Gtk.Image.new_from_stock(Gtk.STOCK_SAVE, Gtk.IconSize.BUTTON)
+        button = Gtk.Button(_('Save Settings'), image=image)
+        button.set_no_show_all(True)
+        action_area.pack_start(button, True, True, 0)
+        action_area.set_child_non_homogeneous(button, True)
+        advanced_buttons.append(button)
 
         ### Content Area
         content_area = self.get_content_area()
@@ -334,6 +360,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         ## Advanced
         expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
+        expander.connect_after('activate', self._on_advanced_expander_activated, advanced_buttons)
         expander.connect_after('activate', self.update_size)
         vbox.pack_end(expander)
         self.advanced_expander = expander
@@ -682,6 +709,14 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         if self._ml_ui is None:
             self._ml_ui = _TaskNewMLUI(self._task_options)
         return self._ml_ui
+
+    def _on_advanced_expander_activated(self, expander, buttons):
+        """When advanced button activated, show or hide advanced buttons."""
+        for button in buttons:
+            if expander.get_expanded():
+                button.show()
+            else:
+                button.hide()
 
     def _on_category_cb_changed(self, category_cb, entry):
         """When category combo box changed, update the directory entry."""
