@@ -44,6 +44,8 @@ _BT_FILTER_NAME = _('Torrent Files')
 _ML_FILTER_NAME = _('Metalink Files')
 _BT_MIME_TYPES = {'application/x-bittorrent'}
 _ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
+_RESPONSE_RESET = -1
+_RESPONSE_SAVE = -2
 
 class _TaskOption(object):
     """An widget wrapper for convert between aria2c needed format and widget
@@ -68,16 +70,17 @@ class _TaskOption(object):
     mib_mapper = lambda x: str(int(x) * 1024 * 1024)
     prioritize_mapper = lambda x: 'head, tail' if x else ''
 
-class _TaskNewUI(object):
+class _TaskNewUI(LoggingMixin):
     """Base class for the UIs of the new task dialog."""
 
-    settings = Gio.Settings('com.kissuki.yaner.task')
-    """GSettings instance for task configurations."""
-
     def __init__(self, task_options, expander_label):
-        self._task_options = task_options.copy()
+        LoggingMixin.__init__(self)
+
+        self.settings = Gio.Settings('com.kissuki.yaner.task')
         # Don't apply changes to dconf until apply() is called
         self.settings.delay()
+
+        self._task_options = task_options.copy()
 
         expander = AlignedExpander(expander_label)
         self._uris_expander = expander
@@ -111,11 +114,31 @@ class _TaskNewUI(object):
         """When the UI changed from this one, unbind the properties."""
         self.settings.revert()
 
-    def response(self):
+    def response(self, response_id):
         """When dialog responsed, create new task. Returning if the dialog should
         be kept showing.
         """
-        return True
+        settings = self.settings
+
+        if response_id in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return False
+        elif response_id == _RESPONSE_RESET:
+            task_options = self._task_options
+            keys = self.settings.list_keys()
+            for key, option in task_options.items():
+                if key in keys:
+                    settings.reset(key)
+                    # When in delayed writing mode, widget values doesn't update
+                    # when the settings isn't different with the default value,
+                    # so update it manually
+                    option.widget.value = settings.get_value(key).unpack()
+            settings.apply()
+            return True
+        elif response_id == _RESPONSE_SAVE:
+            settings.apply()
+            return True
+        else:
+            return True
 
 class _TaskNewDefaultUI(_TaskNewUI):
     """Default UI of the new task dialog."""
@@ -190,22 +213,25 @@ class _TaskNewNormalUI(_TaskNewUI):
         _TaskNewUI.activate(self, options)
         self._uris_view.grab_focus()
 
-    def response(self):
-        options = self.aria2_options
+    def response(self, response_id):
+        if response_id == Gtk.ResponseType.OK:
+            options = self.aria2_options
 
-        # Workaround for aria2 bug#3527521
-        options.pop('bt-prioritize-piece')
+            # Workaround for aria2 bug#3527521
+            options.pop('bt-prioritize-piece')
 
-        category = options.pop('category')
-        uris = options.pop('uris')
-        if not uris:
-            return True
+            category = options.pop('category')
+            uris = options.pop('uris')
+            if not uris:
+                return True
 
-        name = options['out'] if options['out'] else os.path.basename(uris[0])
+            name = options['out'] if options['out'] else os.path.basename(uris[0])
 
-        Task(name=name, uris=uris, options=options, category=category).start()
+            Task(name=name, uris=uris, options=options, category=category).start()
 
-        return False
+            return False
+        else:
+            return _TaskNewUI.response(self, response_id)
 
 class _TaskNewBTUI(_TaskNewUI):
     """BT UI of the new task dialog."""
@@ -224,24 +250,27 @@ class _TaskNewBTUI(_TaskNewUI):
         self._task_options['torrent_filename'] = _TaskOption(
             button, _TaskOption.string_mapper)
 
-    def response(self):
-        options = self.aria2_options
+    def response(self, response_id):
+        if response_id == Gtk.ResponseType.OK:
+            options = self.aria2_options
 
-        torrent_filename = options.pop('torrent_filename')
-        if torrent_filename is None:
-            return
+            torrent_filename = options.pop('torrent_filename')
+            if torrent_filename is None:
+                return True
+            else:
+                name = os.path.basename(torrent_filename)
+                with open(torrent_filename, 'br') as torrent_file:
+                    torrent = xmlrpc.client.Binary(torrent_file.read())
+
+            uris = options.pop('uris')
+            category = options.pop('category')
+
+            Task(name=name, torrent=torrent, uris=uris,
+                 options=options, category=category).start()
+
+            return False
         else:
-            name = os.path.basename(torrent_filename)
-            with open(torrent_filename, 'br') as torrent_file:
-                torrent = xmlrpc.client.Binary(torrent_file.read())
-
-        uris = options.pop('uris')
-        category = options.pop('category')
-
-        Task(name=name, torrent=torrent, uris=uris,
-             options=options, category=category).start()
-
-        return False
+            return _TaskNewUI.response(self, response_id)
 
 class _TaskNewMLUI(_TaskNewUI):
     """Metalink UI of the new task dialog."""
@@ -260,24 +289,28 @@ class _TaskNewMLUI(_TaskNewUI):
         self._task_options['metalink_filename'] = _TaskOption(
             button, _TaskOption.string_mapper)
 
-    def response(self):
-        options = self.aria2_options
+    def response(self, response_id):
+        if response_id == Gtk.ResponseType.OK:
+            options = self.aria2_options
 
-        # Workaround for aria2 bug#3527521
-        options.pop('uris')
+            # Workaround for aria2 bug#3527521
+            options.pop('uris')
 
-        metalink_filename = options.pop('metalink_filename')
-        if metalink_filename is None:
-            return
+            metalink_filename = options.pop('metalink_filename')
+            if metalink_filename is None:
+                return True
+            else:
+                name = os.path.basename(metalink_filename)
+                with open(metalink_filename, 'br') as metalink_file:
+                    metafile = xmlrpc.client.Binary(metalink_file.read())
+
+            category = options.pop('category')
+
+            Task(name=name, metafile=metafile, options=options,
+                 category=category).start()
+            return False
         else:
-            name = os.path.basename(metalink_filename)
-            with open(metalink_filename, 'br') as metalink_file:
-                metafile = xmlrpc.client.Binary(metalink_file.read())
-
-        category = options.pop('category')
-
-        Task(name=name, metafile=metafile, options=options,
-             category=category).start()
+            return _TaskNewUI.response(self, response_id)
 
 class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for creating new tasks."""
@@ -315,15 +348,13 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         image = Gtk.Image.new_from_stock(Gtk.STOCK_UNDO, Gtk.IconSize.BUTTON)
         button = Gtk.Button(_('Reset Settings'), image=image)
         button.set_no_show_all(True)
-        action_area.pack_start(button, True, True, 0)
-        action_area.set_child_non_homogeneous(button, True)
+        self.add_action_widget(button, _RESPONSE_RESET)
         advanced_buttons.append(button)
 
         image = Gtk.Image.new_from_stock(Gtk.STOCK_SAVE, Gtk.IconSize.BUTTON)
         button = Gtk.Button(_('Save Settings'), image=image)
         button.set_no_show_all(True)
-        action_area.pack_start(button, True, True, 0)
-        action_area.set_child_non_homogeneous(button, True)
+        self.add_action_widget(button, _RESPONSE_SAVE)
         advanced_buttons.append(button)
 
         ### Content Area
@@ -747,9 +778,9 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         if self._ui is not self.normal_ui:
             self.set_ui(self.normal_ui, {'uris': entry.get_text()})
 
-    def do_response(self, response):
+    def do_response(self, response_id):
         """Create a new download task if uris are provided."""
-        if response != Gtk.ResponseType.OK or not self._ui.response():
+        if not self._ui.response(response_id):
             self.hide()
 
     def set_ui(self, new_ui, options=None):
