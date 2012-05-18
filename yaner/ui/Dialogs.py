@@ -501,26 +501,20 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             switch, _TaskOption.bool_mapper)
 
         # Referer
-        hbox = Box(HORIZONTAL)
-        vbox.pack_start(hbox, expand=False)
-
         label = LeftAlignedLabel(_('Referer:'))
-        hbox.pack_start(label, expand=False)
+        table.attach_defaults(label, 0, 1, 5, 6)
 
         entry = Entry(activates_default=True)
-        hbox.pack_start(entry)
+        table.attach_defaults(entry, 1, 4, 5, 6)
         self._task_options['referer'] = _TaskOption(entry,
                                                     _TaskOption.string_mapper)
 
         # Header
-        hbox = Box(HORIZONTAL)
-        vbox.pack_start(hbox, expand=False)
-
         label = LeftAlignedLabel(_('Header:'))
-        hbox.pack_start(label, expand=False)
+        table.attach_defaults(label, 0, 1, 6, 7)
 
         entry = Entry(activates_default=True)
-        hbox.pack_start(entry)
+        table.attach_defaults(entry, 1, 4, 6, 7)
         self._task_options['header'] = _TaskOption(entry,
                                                    _TaskOption.string_mapper)
 
@@ -717,8 +711,9 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         label = LeftAlignedLabel(_('Convert downloaded metalink files to Metalink tasks'))
         hbox.pack_start(label)
+
         switch = Switch()
-        hbox.pack_start(switch, expand=False)
+        hbox.pack_start(switch)
         self._task_options['follow-metalink'] = _TaskOption(switch,
                                                             _TaskOption.bool_mapper)
 
