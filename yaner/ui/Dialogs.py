@@ -209,6 +209,10 @@ class _TaskNewNormalUI(_TaskNewUI):
 
         self._uris_view = uris_view
 
+    @property
+    def uris_view(self):
+        return self._uris_view
+
     def activate(self, options):
         _TaskNewUI.activate(self, options)
         self._uris_view.grab_focus()
@@ -733,7 +737,10 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     def normal_ui(self):
         """Get the normal UI."""
         if self._normal_ui is None:
-            self._normal_ui = _TaskNewNormalUI(self._task_options)
+            ui = _TaskNewNormalUI(self._task_options)
+            text_buffer = ui.uris_view.text_buffer
+            text_buffer.connect('changed', self._on_normal_uris_view_changed)
+            self._normal_ui = ui
         return self._normal_ui
 
     @property
@@ -786,6 +793,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         # ignore this.
         if self._ui is not self.normal_ui:
             self.set_ui(self.normal_ui, {'uris': entry.get_text()})
+
+    def _on_normal_uris_view_changed(self, text_buffer):
+        """When the uris view in the normal UI cleared, switch to default mode."""
+        if text_buffer.get_property('text') == '':
+            self.set_ui(self.default_ui, {'uris': ''})
 
     def do_response(self, response_id):
         """Create a new download task if uris are provided."""
