@@ -343,20 +343,20 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         action_area.set_child_secondary(button, True)
 
         image = Gtk.Image.new_from_stock(Gtk.STOCK_GO_DOWN, Gtk.IconSize.BUTTON)
-        button = Gtk.Button(_('Download'), image=image)
+        button = Gtk.Button(_('_Download'), image=image, use_underline=True)
         self.add_action_widget(button, Gtk.ResponseType.OK)
         action_area.set_child_secondary(button, True)
 
         advanced_buttons = []
 
         image = Gtk.Image.new_from_stock(Gtk.STOCK_UNDO, Gtk.IconSize.BUTTON)
-        button = Gtk.Button(_('Reset Settings'), image=image)
+        button = Gtk.Button(_('_Reset Settings'), image=image, use_underline=True)
         button.set_no_show_all(True)
         self.add_action_widget(button, _RESPONSE_RESET)
         advanced_buttons.append(button)
 
         image = Gtk.Image.new_from_stock(Gtk.STOCK_SAVE, Gtk.IconSize.BUTTON)
-        button = Gtk.Button(_('Save Settings'), image=image)
+        button = Gtk.Button(_('_Save Settings'), image=image, use_underline=True)
         button.set_no_show_all(True)
         self.add_action_widget(button, _RESPONSE_SAVE)
         advanced_buttons.append(button)
