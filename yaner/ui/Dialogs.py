@@ -821,6 +821,9 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             main_vbox.reorder_child(new_ui.uris_expander, 0)
 
         if new_ui is self.default_ui:
+            # Hide the advanced buttons when changing to default UI
+            if self.advanced_expander.get_expanded():
+                self.advanced_expander.emit('activate')
             self.advanced_expander.hide()
         else:
             self.advanced_expander.show_all()
