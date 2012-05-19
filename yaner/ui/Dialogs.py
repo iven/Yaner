@@ -771,7 +771,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         model = category_cb.get_model()
         presentable = model.get_value(iter_, PoolModel.COLUMNS.PRESENTABLE)
         entry.set_text(presentable.directory)
-        self.logger.debug(_('Category is changed to {}.').format(presentable))
+        self.logger.debug('Category is changed to {}.'.format(presentable))
 
     def _on_metafile_selected(self, dialog, response_id):
         """When meta file chooser dialog responsed, switch to torrent or metalink
@@ -780,8 +780,12 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             filename = dialog.get_filename()
             current_filter = dialog.get_filter().get_name()
             if current_filter == _BT_FILTER_NAME:
+                self.logger.info(
+                    'Torrent file selected, changing to bittorrent UI...')
                 self.set_ui(self.bt_ui, {'torrent_filename': filename})
             elif current_filter == _ML_FILTER_NAME:
+                self.logger.info(
+                    'Metalink file selected, changing to metalink UI...')
                 self.set_ui(self.ml_ui, {'metalink_filename': filename})
             else:
                 raise RuntimeError('No such filter' + current_filter)
@@ -792,11 +796,13 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         # When default UI activated, the entry text is cleared, we should
         # ignore this.
         if self._ui is not self.normal_ui:
+            self.logger.info('URIs inputed, changing to normal UI...')
             self.set_ui(self.normal_ui, {'uris': entry.get_text()})
 
     def _on_normal_uris_view_changed(self, text_buffer):
         """When the uris view in the normal UI cleared, switch to default mode."""
         if text_buffer.get_property('text') == '':
+            self.logger.info('URIs cleared, changing to default UI...')
             self.set_ui(self.default_ui, {'uris': ''})
 
     def do_response(self, response_id):
@@ -845,7 +851,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         else:
             self.set_ui(self.normal_ui, options)
 
-        self.logger.info(_('Running new task dialog...'))
+        self.logger.info('Running new task dialog...')
 
         Gtk.Dialog.run(self)
 

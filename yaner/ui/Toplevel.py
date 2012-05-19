@@ -63,7 +63,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         Gtk.Window.__init__(self)
         LoggingMixin.__init__(self)
 
-        self.logger.info(_('Initializing toplevel window...'))
+        self.logger.info('Initializing toplevel window...')
 
         self._popups = None
 
@@ -153,25 +153,25 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         self.connect('delete-event', self._on_delete_event, status_icon)
 
-        self.logger.info(_('Toplevel window initialized.'))
+        self.logger.info('Toplevel window initialized.')
 
     @property
     def ui_manager(self):
         """Get the UI Manager of L{yaner}."""
         if self._ui_manager is None:
-            self.logger.info(_('Initializing UI Manager...'))
+            self.logger.info('Initializing UI Manager...')
 
             ui_manager = Gtk.UIManager()
             ui_manager.insert_action_group(self.action_group)
             try:
                 ui_manager.add_ui_from_file(self._UI_FILE)
             except GObject.GError:
-                self.logger.exception(_("Failed to add ui file to UIManager."))
+                self.logger.exception("Failed to add ui file to UIManager.")
                 SQLSession.close()
                 logging.shutdown()
                 sys.exit(1)
             else:
-                self.logger.info(_('UI Manager initialized.'))
+                self.logger.info('UI Manager initialized.')
             self._ui_manager = ui_manager
         return self._ui_manager
 
@@ -179,7 +179,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
     def action_group(self):
         """Get the action group of L{yaner}."""
         if self._action_group is None:
-            self.logger.info(_('Initializing action group...'))
+            self.logger.info('Initializing action group...')
 
             # The actions used by L{action_group}. The members are:
             # name, stock-id, label, accelerator, tooltip, callback
@@ -223,7 +223,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             action_group = Gtk.ActionGroup("ToplevelActions")
             action_group.add_actions(action_entries, self)
 
-            self.logger.info(_('Action group initialized.'))
+            self.logger.info('Action group initialized.')
 
             self._action_group = action_group
         return self._action_group
@@ -232,7 +232,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
     def popups(self):
         """Get popup menus, which is a dict."""
         if self._popups is None:
-            self.logger.info(_('Initializing popup menus...'))
+            self.logger.info('Initializing popup menus...')
             get_widget = self.ui_manager.get_widget
             popups = {}
             for popup_name in ('tray', 'pool',
@@ -240,7 +240,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
                                'queuing_task', 'category_task', 'dustbin_task'):
                 popups[popup_name] = get_widget('/{}_popup'.format(popup_name))
             self._popups = popups
-            self.logger.info(_('Popup menus initialized.'))
+            self.logger.info('Popup menus initialized.')
         return self._popups
 
     @property
@@ -288,22 +288,22 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
     def _on_status_icon_activated(self, status_icon):
         """When status icon clicked, switch the window visible or hidden."""
-        self.logger.debug(_('Status icon activated.'))
+        self.logger.debug('Status icon activated.')
         self.action_group.get_action('toggle_hidden').activate()
 
     def _on_status_icon_popup(self, status_icon, button, activate_time):
         """When status icon right-clicked, show the menu."""
-        self.logger.debug(_('Status icon menu popuped.'))
+        self.logger.debug('Status icon menu popuped.')
         self.popups['tray'].popup(None, None, None, None, button, activate_time)
 
     def _on_toggle_hidden(self, action, data):
         """Toggle the toplevel window shown or hidden."""
         if self.get_property('visible'):
             self.hide()
-            self.logger.debug(_('Toplevel window hidden.'))
+            self.logger.debug('Toplevel window hidden.')
         else:
             self.present()
-            self.logger.debug(_('Toplevel window shown.'))
+            self.logger.debug('Toplevel window shown.')
 
     def _on_delete_event(self, window, event, status_icon):
         """When window close button is clicked, try to hide the window instead
@@ -311,7 +311,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """
         if status_icon.is_embedded():
             self.hide()
-            self.logger.debug(_('Toplevel window hidden.'))
+            self.logger.debug('Toplevel window hidden.')
             return True
         else:
             return False
@@ -600,5 +600,5 @@ class Toplevel(Gtk.Window, LoggingMixin):
     def destroy(self, *args, **kwargs):
         """Destroy toplevel window and quit the application."""
         Gtk.Window.destroy(self)
-        self.logger.debug(_('Window destroyed.'))
+        self.logger.debug('Window destroyed.')
 
