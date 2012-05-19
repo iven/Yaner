@@ -514,7 +514,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                                     _TaskOption.string_mapper)
 
         # Header
-        label = LeftAlignedLabel(_('Header:'))
+        label = LeftAlignedLabel(_('HTTP Header:'))
         table.attach_defaults(label, 0, 1, 6, 7)
 
         entry = Entry(activates_default=True)
