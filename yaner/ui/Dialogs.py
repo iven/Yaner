@@ -364,7 +364,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         ### Content Area
         content_area = self.get_content_area()
 
-        vbox = Box(VERTICAL, border_width=5)
+        vbox = Box(VERTICAL)
         content_area.add(vbox)
         self._main_vbox = vbox
 
