@@ -40,7 +40,7 @@ class TaskListModel(Gtk.TreeStore, LoggingMixin):
     The tree interface used by task list treeviews.
     """
 
-    COLUMNS = Enum(('TASK', ))
+    COLUMNS = Enum('TASK')
     """
     The column names of the tree model, which is a L{Enum<yaner.utils.Enum>}.
     C{COLUMNS.NAME} will return the column number of C{NAME}.
@@ -106,7 +106,7 @@ class TaskListModel(Gtk.TreeStore, LoggingMixin):
     def add_task(self, task):
         """Add a task to the model."""
         if not self.get_iter_for_task(task):
-            self.logger.debug(_('Adding {}...').format(task))
+            self.logger.debug('Adding {}...'.format(task))
             iter_ = self.insert(None, 0)
             self.set(iter_, self.COLUMNS.TASK, task)
 

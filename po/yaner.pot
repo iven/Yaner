@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-02-10 12:12+0800\n"
+"POT-Creation-Date: 2012-05-19 16:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,43 +17,23 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: scripts/../yaner/Application.py:97
-msgid "Logging system initialized, start logging..."
-msgstr ""
-
-#: scripts/../yaner/Application.py:102
-msgid "Connecting to global database file..."
-msgstr ""
-
-#: scripts/../yaner/Application.py:109
-msgid "Initializing database for first start..."
-msgstr ""
-
-#: scripts/../yaner/Application.py:113
+#: scripts/../yaner/Application.py:116
 msgid "My Computer"
 msgstr ""
 
-#: scripts/../yaner/Application.py:116
+#: scripts/../yaner/Application.py:119
 msgid "Documents"
 msgstr ""
 
-#: scripts/../yaner/Application.py:119
+#: scripts/../yaner/Application.py:122
 msgid "Videos"
 msgstr ""
 
-#: scripts/../yaner/Application.py:122
+#: scripts/../yaner/Application.py:125
 msgid "Music"
 msgstr ""
 
-#: scripts/../yaner/Application.py:124
-msgid "Database initialized."
-msgstr ""
-
-#: scripts/../yaner/Application.py:126
-msgid "Global database file connected."
-msgstr ""
-
-#: scripts/../yaner/Application.py:140
+#: scripts/../yaner/Application.py:146
 msgid ""
 "It seems it's the first time you run Yaner. Yaner requires a daemon to run "
 "background, which is highly recommended to be started on system startup.\n"
@@ -62,24 +42,8 @@ msgid ""
 "(Or run it everytime yourself: $ aria2c --enable-rpc --allow-overwrite)"
 msgstr ""
 
-#: scripts/../yaner/Application.py:148
+#: scripts/../yaner/Application.py:154
 msgid "Welcome to Yaner!"
-msgstr ""
-
-#: scripts/../yaner/Application.py:174
-msgid "Received task options from command line arguments."
-msgstr ""
-
-#: scripts/../yaner/Application.py:182
-msgid "Activating toplevel window..."
-msgstr ""
-
-#: scripts/../yaner/Application.py:197
-msgid "Shutting down database..."
-msgstr ""
-
-#: scripts/../yaner/Application.py:201
-msgid "Application quit normally."
 msgstr ""
 
 #: scripts/../yaner/Misc.py:57
@@ -98,10 +62,6 @@ msgstr ""
 msgid "There is NO WARRANTY, to the extent permitted by law."
 msgstr ""
 
-#: scripts/../yaner/Pool.py:100
-msgid "Creating default category for {}."
-msgstr ""
-
 #: scripts/../yaner/Pool.py:102
 msgid "My Downloads"
 msgstr ""
@@ -110,151 +70,199 @@ msgstr ""
 msgid "<Pool {}>"
 msgstr ""
 
-#: scripts/../yaner/Pool.py:163
-msgid "{}: connected."
-msgstr ""
-
-#: scripts/../yaner/Pool.py:173
-msgid "{}: disconnected."
-msgstr ""
-
-#: scripts/../yaner/Presentable.py:140
+#: scripts/../yaner/Presentable.py:136
 msgid "<Category {}>"
 msgstr ""
 
-#: scripts/../yaner/Presentable.py:176
+#: scripts/../yaner/Presentable.py:172
 msgid "Dustbin"
 msgstr ""
 
-#: scripts/../yaner/Task.py:92
-msgid "Adding new task: {}..."
-msgstr ""
-
-#: scripts/../yaner/Task.py:93 scripts/../yaner/ui/Dialogs.py:190
-msgid "Task options: {}"
-msgstr ""
-
-#: scripts/../yaner/Task.py:111
+#: scripts/../yaner/Task.py:108
 msgid "<Task {}>"
 msgstr ""
 
-#: scripts/../yaner/Task.py:284
-msgid "{}: begin updating status."
-msgstr ""
-
-#: scripts/../yaner/Task.py:293
-msgid "{}: end updating status."
-msgstr ""
-
-#: scripts/../yaner/Task.py:407
+#: scripts/../yaner/Task.py:399
 msgid "Network Error"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:51
-msgid "New Task"
+#: scripts/../yaner/ui/Dialogs.py:43
+msgid "Torrent Files"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:71
-msgid "<b>Advanced</b>"
+#: scripts/../yaner/ui/Dialogs.py:44
+msgid "Metalink Files"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:79
-msgid "<b>Save to...</b>"
+#: scripts/../yaner/ui/Dialogs.py:147
+msgid "<b>URIs/Torrent/Metalink File</b>"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:101
-msgid "Select download directory"
+#: scripts/../yaner/ui/Dialogs.py:152
+msgid "Select Torrent/Metalink Files"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:162
-msgid "Category is changed to {}."
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:173
-msgid "Property changed: {} {}"
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:189
-msgid "Running new task dialog..."
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:201
+#: scripts/../yaner/ui/Dialogs.py:178
 msgid "<b>Mirrors</b> - one or more URI(s) for <b>one</b> task"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:216
+#: scripts/../yaner/ui/Dialogs.py:193
 msgid "Rename:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:225
+#: scripts/../yaner/ui/Dialogs.py:202
 msgid "Connections:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:240
-msgid "Referer:"
+#: scripts/../yaner/ui/Dialogs.py:244
+msgid "<b>Torrent File</b>"
 msgstr ""
 
 #: scripts/../yaner/ui/Dialogs.py:249
-msgid "Authorization"
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:255
-msgid "HTTP:"
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:258
-msgid "FTP:"
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:261
-msgid "User"
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:264
-msgid "Password"
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:327
-msgid "<b>Torrent file</b>"
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:330
 msgid "Select torrent file"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:340 scripts/../yaner/ui/Dialogs.py:461
-msgid "Settings"
+#: scripts/../yaner/ui/Dialogs.py:283
+msgid "<b>Metalink File</b>"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:349
+#: scripts/../yaner/ui/Dialogs.py:288
+msgid "Select metalink file"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:323 scripts/../yaner/ui/Toplevel.py:187
+msgid "New Task"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:346
+msgid "_Download"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:353
+msgid "_Reset Settings"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:359
+msgid "_Save Settings"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:372
+msgid "<b>Save to...</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:380
+msgid "Select download directory"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:397
+msgid "<b>Advanced</b>"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:407
+msgid "Normal Task"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:415
+msgid "Upload Limit(KiB/s):"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:424
+msgid "Download Limit(KiB/s):"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:434
+msgid "Max Retries:"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:443
+msgid "Retry Interval(sec):"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:453 scripts/../yaner/ui/Dialogs.py:612
+msgid "Timeout(sec):"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:462 scripts/../yaner/ui/Dialogs.py:621
+msgid "Connect Timeout(sec):"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:472
+msgid "Split Size(MiB):"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:481
+msgid "Per Server Connections:"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:491
+msgid "Allow Overwrite:"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:499
+msgid "Auto Rename Files:"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:508
+msgid "Referer:"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:517
+msgid "HTTP Header:"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:526
+msgid "Authorization"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:533
+msgid "HTTP:"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:536
+msgid "FTP:"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:539
+msgid "User"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:542
+msgid "Password"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:566
+msgid "BitTorrent"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:574
 msgid "Max open files:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:357
+#: scripts/../yaner/ui/Dialogs.py:583
 msgid "Max peers:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:365
+#: scripts/../yaner/ui/Dialogs.py:593
 msgid "Seed time(min):"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:373
+#: scripts/../yaner/ui/Dialogs.py:602
 msgid "Seed ratio:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:382
-msgid "Preview mode"
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:383
+#: scripts/../yaner/ui/Dialogs.py:630
 msgid "Try to download first and last pieces first"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:388
+#: scripts/../yaner/ui/Dialogs.py:637
+msgid "Convert downloaded torrent files to BitTorrent tasks"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:645
 msgid "Mirrors"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:390
+#: scripts/../yaner/ui/Dialogs.py:647
 msgid ""
 "For single file torrents, a mirror can be a complete URI pointing to the "
 "resource or if the mirror ends with /, name in torrent file is added. For "
@@ -262,81 +270,64 @@ msgid ""
 "each file."
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:447
-msgid "<b>Metalink file</b>"
+#: scripts/../yaner/ui/Dialogs.py:665
+msgid "Metalink"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:450
-msgid "Select metalink file"
-msgstr ""
-
-#: scripts/../yaner/ui/Dialogs.py:470
+#: scripts/../yaner/ui/Dialogs.py:672
 msgid "Download Servers:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:478
+#: scripts/../yaner/ui/Dialogs.py:681
 msgid "Preferred locations:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:485
+#: scripts/../yaner/ui/Dialogs.py:689
 msgid "Language:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:492
+#: scripts/../yaner/ui/Dialogs.py:697
 msgid "Version:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:499
+#: scripts/../yaner/ui/Dialogs.py:705
 msgid "OS:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:543
+#: scripts/../yaner/ui/Dialogs.py:716
+msgid "Convert downloaded metalink files to Metalink tasks"
+msgstr ""
+
+#: scripts/../yaner/ui/Dialogs.py:872
 msgid "Category Name:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:550
+#: scripts/../yaner/ui/Dialogs.py:879
 msgid "Default directory:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:553
+#: scripts/../yaner/ui/Dialogs.py:882
 msgid "Select default directory"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:587
+#: scripts/../yaner/ui/Dialogs.py:916
 msgid "Server Name:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:594
+#: scripts/../yaner/ui/Dialogs.py:923
 msgid "IP Address:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:601
+#: scripts/../yaner/ui/Dialogs.py:930
 msgid "Port:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:608
+#: scripts/../yaner/ui/Dialogs.py:937
 msgid "User:"
 msgstr ""
 
-#: scripts/../yaner/ui/Dialogs.py:615
+#: scripts/../yaner/ui/Dialogs.py:944
 msgid "Password:"
-msgstr ""
-
-#: scripts/../yaner/ui/Misc.py:55
-msgid "@widget is not a Gtk.Widget."
-msgstr ""
-
-#: scripts/../yaner/ui/PoolTree.py:63 scripts/../yaner/ui/PoolTree.py:103
-#: scripts/../yaner/ui/TaskListTree.py:109
-msgid "Adding {}..."
-msgstr ""
-
-#: scripts/../yaner/ui/PoolTree.py:73
-msgid "Removing {}..."
-msgstr ""
-
-#: scripts/../yaner/ui/PoolTree.py:109
-msgid "No parent presentable for {0}."
 msgstr ""
 
 #: scripts/../yaner/ui/PoolTree.py:234
@@ -359,151 +350,83 @@ msgstr ""
 msgid "Connections"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:66
-msgid "Initializing toplevel window..."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:164
-msgid "Toplevel window initialized."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:170
-msgid "Initializing UI Manager..."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:177
-msgid "Failed to add ui file to UIManager."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:182
-msgid "UI Manager initialized."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:190
-msgid "Initializing action group..."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:198
-msgid "HTTP/FTP/BT Magnet"
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:200
-msgid "BitTorrent"
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:202
-msgid "Metalink"
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:204
+#: scripts/../yaner/ui/Toplevel.py:189
 msgid "Start"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:206
+#: scripts/../yaner/ui/Toplevel.py:191
 msgid "Pause"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:208
+#: scripts/../yaner/ui/Toplevel.py:193
 msgid "Start All"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:210
+#: scripts/../yaner/ui/Toplevel.py:195
 msgid "Pause All"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:217
+#: scripts/../yaner/ui/Toplevel.py:202
 msgid "Add Category"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:219
+#: scripts/../yaner/ui/Toplevel.py:204
 msgid "Edit Category"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:221
+#: scripts/../yaner/ui/Toplevel.py:206
 msgid "Remove Category"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:223
+#: scripts/../yaner/ui/Toplevel.py:208
 msgid "Add Server"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:225
+#: scripts/../yaner/ui/Toplevel.py:210
 msgid "Edit Server"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:227
+#: scripts/../yaner/ui/Toplevel.py:212
 msgid "Remove Server"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:229
+#: scripts/../yaner/ui/Toplevel.py:214
 msgid "Empty Dustbin"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:232
+#: scripts/../yaner/ui/Toplevel.py:217
 msgid "Show / Hide"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:241
-msgid "Action group initialized."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:250
-msgid "Initializing popup menus..."
-msgstr ""
-
 #: scripts/../yaner/ui/Toplevel.py:258
-msgid "Popup menus initialized."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:292
 msgid "Yaner"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:325
-msgid "Status icon activated."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:330
-msgid "Status icon menu popuped."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:337 scripts/../yaner/ui/Toplevel.py:348
-msgid "Toplevel window hidden."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:340
-msgid "Toplevel window shown."
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:466
+#: scripts/../yaner/ui/Toplevel.py:424
 msgid "Are you sure to remove these tasks?"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:509
+#: scripts/../yaner/ui/Toplevel.py:467
 msgid "The default category should not be removed."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:516
+#: scripts/../yaner/ui/Toplevel.py:474
 msgid ""
 "Are you sure to remove the category \"{}\"?\n"
 "All tasks in the category will be moved to the default category."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:546 scripts/../yaner/ui/Toplevel.py:549
-#: scripts/../yaner/ui/Toplevel.py:620
+#: scripts/../yaner/ui/Toplevel.py:504 scripts/../yaner/ui/Toplevel.py:507
+#: scripts/../yaner/ui/Toplevel.py:578
 msgid "Required"
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:581
+#: scripts/../yaner/ui/Toplevel.py:539
 msgid "The local server should not be removed."
 msgstr ""
 
-#: scripts/../yaner/ui/Toplevel.py:588
+#: scripts/../yaner/ui/Toplevel.py:546
 msgid ""
 "Are you sure to remove the server \"{}\"?\n"
 "All tasks in the server will be <b>removed!</b>"
-msgstr ""
-
-#: scripts/../yaner/ui/Toplevel.py:645
-msgid "Window destroyed."
 msgstr ""

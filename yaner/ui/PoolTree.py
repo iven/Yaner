@@ -42,7 +42,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
     The tree interface used by L{PoolView}.
     """
 
-    COLUMNS = Enum(('PRESENTABLE', ))
+    COLUMNS = Enum('PRESENTABLE')
     """
     The column names of the tree model, which is a L{Enum<yaner.utils.Enum>}.
     C{COLUMNS.NAME} will return the column number of C{NAME}.
@@ -60,7 +60,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         """When a pool is added to the model, connect signals, and add all
         Presentables to the model.
         """
-        self.logger.debug(_('Adding {}...').format(pool))
+        self.logger.debug('Adding {}...'.format(pool))
         self._pool_handlers[pool] = [
                 pool.connect('presentable-added', self.on_presentable_added),
                 pool.connect('presentable-removed', self.on_presentable_removed),
@@ -70,7 +70,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
 
     def remove_pool(self, pool):
         """Removed the pool and presentables, disconnect signals."""
-        self.logger.debug(_('Removing {}...').format(pool))
+        self.logger.debug('Removing {}...'.format(pool))
         for presentable in pool.presentables:
             self.remove_presentable(presentable)
         if pool in self._pool_handlers:
@@ -100,13 +100,13 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         if self.get_iter_for_presentable(presentable):
             return
 
-        self.logger.debug(_('Adding {}...').format(presentable))
+        self.logger.debug('Adding {}...'.format(presentable))
         parent = presentable.parent
         parent_iter = None
         if not parent is None:
             parent_iter = self.get_iter_for_presentable(parent)
             if parent_iter is None:
-                self.logger.warning(_('No parent presentable for {0}.').format(
+                self.logger.warning('No parent presentable for {0}.'.format(
                     presentable.name))
                 self.add_presentable(parent)
                 parent_iter = self.get_iter_for_presentable(parent)

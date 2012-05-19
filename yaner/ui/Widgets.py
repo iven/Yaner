@@ -31,10 +31,33 @@ HORIZONTAL, VERTICAL = Gtk.Orientation.HORIZONTAL, Gtk.Orientation.VERTICAL
 
 LeftAlignedLabel = functools.partial(Gtk.Label, xalign=0)
 
+class _ValueMixin(object):
+    """A mixin class that adds a property `value` to the instance."""
+    @property
+    def value(self):
+        return self.get_value()
+
+    @value.setter
+    def value(self, value):
+        self.set_value(value)
+
+    def do_get_property(self, prop):
+        if prop.name == 'value':
+            return self.value
+        else:
+            raise AttributeError('unknown property %s' % prop.name)
+
+    def do_set_property(self, prop, value):
+        if prop.name == 'value':
+            self.value = value
+        else:
+            raise AttributeError('unknown property %s' % prop.name)
+
 class Box(Gtk.Box):
     """Simplified Gtk.Box."""
-    def __init__(self, orientation, spacing=5):
-        Gtk.Box.__init__(self, orientation=orientation, spacing=spacing)
+    def __init__(self, orientation, spacing=5, *args, **kwargs):
+        Gtk.Box.__init__(self, orientation=orientation,
+                         spacing=spacing, *args, **kwargs)
 
         self.pack_start = functools.partial(self.pack_start,
                                             expand=True, fill=True, padding=0)
@@ -43,40 +66,86 @@ class Box(Gtk.Box):
 
 class AlignedExpander(Gtk.Expander):
     """A L{Gtk.Expander} with an alignment that can place its children nicely."""
-    def __init__(self, markup, expanded=True):
-        Gtk.Expander.__init__(self, label=markup, use_markup=True,
+    def __init__(self, label='', expanded=True):
+        Gtk.Expander.__init__(self, label=label, use_markup=True,
                               resize_toplevel=True, expanded=expanded)
 
-        self.alignment = Gtk.Alignment()
-        self.alignment.set_padding(0, 0, 12, 5)
-        Gtk.Expander.add(self, self.alignment)
+        alignment = Gtk.Alignment()
+        alignment.set_padding(0, 0, 12, 5)
+        Gtk.Expander.add(self, alignment)
 
-    def add(self, child):
-        """Add child to alignment."""
-        self.alignment.add(child)
+        self.add = alignment.add
+        self.remove = alignment.remove
+        self.get_child = alignment.get_child
 
-class URIsView(Gtk.ScrolledWindow):
+class Entry(Gtk.Entry, _ValueMixin):
+    """An entry for using to store settings."""
+    __gproperties__ = {
+        "value": (str, # type
+                  "Value", # nick
+                  "Reads the current value, or sets a new value.",
+                  '',
+                  GObject.PARAM_READWRITE
+                 ),
+    }
+
+    @property
+    def value(self):
+        return self.get_text()
+
+    @value.setter
+    def value(self, value):
+        self.set_text(value)
+
+class SpinButton(Gtk.SpinButton, _ValueMixin):
+    """An spin button for using to store settings."""
+    pass
+
+class Switch(Gtk.Switch, _ValueMixin):
+    """An switch for using to store settings."""
+    __gproperties__ = {
+        "value": (bool, # type
+                  "Value", # nick
+                  "Reads the current value, or sets a new value.",
+                  False,
+                  GObject.PARAM_READWRITE
+                 ),
+    }
+
+    @property
+    def value(self):
+        return self.get_active()
+
+    @value.setter
+    def value(self, value):
+        self.set_active(value)
+
+class URIsView(Gtk.ScrolledWindow, _ValueMixin):
     """ScrolledWindow with a text view for getting/setting URIs."""
+    __gproperties__ = {
+        "value": (str, # type
+                  "Value", # nick
+                  "Reads the current value, or sets a new value.",
+                  '',
+                  GObject.PARAM_READWRITE
+                 ),
+    }
 
     def __init__(self):
         Gtk.ScrolledWindow.__init__(
             self, None, None, shadow_type=Gtk.ShadowType.IN,
             hscrollbar_policy=Gtk.PolicyType.NEVER,
             vscrollbar_policy=Gtk.PolicyType.AUTOMATIC)
-        self.set_size_request(-1, 70)
 
         text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
         self.add(text_view)
+        self.text_view = text_view
 
         text_buffer = text_view.get_buffer()
-        text_buffer.connect('changed', self._text_changed)
         self.text_buffer = text_buffer
 
-    def _text_changed(self, text_buffer):
-        """When text in the buffer changed, update uris property."""
-        self.notify('uris')
-
-    def get_uris(self):
+    @property
+    def value(self):
         tbuffer = self.text_buffer
         return tbuffer.get_text(
             tbuffer.get_start_iter(),
@@ -84,7 +153,8 @@ class URIsView(Gtk.ScrolledWindow):
             False
             ).split()
 
-    def set_uris(self, uris):
+    @value.setter
+    def value(self, uris):
         tbuffer = self.text_buffer
         if isinstance(uris, str):
             tbuffer.set_text(uris)
@@ -93,12 +163,19 @@ class URIsView(Gtk.ScrolledWindow):
         else:
             raise TypeError('URIs should be a string or sequence.')
 
-    uris = GObject.property(getter=get_uris, setter=set_uris)
+    def grab_focus(self):
+        self.text_view.grab_focus()
 
-class MetafileChooserButton(Gtk.FileChooserButton):
+class MetafileChooserButton(Gtk.FileChooserButton, _ValueMixin):
     """A single file chooser button with a file filter."""
-
-    filename = GObject.property(getter=Gtk.FileChooserButton.get_filename)
+    __gproperties__ = {
+        "value": (str, # type
+                  "Value", # nick
+                  "Reads the current value, or sets a new value.",
+                  '',
+                  GObject.PARAM_READWRITE
+                 ),
+    }
 
     def __init__(self, title, mime_types):
         Gtk.FileChooserButton.__init__(self, title=title)
@@ -109,17 +186,22 @@ class MetafileChooserButton(Gtk.FileChooserButton):
 
         self.set_filter(file_filter)
 
-    def do_file_set(self):
-        """When the file selected, update filename property."""
-        self.notify('filename')
+    @property
+    def value(self):
+        return self.get_filename()
 
-class FileChooserEntry(Gtk.Entry):
+    @value.setter
+    def value(self, value):
+        self.set_filename(value)
+
+class FileChooserEntry(Entry):
     """An Entry with a activatable icon that popups FileChooserDialog."""
 
-    def __init__(self, title, parent, file_chooser_action, text=''):
-        Gtk.Entry.__init__(self, text=text)
+    def __init__(self, title, parent, file_chooser_action, update_entry=True,
+                 mime_list=None, **kwargs):
+        Entry.__init__(self, **kwargs)
 
-        self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-directory')
+        self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-open')
         self.connect('icon-press', self._on_icon_press)
 
         dialog = Gtk.FileChooserDialog(
@@ -130,11 +212,33 @@ class FileChooserEntry(Gtk.Entry):
         dialog.set_transient_for(parent)
         self._file_chooser_dialog = dialog
 
+        if mime_list is not None:
+            for mime_item in mime_list:
+                file_filter = Gtk.FileFilter()
+                file_filter.set_name(mime_item[0])
+                for mime_type in mime_item[1]:
+                    file_filter.add_mime_type(mime_type)
+                dialog.add_filter(file_filter)
+
+        # Update the entry text when file choosed?
+        if update_entry:
+            dialog.connect('response', self._update_directory_path)
+
     def _on_icon_press(self, entry, icon_pos, event):
         """When icon activated, popup file chooser dialog."""
         if icon_pos == Gtk.EntryIconPosition.SECONDARY:
             dialog = self._file_chooser_dialog
-            if dialog.run() == Gtk.ResponseType.ACCEPT:
-                self.set_text(dialog.get_filename())
+            dialog.run()
             dialog.hide()
+
+    def _update_directory_path(self, dialog, response_id):
+        """When file choosed, update the entry text."""
+        if response_id == Gtk.ResponseType.ACCEPT:
+            self.set_text(dialog.get_filename())
+
+    def connect(self, signal_name, *args, **kwargs):
+        if signal_name in ('response'):
+            self._file_chooser_dialog.connect(signal_name, *args, **kwargs)
+        else:
+            Gtk.Entry.connect(self, signal_name, *args, **kwargs)
 

@@ -51,6 +51,9 @@ class Application(Gtk.Application, LoggingMixin):
     _DATA_FILE = '{}.db'.format(_NAME)
     """The global database file of the application."""
 
+    _SYNC_INTERVAL = 60
+    """Interval for database sync, in second(s)."""
+
     def __init__(self):
         """
         The init methed of L{Application} class.
@@ -94,19 +97,19 @@ class Application(Gtk.Application, LoggingMixin):
             format = formatstr,
             level = logging.DEBUG
             )
-        self.logger.info(_('Logging system initialized, start logging...'))
+        self.logger.info('Logging system initialized, start logging...')
 
     def _init_database(self):
         """Connect to database and set up database if this is the first
         start of the application."""
-        self.logger.info(_('Connecting to global database file...'))
+        self.logger.info('Connecting to global database file...')
 
         data_file = save_data_file(self._DATA_FILE)
         engine = create_engine('sqlite:///' + data_file)
         SQLSession.configure(bind=engine)
 
         if not os.path.exists(data_file):
-            self.logger.info(_('Initializing database for first start...'))
+            self.logger.info('Initializing database for first start...')
 
             SQLBase.metadata.create_all(engine)
 
@@ -121,9 +124,12 @@ class Application(Gtk.Application, LoggingMixin):
             music_dir = os.environ.get('XDG_MUSIC_DIR', os.path.expanduser('~'))
             Category(name=_('Music'), directory=music_dir, pool=pool)
 
-            self.logger.info(_('Database initialized.'))
+            self.logger.info('Database initialized.')
 
-        self.logger.info(_('Global database file connected.'))
+        # Auto commit to database
+        GLib.timeout_add_seconds(self._SYNC_INTERVAL, SQLSession.commit)
+
+        self.logger.info('Global database file connected.')
 
     def _init_action_group(self):
         """Insert 'cmdline' action for opening new task dialog."""
@@ -171,15 +177,14 @@ class Application(Gtk.Application, LoggingMixin):
         task dialog.
         """
         options = eval(data.unpack())
-        self.logger.info(_('Received task options from command line arguments.'))
+        self.logger.info('Received task options from command line arguments.')
         self.logger.debug(str(options))
 
-        dialog = self.toplevel.normal_task_new_dialog
-        dialog.run(options)
+        self.toplevel.task_new_dialog.run(options)
 
     def do_activate(self):
         """When Application activated, present the main window."""
-        self.logger.debug(_('Activating toplevel window...'))
+        self.logger.debug('Activating toplevel window...')
         self.toplevel.present()
 
     def do_startup(self):
@@ -194,10 +199,10 @@ class Application(Gtk.Application, LoggingMixin):
 
     def do_shutdown(self):
         """When shutdown, finalize database and logging systems."""
-        self.logger.info(_('Shutting down database...'))
+        self.logger.info('Shutting down database...')
         SQLSession.commit()
         SQLSession.close()
 
-        self.logger.info(_('Application quit normally.'))
+        self.logger.info('Application quit normally.')
         logging.shutdown()
 

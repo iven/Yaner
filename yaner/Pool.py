@@ -97,7 +97,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         self._proxy = None
 
         if self.default_category is None:
-            self.logger.info(_('Creating default category for {}.').format(self))
+            self.logger.info('Creating default category for {}.'.format(self))
             down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
             self.default_category = Category(name=_('My Downloads'),
                                              directory= down_dir,
@@ -160,7 +160,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
 
     def do_connected(self):
         """When pool connected, try to resume last session."""
-        self.logger.info(_('{}: connected.').format(self))
+        self.logger.info('{}: connected.'.format(self))
         self._resume_session()
 
     def do_disconnected(self):
@@ -170,7 +170,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         call C{aria2.unpause} method, while inactive tasks will call
         C{aria2.addUri}, or other method to add them as new tasks.
         """
-        self.logger.info(_('{}: disconnected.').format(self))
+        self.logger.info('{}: disconnected.'.format(self))
         for task in self.queuing.tasks:
             task.state = 'inactive'
 
