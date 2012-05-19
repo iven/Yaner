@@ -1,3 +1,11 @@
+0.5.0   <2012-05-19>
+====================
+
+ * Reduced disk writing times.
+ * Newly designed new task dialog.
+ * Added more new task settings.
+ * Reset and saving task settings.
+
 0.4.1   <2012-02-10>
 ====================
 
