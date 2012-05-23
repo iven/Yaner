@@ -458,12 +458,13 @@ class Toplevel(Gtk.Window, LoggingMixin):
         if not settings.get_boolean('maximized'):
             settings.set_uint('width', event.width)
             settings.set_uint('height', event.height)
-        return False
 
-#    def do_window_state_event(self, event):
-#        """When window maximized, save it in GSettings."""
-#        maximized = event.new_window_state & Gdk.WindowState.MAXIMIZED
-#        self.settings.set_boolean('maximized', maximized)
+        Gtk.Window.do_configure_event(self, event)
+
+    def do_window_state_event(self, event):
+        """When window maximized, save it in GSettings."""
+        maximized = event.new_window_state & Gdk.WindowState.MAXIMIZED
+        self.settings.set_boolean('maximized', maximized)
 
     def _on_dustbin_empty(self, action, data):
         """Empty dustbin."""
