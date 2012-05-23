@@ -114,6 +114,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
         task_list_view.selection.set_mode(Gtk.SelectionMode.MULTIPLE)
         task_list_view.connect('button-press-event',
                                self._on_task_list_view_button_pressed)
+        task_list_view.connect('row-activated',
+                               self._on_task_list_view_row_activated)
         scrolled_window.add(task_list_view)
 
         self._task_list_view = task_list_view
@@ -330,6 +332,18 @@ class Toplevel(Gtk.Window, LoggingMixin):
             return True
         else:
             return False
+
+    def _on_task_list_view_row_activated(self, treeview, path, column):
+        """When task row double clicked, start or pause the task."""
+        model = treeview.get_model()
+        activating_task = model.get_task(model.get_iter(path))
+
+        presentable = self._pool_view.selected_presentable
+        if presentable.TYPE == Presentable.TYPES.QUEUING:
+            if activating_task.is_pausable:
+                activating_task.pause()
+            elif activating_task.is_unpausable or activating_task.is_addable:
+                activating_task.start()
 
     def _on_task_list_view_button_pressed(self, treeview, event):
         """Popup menu when necessary."""
