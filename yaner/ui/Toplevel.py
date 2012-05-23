@@ -466,6 +466,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
         maximized = event.new_window_state & Gdk.WindowState.MAXIMIZED
         self.settings.set_boolean('maximized', maximized)
 
+        Gtk.Window.do_window_state_event(self, event)
+
     def _on_dustbin_empty(self, action, data):
         """Empty dustbin."""
         if self._pool_view.selected_presentable.TYPE == Presentable.TYPES.DUSTBIN:

@@ -187,6 +187,8 @@ class Application(Gtk.Application, LoggingMixin):
         self.logger.debug('Activating toplevel window...')
         self.toplevel.present()
 
+        Gtk.Application.do_activate(self)
+
     def do_startup(self):
         """When start up, initialize logging and database systems, and
         show the toplevel window.
@@ -197,6 +199,8 @@ class Application(Gtk.Application, LoggingMixin):
         self.toplevel.set_application(self)
         self.toplevel.show_all()
 
+        Gtk.Application.do_startup(self)
+
     def do_shutdown(self):
         """When shutdown, finalize database and logging systems."""
         self.logger.info('Shutting down database...')
@@ -205,4 +209,6 @@ class Application(Gtk.Application, LoggingMixin):
 
         self.logger.info('Application quit normally.')
         logging.shutdown()
+
+        Gtk.Application.do_shutdown(self)
 
