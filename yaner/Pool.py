@@ -24,10 +24,13 @@
 This module contains the L{Pool} class of L{yaner}.
 """
 
+import os
+
 from gi.repository import GLib
 from gi.repository import GObject
-from sqlalchemy import Column, Integer, Unicode
+from sqlalchemy import Column, Unicode, Boolean
 from sqlalchemy.orm import reconstructor, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from yaner import SQLSession, SQLBase
 from yaner.Task import Task
@@ -62,16 +65,19 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     user = Column(Unicode)
     passwd = Column(Unicode)
     host = Column(Unicode)
-    port = Column(Integer)
-    categories = relationship(Category, backref='pool')
-    tasks = relationship(Task, backref='pool')
+    port = Column(Unicode)
+    is_local = Column(Boolean)
+    categories = relationship(Category, backref='pool',
+                              cascade='all, delete-orphan')
+    default_category = relationship(Category, uselist=False)
 
-    def __init__(self, name, host, user='', passwd='', port=6800):
+    def __init__(self, name, host, user='', passwd='', port='6800', is_local=False):
         self.name = name
         self.user = user
         self.passwd = passwd
         self.host = host
         self.port = port
+        self.is_local = is_local
 
         SQLSession.add(self)
         SQLSession.commit()
@@ -89,6 +95,14 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
 
         self._connected = False
         self._proxy = None
+
+        if self.default_category is None:
+            self.logger.info('Creating default category for {}.'.format(self))
+            down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
+            self.default_category = Category(name=_('My Downloads'),
+                                             directory= down_dir,
+                                             pool=self)
+            SQLSession.commit()
 
         self.do_disconnected()
         self._keep_connection()
@@ -123,6 +137,12 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         """Get the presentables of the pool."""
         return [self.queuing] + self.categories + [self.dustbin]
 
+    @hybrid_property
+    def tasks(self):
+        for category in self.categories:
+            for task in category._tasks:
+                yield task
+
     @property
     def connected(self):
         """Get the connection status of the pool."""
@@ -152,9 +172,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         """
         self.logger.info('{}: disconnected.'.format(self))
         for task in self.queuing.tasks:
-            task.status = Task.STATUSES.INACTIVE
-            task.end_update_status()
-            task.changed()
+            task.state = 'inactive'
 
     def _keep_connection(self):
         """Keep calling C{aria2.getVersion} and mark pool as connected."""
@@ -182,7 +200,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
             session_info = deferred.result
             for task in self.queuing.tasks:
                 if task.session_id == session_info['sessionId']:
-                    task.status = Task.STATUSES.WAITING
+                    task.state = 'waiting'
                     task.begin_update_status()
 
         deferred = self.proxy.call('aria2.getSessionInfo')

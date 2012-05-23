@@ -1,68 +1,107 @@
+0.5.0   <2012-05-19>
+====================
+
+ * Reduced disk writing times.
+ * Newly designed new task dialog.
+ * Added more new task settings.
+ * Reset and saving task settings.
+
+0.4.1   <2012-02-10>
+====================
+
+ * Always use --allow-overwrite, so that follow-torrent and follow-metalink works.
+
+0.4.0   <2012-02-10>
+====================
+
+ * Added a simple dialog to ask user to start yaner daemon on startup.
+ * Added Pool, Category related UI.
+ * Added application icon.
+ * Added follow-torrent and follow-metalink support.
+ * UI ajustments.
+
+0.3.1   <2011-12-25>
+====================
+
+* Added more logging messages, and displaying them in console by default.
+* Removed ini configuration files.
+* Added a wrapper ScrollWindow for task list treeview, so that it's now scrollable.
+
 0.3.0   <2011-12-23>
-======
- * Added popup menus for status icons and treeviews.
- * Added task restore.
- * Added filename encoding auto-detection.
- * Simplified task new dialogs a lot.
- * Fixed task name displaying when it contains special characters.
- * Use GSettings to store task options.
+====================
+
+* Added popup menus for status icons and treeviews.
+* Added task restore.
+* Added filename encoding auto-detection.
+* Simplified task new dialogs a lot.
+* Fixed task name displaying when it contains special characters.
+* Use GSettings to store task options.
 
 0.2.1   <2011-11-29>
-======
- * Fixed cookie format, cookies works now.
- * Fixed metafile encoding, so BT and ML tasks can be added now.
+====================
+
+* Fixed cookie format, cookies works now.
+* Fixed metafile encoding, so BT and ML tasks can be added now.
 
 0.2.0   <2011-11-28>
-======
- * Use PyGObject + GTK3 instead of pygtk.
- * Use Python3 instead of Python2.
- * Use SQLAlchemy instead of SQLObject, which doesn't support Python3.
- * Much Python3 and GTK3 features, makes the code cleaner.
- * Removed twisted, which doesn't support Python3 nor GTK3.
- * Small fixes.
+====================
+
+* Use PyGObject + GTK3 instead of pygtk.
+* Use Python3 instead of Python2.
+* Use SQLAlchemy instead of SQLObject, which doesn't support Python3.
+* Much Python3 and GTK3 features, makes the code cleaner.
+* Removed twisted, which doesn't support Python3 nor GTK3.
+* Small fixes.
 
 0.1.0   <2011-11-18>
-======
- * Full redesigned and rewritten, more flexible and easy to expand.
- * Prettier GUI TreeViews.
- * Basic task control, now you can remove tasks(but no restoring.
- * Don't start aria2 automatically, but auto connect to it when possible.
- * Use database instead of config files to store task data.
- * Added logging system.
+====================
+
+* Full redesigned and rewritten, more flexible and easy to expand.
+* Prettier GUI TreeViews.
+* Basic task control, now you can remove tasks(but no restoring.
+* Don't start aria2 automatically, but auto connect to it when possible.
+* Use database instead of config files to store task data.
+* Added logging system.
 
 0.0.9   <2011-01-25>
-======
- * Replace confusing GtkFileChooserButton with GtkButton.
- * Close window defaults to minimize to tray.
- * Add tray popup menu.
+====================
+
+* Replace confusing GtkFileChooserButton with GtkButton.
+* Close window defaults to minimize to tray.
+* Add tray popup menu.
 
 0.0.8   <2010-10-07>
-======
- * Use D-Bus to provide single instance support.
- * Command line options support.
- * Start a new task from command line when an instance exists.
- * Firefox support using FlashGot
+====================
+
+* Use D-Bus to provide single instance support.
+* Command line options support.
+* Start a new task from command line when an instance exists.
+* Firefox support using FlashGot
 
 0.0.7   <2010-09-09>
-======
- * Task control buttons works now.
- * More friendly task name displaying.
- * More friendly error displaying.
- * Add task profile dialog to change default task settings.
+====================
+
+* Task control buttons works now.
+* More friendly task name displaying.
+* More friendly error displaying.
+* Add task profile dialog to change default task settings.
 
 0.0.6   <2010-08-21>
-======
- * Add i18n support.
- * Rewrite setup.py
+====================
+
+* Add i18n support.
+* Rewrite setup.py
 
 0.0.5   <2010-08-14>
-======
- * Rewrite config files structure, use uuid to name them.
- * Local aria2 server could start automatically.
- * Many UI improvements.
+====================
+
+* Rewrite config files structure, use uuid to name them.
+* Local aria2 server could start automatically.
+* Many UI improvements.
 
 0.0.2   <2010-05-19>
-======
- * Basic GUI, including main window and new task dialog
- * Basic Configuration files
- * Could add task, no pausing, removing, nor resuming
+====================
+
+* Basic GUI, including main window and new task dialog
+* Basic Configuration files
+* Could add task, no pausing, removing, nor resuming

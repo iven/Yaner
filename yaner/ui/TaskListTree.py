@@ -40,7 +40,7 @@ class TaskListModel(Gtk.TreeStore, LoggingMixin):
     The tree interface used by task list treeviews.
     """
 
-    COLUMNS = Enum(('TASK', ))
+    COLUMNS = Enum('TASK')
     """
     The column names of the tree model, which is a L{Enum<yaner.utils.Enum>}.
     C{COLUMNS.NAME} will return the column number of C{NAME}.
@@ -106,7 +106,7 @@ class TaskListModel(Gtk.TreeStore, LoggingMixin):
     def add_task(self, task):
         """Add a task to the model."""
         if not self.get_iter_for_task(task):
-            self.logger.debug(_('Adding {}...').format(task))
+            self.logger.debug('Adding {}...'.format(task))
             iter_ = self.insert(None, 0)
             self.set(iter_, self.COLUMNS.TASK, task)
 
@@ -197,17 +197,16 @@ class TaskListView(Gtk.TreeView):
     def _status_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the icon and its size in the column."""
         task = model.get_task(iter_)
-        statuses = Task.STATUSES
-        stock_ids = {statuses.ACTIVE: 'gtk-media-play',
-                statuses.WAITING: 'gtk-refresh',
-                statuses.PAUSED: 'gtk-media-pause',
-                statuses.COMPLETE: 'gtk-apply',
-                statuses.ERROR: 'gtk-stop',
-                statuses.TRASHED: 'gtk-delete',
-                statuses.INACTIVE: 'gtk-disconnect',
-                }
+        stock_ids = {'active': 'gtk-media-play',
+                     'waiting': 'gtk-refresh',
+                     'paused': 'gtk-media-pause',
+                     'complete': 'gtk-apply',
+                     'error': 'gtk-stop',
+                     'removed': 'gtk-delete',
+                     'inactive': 'gtk-disconnect',
+                    }
         renderer.set_properties(
-                stock_id = stock_ids[task.status],
+                stock_id = stock_ids[task.state],
                 stock_size = Gtk.IconSize.LARGE_TOOLBAR,
                 )
 
@@ -226,7 +225,7 @@ class TaskListView(Gtk.TreeView):
         color = get_mix_color(self, state)
 
         # If task completed, don't show completed length
-        if task.status == Task.STATUSES.COMPLETE:
+        if task.in_category:
             completed_text = ''
         else:
             completed_text = '{} / '.format(psize(task.completed_length))
@@ -261,7 +260,7 @@ class TaskListView(Gtk.TreeView):
         """Method for set the up and down speed in the column."""
         task = model.get_task(iter_)
         text = []
-        if task.status == Task.STATUSES.ACTIVE:
+        if task.is_active:
             if task.upload_speed:
                 text.append('\u2B06 {}'.format(pspeed(task.upload_speed)))
             if task.download_speed:
@@ -271,7 +270,7 @@ class TaskListView(Gtk.TreeView):
     def _connection_data_func(self, column, renderer, model, iter_, data=None):
         """Method for set the connections in the column."""
         task = model.get_task(iter_)
-        if task.status == Task.STATUSES.ACTIVE:
+        if task.is_active:
             text = task.connections
         else:
             text = ''

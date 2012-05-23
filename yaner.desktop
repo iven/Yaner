@@ -1,12 +1,14 @@
 [Desktop Entry]
-Name=Yaner Download Manager
-Name[zh_CN]=掩耳下载器
+Name=Yaner
+Name[zh_CN]=掩耳
+GenericName=Download Manager
+GenericName[zh_CN]=下载管理器
 Comment=A download manager based on Aria2
 Comment[zh_CN]=基于 Aria2 的下载管理器
 Exec=yaner %u
-Icon=emblem-downloads
+Icon=yaner
 Terminal=false
 Type=Application
-Categories=GNOME;GTK;Network;FileTransfer;P2P
+Categories=GTK;Network;FileTransfer;P2P
 StartupNotify=true
 Encoding=UTF-8

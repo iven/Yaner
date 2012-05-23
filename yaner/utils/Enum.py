@@ -29,7 +29,7 @@ class Enum(object):
     The emunerate class like in C / C++. Usage:
 
     >>> from Enum import Enum
-    >>> msgtype = Enum(('a', 'b', 'c'))
+    >>> msgtype = Enum('a', 'b', 'c')
     >>> msgtype.a
     0
     >>> msgtype.b
@@ -37,7 +37,7 @@ class Enum(object):
     >>> msgtype[0]
     'a'
     """
-    def __init__(self, names):
+    def __init__(self, *names):
         """
         Extract attributes from L{names}.
         @arg names:Enum names. Each name is a C{str}.
