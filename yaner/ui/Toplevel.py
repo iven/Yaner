@@ -360,13 +360,14 @@ class Toplevel(Gtk.Window, LoggingMixin):
         selection = treeview.get_selection()
         (model, iter_) = selection.get_selected()
         current_path = treeview.get_path_at_pos(event.x, event.y)
-        if current_path is None:
-            self.popups['pool'].popup(None, None, None, None,
-                                      event.button, event.time)
-            return True
 
         if event.button == 3:
-            # If the clicked row is not selected, select it only
+            if current_path is None:
+                self.popups['pool'].popup(None, None, None, None,
+                                          event.button, event.time)
+                return True
+
+            # If the clicked row is not selected, select it
             if current_path[0] != model.get_path(iter_):
                 selection.select_path(current_path[0])
 
