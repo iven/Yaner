@@ -112,6 +112,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
         task_list_view.set_level_indentation(16)
         task_list_view.expand_all()
         task_list_view.selection.set_mode(Gtk.SelectionMode.MULTIPLE)
+        task_list_view.connect('key-press-event',
+                               self._on_task_list_view_key_pressed)
         task_list_view.connect('button-press-event',
                                self._on_task_list_view_button_pressed)
         task_list_view.connect('row-activated',
@@ -345,6 +347,10 @@ class Toplevel(Gtk.Window, LoggingMixin):
             elif activating_task.is_unpausable or activating_task.is_addable:
                 activating_task.start()
 
+    def _on_task_list_view_key_pressed(self, treeview, event):
+        if event.keyval == Gdk.KEY_Delete:
+            self._on_task_remove()
+
     def _on_task_list_view_button_pressed(self, treeview, event):
         """Popup menu when necessary."""
         selection = treeview.get_selection()
@@ -441,7 +447,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             for task in pool.queuing.tasks:
                 task.pause()
 
-    def _on_task_remove(self, action, data):
+    def _on_task_remove(self, action=None, data=None):
         """When task remove button clicked, remove the task."""
         tasks = self._task_list_view.selected_tasks
         if not tasks:
