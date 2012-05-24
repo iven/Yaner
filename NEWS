@@ -1,3 +1,12 @@
+0.5.1   <2012-05-24>
+====================
+
+ * Save window size and if it's maximized.
+ * Double click to start/pause task.
+ * Delete key to remove task.
+ * Fixed the wrong behavior when adding tasks from browser.
+ * UI adjustments.
+
 0.5.0   <2012-05-19>
 ====================
 
@@ -18,7 +27,7 @@
  * Added Pool, Category related UI.
  * Added application icon.
  * Added follow-torrent and follow-metalink support.
- * UI ajustments.
+ * UI adjustments.
 
 0.3.1   <2011-12-25>
 ====================

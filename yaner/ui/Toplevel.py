@@ -29,6 +29,8 @@ import logging
 
 from gi.repository import Gtk
 from gi.repository import GObject
+from gi.repository import Gio
+from gi.repository import Gdk
 
 from yaner import SQLSession
 from yaner import __version__, __author__
@@ -65,13 +67,19 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         self.logger.info('Initializing toplevel window...')
 
+        self._settings = None
+
         self._popups = None
 
         # UIManager: Toolbar and menus
         self._action_group = None
         self._ui_manager = None
 
-        self.set_default_size(650, 450)
+        self.set_default_size(self.settings.get_uint('width'),
+                              self.settings.get_uint('height'))
+        if self.settings.get_boolean('maximized'):
+            self.maximize()
+
         self.set_default_icon_name('yaner')
 
         # The toplevel vbox
@@ -104,8 +112,12 @@ class Toplevel(Gtk.Window, LoggingMixin):
         task_list_view.set_level_indentation(16)
         task_list_view.expand_all()
         task_list_view.selection.set_mode(Gtk.SelectionMode.MULTIPLE)
+        task_list_view.connect('key-press-event',
+                               self._on_task_list_view_key_pressed)
         task_list_view.connect('button-press-event',
                                self._on_task_list_view_button_pressed)
+        task_list_view.connect('row-activated',
+                               self._on_task_list_view_row_activated)
         scrolled_window.add(task_list_view)
 
         self._task_list_view = task_list_view
@@ -154,6 +166,13 @@ class Toplevel(Gtk.Window, LoggingMixin):
         self.connect('delete-event', self._on_delete_event, status_icon)
 
         self.logger.info('Toplevel window initialized.')
+
+    @property
+    def settings(self):
+        """Get the GSettings object."""
+        if self._settings is None:
+            self._settings = Gio.Settings('com.kissuki.yaner.ui')
+        return self._settings
 
     @property
     def ui_manager(self):
@@ -316,6 +335,22 @@ class Toplevel(Gtk.Window, LoggingMixin):
         else:
             return False
 
+    def _on_task_list_view_row_activated(self, treeview, path, column):
+        """When task row double clicked, start or pause the task."""
+        model = treeview.get_model()
+        activating_task = model.get_task(model.get_iter(path))
+
+        presentable = self._pool_view.selected_presentable
+        if presentable.TYPE == Presentable.TYPES.QUEUING:
+            if activating_task.is_pausable:
+                activating_task.pause()
+            elif activating_task.is_unpausable or activating_task.is_addable:
+                activating_task.start()
+
+    def _on_task_list_view_key_pressed(self, treeview, event):
+        if event.keyval == Gdk.KEY_Delete:
+            self._on_task_remove()
+
     def _on_task_list_view_button_pressed(self, treeview, event):
         """Popup menu when necessary."""
         selection = treeview.get_selection()
@@ -345,13 +380,14 @@ class Toplevel(Gtk.Window, LoggingMixin):
         selection = treeview.get_selection()
         (model, iter_) = selection.get_selected()
         current_path = treeview.get_path_at_pos(event.x, event.y)
-        if current_path is None:
-            self.popups['pool'].popup(None, None, None, None,
-                                      event.button, event.time)
-            return True
 
         if event.button == 3:
-            # If the clicked row is not selected, select it only
+            if current_path is None:
+                self.popups['pool'].popup(None, None, None, None,
+                                          event.button, event.time)
+                return True
+
+            # If the clicked row is not selected, select it
             if current_path[0] != model.get_path(iter_):
                 selection.select_path(current_path[0])
 
@@ -411,7 +447,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
             for task in pool.queuing.tasks:
                 task.pause()
 
-    def _on_task_remove(self, action, data):
+    def _on_task_remove(self, action=None, data=None):
         """When task remove button clicked, remove the task."""
         tasks = self._task_list_view.selected_tasks
         if not tasks:
@@ -436,6 +472,22 @@ class Toplevel(Gtk.Window, LoggingMixin):
         """When task is removed, restore the task."""
         for task in self._task_list_view.selected_tasks:
             task.restore()
+
+    def do_configure_event(self, event):
+        """When window size changed, save it in GSettings."""
+        settings = self.settings
+        if not settings.get_boolean('maximized'):
+            settings.set_uint('width', event.width)
+            settings.set_uint('height', event.height)
+
+        Gtk.Window.do_configure_event(self, event)
+
+    def do_window_state_event(self, event):
+        """When window maximized, save it in GSettings."""
+        maximized = event.new_window_state & Gdk.WindowState.MAXIMIZED
+        self.settings.set_boolean('maximized', maximized)
+
+        Gtk.Window.do_window_state_event(self, event)
 
     def _on_dustbin_empty(self, action, data):
         """Empty dustbin."""

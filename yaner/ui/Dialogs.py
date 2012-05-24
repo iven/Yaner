@@ -364,7 +364,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         ### Content Area
         content_area = self.get_content_area()
 
-        vbox = Box(VERTICAL, border_width=5)
+        vbox = Box(VERTICAL)
         content_area.add(vbox)
         self._main_vbox = vbox
 
@@ -804,6 +804,12 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         if text_buffer.get_property('text') == '':
             self.logger.info('URIs cleared, changing to default UI...')
             self.set_ui(self.default_ui, {'uris': ''})
+        elif self._ui is not self.normal_ui:
+            # When it's already the normal UI, and the text of the
+            # URIs view is set (from the browser), the textview will
+            # firstly been cleared, and it changes to default UI,
+            # in this case we need to set the UI back to normal UI.
+            self.set_ui(self.normal_ui, {})
 
     def do_response(self, response_id):
         """Create a new download task if uris are provided."""
