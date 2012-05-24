@@ -4,10 +4,11 @@ Dependences
 * Python >= 3.2.0
 * PyGObject
 * GTK3
+* dconf
 * libnotify
 * SQLAlchemy >= 0.7.0
 * python-chardet
-* dconf
+* xdg-utils
 
 Install
 =======

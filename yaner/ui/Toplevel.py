@@ -24,6 +24,7 @@
 This module contains the toplevel window class of L{yaner}.
 """
 
+import os
 import sys
 import logging
 
@@ -36,6 +37,7 @@ from yaner import SQLSession
 from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Presentable import Presentable, Category
+from yaner.XDG import xdg_open
 from yaner.ui.Dialogs import TaskNewDialog
 from yaner.ui.Dialogs import CategoryBar, PoolBar
 from yaner.ui.PoolTree import PoolModel, PoolView
@@ -346,6 +348,13 @@ class Toplevel(Gtk.Window, LoggingMixin):
                 activating_task.pause()
             elif activating_task.is_unpausable or activating_task.is_addable:
                 activating_task.start()
+        elif presentable.TYPE == Presentable.TYPES.CATEGORY:
+            pool = presentable.pool
+            if pool.is_local and not activating_task.has_bittorrent:
+                path = os.path.join(activating_task.options['dir'],
+                                    activating_task.options['out'])
+                self.logger.info('Opening file {}...'.format(path))
+                xdg_open([path])
 
     def _on_task_list_view_key_pressed(self, treeview, event):
         if event.keyval == Gdk.KEY_Delete:
