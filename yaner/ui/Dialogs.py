@@ -372,6 +372,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         expander = AlignedExpander(_('<b>Save to...</b>'))
         expander.connect_after('activate', self.update_size)
         vbox.pack_start(expander)
+        self.save_expander = expander
 
         hbox = Box(HORIZONTAL)
         expander.add(hbox)
@@ -831,8 +832,10 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             if self.advanced_expander.get_expanded():
                 self.advanced_expander.emit('activate')
             self.advanced_expander.hide()
+            self.save_expander.hide()
         else:
             self.advanced_expander.show_all()
+            self.save_expander.show_all()
 
         if self._ui is not None:
             self._ui.deactivate()
