@@ -670,7 +670,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(1, 4, False, row_spacing=5, column_spacing=5)
+        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
         vbox.pack_start(table, expand=False)
 
         # Overwrite and Rename
@@ -689,6 +689,15 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         table.attach_defaults(switch, 3, 4, 0, 1)
         self._task_options['auto-file-renaming'] = _TaskOption(
             switch, _TaskOption.bool_mapper)
+
+        label = LeftAlignedLabel(_('Proxy:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        entry = Entry(activates_default=True)
+        entry.set_placeholder_text(_('Format: [http://][USER:PASSWORD@]HOST[:PORT]'))
+        table.attach_defaults(entry, 1, 4, 1, 2)
+        self._task_options['all-proxy'] = _TaskOption(entry,
+                                                      _TaskOption.string_mapper)
 
         # Authorization
         expander = AlignedExpander(_('Authorization'), expanded=False)
