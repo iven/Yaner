@@ -488,80 +488,23 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['max-connection-per-server'] = _TaskOption(
             spin_button, _TaskOption.int_mapper)
 
-        # Overwrite and Rename
-        label = LeftAlignedLabel(_('Allow Overwrite:'))
-        table.attach_defaults(label, 0, 1, 4, 5)
-
-        switch = Switch()
-        table.attach_defaults(switch, 1, 2, 4, 5)
-        self._task_options['allow-overwrite'] = _TaskOption(switch,
-                                                            _TaskOption.bool_mapper)
-
-        label = LeftAlignedLabel(_('Auto Rename Files:'))
-        table.attach_defaults(label, 2, 3, 4, 5)
-
-        switch = Switch()
-        table.attach_defaults(switch, 3, 4, 4, 5)
-        self._task_options['auto-file-renaming'] = _TaskOption(
-            switch, _TaskOption.bool_mapper)
-
         # Referer
         label = LeftAlignedLabel(_('Referer:'))
-        table.attach_defaults(label, 0, 1, 5, 6)
+        table.attach_defaults(label, 0, 1, 4, 5)
 
         entry = Entry(activates_default=True)
-        table.attach_defaults(entry, 1, 4, 5, 6)
+        table.attach_defaults(entry, 1, 4, 4, 5)
         self._task_options['referer'] = _TaskOption(entry,
                                                     _TaskOption.string_mapper)
 
         # Header
         label = LeftAlignedLabel(_('HTTP Header:'))
-        table.attach_defaults(label, 0, 1, 6, 7)
+        table.attach_defaults(label, 0, 1, 5, 6)
 
         entry = Entry(activates_default=True)
-        table.attach_defaults(entry, 1, 4, 6, 7)
+        table.attach_defaults(entry, 1, 4, 5, 6)
         self._task_options['header'] = _TaskOption(entry,
                                                    _TaskOption.string_mapper)
-
-        # Authorization
-        expander = AlignedExpander(_('Authorization'), expanded=False)
-        expander.connect_after('activate', self.update_size)
-        vbox.pack_start(expander, expand=False)
-
-        table = Gtk.Table(3, 3, False, row_spacing=5, column_spacing=5)
-        expander.add(table)
-
-        label = LeftAlignedLabel(_('HTTP:'))
-        table.attach_defaults(label, 0, 1, 1, 2)
-
-        label = LeftAlignedLabel(_('FTP:'))
-        table.attach_defaults(label, 0, 1, 2, 3)
-
-        label = LeftAlignedLabel(_('User'))
-        table.attach_defaults(label, 1, 2, 0, 1)
-
-        label = LeftAlignedLabel(_('Password'))
-        table.attach_defaults(label, 2, 3, 0, 1)
-
-        entry = Entry(activates_default=True)
-        table.attach_defaults(entry, 1, 2, 1, 2)
-        self._task_options['http-user'] = _TaskOption(entry,
-                                                      _TaskOption.string_mapper)
-
-        entry = Entry(activates_default=True)
-        table.attach_defaults(entry, 2, 3, 1, 2)
-        self._task_options['http-passwd'] = _TaskOption(entry,
-                                                        _TaskOption.string_mapper)
-
-        entry = Entry(activates_default=True)
-        table.attach_defaults(entry, 1, 2, 2, 3)
-        self._task_options['ftp-user'] = _TaskOption(entry,
-                                                     _TaskOption.string_mapper)
-
-        entry = Entry(activates_default=True)
-        table.attach_defaults(entry, 2, 3, 2, 3)
-        self._task_options['ftp-passwd'] = _TaskOption(entry,
-                                                       _TaskOption.string_mapper)
 
         ## BT Task Page
         label = Gtk.Label(_('BitTorrent'))
@@ -721,6 +664,71 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         hbox.pack_start(switch)
         self._task_options['follow-metalink'] = _TaskOption(switch,
                                                             _TaskOption.bool_mapper)
+
+        ## Miscellaneous Page
+        label = Gtk.Label(_('Miscellaneous'))
+        vbox = Box(VERTICAL, border_width=5)
+        notebook.append_page(vbox, label)
+
+        table = Gtk.Table(1, 4, False, row_spacing=5, column_spacing=5)
+        vbox.pack_start(table, expand=False)
+
+        # Overwrite and Rename
+        label = LeftAlignedLabel(_('Allow Overwrite:'))
+        table.attach_defaults(label, 0, 1, 0, 1)
+
+        switch = Switch()
+        table.attach_defaults(switch, 1, 2, 0, 1)
+        self._task_options['allow-overwrite'] = _TaskOption(switch,
+                                                            _TaskOption.bool_mapper)
+
+        label = LeftAlignedLabel(_('Auto Rename Files:'))
+        table.attach_defaults(label, 2, 3, 0, 1)
+
+        switch = Switch()
+        table.attach_defaults(switch, 3, 4, 0, 1)
+        self._task_options['auto-file-renaming'] = _TaskOption(
+            switch, _TaskOption.bool_mapper)
+
+        # Authorization
+        expander = AlignedExpander(_('Authorization'), expanded=False)
+        expander.connect_after('activate', self.update_size)
+        vbox.pack_start(expander, expand=False)
+
+        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
+        expander.add(table)
+
+        label = LeftAlignedLabel(_('HTTP User:'))
+        table.attach_defaults(label, 0, 1, 0, 1)
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 1, 2, 0, 1)
+        self._task_options['http-user'] = _TaskOption(entry,
+                                                      _TaskOption.string_mapper)
+
+        label = LeftAlignedLabel(_('Password'))
+        table.attach_defaults(label, 2, 3, 0, 1)
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 3, 4, 0, 1)
+        self._task_options['http-passwd'] = _TaskOption(entry,
+                                                        _TaskOption.string_mapper)
+
+        label = LeftAlignedLabel(_('FTP User:'))
+        table.attach_defaults(label, 0, 1, 1, 2)
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 1, 2, 1, 2)
+        self._task_options['ftp-user'] = _TaskOption(entry,
+                                                     _TaskOption.string_mapper)
+
+        label = LeftAlignedLabel(_('Password'))
+        table.attach_defaults(label, 2, 3, 1, 2)
+
+        entry = Entry(activates_default=True)
+        table.attach_defaults(entry, 3, 4, 1, 2)
+        self._task_options['ftp-passwd'] = _TaskOption(entry,
+                                                       _TaskOption.string_mapper)
 
         self.show_all()
 
