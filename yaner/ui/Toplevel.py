@@ -267,7 +267,11 @@ class Toplevel(Gtk.Window, LoggingMixin):
     def task_new_dialog(self):
         """Get the new task dialog of the window."""
         if self._task_new_dialog is None:
-            self._task_new_dialog = TaskNewDialog(self, self._pool_model)
+            self._task_new_dialog = TaskNewDialog(
+                self._pool_model,
+                parent=self,
+                flags=(Gtk.DialogFlags.DESTROY_WITH_PARENT | Gtk.DialogFlags.MODAL)
+                )
             self._task_new_dialog.set_transient_for(self)
         return self._task_new_dialog
 

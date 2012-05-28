@@ -333,12 +333,8 @@ class _TaskNewMLUI(_TaskNewUI):
 
 class TaskNewDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for creating new tasks."""
-    def __init__(self, parent, pool_model):
-        """"""
-        Gtk.Dialog.__init__(self, title=_('New Task'), parent=parent,
-                            flags=(Gtk.DialogFlags.DESTROY_WITH_PARENT |
-                                   Gtk.DialogFlags.MODAL),
-                           )
+    def __init__(self, pool_model, *args, **kwargs):
+        Gtk.Dialog.__init__(self, title=_('New Task'), *args, **kwargs)
         LoggingMixin.__init__(self)
 
         self._ui = None
@@ -411,7 +407,9 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         ## Advanced
         expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
-        expander.connect_after('activate', self._on_advanced_expander_activated, advanced_buttons)
+        expander.connect_after('activate',
+                               self._on_advanced_expander_activated,
+                               advanced_buttons)
         expander.connect_after('activate', self.update_size)
         vbox.pack_end(expander)
         self.advanced_expander = expander
