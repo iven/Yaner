@@ -38,7 +38,7 @@ from yaner import __version__, __author__
 from yaner.Pool import Pool
 from yaner.Presentable import Presentable, Category
 from yaner.XDG import xdg_open
-from yaner.ui.Dialogs import TaskNewDialog
+from yaner.ui.Dialogs import TaskNewDialog, PreferencesDialog
 from yaner.ui.InfoBars import CategoryBar, PoolBar
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
@@ -155,6 +155,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         # Dialogs
         self._task_new_dialog = None
+        self._preferences_dialog = None
         self._about_dialog = None
         self._category_bar = None
         self._pool_bar = None
@@ -236,6 +237,8 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
                 ("toggle_hidden", None, _("Show / Hide"), None,
                  None, self._on_toggle_hidden),
+                ("preferences", "gtk-preferences", None, None,
+                 None, self._on_preferences),
                 ("about", "gtk-about", None, None, None, self.about),
                 ("quit", "gtk-quit", None, None, None, self.destroy),
             )
@@ -274,6 +277,17 @@ class Toplevel(Gtk.Window, LoggingMixin):
                 )
             self._task_new_dialog.set_transient_for(self)
         return self._task_new_dialog
+
+    @property
+    def preferences_dialog(self):
+        """Get the preferences dialog of the window."""
+        if self._preferences_dialog is None:
+            self._preferences_dialog = PreferencesDialog(
+                parent=self,
+                flags=(Gtk.DialogFlags.DESTROY_WITH_PARENT | Gtk.DialogFlags.MODAL)
+                )
+            self._preferences_dialog.set_transient_for(self)
+        return self._preferences_dialog
 
     @property
     def about_dialog(self):
@@ -420,6 +434,10 @@ class Toplevel(Gtk.Window, LoggingMixin):
         presentable = self._pool_view.selected_presentable
         if presentable is not None:
             self._task_list_model.presentable = presentable
+
+    def _on_preferences(self, action, data):
+        """When preferences action is activated, call the preferences dialog."""
+        self.preferences_dialog.run()
 
     def _on_task_new(self, action, data):
         """When task new action is activated, call the task new dialog."""
