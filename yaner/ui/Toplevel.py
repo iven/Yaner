@@ -39,7 +39,7 @@ from yaner.Pool import Pool
 from yaner.Presentable import Presentable, Category
 from yaner.XDG import xdg_open
 from yaner.ui.Dialogs import TaskNewDialog
-from yaner.ui.Dialogs import CategoryBar, PoolBar
+from yaner.ui.InfoBars import CategoryBar, PoolBar
 from yaner.ui.PoolTree import PoolModel, PoolView
 from yaner.ui.TaskListTree import TaskListModel, TaskListView
 from yaner.ui.Misc import load_ui_file
