@@ -900,7 +900,10 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 class PreferencesDialog(Gtk.Dialog, LoggingMixin):
     """Dialog for global preferences."""
     def __init__(self, *args, **kwargs):
-        Gtk.Dialog.__init__(self, title=_('Preferences'), *args, **kwargs)
+        Gtk.Dialog.__init__(self,
+                            title=_('Preferences'),
+                            buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE),
+                            *args, **kwargs)
         LoggingMixin.__init__(self)
 
         self.preferences = {}
@@ -930,17 +933,17 @@ class PreferencesDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 0, 1)
-        #self._task_options['max-concurrent-downloads'] = _TaskOption(
-        #    spin_button, 'value', _TaskOption.int_mapper)
+        self._preferences['max-concurrent-downloads'] = _TaskOption(
+            spin_button, 'value', _TaskOption.int_mapper)
 
         label = LeftAlignedLabel(_('Global Upload Limit(KiB/s):'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
-        adjustment = Gtk.Adjustment(lower=1, upper=4096, step_increment=1)
+        adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 1, 2)
-        #self._task_options['max-overall-upload-limit'] = _TaskOption(
-        #    spin_button, 'value', _TaskOption.kib_mapper)
+        self._preferences['max-overall-upload-limit'] = _TaskOption(
+            spin_button, 'value', _TaskOption.kib_mapper)
 
         label = LeftAlignedLabel(_('Global Download Limit(KiB/s):'))
         table.attach_defaults(label, 0, 1, 2, 3)
@@ -948,8 +951,15 @@ class PreferencesDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 2, 3)
-        #self._task_options['max-overall-download-limit'] = _TaskOption(
-        #    spin_button, 'value', _TaskOption.kib_mapper)
+        self._preferences['max-overall-download-limit'] = _TaskOption(
+            spin_button, 'value', _TaskOption.kib_mapper)
 
         self.show_all()
+
+    def run(self, options=None):
+        """Popup new task dialog."""
+        self.logger.info('Running preferences dialog...')
+
+        Gtk.Dialog.run(self)
+        self.hide()
 
