@@ -90,7 +90,6 @@ class Toplevel(Gtk.Window, LoggingMixin):
 
         # Toolbar
         toolbar = self.ui_manager.get_widget('/toolbar')
-        #toolbar.set_style(Gtk.ToolbarStyle.BOTH)
         vbox.pack_start(toolbar, expand=False)
 
         # HPaned: PoolView as left, TaskVBox as right
