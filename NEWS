@@ -1,3 +1,11 @@
+0.5.2   <2012-05-29>
+====================
+
+ * Proxy support.
+ * Double click the task to open the downloaded file.
+ * Fixed settings saving.
+ * Code cleaning and UI adjustments.
+
 0.5.1   <2012-05-24>
 ====================
 
