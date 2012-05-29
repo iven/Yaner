@@ -80,16 +80,41 @@ class _TaskOption(object):
     mib_mapper = lambda x: str(int(x) * 1024 * 1024)
     prioritize_mapper = lambda x: 'head, tail' if x else ''
 
+class _Settings(Gio.Settings):
+    """GSettings class for options."""
+    def __init__(self, schema_id, delay=False):
+        Gio.Settings.__init__(self, schema_id)
+
+        if delay:
+            # Don't apply changes to dconf until apply() is called
+            self.delay()
+
+        self._delay = delay
+
+    def bind(self, options, flags=BindFlags.DEFAULT):
+        keys = self.list_keys()
+        for key, option in options.items():
+            if key in keys:
+                Gio.Settings.bind(self, key, option.widget, option.property_, flags)
+
+    def reset(self, options):
+            keys = self.list_keys()
+            for key, option in options.items():
+                if key in keys:
+                    Gio.Settings.reset(self, key)
+                    # When in delayed writing mode, widget values doesn't update
+                    # when the settings isn't different with the default value,
+                    # so update it manually
+                    option.widget_value = self.get_value(key).unpack()
+            self.apply()
+
 class _TaskNewUI(LoggingMixin):
     """Base class for the UIs of the new task dialog."""
 
     def __init__(self, task_options, expander_label):
         LoggingMixin.__init__(self)
 
-        self.settings = Gio.Settings('com.kissuki.yaner.task')
-        # Don't apply changes to dconf until apply() is called
-        self.settings.delay()
-
+        self._settings = _Settings('com.kissuki.yaner.task', delay=True)
         self._task_options = task_options.copy()
 
         expander = AlignedExpander(expander_label)
@@ -109,14 +134,8 @@ class _TaskNewUI(LoggingMixin):
 
     def activate(self, new_options):
         """When the UI changed to this one, bind and update the setting widgets."""
-        keys = self.settings.list_keys()
+        self._settings.bind(self._task_options)
         for key, option in self._task_options.items():
-            if key in keys:
-                self.settings.bind(key,
-                                   option.widget,
-                                   option.property_,
-                                   BindFlags.DEFAULT
-                                  )
             try:
                 option.widget_value = new_options[key]
             except KeyError:
@@ -125,30 +144,19 @@ class _TaskNewUI(LoggingMixin):
 
     def deactivate(self):
         """When the UI changed from this one, unbind the properties."""
-        self.settings.revert()
+        self._settings.revert()
 
     def response(self, response_id):
         """When dialog responsed, create new task. Returning if the dialog should
         be kept showing.
         """
-        settings = self.settings
-
         if response_id in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return False
         elif response_id == _RESPONSE_RESET:
-            task_options = self._task_options
-            keys = self.settings.list_keys()
-            for key, option in task_options.items():
-                if key in keys:
-                    settings.reset(key)
-                    # When in delayed writing mode, widget values doesn't update
-                    # when the settings isn't different with the default value,
-                    # so update it manually
-                    option.widget_value = settings.get_value(key).unpack()
-            settings.apply()
+            self._settings.reset(self._task_options)
             return True
         elif response_id == _RESPONSE_SAVE:
-            settings.apply()
+            self._settings.apply()
             return True
         else:
             return True
