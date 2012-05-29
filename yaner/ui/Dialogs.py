@@ -45,7 +45,7 @@ _ML_MIME_TYPES = {'application/metalink4+xml', 'application/metalink+xml'}
 _RESPONSE_RESET = -1
 _RESPONSE_SAVE = -2
 
-class _TaskOption(object):
+class _Option(object):
     """An widget wrapper for convert between aria2c needed format and widget
     values.
     """
@@ -184,8 +184,7 @@ class _TaskNewDefaultUI(_TaskNewUI):
                                 )
         entry.set_size_request(350, -1)
         box.pack_start(entry)
-        self._task_options['uris'] = _TaskOption(entry, 'text',
-                                                 _TaskOption.string_mapper)
+        self._task_options['uris'] = _Option(entry, 'text', _Option.string_mapper)
 
         self.uri_entry = entry
 
@@ -205,8 +204,8 @@ class _TaskNewNormalUI(_TaskNewUI):
         uris_view = URIsView()
         uris_view.set_size_request(350, 70)
         box.pack_start(uris_view)
-        self._task_options['uris'] = _TaskOption(uris_view, 'uris',
-                                                 _TaskOption.default_mapper)
+        self._task_options['uris'] = _Option(uris_view, 'uris',
+                                             _Option.default_mapper)
 
         hbox = Box(HORIZONTAL)
         box.pack_start(hbox)
@@ -217,8 +216,7 @@ class _TaskNewNormalUI(_TaskNewUI):
 
         entry = Gtk.Entry(activates_default=True)
         hbox.pack_start(entry)
-        self._task_options['out'] = _TaskOption(entry, 'text',
-                                                _TaskOption.string_mapper)
+        self._task_options['out'] = _Option(entry, 'text', _Option.string_mapper)
 
         # Connections
         label = LeftAlignedLabel(_('Connections:'))
@@ -227,8 +225,8 @@ class _TaskNewNormalUI(_TaskNewUI):
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         hbox.pack_start(spin_button)
-        self._task_options['split'] = _TaskOption(spin_button, 'value',
-                                                  _TaskOption.int_mapper)
+        self._task_options['split'] = _Option(spin_button, 'value',
+                                              _Option.int_mapper)
 
         self._uris_view = uris_view
 
@@ -274,8 +272,8 @@ class _TaskNewBTUI(_TaskNewUI):
                                       )
         button.set_size_request(350, -1)
         box.pack_start(button)
-        self._task_options['torrent_filename'] = _TaskOption(
-            button, 'filename', _TaskOption.string_mapper)
+        self._task_options['torrent_filename'] = _Option(button, 'filename',
+                                                         _Option.string_mapper)
 
     def response(self, response_id):
         if response_id == Gtk.ResponseType.OK:
@@ -313,8 +311,8 @@ class _TaskNewMLUI(_TaskNewUI):
                                       )
         button.set_size_request(350, -1)
         box.pack_start(button)
-        self._task_options['metalink_filename'] = _TaskOption(
-            button, 'filename', _TaskOption.string_mapper)
+        self._task_options['metalink_filename'] = _Option(button, 'filename',
+                                                          _Option.string_mapper)
 
     def response(self, response_id):
         if response_id == Gtk.ResponseType.OK:
@@ -402,16 +400,15 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                  Gtk.FileChooserAction.SELECT_FOLDER
                                 )
         hbox.pack_end(entry)
-        self._task_options['dir'] = _TaskOption(
-            entry, 'text', _TaskOption.string_mapper)
+        self._task_options['dir'] = _Option(entry, 'text', _Option.string_mapper)
 
         model = CategoryFilterModel(pool_model)
         combo_box = CategoryComboBox(model, self)
         combo_box.connect('changed', self._on_category_cb_changed, entry)
         combo_box.set_active(0)
         hbox.pack_start(combo_box)
-        self._task_options['category'] = _TaskOption(
-            combo_box, 'category', _TaskOption.default_mapper)
+        self._task_options['category'] = _Option(combo_box, 'category',
+                                                 _Option.default_mapper)
 
         ## Advanced
         expander = AlignedExpander(_('<b>Advanced</b>'), expanded=False)
@@ -440,8 +437,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 0, 1)
-        self._task_options['max-upload-limit'] = _TaskOption(
-            spin_button, 'value', _TaskOption.kib_mapper)
+        self._task_options['max-upload-limit'] = _Option(spin_button, 'value',
+                                                         _Option.kib_mapper)
 
         label = LeftAlignedLabel(_('Download Limit(KiB/s):'))
         table.attach_defaults(label, 2, 3, 0, 1)
@@ -449,8 +446,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 0, 1)
-        self._task_options['max-download-limit'] = _TaskOption(
-            spin_button, 'value', _TaskOption.kib_mapper)
+        self._task_options['max-download-limit'] = _Option(spin_button, 'value',
+                                                           _Option.kib_mapper)
 
         # Retry
         label = LeftAlignedLabel(_('Max Retries:'))
@@ -459,8 +456,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 1, 2)
-        self._task_options['max-tries'] = _TaskOption(spin_button, 'value',
-                                                      _TaskOption.int_mapper)
+        self._task_options['max-tries'] = _Option(spin_button, 'value',
+                                                  _Option.int_mapper)
 
         label = LeftAlignedLabel(_('Retry Interval(sec):'))
         table.attach_defaults(label, 2, 3, 1, 2)
@@ -468,8 +465,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 1, 2)
-        self._task_options['retry-wait'] = _TaskOption(spin_button, 'value',
-                                                       _TaskOption.int_mapper)
+        self._task_options['retry-wait'] = _Option(spin_button, 'value',
+                                                   _Option.int_mapper)
 
         # Timeout
         label = LeftAlignedLabel(_('Timeout(sec):'))
@@ -478,8 +475,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 2, 3)
-        self._task_options['timeout'] = _TaskOption(spin_button, 'value',
-                                                    _TaskOption.int_mapper)
+        self._task_options['timeout'] = _Option(spin_button, 'value',
+                                                _Option.int_mapper)
 
         label = LeftAlignedLabel(_('Connect Timeout(sec):'))
         table.attach_defaults(label, 2, 3, 2, 3)
@@ -487,8 +484,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 2, 3)
-        self._task_options['connect-timeout'] = _TaskOption(spin_button, 'value',
-                                                            _TaskOption.int_mapper)
+        self._task_options['connect-timeout'] = _Option(spin_button, 'value',
+                                                        _Option.int_mapper)
 
         # Split and Connections
         label = LeftAlignedLabel(_('Split Size(MiB):'))
@@ -497,8 +494,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 3, 4)
-        self._task_options['min-split-size'] = _TaskOption(spin_button, 'value',
-                                                           _TaskOption.mib_mapper)
+        self._task_options['min-split-size'] = _Option(spin_button, 'value',
+                                                       _Option.mib_mapper)
 
         label = LeftAlignedLabel(_('Per Server Connections:'))
         table.attach_defaults(label, 2, 3, 3, 4)
@@ -506,8 +503,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=10, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 3, 4)
-        self._task_options['max-connection-per-server'] = _TaskOption(
-            spin_button, 'value', _TaskOption.int_mapper)
+        self._task_options['max-connection-per-server'] = _Option(
+            spin_button, 'value', _Option.int_mapper)
 
         # Referer
         label = LeftAlignedLabel(_('Referer:'))
@@ -515,8 +512,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         entry = Gtk.Entry(activates_default=True)
         table.attach_defaults(entry, 1, 4, 4, 5)
-        self._task_options['referer'] = _TaskOption(entry, 'text',
-                                                    _TaskOption.string_mapper)
+        self._task_options['referer'] = _Option(entry, 'text',
+                                                _Option.string_mapper)
 
         # Header
         label = LeftAlignedLabel(_('HTTP Header:'))
@@ -524,8 +521,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         entry = Gtk.Entry(activates_default=True)
         table.attach_defaults(entry, 1, 4, 5, 6)
-        self._task_options['header'] = _TaskOption(entry, 'text',
-                                                   _TaskOption.string_mapper)
+        self._task_options['header'] = _Option(entry, 'text',
+                                               _Option.string_mapper)
 
         ## BT Task Page
         label = Gtk.Label(_('BitTorrent'))
@@ -542,8 +539,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 0, 1)
-        self._task_options['bt-max-open-files'] = _TaskOption(
-            spin_button, 'value', _TaskOption.int_mapper)
+        self._task_options['bt-max-open-files'] = _Option(spin_button, 'value',
+                                                          _Option.int_mapper)
 
         label = LeftAlignedLabel(_('Max peers:'))
         table.attach_defaults(label, 2, 3, 0, 1)
@@ -551,8 +548,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 0, 1)
-        self._task_options['bt-max-peers'] = _TaskOption(spin_button, 'value',
-                                                         _TaskOption.int_mapper)
+        self._task_options['bt-max-peers'] = _Option(spin_button, 'value',
+                                                     _Option.int_mapper)
 
         # Seed
         label = LeftAlignedLabel(_('Seed time(min):'))
@@ -561,8 +558,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=7200, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 1, 2)
-        self._task_options['seed-time'] = _TaskOption(spin_button, 'value',
-                                                      _TaskOption.int_mapper)
+        self._task_options['seed-time'] = _Option(spin_button, 'value',
+                                                  _Option.int_mapper)
 
         label = LeftAlignedLabel(_('Seed ratio:'))
         table.attach_defaults(label, 2, 3, 1, 2)
@@ -570,8 +567,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=20, step_increment=.1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True, digits=1)
         table.attach_defaults(spin_button, 3, 4, 1, 2)
-        self._task_options['seed-ratio'] = _TaskOption(spin_button, 'value',
-                                                       _TaskOption.float_mapper)
+        self._task_options['seed-ratio'] = _Option(spin_button, 'value',
+                                                   _Option.float_mapper)
 
         # Timeout
         label = LeftAlignedLabel(_('Timeout(sec):'))
@@ -580,8 +577,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 2, 3)
-        self._task_options['bt-tracker-timeout'] = _TaskOption(
-            spin_button, 'value', _TaskOption.int_mapper)
+        self._task_options['bt-tracker-timeout'] = _Option(spin_button, 'value',
+                                                           _Option.int_mapper)
 
         label = LeftAlignedLabel(_('Connect Timeout(sec):'))
         table.attach_defaults(label, 2, 3, 2, 3)
@@ -589,22 +586,22 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 3, 4, 2, 3)
-        self._task_options['bt-tracker-connect-timeout'] = _TaskOption(
-            spin_button, 'value', _TaskOption.int_mapper)
+        self._task_options['bt-tracker-connect-timeout'] = _Option(
+            spin_button, 'value', _Option.int_mapper)
 
         label = LeftAlignedLabel(_('Try to download first and last pieces first'))
         table.attach_defaults(label, 0, 3, 3, 4)
         switch = Gtk.Switch()
         table.attach_defaults(switch, 3, 4, 3, 4)
-        self._task_options['bt-prioritize-piece'] = _TaskOption(
-            switch, 'active', _TaskOption.prioritize_mapper)
+        self._task_options['bt-prioritize-piece'] = _Option(
+            switch, 'active', _Option.prioritize_mapper)
 
         label = LeftAlignedLabel(_('Convert downloaded torrent files to BitTorrent tasks'))
         table.attach_defaults(label, 0, 3, 4, 5)
         switch = Gtk.Switch()
         table.attach_defaults(switch, 3, 4, 4, 5)
-        self._task_options['follow-torrent'] = _TaskOption(switch, 'active',
-                                                           _TaskOption.bool_mapper)
+        self._task_options['follow-torrent'] = _Option(switch, 'active',
+                                                       _Option.bool_mapper)
 
         # Mirrors
         expander = AlignedExpander(_('Mirrors'), expanded=False)
@@ -623,8 +620,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         uris_view = URIsView()
         uris_view.set_size_request(-1, 70)
         vbox.pack_start(uris_view)
-        self._task_options['uris'] = _TaskOption(uris_view, 'uris',
-                                                 _TaskOption.default_mapper)
+        self._task_options['uris'] = _Option(uris_view, 'uris',
+                                             _Option.default_mapper)
 
         ## Metalink Page
         label = Gtk.Label(_('Metalink'))
@@ -640,40 +637,40 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 0, 1)
-        self._task_options['split'] = _TaskOption(spin_button, 'value',
-                                                  _TaskOption.int_mapper)
+        self._task_options['split'] = _Option(spin_button, 'value',
+                                              _Option.int_mapper)
 
         label = LeftAlignedLabel(_('Preferred locations:'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
         entry = Gtk.Entry()
         table.attach_defaults(entry, 1, 2, 1, 2)
-        self._task_options['metalink-location'] = _TaskOption(
-            entry, 'text', _TaskOption.string_mapper)
+        self._task_options['metalink-location'] = _Option(entry, 'text',
+                                                          _Option.string_mapper)
 
         label = LeftAlignedLabel(_('Language:'))
         table.attach_defaults(label, 0, 1, 2, 3)
 
         entry = Gtk.Entry()
         table.attach_defaults(entry, 1, 2, 2, 3)
-        self._task_options['metalink-language'] = _TaskOption(
-            entry, 'text', _TaskOption.string_mapper)
+        self._task_options['metalink-language'] = _Option(entry, 'text',
+                                                          _Option.string_mapper)
 
         label = LeftAlignedLabel(_('Version:'))
         table.attach_defaults(label, 0, 1, 3, 4)
 
         entry = Gtk.Entry()
         table.attach_defaults(entry, 1, 2, 3, 4)
-        self._task_options['metalink-version'] = _TaskOption(
-            entry, 'text', _TaskOption.string_mapper)
+        self._task_options['metalink-version'] = _Option(entry, 'text',
+                                                         _Option.string_mapper)
 
         label = LeftAlignedLabel(_('OS:'))
         table.attach_defaults(label, 0, 1, 4, 5)
 
         entry = Gtk.Entry()
         table.attach_defaults(entry, 1, 2, 4, 5)
-        self._task_options['metalink-os'] = _TaskOption(
-            entry, 'text', _TaskOption.string_mapper)
+        self._task_options['metalink-os'] = _Option(entry, 'text',
+                                                    _Option.string_mapper)
 
         hbox = Box(HORIZONTAL)
         vbox.pack_start(hbox, expand=False)
@@ -683,8 +680,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         switch = Gtk.Switch()
         hbox.pack_start(switch)
-        self._task_options['follow-metalink'] = _TaskOption(switch, 'active',
-                                                            _TaskOption.bool_mapper)
+        self._task_options['follow-metalink'] = _Option(switch, 'active',
+                                                        _Option.bool_mapper)
 
         ## Miscellaneous Page
         label = Gtk.Label(_('Miscellaneous'))
@@ -700,16 +697,16 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         switch = Gtk.Switch()
         table.attach_defaults(switch, 1, 2, 0, 1)
-        self._task_options['allow-overwrite'] = _TaskOption(switch, 'active',
-                                                            _TaskOption.bool_mapper)
+        self._task_options['allow-overwrite'] = _Option(switch, 'active',
+                                                        _Option.bool_mapper)
 
         label = LeftAlignedLabel(_('Auto Rename Files:'))
         table.attach_defaults(label, 2, 3, 0, 1)
 
         switch = Gtk.Switch()
         table.attach_defaults(switch, 3, 4, 0, 1)
-        self._task_options['auto-file-renaming'] = _TaskOption(
-            switch, 'active', _TaskOption.bool_mapper)
+        self._task_options['auto-file-renaming'] = _Option(switch, 'active',
+                                                           _Option.bool_mapper)
 
         label = LeftAlignedLabel(_('Proxy:'))
         table.attach_defaults(label, 0, 1, 1, 2)
@@ -717,8 +714,8 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         entry = Gtk.Entry(activates_default=True)
         entry.set_placeholder_text(_('Format: [http://][USER:PASSWORD@]HOST[:PORT]'))
         table.attach_defaults(entry, 1, 4, 1, 2)
-        self._task_options['all-proxy'] = _TaskOption(entry, 'text',
-                                                      _TaskOption.string_mapper)
+        self._task_options['all-proxy'] = _Option(entry, 'text',
+                                                  _Option.string_mapper)
 
         # Authorization
         expander = AlignedExpander(_('Authorization'), expanded=False)
@@ -733,32 +730,32 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
 
         entry = Gtk.Entry(activates_default=True)
         table.attach_defaults(entry, 1, 2, 0, 1)
-        self._task_options['http-user'] = _TaskOption(entry, 'text',
-                                                      _TaskOption.string_mapper)
+        self._task_options['http-user'] = _Option(entry, 'text',
+                                                  _Option.string_mapper)
 
         label = LeftAlignedLabel(_('Password'))
         table.attach_defaults(label, 2, 3, 0, 1)
 
         entry = Gtk.Entry(activates_default=True)
         table.attach_defaults(entry, 3, 4, 0, 1)
-        self._task_options['http-passwd'] = _TaskOption(entry, 'text',
-                                                        _TaskOption.string_mapper)
+        self._task_options['http-passwd'] = _Option(entry, 'text',
+                                                    _Option.string_mapper)
 
         label = LeftAlignedLabel(_('FTP User:'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
         entry = Gtk.Entry(activates_default=True)
         table.attach_defaults(entry, 1, 2, 1, 2)
-        self._task_options['ftp-user'] = _TaskOption(entry, 'text',
-                                                     _TaskOption.string_mapper)
+        self._task_options['ftp-user'] = _Option(entry, 'text',
+                                                 _Option.string_mapper)
 
         label = LeftAlignedLabel(_('Password'))
         table.attach_defaults(label, 2, 3, 1, 2)
 
         entry = Gtk.Entry(activates_default=True)
         table.attach_defaults(entry, 3, 4, 1, 2)
-        self._task_options['ftp-passwd'] = _TaskOption(entry, 'text',
-                                                       _TaskOption.string_mapper)
+        self._task_options['ftp-passwd'] = _Option(entry, 'text',
+                                                   _Option.string_mapper)
 
         self.show_all()
 
@@ -941,8 +938,8 @@ class PreferencesDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 0, 1)
-        self._preferences['max-concurrent-downloads'] = _TaskOption(
-            spin_button, 'value', _TaskOption.int_mapper)
+        self._preferences['max-concurrent-downloads'] = _Option(
+            spin_button, 'value', _Option.int_mapper)
 
         label = LeftAlignedLabel(_('Global Upload Limit(KiB/s):'))
         table.attach_defaults(label, 0, 1, 1, 2)
@@ -950,8 +947,8 @@ class PreferencesDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 1, 2)
-        self._preferences['max-overall-upload-limit'] = _TaskOption(
-            spin_button, 'value', _TaskOption.kib_mapper)
+        self._preferences['max-overall-upload-limit'] = _Option(
+            spin_button, 'value', _Option.kib_mapper)
 
         label = LeftAlignedLabel(_('Global Download Limit(KiB/s):'))
         table.attach_defaults(label, 0, 1, 2, 3)
@@ -959,8 +956,8 @@ class PreferencesDialog(Gtk.Dialog, LoggingMixin):
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
         table.attach_defaults(spin_button, 1, 2, 2, 3)
-        self._preferences['max-overall-download-limit'] = _TaskOption(
-            spin_button, 'value', _TaskOption.kib_mapper)
+        self._preferences['max-overall-download-limit'] = _Option(
+            spin_button, 'value', _Option.kib_mapper)
 
         self.show_all()
 
