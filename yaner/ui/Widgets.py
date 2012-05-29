@@ -31,28 +31,6 @@ HORIZONTAL, VERTICAL = Gtk.Orientation.HORIZONTAL, Gtk.Orientation.VERTICAL
 
 LeftAlignedLabel = functools.partial(Gtk.Label, xalign=0)
 
-class _ValueMixin(object):
-    """A mixin class that adds a property `value` to the instance."""
-    @property
-    def value(self):
-        return self.get_value()
-
-    @value.setter
-    def value(self, value):
-        self.set_value(value)
-
-    def do_get_property(self, prop):
-        if prop.name == 'value':
-            return self.value
-        else:
-            raise AttributeError('unknown property %s' % prop.name)
-
-    def do_set_property(self, prop, value):
-        if prop.name == 'value':
-            self.value = value
-        else:
-            raise AttributeError('unknown property %s' % prop.name)
-
 class Box(Gtk.Box):
     """Simplified Gtk.Box."""
     def __init__(self, orientation, spacing=5, *args, **kwargs):
@@ -78,59 +56,8 @@ class AlignedExpander(Gtk.Expander):
         self.remove = alignment.remove
         self.get_child = alignment.get_child
 
-class Entry(Gtk.Entry, _ValueMixin):
-    """An entry for using to store settings."""
-    __gproperties__ = {
-        "value": (str, # type
-                  "Value", # nick
-                  "Reads the current value, or sets a new value.",
-                  '',
-                  GObject.PARAM_READWRITE
-                 ),
-    }
-
-    @property
-    def value(self):
-        return self.get_text()
-
-    @value.setter
-    def value(self, value):
-        self.set_text(value)
-
-class SpinButton(Gtk.SpinButton, _ValueMixin):
-    """An spin button for using to store settings."""
-    pass
-
-class Switch(Gtk.Switch, _ValueMixin):
-    """An switch for using to store settings."""
-    __gproperties__ = {
-        "value": (bool, # type
-                  "Value", # nick
-                  "Reads the current value, or sets a new value.",
-                  False,
-                  GObject.PARAM_READWRITE
-                 ),
-    }
-
-    @property
-    def value(self):
-        return self.get_active()
-
-    @value.setter
-    def value(self, value):
-        self.set_active(value)
-
-class URIsView(Gtk.ScrolledWindow, _ValueMixin):
+class URIsView(Gtk.ScrolledWindow):
     """ScrolledWindow with a text view for getting/setting URIs."""
-    __gproperties__ = {
-        "value": (str, # type
-                  "Value", # nick
-                  "Reads the current value, or sets a new value.",
-                  '',
-                  GObject.PARAM_READWRITE
-                 ),
-    }
-
     def __init__(self):
         Gtk.ScrolledWindow.__init__(
             self, None, None, shadow_type=Gtk.ShadowType.IN,
@@ -144,8 +71,8 @@ class URIsView(Gtk.ScrolledWindow, _ValueMixin):
         text_buffer = text_view.get_buffer()
         self.text_buffer = text_buffer
 
-    @property
-    def value(self):
+    @GObject.property
+    def uris(self):
         tbuffer = self.text_buffer
         return tbuffer.get_text(
             tbuffer.get_start_iter(),
@@ -153,8 +80,8 @@ class URIsView(Gtk.ScrolledWindow, _ValueMixin):
             False
             ).split()
 
-    @value.setter
-    def value(self, uris):
+    @uris.setter
+    def uris(self, uris):
         tbuffer = self.text_buffer
         if isinstance(uris, str):
             tbuffer.set_text(uris)
@@ -166,17 +93,8 @@ class URIsView(Gtk.ScrolledWindow, _ValueMixin):
     def grab_focus(self):
         self.text_view.grab_focus()
 
-class MetafileChooserButton(Gtk.FileChooserButton, _ValueMixin):
+class MetafileChooserButton(Gtk.FileChooserButton):
     """A single file chooser button with a file filter."""
-    __gproperties__ = {
-        "value": (str, # type
-                  "Value", # nick
-                  "Reads the current value, or sets a new value.",
-                  '',
-                  GObject.PARAM_READWRITE
-                 ),
-    }
-
     def __init__(self, title, mime_types):
         Gtk.FileChooserButton.__init__(self, title=title)
 
@@ -186,20 +104,20 @@ class MetafileChooserButton(Gtk.FileChooserButton, _ValueMixin):
 
         self.set_filter(file_filter)
 
-    @property
-    def value(self):
+    @GObject.property
+    def filename(self):
         return self.get_filename()
 
-    @value.setter
-    def value(self, value):
-        self.set_filename(value)
+    @filename.setter
+    def filename(self, filename):
+        self.set_filename(filename)
 
-class FileChooserEntry(Entry):
+class FileChooserEntry(Gtk.Entry):
     """An Entry with a activatable icon that popups FileChooserDialog."""
 
     def __init__(self, title, parent, file_chooser_action, update_entry=True,
                  mime_list=None, **kwargs):
-        Entry.__init__(self, **kwargs)
+        Gtk.Entry.__init__(self, **kwargs)
 
         self.set_icon_from_stock(Gtk.EntryIconPosition.SECONDARY, 'gtk-open')
         self.connect('icon-press', self._on_icon_press)

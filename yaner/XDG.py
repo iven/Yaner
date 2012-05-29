@@ -25,6 +25,7 @@ Functions in this module automatically add __module__ prefix to the paths.
 """
 
 import os
+import subprocess
 
 from functools import partial
 
@@ -41,4 +42,8 @@ save_data_path = partial(save_data_path, directory)
 save_config_path = partial(save_config_path, directory)
 save_data_file = lambda filename: os.path.join(save_data_path(), filename)
 save_config_file = lambda filename: os.path.join(save_config_path(), filename)
+
+def xdg_open(args):
+    args.insert(0, 'xdg-open')
+    return subprocess.call(args)
 

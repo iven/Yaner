@@ -24,9 +24,7 @@
 new task dialog.
 """
 
-from gi.repository import Gtk
-from gi.repository import GLib
-from gi.repository import Pango
+from gi.repository import Gtk, GLib, GObject, Pango
 
 from yaner.Presentable import Presentable
 from yaner.ui.PoolTree import PoolModel
@@ -66,8 +64,8 @@ class CategoryComboBox(Gtk.ComboBox):
 
         self.connect('changed', self._on_changed)
 
-    @property
-    def value(self):
+    @GObject.property
+    def category(self):
         return self._active_category
 
     def _pixbuf_data_func(self, cell_layout, renderer, model, iter_, data=None):

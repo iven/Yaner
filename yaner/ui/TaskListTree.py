@@ -89,7 +89,6 @@ class TaskListModel(Gtk.TreeStore, LoggingMixin):
         """
         When a task removed from the presentable, remove it from
         the model.
-        @TODO: Test this.
         """
         iter_ = self.get_iter_for_task(task)
         if iter_ is not None:

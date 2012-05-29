@@ -45,7 +45,7 @@ The module level attribute.
 @see:U{PEP-366<http://www.python.org/dev/peps/pep-0366/>}.
 """
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 """
 The version of L{yaner}.
 This is also used by the setup script.
