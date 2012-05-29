@@ -6,8 +6,10 @@
         <toolitem action='task_pause' />
         <toolitem action='task_remove' />
         <separator />
+        <!--
         <toolitem action='preferences' />
         <separator />
+        -->
         <toolitem action='about' />
         <toolitem action='quit' />
     </toolbar>
