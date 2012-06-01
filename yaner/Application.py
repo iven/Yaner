@@ -157,16 +157,14 @@ class Application(Gtk.Application, LoggingMixin):
 
             if response == Gtk.ResponseType.YES:
                 import subprocess
-                from yaner.utils.XDG import load_first_config, save_config_path
+                from yaner.utils.XDG import save_config_path
 
-                in_path = load_first_config('autostart/yaner-daemon.desktop')
+                # Use this temporaily
+                in_path = '/usr/share/applications/yaner-daemon.desktop'
                 out_path = os.path.join(save_config_path('autostart'),
                                         'yaner-daemon.desktop')
-                if in_path != out_path:
-                    with open(in_path) as f_in, open(out_path, 'w') as f_out:
-                        lines = [line for line in f_in
-                                 if not line.startswith('Hidden')]
-                        f_out.writelines(lines)
+                if not os.path.exists(out_path):
+                    os.symlink(in_path, out_path)
                     subprocess.Popen(['aria2c', '--enable-rpc', '--allow-overwrite'],
                                      stdout=subprocess.PIPE)
 

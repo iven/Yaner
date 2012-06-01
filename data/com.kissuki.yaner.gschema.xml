@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <schemalist>
-    <schema id='com.kissuki.yaner' path='/com/kissuki/yaner/'>
+    <schema id='com.kissuki.yaner' path='/com/kissuki/yaner/' gettext-domain='yaner'>
         <child schema='com.kissuki.yaner.task' name='task' />
         <child schema='com.kissuki.yaner.ui' name='ui' />
         <child schema='com.kissuki.yaner.global' name='global' />
