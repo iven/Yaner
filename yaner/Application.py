@@ -26,6 +26,7 @@ This module contains the main application class of L{yaner}.
 
 import os
 import logging
+import subprocess
 
 from gi.repository import Gtk, GLib, Gio
 from sqlalchemy import create_engine
@@ -71,6 +72,7 @@ class Application(Gtk.Application, LoggingMixin):
 
         self._toplevel = None
         self._settings = None
+        self._daemon = None
 
         self._init_action_group()
 
@@ -145,35 +147,12 @@ class Application(Gtk.Application, LoggingMixin):
         action_group.insert(action)
         self.set_action_group(action_group)
 
-    def _init_first_start(self):
-        """If it's first start, ask for starting daemon on system startup."""
-        if self.settings.get_boolean('first-start'):
-            message = _("It seems it's the first time you run Yaner. "
-                        "Yaner requires a daemon to run background, which is "
-                        "highly recommended to be started on system startup.\n\n"
-                        "Do you want to run it on system startup?\n"
-                        "(Or run it everytime yourself: "
-                        "$ aria2c --enable-rpc --allow-overwrite)")
-            dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.QUESTION,
-                                       Gtk.ButtonsType.YES_NO, message,
-                                       title=_('Welcome to Yaner!'))
-            response = dialog.run()
-            dialog.destroy()
-
-            if response == Gtk.ResponseType.YES:
-                import subprocess
-                from yaner.utils.XDG import save_config_path
-
-                # Use this temporaily
-                in_path = '/usr/share/applications/yaner-daemon.desktop'
-                out_path = os.path.join(save_config_path('autostart'),
-                                        'yaner-daemon.desktop')
-                if not os.path.exists(out_path):
-                    os.symlink(in_path, out_path)
-                    subprocess.Popen(['aria2c', '--enable-rpc', '--allow-overwrite'],
-                                     stdout=subprocess.PIPE)
-
-            self.settings.set_boolean('first-start', False)
+    def _init_daemon(self):
+        """Start aria2 daemon on start up."""
+        self._daemon = subprocess.Popen(['aria2c', '--enable-rpc'],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                        )
 
     def on_cmdline(self, action, data):
         """When application started with command line arguments, open new
@@ -197,8 +176,8 @@ class Application(Gtk.Application, LoggingMixin):
         show the toplevel window.
         """
         self._init_logging()
-        self._init_first_start()
         self._init_database()
+        self._init_daemon()
         self.toplevel.set_application(self)
         self.toplevel.show_all()
 
@@ -209,6 +188,8 @@ class Application(Gtk.Application, LoggingMixin):
         self.logger.info('Shutting down database...')
         SQLSession.commit()
         SQLSession.close()
+
+        self._daemon.terminate()
 
         self.logger.info('Application quit normally.')
         logging.shutdown()

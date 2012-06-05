@@ -4,13 +4,6 @@
         <child schema='com.kissuki.yaner.task' name='task' />
         <child schema='com.kissuki.yaner.ui' name='ui' />
         <child schema='com.kissuki.yaner.global' name='global' />
-        <key type='b' name='first-start'>
-            <default>true</default>
-            <summary>First start</summary>
-            <description>
-                If it's the first start of the application.
-            </description>
-        </key>
     </schema>
     <schema id='com.kissuki.yaner.ui' path='/com/kissuki/yaner/ui/'>
         <key type='u' name='width'>
