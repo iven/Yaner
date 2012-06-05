@@ -48,7 +48,7 @@ class SQLBase(object):
 
     id = Column(Integer, primary_key=True)
 
-class _VERSION(argparse.Action):
+class VersionAction(argparse.Action):
     """Show version information of the application."""
 
     def __call__(self, parser, namespace, values, option_string=None):

@@ -35,7 +35,6 @@ from yaner import SQLSession, SQLBase
 from yaner.XDG import save_data_file
 from yaner.Pool import Pool
 from yaner.Presentable import Category
-from yaner.Constants import APPLICATION_ID
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 
@@ -44,6 +43,12 @@ class Application(Gtk.Application, LoggingMixin):
 
     _NAME = __package__
     """The name of the application, used by L{_LOG_FILE}, etc."""
+
+    _APPLICATION_ID = 'com.kissuki.yaner'
+    """
+    The unique bus name of the application, which identifies the application when
+    using L{Gtk.Application} to make the application unique.
+    """
 
     _LOG_FILE = '{0}.log'.format(_NAME)
     """The logging file of the application."""
@@ -61,7 +66,7 @@ class Application(Gtk.Application, LoggingMixin):
         It handles command line options, creates L{toplevel window
         <Toplevel>}, and initialize logging configuration.
         """
-        Gtk.Application.__init__(self, application_id=APPLICATION_ID, flags=0)
+        Gtk.Application.__init__(self, application_id=self._APPLICATION_ID, flags=0)
         LoggingMixin.__init__(self)
 
         self._toplevel = None
