@@ -57,11 +57,3 @@ __author__    = "Iven Hsu (Xu Lijian) <ivenvd@gmail.com>"
 __license__   = "GPLv3"
 """The license governing the use and distribution of L{yaner}."""
 
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-
-from yaner.Misc import SQLBase, DeclarativeGObjectMeta
-
-SQLSession = scoped_session(sessionmaker())
-SQLBase = declarative_base(cls=SQLBase, metaclass=DeclarativeGObjectMeta)
-

@@ -32,8 +32,8 @@ from sqlalchemy import Column, Integer, PickleType, Unicode, ForeignKey
 from sqlalchemy.orm import reconstructor, deferred
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from yaner import SQLBase, SQLSession
 from yaner.Misc import unquote
+from yaner.Database import SQLBase, SQLSession
 from yaner.utils.Logging import LoggingMixin
 from yaner.utils.MutationDict import MutationDict
 from yaner.utils.Notification import Notification

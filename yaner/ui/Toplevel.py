@@ -33,11 +33,11 @@ from gi.repository import GObject
 from gi.repository import Gio
 from gi.repository import Gdk
 
-from yaner import SQLSession
 from yaner import __version__, __author__
-from yaner.Pool import Pool
-from yaner.Presentable import Presentable, Category
 from yaner.XDG import xdg_open
+from yaner.Pool import Pool
+from yaner.Database import SQLSession
+from yaner.Presentable import Presentable, Category
 from yaner.ui.Dialogs import TaskNewDialog, PreferencesDialog
 from yaner.ui.InfoBars import CategoryBar, PoolBar
 from yaner.ui.PoolTree import PoolModel, PoolView

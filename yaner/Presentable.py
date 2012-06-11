@@ -29,8 +29,8 @@ from sqlalchemy import Column, Integer, Unicode, ForeignKey
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from yaner import SQLSession, SQLBase
 from yaner.Task import Task
+from yaner.Database import SQLSession, SQLBase
 from yaner.utils.Enum import Enum
 from yaner.utils.Logging import LoggingMixin
 

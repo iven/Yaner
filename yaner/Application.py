@@ -32,9 +32,9 @@ from gi.repository import Gtk, GLib, Gio
 from sqlalchemy import create_engine
 
 from yaner import __package__
-from yaner import SQLSession, SQLBase
 from yaner.XDG import save_data_file
 from yaner.Pool import Pool
+from yaner.Database import SQLSession, SQLBase
 from yaner.Presentable import Category
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
