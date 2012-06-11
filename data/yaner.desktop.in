@@ -1,7 +1,7 @@
 [Desktop Entry]
 _Name=Yaner
 _GenericName=Download Manager
-_Comment=A download manager based on Aria2
+_Comment=Powerful download manager with an easy-to-use interface
 Exec=yaner %u
 Icon=yaner
 Terminal=false

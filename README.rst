@@ -14,10 +14,15 @@ doesn't work properly after an update, just try to remove ``~/.config/yaner/`` a
 Features
 ========
 
-* (Almostly) all features aria2 supports.
-* Pretty simple, straight toward UI.
-* Control your downloads remotely.
-* Multiple aria2 download servers, and multiple task categories for each server.
+* Multi-protocol support(HTTP/HTTPS/FTP/BitTorrent/Metalink).
+* Multi-threaded and multi-server downloading.
+* Controlling your downloads remotely.
+* BitTorrent magnet links support.
+* Download resuming.
+* Connection to HTTP(s)/FTP servers which require passwords.
+* Proxy support for HTTP(s)/FTP servers.
+* Firefox integration through FlashGot.
+* Command line support.
 * A smart and handsome author.
 
 Dependencies
