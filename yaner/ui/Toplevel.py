@@ -64,7 +64,7 @@ class Toplevel(Gtk.Window, LoggingMixin):
                     - task_vbox
                         - _task_list_view
         """
-        Gtk.Window.__init__(self)
+        Gtk.Window.__init__(self, title=_('Yaner'))
         LoggingMixin.__init__(self)
 
         self.logger.info('Initializing toplevel window...')
