@@ -30,6 +30,7 @@ from gi.repository import Gtk, GObject
 HORIZONTAL, VERTICAL = Gtk.Orientation.HORIZONTAL, Gtk.Orientation.VERTICAL
 
 LeftAlignedLabel = functools.partial(Gtk.Label, xalign=0)
+RightAlignedLabel = functools.partial(Gtk.Label, xalign=1)
 
 class Box(Gtk.Box):
     """Simplified Gtk.Box."""
@@ -44,9 +45,10 @@ class Box(Gtk.Box):
 
 class AlignedExpander(Gtk.Expander):
     """A L{Gtk.Expander} with an alignment that can place its children nicely."""
-    def __init__(self, label='', expanded=True):
+    def __init__(self, label='', expanded=True, *args, **kwargs):
         Gtk.Expander.__init__(self, label=label, use_markup=True,
-                              resize_toplevel=True, expanded=expanded)
+                              resize_toplevel=True, expanded=expanded,
+                              *args, **kwargs)
 
         alignment = Gtk.Alignment()
         alignment.set_padding(0, 0, 12, 5)

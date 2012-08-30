@@ -31,8 +31,8 @@ from gi.repository import Gtk, Gio
 from gi.repository.Gio import SettingsBindFlags as BindFlags
 
 from yaner.Task import Task
-from yaner.ui.Widgets import LeftAlignedLabel, AlignedExpander, URIsView
-from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry
+from yaner.ui.Widgets import RightAlignedLabel, AlignedExpander
+from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry, URIsView
 from yaner.ui.Widgets import HORIZONTAL, VERTICAL, Box
 from yaner.ui.PoolTree import PoolModel
 from yaner.ui.CategoryComboBox import CategoryFilterModel, CategoryComboBox
@@ -211,7 +211,7 @@ class _TaskNewNormalUI(_TaskNewUI):
         box.pack_start(hbox)
 
         # Rename
-        label = LeftAlignedLabel(_('Rename:'))
+        label = RightAlignedLabel(_('Rename:'))
         hbox.pack_start(label, expand=False)
 
         entry = Gtk.Entry(activates_default=True)
@@ -219,7 +219,7 @@ class _TaskNewNormalUI(_TaskNewUI):
         self._task_options['out'] = _Option(entry, 'text', _Option.string_mapper)
 
         # Connections
-        label = LeftAlignedLabel(_('Connections:'))
+        label = RightAlignedLabel(_('Connections:'))
         hbox.pack_start(label, expand=False)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
@@ -427,11 +427,12 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(5, 4, False, row_spacing=5, column_spacing=5)
+        table = Gtk.Table(5, 4, False, row_spacing=5, column_spacing=5,
+                          halign=Gtk.Align.CENTER)
         vbox.pack_start(table, expand=False)
 
         # Speed Limit
-        label = LeftAlignedLabel(_('Upload Limit(KiB/s):'))
+        label = RightAlignedLabel(_('Upload Limit(KiB/s):'))
         table.attach_defaults(label, 0, 1, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
@@ -440,7 +441,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['max-upload-limit'] = _Option(spin_button, 'value',
                                                          _Option.kib_mapper)
 
-        label = LeftAlignedLabel(_('Download Limit(KiB/s):'))
+        label = RightAlignedLabel(_('Download Limit(KiB/s):'))
         table.attach_defaults(label, 2, 3, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
@@ -450,7 +451,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                                            _Option.kib_mapper)
 
         # Retry
-        label = LeftAlignedLabel(_('Max Retries:'))
+        label = RightAlignedLabel(_('Max Retries:'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
         adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
@@ -459,7 +460,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['max-tries'] = _Option(spin_button, 'value',
                                                   _Option.int_mapper)
 
-        label = LeftAlignedLabel(_('Retry Interval(sec):'))
+        label = RightAlignedLabel(_('Retry Interval(sec):'))
         table.attach_defaults(label, 2, 3, 1, 2)
 
         adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
@@ -469,7 +470,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                                    _Option.int_mapper)
 
         # Timeout
-        label = LeftAlignedLabel(_('Timeout(sec):'))
+        label = RightAlignedLabel(_('Timeout(sec):'))
         table.attach_defaults(label, 0, 1, 2, 3)
 
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
@@ -478,7 +479,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['timeout'] = _Option(spin_button, 'value',
                                                 _Option.int_mapper)
 
-        label = LeftAlignedLabel(_('Connect Timeout(sec):'))
+        label = RightAlignedLabel(_('Connect Timeout(sec):'))
         table.attach_defaults(label, 2, 3, 2, 3)
 
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
@@ -488,7 +489,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                                         _Option.int_mapper)
 
         # Split and Connections
-        label = LeftAlignedLabel(_('Split Size(MiB):'))
+        label = RightAlignedLabel(_('Split Size(MiB):'))
         table.attach_defaults(label, 0, 1, 3, 4)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
@@ -497,7 +498,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['min-split-size'] = _Option(spin_button, 'value',
                                                        _Option.mib_mapper)
 
-        label = LeftAlignedLabel(_('Per Server Connections:'))
+        label = RightAlignedLabel(_('Per Server Connections:'))
         table.attach_defaults(label, 2, 3, 3, 4)
 
         adjustment = Gtk.Adjustment(lower=1, upper=10, step_increment=1)
@@ -507,7 +508,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
             spin_button, 'value', _Option.int_mapper)
 
         # Referer
-        label = LeftAlignedLabel(_('Referer:'))
+        label = RightAlignedLabel(_('Referer:'))
         table.attach_defaults(label, 0, 1, 4, 5)
 
         entry = Gtk.Entry(activates_default=True)
@@ -516,7 +517,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                                 _Option.string_mapper)
 
         # Header
-        label = LeftAlignedLabel(_('HTTP Header:'))
+        label = RightAlignedLabel(_('HTTP Header:'))
         table.attach_defaults(label, 0, 1, 5, 6)
 
         entry = Gtk.Entry(activates_default=True)
@@ -529,11 +530,12 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(4, 4, False, row_spacing=5, column_spacing=5)
+        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5,
+                          halign=Gtk.Align.CENTER)
         vbox.pack_start(table, expand=False)
 
         # Limit
-        label = LeftAlignedLabel(_('Max open files:'))
+        label = RightAlignedLabel(_('Max open files:'))
         table.attach_defaults(label, 0, 1, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
@@ -542,7 +544,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['bt-max-open-files'] = _Option(spin_button, 'value',
                                                           _Option.int_mapper)
 
-        label = LeftAlignedLabel(_('Max peers:'))
+        label = RightAlignedLabel(_('Max peers:'))
         table.attach_defaults(label, 2, 3, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
@@ -552,7 +554,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                                      _Option.int_mapper)
 
         # Seed
-        label = LeftAlignedLabel(_('Seed time(min):'))
+        label = RightAlignedLabel(_('Seed time(min):'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
         adjustment = Gtk.Adjustment(lower=0, upper=7200, step_increment=1)
@@ -561,7 +563,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['seed-time'] = _Option(spin_button, 'value',
                                                   _Option.int_mapper)
 
-        label = LeftAlignedLabel(_('Seed ratio:'))
+        label = RightAlignedLabel(_('Seed ratio:'))
         table.attach_defaults(label, 2, 3, 1, 2)
 
         adjustment = Gtk.Adjustment(lower=0, upper=20, step_increment=.1)
@@ -571,7 +573,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                                                    _Option.float_mapper)
 
         # Timeout
-        label = LeftAlignedLabel(_('Timeout(sec):'))
+        label = RightAlignedLabel(_('Timeout(sec):'))
         table.attach_defaults(label, 0, 1, 2, 3)
 
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
@@ -580,7 +582,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['bt-tracker-timeout'] = _Option(spin_button, 'value',
                                                            _Option.int_mapper)
 
-        label = LeftAlignedLabel(_('Connect Timeout(sec):'))
+        label = RightAlignedLabel(_('Connect Timeout(sec):'))
         table.attach_defaults(label, 2, 3, 2, 3)
 
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
@@ -589,17 +591,21 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['bt-tracker-connect-timeout'] = _Option(
             spin_button, 'value', _Option.int_mapper)
 
-        label = LeftAlignedLabel(_('Try to download first and last pieces first'))
-        table.attach_defaults(label, 0, 3, 3, 4)
+        table = Gtk.Table(2, 2, False, row_spacing=5, column_spacing=5,
+                          halign=Gtk.Align.CENTER)
+        vbox.pack_start(table, expand=False)
+
+        label = RightAlignedLabel(_('Try to download first and last pieces first'))
+        table.attach_defaults(label, 0, 1, 0, 1)
         switch = Gtk.Switch()
-        table.attach_defaults(switch, 3, 4, 3, 4)
+        table.attach_defaults(switch, 1, 2, 0, 1)
         self._task_options['bt-prioritize-piece'] = _Option(
             switch, 'active', _Option.prioritize_mapper)
 
-        label = LeftAlignedLabel(_('Convert downloaded torrent files to BitTorrent tasks'))
-        table.attach_defaults(label, 0, 3, 4, 5)
+        label = RightAlignedLabel(_('Convert downloaded torrent files to BitTorrent tasks'))
+        table.attach_defaults(label, 0, 1, 1, 2)
         switch = Gtk.Switch()
-        table.attach_defaults(switch, 3, 4, 4, 5)
+        table.attach_defaults(switch, 1, 2, 1, 2)
         self._task_options['follow-torrent'] = _Option(switch, 'active',
                                                        _Option.bool_mapper)
 
@@ -628,10 +634,11 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(5, 2, False, row_spacing=5, column_spacing=5)
+        table = Gtk.Table(5, 2, False, row_spacing=5, column_spacing=5,
+                          halign=Gtk.Align.CENTER)
         vbox.pack_start(table, expand=False)
 
-        label = LeftAlignedLabel(_('Download Servers:'))
+        label = RightAlignedLabel(_('Download Servers:'))
         table.attach_defaults(label, 0, 1, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
@@ -640,7 +647,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['split'] = _Option(spin_button, 'value',
                                               _Option.int_mapper)
 
-        label = LeftAlignedLabel(_('Preferred locations:'))
+        label = RightAlignedLabel(_('Preferred locations:'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
         entry = Gtk.Entry()
@@ -648,7 +655,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['metalink-location'] = _Option(entry, 'text',
                                                           _Option.string_mapper)
 
-        label = LeftAlignedLabel(_('Language:'))
+        label = RightAlignedLabel(_('Language:'))
         table.attach_defaults(label, 0, 1, 2, 3)
 
         entry = Gtk.Entry()
@@ -656,7 +663,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['metalink-language'] = _Option(entry, 'text',
                                                           _Option.string_mapper)
 
-        label = LeftAlignedLabel(_('Version:'))
+        label = RightAlignedLabel(_('Version:'))
         table.attach_defaults(label, 0, 1, 3, 4)
 
         entry = Gtk.Entry()
@@ -664,7 +671,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['metalink-version'] = _Option(entry, 'text',
                                                          _Option.string_mapper)
 
-        label = LeftAlignedLabel(_('OS:'))
+        label = RightAlignedLabel(_('OS:'))
         table.attach_defaults(label, 0, 1, 4, 5)
 
         entry = Gtk.Entry()
@@ -672,10 +679,10 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['metalink-os'] = _Option(entry, 'text',
                                                     _Option.string_mapper)
 
-        hbox = Box(HORIZONTAL)
+        hbox = Box(HORIZONTAL, halign=Gtk.Align.CENTER)
         vbox.pack_start(hbox, expand=False)
 
-        label = LeftAlignedLabel(_('Convert downloaded metalink files to Metalink tasks'))
+        label = RightAlignedLabel(_('Convert downloaded metalink files to Metalink tasks'))
         hbox.pack_start(label)
 
         switch = Gtk.Switch()
@@ -688,11 +695,12 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
+        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5,
+                          halign=Gtk.Align.CENTER)
         vbox.pack_start(table, expand=False)
 
         # Overwrite and Rename
-        label = LeftAlignedLabel(_('Allow Overwrite:'))
+        label = RightAlignedLabel(_('Allow Overwrite:'))
         table.attach_defaults(label, 0, 1, 0, 1)
 
         switch = Gtk.Switch()
@@ -700,7 +708,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['allow-overwrite'] = _Option(switch, 'active',
                                                         _Option.bool_mapper)
 
-        label = LeftAlignedLabel(_('Auto Rename Files:'))
+        label = RightAlignedLabel(_('Auto Rename Files:'))
         table.attach_defaults(label, 2, 3, 0, 1)
 
         switch = Gtk.Switch()
@@ -708,7 +716,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['auto-file-renaming'] = _Option(switch, 'active',
                                                            _Option.bool_mapper)
 
-        label = LeftAlignedLabel(_('Proxy:'))
+        label = RightAlignedLabel(_('Proxy:'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
         entry = Gtk.Entry(activates_default=True)
@@ -720,12 +728,13 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         # Authorization
         expander = AlignedExpander(_('Authorization'), expanded=False)
         expander.connect_after('activate', self.update_size)
-        vbox.pack_start(expander, expand=False)
+        table.attach_defaults(expander, 0, 4, 2, 3)
 
-        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5)
+        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5,
+                          halign=Gtk.Align.CENTER)
         expander.add(table)
 
-        label = LeftAlignedLabel(_('HTTP User:'))
+        label = RightAlignedLabel(_('HTTP User:'))
         table.attach_defaults(label, 0, 1, 0, 1)
 
         entry = Gtk.Entry(activates_default=True)
@@ -733,7 +742,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['http-user'] = _Option(entry, 'text',
                                                   _Option.string_mapper)
 
-        label = LeftAlignedLabel(_('Password'))
+        label = RightAlignedLabel(_('Password'))
         table.attach_defaults(label, 2, 3, 0, 1)
 
         entry = Gtk.Entry(activates_default=True)
@@ -741,7 +750,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['http-passwd'] = _Option(entry, 'text',
                                                     _Option.string_mapper)
 
-        label = LeftAlignedLabel(_('FTP User:'))
+        label = RightAlignedLabel(_('FTP User:'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
         entry = Gtk.Entry(activates_default=True)
@@ -749,7 +758,7 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         self._task_options['ftp-user'] = _Option(entry, 'text',
                                                  _Option.string_mapper)
 
-        label = LeftAlignedLabel(_('Password'))
+        label = RightAlignedLabel(_('Password'))
         table.attach_defaults(label, 2, 3, 1, 2)
 
         entry = Gtk.Entry(activates_default=True)
@@ -929,10 +938,11 @@ class PreferencesDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(3, 2, False, row_spacing=5, column_spacing=5)
+        table = Gtk.Table(3, 2, False, row_spacing=5, column_spacing=5,
+                          halign=Gtk.Align.CENTER)
         vbox.pack_start(table, expand=False)
 
-        label = LeftAlignedLabel(_('Max Concurrent Tasks:'))
+        label = RightAlignedLabel(_('Max Concurrent Tasks:'))
         table.attach_defaults(label, 0, 1, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
@@ -941,7 +951,7 @@ class PreferencesDialog(Gtk.Dialog, LoggingMixin):
         self._preferences['max-concurrent-downloads'] = _Option(
             spin_button, 'value', _Option.int_mapper)
 
-        label = LeftAlignedLabel(_('Global Upload Limit(KiB/s):'))
+        label = RightAlignedLabel(_('Global Upload Limit(KiB/s):'))
         table.attach_defaults(label, 0, 1, 1, 2)
 
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=1)
@@ -950,7 +960,7 @@ class PreferencesDialog(Gtk.Dialog, LoggingMixin):
         self._preferences['max-overall-upload-limit'] = _Option(
             spin_button, 'value', _Option.kib_mapper)
 
-        label = LeftAlignedLabel(_('Global Download Limit(KiB/s):'))
+        label = RightAlignedLabel(_('Global Download Limit(KiB/s):'))
         table.attach_defaults(label, 0, 1, 2, 3)
 
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=1)
