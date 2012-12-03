@@ -37,7 +37,7 @@ if os.path.isdir('../yaner'):
     sys.path.insert(0, '..')
 
 from yaner import __package__
-from yaner.Misc import _VERSION
+from yaner.Misc import VersionAction
 
 # Setup Translation
 gettext.install('yaner')
@@ -55,7 +55,7 @@ if len(sys.argv) > 1:
             default='', help=_('cookies of the website'))
     parser.add_argument('uris', nargs='*', metavar='URI | MAGNET',
             help=_('the download addresses'))
-    parser.add_argument('-v', '--version', action=_VERSION, nargs=0,
+    parser.add_argument('-v', '--version', action=VersionAction, nargs=0,
             help=_('output version information and exit'))
     args = parser.parse_args()
 
@@ -66,37 +66,19 @@ if len(sys.argv) > 1:
     if args.rename is not None:
         options['out'] = args.rename
 
-# Requirements
-try:
-    import gi
-except ImportError:
-    raise SystemExit(' * Error: pygobject required')
-
-try:
-    gi.require_version('Gtk', '3.0')
-except ValueError:
-    raise SystemExit(' * Error: Gtk3 required')
-
-try:
-    gi.require_version('GLib', '2.0')
-except ValueError:
-    raise SystemExit(' * Error: GLib2 required')
-else:
-    from gi.repository import GLib
-
-try:
-    from gi.repository import Notify
-except ImportError:
-    raise SystemExit(' * Error: libnotify required')
-else:
-    Notify.init('yaner')
-
 # Start the Application
+from gi.repository import GLib
+from gi.repository import Notify
 from yaner.Application import Application
+
+Notify.init('yaner')
+
 main_app = Application()
+
 if options is not None:
     main_app.register(None)
     # FIXME: GLib works strange when passing dictionaries, maybe a bug
     main_app.activate_action('cmdline', GLib.Variant.new_string(str(options)))
+
 main_app.run(None)
 

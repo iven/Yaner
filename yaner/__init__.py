@@ -45,7 +45,7 @@ The module level attribute.
 @see:U{PEP-366<http://www.python.org/dev/peps/pep-0366/>}.
 """
 
-__version__ = '0.5.2'
+__version__ = '0.5.3'
 """
 The version of L{yaner}.
 This is also used by the setup script.
@@ -56,12 +56,4 @@ __author__    = "Iven Hsu (Xu Lijian) <ivenvd@gmail.com>"
 
 __license__   = "GPLv3"
 """The license governing the use and distribution of L{yaner}."""
-
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-
-from yaner.Misc import SQLBase, DeclarativeGObjectMeta
-
-SQLSession = scoped_session(sessionmaker())
-SQLBase = declarative_base(cls=SQLBase, metaclass=DeclarativeGObjectMeta)
 

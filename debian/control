@@ -1,0 +1,28 @@
+Source: yaner
+Section: web
+Priority: extra
+Maintainer: Iven Hsu <ivenvd@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), python3-distutils-extra (>= 2.32), python3-sqlalchemy, python3-gi, python3-chardet
+Standards-Version: 3.9.3
+Homepage: http://www.kissuki.com/Yaner
+Vcs-Git: https://github.com/iven/Yaner.git
+Vcs-Browser: https://github.com/iven/Yaner
+X-Python3-Version: >= 3.2
+
+Package: yaner
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}, python3-gi, python3-sqlalchemy, python3-chardet, libgtk-3-0, libnotify4, xdg-utils, aria2 (>= 1.13.0)
+Description: GUI Download Manager
+ Yaner is a powerful download manager with an easy-to-use interface.
+ It provides the following features:
+  * Multi-protocol support(HTTP/HTTPS/FTP/BitTorrent/Metalink).
+  * Multi-threaded and multi-server downloading.
+  * Controlling your downloads remotely.
+  * BitTorrent magnet links support.
+  * Download resuming.
+  * Connection to HTTP(s)/FTP servers which require passwords.
+  * Proxy support for HTTP(s)/FTP servers.
+  * Firefox integration through FlashGot.
+  * Command line support.
+  * A smart and handsome author.
+

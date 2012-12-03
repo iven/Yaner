@@ -32,9 +32,8 @@ from sqlalchemy import Column, Unicode, Boolean
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from yaner import SQLSession, SQLBase
-from yaner.Task import Task
 from yaner.Xmlrpc import ServerProxy
+from yaner.Database import SQLSession, SQLBase
 from yaner.Presentable import Presentable, Queuing, Category, Dustbin
 from yaner.utils.Logging import LoggingMixin
 

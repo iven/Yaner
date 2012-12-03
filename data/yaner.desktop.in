@@ -1,0 +1,11 @@
+[Desktop Entry]
+_Name=Yaner
+_GenericName=Download Manager
+_Comment=Powerful download manager with an easy-to-use interface
+Exec=yaner %u
+Icon=yaner
+Terminal=false
+Type=Application
+Categories=GTK;Network;FileTransfer;P2P
+StartupNotify=true
+Encoding=UTF-8

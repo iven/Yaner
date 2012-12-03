@@ -26,16 +26,16 @@ This module contains the main application class of L{yaner}.
 
 import os
 import logging
+import subprocess
 
 from gi.repository import Gtk, GLib, Gio
 from sqlalchemy import create_engine
 
 from yaner import __package__
-from yaner import SQLSession, SQLBase
 from yaner.XDG import save_data_file
 from yaner.Pool import Pool
+from yaner.Database import SQLSession, SQLBase
 from yaner.Presentable import Category
-from yaner.Constants import APPLICATION_ID
 from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 
@@ -44,6 +44,12 @@ class Application(Gtk.Application, LoggingMixin):
 
     _NAME = __package__
     """The name of the application, used by L{_LOG_FILE}, etc."""
+
+    _APPLICATION_ID = 'com.kissuki.yaner'
+    """
+    The unique bus name of the application, which identifies the application when
+    using L{Gtk.Application} to make the application unique.
+    """
 
     _LOG_FILE = '{0}.log'.format(_NAME)
     """The logging file of the application."""
@@ -61,11 +67,12 @@ class Application(Gtk.Application, LoggingMixin):
         It handles command line options, creates L{toplevel window
         <Toplevel>}, and initialize logging configuration.
         """
-        Gtk.Application.__init__(self, application_id=APPLICATION_ID, flags=0)
+        Gtk.Application.__init__(self, application_id=self._APPLICATION_ID, flags=0)
         LoggingMixin.__init__(self)
 
         self._toplevel = None
         self._settings = None
+        self._daemon = None
 
         self._init_action_group()
 
@@ -140,37 +147,12 @@ class Application(Gtk.Application, LoggingMixin):
         action_group.insert(action)
         self.set_action_group(action_group)
 
-    def _init_first_start(self):
-        """If it's first start, ask for starting daemon on system startup."""
-        if self.settings.get_boolean('first-start'):
-            message = _("It seems it's the first time you run Yaner. "
-                        "Yaner requires a daemon to run background, which is "
-                        "highly recommended to be started on system startup.\n\n"
-                        "Do you want to run it on system startup?\n"
-                        "(Or run it everytime yourself: "
-                        "$ aria2c --enable-rpc --allow-overwrite)")
-            dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.QUESTION,
-                                       Gtk.ButtonsType.YES_NO, message,
-                                       title=_('Welcome to Yaner!'))
-            response = dialog.run()
-            dialog.destroy()
-
-            if response == Gtk.ResponseType.YES:
-                import subprocess
-                from yaner.utils.XDG import load_first_config, save_config_path
-
-                in_path = load_first_config('autostart/yaner-daemon.desktop')
-                out_path = os.path.join(save_config_path('autostart'),
-                                        'yaner-daemon.desktop')
-                if in_path != out_path:
-                    with open(in_path) as f_in, open(out_path, 'w') as f_out:
-                        lines = [line for line in f_in
-                                 if not line.startswith('Hidden')]
-                        f_out.writelines(lines)
-                    subprocess.Popen(['aria2c', '--enable-rpc', '--allow-overwrite'],
-                                     stdout=subprocess.PIPE)
-
-            self.settings.set_boolean('first-start', False)
+    def _init_daemon(self):
+        """Start aria2 daemon on start up."""
+        self._daemon = subprocess.Popen(['aria2c', '--enable-rpc'],
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                        )
 
     def on_cmdline(self, action, data):
         """When application started with command line arguments, open new
@@ -194,8 +176,8 @@ class Application(Gtk.Application, LoggingMixin):
         show the toplevel window.
         """
         self._init_logging()
-        self._init_first_start()
         self._init_database()
+        self._init_daemon()
         self.toplevel.set_application(self)
         self.toplevel.show_all()
 
@@ -206,6 +188,8 @@ class Application(Gtk.Application, LoggingMixin):
         self.logger.info('Shutting down database...')
         SQLSession.commit()
         SQLSession.close()
+
+        self._daemon.terminate()
 
         self.logger.info('Application quit normally.')
         logging.shutdown()

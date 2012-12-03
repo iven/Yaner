@@ -29,26 +29,9 @@ import urllib
 import chardet
 import argparse
 
-from gi.repository.GObject import GObjectMeta
-from sqlalchemy import Column, Integer
-from sqlalchemy.ext.declarative import DeclarativeMeta, declared_attr
-
 from yaner import __package__, __version__
 
-class DeclarativeGObjectMeta(DeclarativeMeta, GObjectMeta):
-    """Metaclass for Declarative and GObject subclasses."""
-    pass
-
-class SQLBase(object):
-    """Base class for all SQLAlchemy classes."""
-
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
-    id = Column(Integer, primary_key=True)
-
-class _VERSION(argparse.Action):
+class VersionAction(argparse.Action):
     """Show version information of the application."""
 
     def __call__(self, parser, namespace, values, option_string=None):

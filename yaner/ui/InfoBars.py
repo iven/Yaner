@@ -26,7 +26,7 @@ This module contains the infobar classes of L{yaner}.
 
 from gi.repository import Gtk
 
-from yaner.ui.Widgets import LeftAlignedLabel, FileChooserEntry
+from yaner.ui.Widgets import RightAlignedLabel, FileChooserEntry, Grid
 
 class CategoryBar(Gtk.InfoBar):
     """A InfoBar used to adding or editing categories."""
@@ -36,22 +36,24 @@ class CategoryBar(Gtk.InfoBar):
         widgets = {}
         content_area = self.get_content_area()
 
-        table = Gtk.Table(2, 2, False, row_spacing=5, column_spacing=5)
-        content_area.pack_start(table, True, True, 0)
+        grid = Grid()
+        content_area.pack_start(grid, True, True, 0)
 
-        label = LeftAlignedLabel(_('Category Name:'))
-        table.attach_defaults(label, 0, 1, 0, 1)
+        label = RightAlignedLabel(_('Category Name:'))
+        grid.attach(label, 0, 0)
 
-        entry = Gtk.Entry()
-        table.attach_defaults(entry, 1, 2, 0, 1)
+        entry = Gtk.Entry(hexpand=True)
+        grid.attach(entry, 1, 0)
         widgets['name'] = entry
 
-        label = LeftAlignedLabel(_('Default directory:'))
-        table.attach_defaults(label, 0, 1, 1, 2)
+        label = RightAlignedLabel(_('Default directory:'))
+        grid.attach(label, 0, 1)
 
         entry = FileChooserEntry(_('Select default directory'), parent,
-                                 Gtk.FileChooserAction.SELECT_FOLDER)
-        table.attach_defaults(entry, 1, 2, 1, 2)
+                                 Gtk.FileChooserAction.SELECT_FOLDER,
+                                 hexpand=True
+                                )
+        grid.attach(entry, 1, 1)
         widgets['directory'] = entry
 
         self.add_button(Gtk.STOCK_OK, Gtk.ResponseType.OK)
@@ -80,42 +82,42 @@ class PoolBar(Gtk.InfoBar):
         widgets = {}
         content_area = self.get_content_area()
 
-        table = Gtk.Table(5, 2, False, row_spacing=5, column_spacing=5)
-        content_area.pack_start(table, True, True, 0)
+        grid = Grid()
+        content_area.pack_start(grid, True, True, 0)
 
-        label = LeftAlignedLabel(_('Server Name:'))
-        table.attach_defaults(label, 0, 1, 0, 1)
+        label = RightAlignedLabel(_('Server Name:'))
+        grid.attach(label, 0, 0)
 
-        entry = Gtk.Entry()
-        table.attach_defaults(entry, 1, 2, 0, 1)
+        entry = Gtk.Entry(hexpand=True)
+        grid.attach(entry, 1, 0)
         widgets['name'] = entry
 
-        label = LeftAlignedLabel(_('IP Address:'))
-        table.attach_defaults(label, 0, 1, 1, 2)
+        label = RightAlignedLabel(_('IP Address:'))
+        grid.attach(label, 0, 1)
 
-        entry = Gtk.Entry()
-        table.attach_defaults(entry, 1, 2, 1, 2)
+        entry = Gtk.Entry(hexpand=True)
+        grid.attach(entry, 1, 1)
         widgets['host'] = entry
 
-        label = LeftAlignedLabel(_('Port:'))
-        table.attach_defaults(label, 0, 1, 2, 3)
+        label = RightAlignedLabel(_('Port:'))
+        grid.attach(label, 0, 2)
 
-        entry = Gtk.Entry()
-        table.attach_defaults(entry, 1, 2, 2, 3)
+        entry = Gtk.Entry(hexpand=True)
+        grid.attach(entry, 1, 2)
         widgets['port'] = entry
 
-        label = LeftAlignedLabel(_('User:'))
-        table.attach_defaults(label, 0, 1, 3, 4)
+        label = RightAlignedLabel(_('User:'))
+        grid.attach(label, 0, 3)
 
-        entry = Gtk.Entry()
-        table.attach_defaults(entry, 1, 2, 3, 4)
+        entry = Gtk.Entry(hexpand=True)
+        grid.attach(entry, 1, 3)
         widgets['user'] = entry
 
-        label = LeftAlignedLabel(_('Password:'))
-        table.attach_defaults(label, 0, 1, 4, 5)
+        label = RightAlignedLabel(_('Password:'))
+        grid.attach(label, 0, 4)
 
-        entry = Gtk.Entry()
-        table.attach_defaults(entry, 1, 2, 4, 5)
+        entry = Gtk.Entry(hexpand=True)
+        grid.attach(entry, 1, 4)
         widgets['passwd'] = entry
 
         self.add_button(Gtk.STOCK_OK, Gtk.ResponseType.OK)

@@ -29,7 +29,8 @@ from gi.repository import Gtk, GObject
 
 HORIZONTAL, VERTICAL = Gtk.Orientation.HORIZONTAL, Gtk.Orientation.VERTICAL
 
-LeftAlignedLabel = functools.partial(Gtk.Label, xalign=0)
+LeftAlignedLabel = functools.partial(Gtk.Label, xalign=0, hexpand=True)
+RightAlignedLabel = functools.partial(Gtk.Label, xalign=1, hexpand=True)
 
 class Box(Gtk.Box):
     """Simplified Gtk.Box."""
@@ -42,11 +43,21 @@ class Box(Gtk.Box):
         self.pack_end = functools.partial(self.pack_end,
                                           expand=True, fill=True, padding=0)
 
+class Grid(Gtk.Grid):
+    """Simplified Gtk.Grid."""
+    def __init__(self, row_spacing=5, column_spacing=5, *args, **kwargs):
+        Gtk.Grid.__init__(self, column_spacing=column_spacing,
+                          row_spacing=row_spacing, *args, **kwargs)
+
+    def attach(self, widget, left, top, width=1, height=1, *args, **kwargs):
+        Gtk.Grid.attach(self, widget, left, top, width, height, *args, **kwargs)
+
 class AlignedExpander(Gtk.Expander):
     """A L{Gtk.Expander} with an alignment that can place its children nicely."""
-    def __init__(self, label='', expanded=True):
+    def __init__(self, label='', expanded=True, *args, **kwargs):
         Gtk.Expander.__init__(self, label=label, use_markup=True,
-                              resize_toplevel=True, expanded=expanded)
+                              resize_toplevel=True, expanded=expanded,
+                              *args, **kwargs)
 
         alignment = Gtk.Alignment()
         alignment.set_padding(0, 0, 12, 5)
@@ -58,13 +69,16 @@ class AlignedExpander(Gtk.Expander):
 
 class URIsView(Gtk.ScrolledWindow):
     """ScrolledWindow with a text view for getting/setting URIs."""
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         Gtk.ScrolledWindow.__init__(
             self, None, None, shadow_type=Gtk.ShadowType.IN,
             hscrollbar_policy=Gtk.PolicyType.NEVER,
             vscrollbar_policy=Gtk.PolicyType.AUTOMATIC)
 
-        text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
+        text_view = Gtk.TextView(accepts_tab=False,
+                                 wrap_mode=Gtk.WrapMode.CHAR,
+                                 *args, **kwargs
+                                )
         self.add(text_view)
         self.text_view = text_view
 

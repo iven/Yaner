@@ -21,6 +21,29 @@
 #
 
 """
-This module contains the global constants of L{yaner.ui}.
+This module contains classes and constants related to database.
 """
+
+from gi.repository.GObject import GObjectMeta
+
+from sqlalchemy import Column, Integer
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import DeclarativeMeta, declared_attr
+
+class DeclarativeGObjectMeta(DeclarativeMeta, GObjectMeta):
+    """Metaclass for Declarative and GObject subclasses."""
+    pass
+
+class _SQLBase(object):
+    """Base class for all SQLAlchemy classes."""
+
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
+
+    id = Column(Integer, primary_key=True)
+
+SQLSession = scoped_session(sessionmaker())
+SQLBase = declarative_base(cls=_SQLBase, metaclass=DeclarativeGObjectMeta)
 
