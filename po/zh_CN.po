@@ -6,9 +6,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: yaner 0.5.2\n"
+"Project-Id-Version: yaner 0.5.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-11 19:36+0800\n"
+"POT-Creation-Date: 2012-12-03 23:25+0800\n"
 "PO-Revision-Date: 2010-08-17 15:18+0800\n"
 "Last-Translator:  <ivenvd@gmail.com>\n"
 "Language-Team: Chinese (simplified)\n"
@@ -17,224 +17,299 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. Set up columns
-#: ../yaner/ui/TaskListTree.py:147
-msgid "Tasks"
-msgstr "任务"
-
-#: ../yaner/ui/TaskListTree.py:160
-msgid "Progress"
-msgstr "进度"
-
-#: ../yaner/ui/TaskListTree.py:169
-msgid "Speed"
-msgstr "速度"
-
-#: ../yaner/ui/TaskListTree.py:177
-msgid "Connections"
-msgstr "连接"
-
-#: ../yaner/Application.py:123
+#: scripts/../yaner/Application.py:123
 msgid "My Computer"
 msgstr "我的电脑"
 
-#: ../yaner/Application.py:126
+#: scripts/../yaner/Application.py:126
 msgid "Documents"
 msgstr "文档"
 
-#: ../yaner/Application.py:129
+#: scripts/../yaner/Application.py:129
 msgid "Videos"
 msgstr "视频"
 
-#: ../yaner/Application.py:132
+#: scripts/../yaner/Application.py:132
 msgid "Music"
 msgstr "音乐"
 
-#: ../yaner/Pool.py:101
+#: scripts/../yaner/Misc.py:40
+msgid "License GPLv3+: GNU GPL version 3 or later"
+msgstr "GPLv3+ 许可：GNU 通用公共许可证第3 版或更新版本"
+
+#: scripts/../yaner/Misc.py:42
+msgid "This is free software:"
+msgstr "本软件是自由软件："
+
+#: scripts/../yaner/Misc.py:43
+msgid "You are free to change and redistribute it."
+msgstr "您可以自由修改和重新发布它。"
+
+#: scripts/../yaner/Misc.py:44
+msgid "There is NO WARRANTY, to the extent permitted by law."
+msgstr "在法律范围内没有其他保证。"
+
+#: scripts/../yaner/Pool.py:101
 msgid "My Downloads"
 msgstr "我的下载"
 
-#: ../yaner/Pool.py:110
+#: scripts/../yaner/Pool.py:110
 msgid "<Pool {}>"
 msgstr "<池 {}>"
 
-#: ../yaner/ui/PoolTree.py:234
-msgid "{} Task(s) {}"
-msgstr "{} 个任务 {}"
-
-#: ../yaner/Presentable.py:136
+#: scripts/../yaner/Presentable.py:136
 msgid "<Category {}>"
 msgstr "<分类 {}>"
 
-#: ../yaner/Presentable.py:172
+#: scripts/../yaner/Presentable.py:172
 msgid "Dustbin"
 msgstr "回收站"
 
-#: ../yaner/ui/Dialogs.py:41
+#: scripts/../yaner/Task.py:108
+msgid "<Task {}>"
+msgstr "<任务 {}>"
+
+#: scripts/../yaner/Task.py:399
+msgid "Network Error"
+msgstr "网络错误"
+
+#: scripts/../yaner/ui/Dialogs.py:41
 msgid "Torrent Files"
 msgstr "种子文件"
 
-#: ../yaner/ui/Dialogs.py:42
+#: scripts/../yaner/ui/Dialogs.py:42
 msgid "Metalink Files"
 msgstr "Metalink 文件"
 
-#: ../yaner/ui/Dialogs.py:168
+#: scripts/../yaner/ui/Dialogs.py:168
 msgid "<b>URIs/Torrent/Metalink File</b>"
 msgstr "<b>地址/种子/Metalink 文件</b>"
 
-#: ../yaner/ui/Dialogs.py:173
+#: scripts/../yaner/ui/Dialogs.py:173
+msgid ""
+"Enter URIs here or select Torrent/Metalink files by clicking the icon on the "
+"right side."
+msgstr "在此输入地址或者单击右边的图标来选择种子或者 Metalink 文件。"
+
+#: scripts/../yaner/ui/Dialogs.py:175
 msgid "Select Torrent/Metalink Files"
 msgstr "选择种子/Metalink 文件"
 
-#: ../yaner/ui/Dialogs.py:199
-msgid "<b>Mirrors</b> - one or more URI(s) for <b>one</b> task"
-msgstr "<b>镜像</b> - <b>同一个</b>任务的一个或多个地址"
+#: scripts/../yaner/ui/Dialogs.py:202
+msgid "<b>URI(s)</b>"
+msgstr "<b>地址</b>"
 
-#. Rename
-#: ../yaner/ui/Dialogs.py:214
+#: scripts/../yaner/ui/Dialogs.py:207
+msgid ""
+"Specify HTTP(S)/FTP URI:\n"
+"\thttp://www.example.com/bar.iso\n"
+"\n"
+"Add some mirrors for that file:\n"
+"\thttps://www.mirror1.com/foo/bar.iso\n"
+"\tftp://www.mirror2.com/foo/bar.iso\n"
+"\n"
+"Or use Magnet URI(<b>Does not support mirrors</b>):\n"
+"\tmagnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C\n"
+msgstr ""
+"指定 HTTP(S)/FTP 地址：\n"
+"\thttp://www.example.com/bar.iso\n"
+"\n"
+"为该文件添加镜像：\n"
+"\thttps://www.mirror1.com/foo/bar.iso\n"
+"\tftp://www.mirror2.com/foo/bar.iso\n"
+"\n"
+"或者使用磁力链接（<b>磁力链接不支持镜像</b>）：\n"
+"\tmagnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C\n"
+
+#: scripts/../yaner/ui/Dialogs.py:225
+msgid "Rename the downloaded file to this name."
+msgstr "将下载的文件改为此文件名。"
+
+#: scripts/../yaner/ui/Dialogs.py:227
 msgid "Rename:"
 msgstr "重命名："
 
-#. Connections
-#: ../yaner/ui/Dialogs.py:222
+#: scripts/../yaner/ui/Dialogs.py:235
+msgid "The max connections to download the file."
+msgstr "下载此文件使用的最大连接数。"
+
+#: scripts/../yaner/ui/Dialogs.py:237
 msgid "Connections:"
 msgstr "连接数："
 
-#: ../yaner/ui/Dialogs.py:265
+#: scripts/../yaner/ui/Dialogs.py:281
 msgid "<b>Torrent File</b>"
 msgstr "<b>种子文件</b>"
 
-#: ../yaner/ui/Dialogs.py:270
+#: scripts/../yaner/ui/Dialogs.py:286
 msgid "Select torrent file"
 msgstr "选择种子文件"
 
-#: ../yaner/ui/Dialogs.py:304
+#: scripts/../yaner/ui/Dialogs.py:320
 msgid "<b>Metalink File</b>"
 msgstr "<b>Metalink 文件</b>"
 
-#: ../yaner/ui/Dialogs.py:309
+#: scripts/../yaner/ui/Dialogs.py:325
 msgid "Select metalink file"
 msgstr "选择 Metalink 文件"
 
-#: ../yaner/ui/Dialogs.py:343 ../yaner/ui/Toplevel.py:208
-msgid "New Task"
-msgstr "新任务"
+#: scripts/../yaner/ui/Dialogs.py:359
+msgid "Create New Task"
+msgstr "新建任务"
 
-#: ../yaner/ui/Dialogs.py:363
+#: scripts/../yaner/ui/Dialogs.py:379
 msgid "_Download"
 msgstr "下载(_D)"
 
-#: ../yaner/ui/Dialogs.py:370
+#: scripts/../yaner/ui/Dialogs.py:386
 msgid "_Reset Settings"
 msgstr "重置设置(_R)"
 
-#: ../yaner/ui/Dialogs.py:376
+#: scripts/../yaner/ui/Dialogs.py:392
 msgid "_Save Settings"
 msgstr "保存设置(_S)"
 
-#. # Save to
-#: ../yaner/ui/Dialogs.py:389
+#: scripts/../yaner/ui/Dialogs.py:405
 msgid "<b>Save to...</b>"
 msgstr "<b>保存到……</b>"
 
-#. Directory
-#: ../yaner/ui/Dialogs.py:398
+#: scripts/../yaner/ui/Dialogs.py:414
+msgid "Select the directory to save files"
+msgstr "选择文件保存目录"
+
+#: scripts/../yaner/ui/Dialogs.py:415
 msgid "Select download directory"
 msgstr "选择下载目录"
 
-#. # Advanced
-#: ../yaner/ui/Dialogs.py:414
+#: scripts/../yaner/ui/Dialogs.py:432
 msgid "<b>Advanced</b>"
 msgstr "<b>高级</b>"
 
-#. # Normal Task Page
-#: ../yaner/ui/Dialogs.py:426
+#: scripts/../yaner/ui/Dialogs.py:444
 msgid "Normal Task"
 msgstr "普通任务"
 
-#. Speed Limit
-#: ../yaner/ui/Dialogs.py:434
-msgid "Upload Limit(KiB/s):"
-msgstr "上传限制(KiB/s)："
+#: scripts/../yaner/ui/Dialogs.py:452
+msgid "Upload speed limit, in KiB/s."
+msgstr "上传速度限制(KiB/s)："
 
-#: ../yaner/ui/Dialogs.py:443
-msgid "Download Limit(KiB/s):"
-msgstr "下载限制(KiB/s)："
+#: scripts/../yaner/ui/Dialogs.py:454
+msgid "Upload Limit:"
+msgstr "上传限制："
 
-#. Retry
-#: ../yaner/ui/Dialogs.py:453
+#: scripts/../yaner/ui/Dialogs.py:464
+msgid "Download speed limit, in KiB/s."
+msgstr "下载速度限制(KiB/s)："
+
+#: scripts/../yaner/ui/Dialogs.py:466
+msgid "Download Limit:"
+msgstr "下载限制："
+
+#: scripts/../yaner/ui/Dialogs.py:477
+msgid "Number of retries."
+msgstr "重试次数。"
+
+#: scripts/../yaner/ui/Dialogs.py:479
 msgid "Max Retries:"
 msgstr "最多重试数："
 
-#: ../yaner/ui/Dialogs.py:462
-msgid "Retry Interval(sec):"
-msgstr "重试间隔（秒)："
+#: scripts/../yaner/ui/Dialogs.py:489
+msgid "Time to wait before retries, in seconds."
+msgstr "重试前等待时间（秒）。"
 
-#. Timeout
-#: ../yaner/ui/Dialogs.py:472 ../yaner/ui/Dialogs.py:574
-msgid "Timeout(sec):"
-msgstr "超时（秒）："
+#: scripts/../yaner/ui/Dialogs.py:491
+msgid "Retry Interval:"
+msgstr "重试间隔："
 
-#: ../yaner/ui/Dialogs.py:481 ../yaner/ui/Dialogs.py:583
-msgid "Connect Timeout(sec):"
-msgstr "连接超时（秒）："
+#: scripts/../yaner/ui/Dialogs.py:502 scripts/../yaner/ui/Dialogs.py:619
+msgid "Download timeout, in seconds."
+msgstr "下载超时（秒）。"
 
-#. Split and Connections
-#: ../yaner/ui/Dialogs.py:491
-msgid "Split Size(MiB):"
-msgstr "分块大小(MiB)："
+#: scripts/../yaner/ui/Dialogs.py:504 scripts/../yaner/ui/Dialogs.py:621
+msgid "Timeout:"
+msgstr "超时："
 
-#: ../yaner/ui/Dialogs.py:500
+#: scripts/../yaner/ui/Dialogs.py:514
+msgid "Timeout to connect HTTP/FTP/proxy server, in seconds."
+msgstr "连接 HTTP/FTP/代理服务器的超时时间（秒）。"
+
+#: scripts/../yaner/ui/Dialogs.py:516 scripts/../yaner/ui/Dialogs.py:633
+msgid "Connect Timeout:"
+msgstr "连接超时："
+
+#: scripts/../yaner/ui/Dialogs.py:527
+msgid "Minimal size to split the file into pieces, in MiB."
+msgstr "文件的最小分块大小（MiB）。"
+
+#: scripts/../yaner/ui/Dialogs.py:529
+msgid "Split Size:"
+msgstr "分块大小："
+
+#: scripts/../yaner/ui/Dialogs.py:539
+msgid "Max connections per server."
+msgstr "每服务器最多连接数。"
+
+#: scripts/../yaner/ui/Dialogs.py:540
 msgid "Per Server Connections:"
 msgstr "每服务器连接数："
 
-#. Referer
-#: ../yaner/ui/Dialogs.py:510
+#: scripts/../yaner/ui/Dialogs.py:551
+msgid "The referrer page of the download."
+msgstr "下载的引用页"
+
+#: scripts/../yaner/ui/Dialogs.py:552
 msgid "Referer:"
 msgstr "引用页："
 
-#. Header
-#: ../yaner/ui/Dialogs.py:519
+#: scripts/../yaner/ui/Dialogs.py:561
 msgid "HTTP Header:"
 msgstr "HTTP 报头："
 
-#. # BT Task Page
-#: ../yaner/ui/Dialogs.py:528
+#: scripts/../yaner/ui/Dialogs.py:570
 msgid "BitTorrent"
 msgstr ""
 
-#. Limit
-#: ../yaner/ui/Dialogs.py:536
+#: scripts/../yaner/ui/Dialogs.py:578
 msgid "Max open files:"
 msgstr "最多打开文件数："
 
-#: ../yaner/ui/Dialogs.py:545
+#: scripts/../yaner/ui/Dialogs.py:587
 msgid "Max peers:"
 msgstr "最多 Peer 数："
 
-#. Seed
-#: ../yaner/ui/Dialogs.py:555
-msgid "Seed time(min):"
-msgstr "做种时间（分）："
+#: scripts/../yaner/ui/Dialogs.py:597
+msgid "Seed time, in minutes"
+msgstr "做种时间（分）。"
 
-#: ../yaner/ui/Dialogs.py:564
+#: scripts/../yaner/ui/Dialogs.py:599
+msgid "Seed time:"
+msgstr "做种时间："
+
+#: scripts/../yaner/ui/Dialogs.py:609
 msgid "Seed ratio:"
 msgstr "做种比例："
 
-#: ../yaner/ui/Dialogs.py:592
-msgid "Try to download first and last pieces first"
-msgstr "试图优先下载文件最前一段和最后一段"
+#: scripts/../yaner/ui/Dialogs.py:631
+msgid "Timeout to establish connection to trackers, in seconds."
+msgstr "建立到 Tracker 服务器的连接超时时间（秒）。"
 
-#: ../yaner/ui/Dialogs.py:599
-msgid "Convert downloaded torrent files to BitTorrent tasks"
-msgstr "将下载的种子文件转换为 BitTorrent 任务"
+#: scripts/../yaner/ui/Dialogs.py:643
+msgid "Try to download first and last pieces first."
+msgstr "试图优先下载文件最前一段和最后一段。"
 
-#. Mirrors
-#: ../yaner/ui/Dialogs.py:607
-msgid "Mirrors"
-msgstr "镜像"
+#: scripts/../yaner/ui/Dialogs.py:644
+msgid "Preview Mode:"
+msgstr "预览模式："
 
-#: ../yaner/ui/Dialogs.py:609
+#: scripts/../yaner/ui/Dialogs.py:651
+msgid "Convert downloaded torrent files to BitTorrent tasks."
+msgstr "将下载的种子文件转换为 BitTorrent 任务。"
+
+#: scripts/../yaner/ui/Dialogs.py:652
+msgid "Follow Torrent:"
+msgstr "跟踪种子："
+
+#: scripts/../yaner/ui/Dialogs.py:660
 msgid ""
 "For single file torrents, a mirror can be a complete URI pointing to the "
 "resource or if the mirror ends with /, name in torrent file is added. For "
@@ -245,161 +320,226 @@ msgstr ""
 "动追加其后。对于多文件种子，种子中每个文件的文件名和路径都会自动追加在给定地"
 "址之后。"
 
-#. # Metalink Page
-#: ../yaner/ui/Dialogs.py:627
+#: scripts/../yaner/ui/Dialogs.py:665
+msgid "Mirrors"
+msgstr "镜像"
+
+#: scripts/../yaner/ui/Dialogs.py:677
 msgid "Metalink"
 msgstr ""
 
-#: ../yaner/ui/Dialogs.py:634
-msgid "Download Servers:"
-msgstr "下载服务器数："
-
-#: ../yaner/ui/Dialogs.py:643
+#: scripts/../yaner/ui/Dialogs.py:684
 msgid "Preferred locations:"
 msgstr "优先选择地点："
 
-#: ../yaner/ui/Dialogs.py:651
+#: scripts/../yaner/ui/Dialogs.py:692
 msgid "Language:"
 msgstr "语言："
 
-#: ../yaner/ui/Dialogs.py:659
+#: scripts/../yaner/ui/Dialogs.py:700
 msgid "Version:"
 msgstr "版本："
 
-#: ../yaner/ui/Dialogs.py:667
+#: scripts/../yaner/ui/Dialogs.py:708
 msgid "OS:"
 msgstr "操作系统："
 
-#: ../yaner/ui/Dialogs.py:678
-msgid "Convert downloaded metalink files to Metalink tasks"
-msgstr "将下载的 Metalink 文件转换为 Metalink 任务"
+#: scripts/../yaner/ui/Dialogs.py:716
+msgid "Convert downloaded metalink files to Metalink tasks."
+msgstr "将下载的 Metalink 文件转换为 Metalink 任务。"
 
-#. # Miscellaneous Page
-#: ../yaner/ui/Dialogs.py:687
+#: scripts/../yaner/ui/Dialogs.py:718
+msgid "Follow Metalink:"
+msgstr "跟踪 Metalink"
+
+#: scripts/../yaner/ui/Dialogs.py:727
 msgid "Miscellaneous"
 msgstr "杂项"
 
-#. Overwrite and Rename
-#: ../yaner/ui/Dialogs.py:695
+#: scripts/../yaner/ui/Dialogs.py:735
+msgid ""
+"Restart download from scratch if the corresponding control file doesn't "
+"exist."
+msgstr "对应的下载控制文件不存在时重头开始下载任务。"
+
+#: scripts/../yaner/ui/Dialogs.py:738
 msgid "Allow Overwrite:"
 msgstr "允许覆盖："
 
-#: ../yaner/ui/Dialogs.py:703
+#: scripts/../yaner/ui/Dialogs.py:746
+msgid "Rename file name if the same file already exists."
+msgstr "当文件已经存在时覆盖文件。"
+
+#: scripts/../yaner/ui/Dialogs.py:748
 msgid "Auto Rename Files:"
 msgstr "自动重命名文件："
 
-#: ../yaner/ui/Dialogs.py:711
-msgid "Proxy:"
-msgstr "代理服务器："
-
-#: ../yaner/ui/Dialogs.py:715
+#: scripts/../yaner/ui/Dialogs.py:756
 msgid "Format: [http://][USER:PASSWORD@]HOST[:PORT]"
 msgstr "格式：[http://][用户名:密码@]主机[:端口]"
 
-#. Authorization
-#: ../yaner/ui/Dialogs.py:721
+#: scripts/../yaner/ui/Dialogs.py:757
+msgid "Proxy:"
+msgstr "代理服务器："
+
+#: scripts/../yaner/ui/Dialogs.py:767
 msgid "Authorization"
 msgstr "身份验证"
 
-#: ../yaner/ui/Dialogs.py:728
+#: scripts/../yaner/ui/Dialogs.py:774
 msgid "HTTP User:"
 msgstr "HTTP 用户："
 
-#: ../yaner/ui/Dialogs.py:736 ../yaner/ui/Dialogs.py:752
-msgid "Password"
-msgstr "密码"
+#: scripts/../yaner/ui/Dialogs.py:782 scripts/../yaner/ui/Dialogs.py:798
+#: scripts/../yaner/ui/InfoBars.py:116
+msgid "Password:"
+msgstr "密码："
 
-#: ../yaner/ui/Dialogs.py:744
+#: scripts/../yaner/ui/Dialogs.py:790
 msgid "FTP User:"
 msgstr "FTP 用户："
 
-#: ../yaner/ui/Dialogs.py:909
+#: scripts/../yaner/ui/Dialogs.py:955
 msgid "Preferences"
 msgstr "首选项"
 
-#. # General Page
-#: ../yaner/ui/Dialogs.py:923
+#: scripts/../yaner/ui/Dialogs.py:969
 msgid "General"
 msgstr "常规"
 
-#. # Download Page
-#: ../yaner/ui/Dialogs.py:928
+#: scripts/../yaner/ui/Dialogs.py:974
 msgid "Download"
 msgstr "下载"
 
-#: ../yaner/ui/Dialogs.py:935
+#: scripts/../yaner/ui/Dialogs.py:981
 msgid "Max Concurrent Tasks:"
 msgstr "最大并行任务数："
 
-#: ../yaner/ui/Dialogs.py:944
+#: scripts/../yaner/ui/Dialogs.py:990
 msgid "Global Upload Limit(KiB/s):"
 msgstr "全局上传限制(KiB/s)："
 
-#: ../yaner/ui/Dialogs.py:953
+#: scripts/../yaner/ui/Dialogs.py:999
 msgid "Global Download Limit(KiB/s):"
 msgstr "全局下载限制(KiB/s)："
 
-#: ../yaner/ui/Toplevel.py:210
-msgid "Start"
-msgstr "开始"
+#: scripts/../yaner/ui/InfoBars.py:42
+msgid "Category Name:"
+msgstr "分类名称："
 
-#: ../yaner/ui/Toplevel.py:212
-msgid "Pause"
-msgstr "暂停"
+#: scripts/../yaner/ui/InfoBars.py:49
+msgid "Default directory:"
+msgstr "下载目录："
 
-#: ../yaner/ui/Toplevel.py:214
-msgid "Start All"
-msgstr "全部开始"
+#: scripts/../yaner/ui/InfoBars.py:52
+msgid "Select default directory"
+msgstr "选择默认目录"
 
-#: ../yaner/ui/Toplevel.py:216
-msgid "Pause All"
-msgstr "全部暂停"
+#: scripts/../yaner/ui/InfoBars.py:88
+msgid "Server Name:"
+msgstr "服务器名称："
 
-#: ../yaner/ui/Toplevel.py:223
-msgid "Add Category"
-msgstr "添加分类"
+#: scripts/../yaner/ui/InfoBars.py:95
+msgid "IP Address:"
+msgstr "IP 地址："
 
-#: ../yaner/ui/Toplevel.py:225
-msgid "Edit Category"
-msgstr "编辑分类"
+#: scripts/../yaner/ui/InfoBars.py:102
+msgid "Port:"
+msgstr "端口："
 
-#: ../yaner/ui/Toplevel.py:227
-msgid "Remove Category"
-msgstr "删除分类"
+#: scripts/../yaner/ui/InfoBars.py:109
+msgid "User:"
+msgstr "用户："
 
-#: ../yaner/ui/Toplevel.py:229
-msgid "Add Server"
-msgstr "添加服务器"
+#: scripts/../yaner/ui/Misc.py:55
+msgid "@widget is not a Gtk.Widget."
+msgstr "@widget 并非 gtk.Widget。"
 
-#: ../yaner/ui/Toplevel.py:231
-msgid "Edit Server"
-msgstr "编辑服务器"
+#: scripts/../yaner/ui/PoolTree.py:234
+msgid "{} Task(s) {}"
+msgstr "{} 个任务 {}"
 
-#: ../yaner/ui/Toplevel.py:233
-msgid "Remove Server"
-msgstr "删除服务器"
+#: scripts/../yaner/ui/TaskListTree.py:147
+msgid "Tasks"
+msgstr "任务"
 
-#: ../yaner/ui/Toplevel.py:235
-msgid "Empty Dustbin"
-msgstr "清空回收站"
+#: scripts/../yaner/ui/TaskListTree.py:160
+msgid "Progress"
+msgstr "进度"
 
-#: ../yaner/ui/Toplevel.py:238
-msgid "Show / Hide"
-msgstr "显示/隐藏"
+#: scripts/../yaner/ui/TaskListTree.py:169
+msgid "Speed"
+msgstr "速度"
 
-#: ../yaner/ui/Toplevel.py:296 ../data/yaner.desktop.in.h:1
+#: scripts/../yaner/ui/TaskListTree.py:177
+msgid "Connections"
+msgstr "连接"
+
+#: scripts/../yaner/ui/Toplevel.py:67 scripts/../yaner/ui/Toplevel.py:296
 msgid "Yaner"
 msgstr "掩耳"
 
-#: ../yaner/ui/Toplevel.py:490
+#: scripts/../yaner/ui/Toplevel.py:208
+msgid "New Task"
+msgstr "新任务"
+
+#: scripts/../yaner/ui/Toplevel.py:210
+msgid "Start"
+msgstr "开始"
+
+#: scripts/../yaner/ui/Toplevel.py:212
+msgid "Pause"
+msgstr "暂停"
+
+#: scripts/../yaner/ui/Toplevel.py:214
+msgid "Start All"
+msgstr "全部开始"
+
+#: scripts/../yaner/ui/Toplevel.py:216
+msgid "Pause All"
+msgstr "全部暂停"
+
+#: scripts/../yaner/ui/Toplevel.py:223
+msgid "Add Category"
+msgstr "添加分类"
+
+#: scripts/../yaner/ui/Toplevel.py:225
+msgid "Edit Category"
+msgstr "编辑分类"
+
+#: scripts/../yaner/ui/Toplevel.py:227
+msgid "Remove Category"
+msgstr "删除分类"
+
+#: scripts/../yaner/ui/Toplevel.py:229
+msgid "Add Server"
+msgstr "添加服务器"
+
+#: scripts/../yaner/ui/Toplevel.py:231
+msgid "Edit Server"
+msgstr "编辑服务器"
+
+#: scripts/../yaner/ui/Toplevel.py:233
+msgid "Remove Server"
+msgstr "删除服务器"
+
+#: scripts/../yaner/ui/Toplevel.py:235
+msgid "Empty Dustbin"
+msgstr "清空回收站"
+
+#: scripts/../yaner/ui/Toplevel.py:238
+msgid "Show / Hide"
+msgstr "显示/隐藏"
+
+#: scripts/../yaner/ui/Toplevel.py:490
 msgid "Are you sure to remove these tasks?"
 msgstr "确定删除这些任务？"
 
-#: ../yaner/ui/Toplevel.py:549
+#: scripts/../yaner/ui/Toplevel.py:549
 msgid "The default category should not be removed."
 msgstr "默认分类不能被删除。"
 
-#: ../yaner/ui/Toplevel.py:556
+#: scripts/../yaner/ui/Toplevel.py:556
 msgid ""
 "Are you sure to remove the category \"{}\"?\n"
 "All tasks in the category will be moved to the default category."
@@ -407,16 +547,16 @@ msgstr ""
 "确定删除分类“{}”?\n"
 "该分类中全部任务将被移动到默认分类。"
 
-#: ../yaner/ui/Toplevel.py:586 ../yaner/ui/Toplevel.py:589
-#: ../yaner/ui/Toplevel.py:660
+#: scripts/../yaner/ui/Toplevel.py:586 scripts/../yaner/ui/Toplevel.py:589
+#: scripts/../yaner/ui/Toplevel.py:660
 msgid "Required"
 msgstr "必需"
 
-#: ../yaner/ui/Toplevel.py:621
+#: scripts/../yaner/ui/Toplevel.py:621
 msgid "The local server should not be removed."
 msgstr "本地服务器不能被删除。"
 
-#: ../yaner/ui/Toplevel.py:628
+#: scripts/../yaner/ui/Toplevel.py:628
 msgid ""
 "Are you sure to remove the server \"{}\"?\n"
 "All tasks in the server will be <b>removed!</b>"
@@ -424,93 +564,35 @@ msgstr ""
 "确定删除服务器“{}”？\n"
 "服务器中全部任务<b>删除</b>。"
 
-#: ../data/yaner.desktop.in.h:2
-msgid "Download Manager"
-msgstr "下载管理器"
+#~ msgid "<b>Mirrors</b> - one or more URI(s) for <b>one</b> task"
+#~ msgstr "<b>镜像</b> - <b>同一个</b>任务的一个或多个地址"
 
-#: ../data/yaner.desktop.in.h:3
-msgid "Powerful download manager with an easy-to-use interface"
-msgstr "拥有易用界面的强大下载管理器"
+#~ msgid "Download Servers:"
+#~ msgstr "下载服务器数："
 
-#: ../yaner/Misc.py:40
-msgid "License GPLv3+: GNU GPL version 3 or later"
-msgstr "GPLv3+ 许可：GNU 通用公共许可证第3 版或更新版本"
+#~ msgid "Password"
+#~ msgstr "密码"
 
-#: ../yaner/Misc.py:42
-msgid "This is free software:"
-msgstr "本软件是自由软件："
+#~ msgid "Download Manager"
+#~ msgstr "下载管理器"
 
-#: ../yaner/Misc.py:43
-msgid "You are free to change and redistribute it."
-msgstr "您可以自由修改和重新发布它。"
+#~ msgid "Powerful download manager with an easy-to-use interface"
+#~ msgstr "拥有易用界面的强大下载管理器"
 
-#: ../yaner/Misc.py:44
-msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr "在法律范围内没有其他保证。"
+#~ msgid "{0} download mananger."
+#~ msgstr "{0} 下载管理器"
 
-#: ../yaner/ui/InfoBars.py:42
-msgid "Category Name:"
-msgstr "分类名称："
+#~ msgid "filename to save"
+#~ msgstr "保存的文件名"
 
-#: ../yaner/ui/InfoBars.py:49
-msgid "Default directory:"
-msgstr "下载目录："
+#~ msgid "cookies of the website"
+#~ msgstr "网站的 Cookies"
 
-#: ../yaner/ui/InfoBars.py:52
-msgid "Select default directory"
-msgstr "选择默认目录"
+#~ msgid "the download addresses"
+#~ msgstr "下载的地址"
 
-#: ../yaner/ui/InfoBars.py:86
-msgid "Server Name:"
-msgstr "服务器名称："
-
-#: ../yaner/ui/InfoBars.py:93
-msgid "IP Address:"
-msgstr "IP 地址："
-
-#: ../yaner/ui/InfoBars.py:100
-msgid "Port:"
-msgstr "端口："
-
-#: ../yaner/ui/InfoBars.py:107
-msgid "User:"
-msgstr "用户："
-
-#: ../yaner/ui/InfoBars.py:114
-msgid "Password:"
-msgstr "密码："
-
-#: ../bin/yaner.py:49
-msgid "{0} download mananger."
-msgstr "{0} 下载管理器"
-
-#: ../bin/yaner.py:51
-msgid "filename to save"
-msgstr "保存的文件名"
-
-#: ../bin/yaner.py:53
-msgid "referer page of the link"
-msgstr "链接的引用页"
-
-#: ../bin/yaner.py:55
-msgid "cookies of the website"
-msgstr "网站的 Cookies"
-
-#: ../bin/yaner.py:57
-msgid "the download addresses"
-msgstr "下载的地址"
-
-#: ../bin/yaner.py:59
-msgid "output version information and exit"
-msgstr "输出版本信息并退出"
-
-#: ../yaner/Task.py:108
-msgid "<Task {}>"
-msgstr "<任务 {}>"
-
-#: ../yaner/Task.py:399
-msgid "Network Error"
-msgstr "网络错误"
+#~ msgid "output version information and exit"
+#~ msgstr "输出版本信息并退出"
 
 #~ msgid ""
 #~ "It seems it's the first time you run Yaner. Yaner requires a daemon to "
@@ -533,9 +615,6 @@ msgstr "网络错误"
 
 #~ msgid "Logging system initialized, start logging..."
 #~ msgstr "日志系统初始化完毕，开始记录……"
-
-#~ msgid "Connecting to global database file..."
-#~ msgstr "全局数据库文件连接中……"
 
 #~ msgid "Initializing database for first start..."
 #~ msgstr "为首次启动初始化数据库中……"
@@ -587,12 +666,6 @@ msgstr "网络错误"
 
 #~ msgid "Running new task dialog..."
 #~ msgstr "运行新任务对话框……"
-
-#~ msgid "Preview mode"
-#~ msgstr "预览模式"
-
-#~ msgid "@widget is not a Gtk.Widget."
-#~ msgstr "@widget 并非 gtk.Widget。"
 
 #~ msgid "Adding {}..."
 #~ msgstr "添加 {} 中……"
