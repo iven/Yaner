@@ -221,11 +221,11 @@ class PoolView(Gtk.TreeView):
         # Get current state of the iter
         if self.selection.iter_is_selected(iter_):
             if self.has_focus():
-                state = Gtk.StateType.SELECTED
+                state = Gtk.StateFlags.SELECTED
             else:
-                state = Gtk.StateType.ACTIVE
+                state = Gtk.StateFlags.ACTIVE
         else:
-            state = Gtk.StateType.NORMAL
+            state = Gtk.StateFlags.NORMAL
         # Get the color for the description
         color = get_mix_color(self, state)
 

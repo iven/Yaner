@@ -56,12 +56,11 @@ def get_mix_color(widget, state):
         return 'gray'
 
     color = {}
-    style = widget.get_style()
+    style = widget.get_style_context()
     for component in ('red', 'green', 'blue'):
-        color[component] = int(
-                getattr(style.text[state], component) * 0.7 +
-                getattr(style.base[state], component) * 0.3
-                )
+        foreground = getattr(style.get_color(state), component) * 255
+        background = getattr(style.get_background_color(state), component) * 255
+        color[component] = int(foreground * .7 + background * .3)
     color = '#{red:02X}{green:02X}{blue:02X}'.format(**color)
     #_logger.debug(_("Got mix color: {0}.").format(color))
 
