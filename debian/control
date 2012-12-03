@@ -1,0 +1,27 @@
+Source: yaner
+Section: web
+Priority: extra
+Maintainer: Iven Hsu <ivenvd@gmail.com>
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 7), cmake, libx11-dev, libqt4-dev, libqt4-gui ( >= 4.6 ), libqt4-network ( >= 4.6 ), libqt4-xml ( >= 4.6 ), libqt4-svg ( >= 4.6 )
+Homepage: http://www.kissuki.com/Yaner
+Vcs-Git: https://github.com/iven/Yaner.git
+Vcs-Browser: https://github.com/iven/Yaner
+
+Package: yaner
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libqt4-gui, libqt4-network, libqt4-xml, libqt4-svg
+Description: GUI Download Manager
+ Yaner is a powerful download manager with an easy-to-use interface.
+ It provides the following features:
+  * Multi-protocol support(HTTP/HTTPS/FTP/BitTorrent/Metalink).
+  * Multi-threaded and multi-server downloading.
+  * Controlling your downloads remotely.
+  * BitTorrent magnet links support.
+  * Download resuming.
+  * Connection to HTTP(s)/FTP servers which require passwords.
+  * Proxy support for HTTP(s)/FTP servers.
+  * Firefox integration through FlashGot.
+  * Command line support.
+  * A smart and handsome author.
+
