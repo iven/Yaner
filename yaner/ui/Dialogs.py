@@ -33,7 +33,7 @@ from gi.repository.Gio import SettingsBindFlags as BindFlags
 from yaner.Task import Task
 from yaner.ui.Widgets import RightAlignedLabel, AlignedExpander
 from yaner.ui.Widgets import MetafileChooserButton, FileChooserEntry, URIsView
-from yaner.ui.Widgets import HORIZONTAL, VERTICAL, Box
+from yaner.ui.Widgets import HORIZONTAL, VERTICAL, Box, Grid
 from yaner.ui.PoolTree import PoolModel
 from yaner.ui.CategoryComboBox import CategoryFilterModel, CategoryComboBox
 from yaner.utils.Logging import LoggingMixin
@@ -445,32 +445,31 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(5, 4, False, row_spacing=5, column_spacing=5,
-                          halign=Gtk.Align.CENTER)
-        vbox.pack_start(table, expand=False)
+        grid = Grid()
+        vbox.pack_start(grid, expand=False)
 
         # Speed Limit
         tooltip = _('Upload speed limit, in KiB/s.')
 
         label = RightAlignedLabel(_('Upload Limit:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 0, 1)
+        grid.attach(label, 0, 0)
 
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 1, 2, 0, 1)
+        grid.attach(spin_button, 1, 0)
         self._task_options['max-upload-limit'] = _Option(spin_button, 'value',
                                                          _Option.kib_mapper)
 
         tooltip = _('Download speed limit, in KiB/s.')
 
         label = RightAlignedLabel(_('Download Limit:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 2, 3, 0, 1)
+        grid.attach(label, 2, 0)
 
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=10)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 3, 4, 0, 1)
+        grid.attach(spin_button, 3, 0)
         self._task_options['max-download-limit'] = _Option(spin_button, 'value',
                                                            _Option.kib_mapper)
 
@@ -478,24 +477,24 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         tooltip = _('Number of retries.')
 
         label = RightAlignedLabel(_('Max Retries:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 1, 2)
+        grid.attach(label, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 1, 2, 1, 2)
+        grid.attach(spin_button, 1, 1)
         self._task_options['max-tries'] = _Option(spin_button, 'value',
                                                   _Option.int_mapper)
 
         tooltip = _('Time to wait before retries, in seconds.')
 
         label = RightAlignedLabel(_('Retry Interval:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 2, 3, 1, 2)
+        grid.attach(label, 2, 1)
 
         adjustment = Gtk.Adjustment(lower=0, upper=60, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 3, 4, 1, 2)
+        grid.attach(spin_button, 3, 1)
         self._task_options['retry-wait'] = _Option(spin_button, 'value',
                                                    _Option.int_mapper)
 
@@ -503,24 +502,24 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         tooltip = _('Download timeout, in seconds.')
 
         label = RightAlignedLabel(_('Timeout:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 2, 3)
+        grid.attach(label, 0, 2)
 
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 1, 2, 2, 3)
+        grid.attach(spin_button, 1, 2)
         self._task_options['timeout'] = _Option(spin_button, 'value',
                                                 _Option.int_mapper)
 
         tooltip = _('Timeout to connect HTTP/FTP/proxy server, in seconds.')
 
         label = RightAlignedLabel(_('Connect Timeout:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 2, 3, 2, 3)
+        grid.attach(label, 2, 2)
 
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 3, 4, 2, 3)
+        grid.attach(spin_button, 3, 2)
         self._task_options['connect-timeout'] = _Option(spin_button, 'value',
                                                         _Option.int_mapper)
 
@@ -528,42 +527,42 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         tooltip = _('Minimal size to split the file into pieces, in MiB.')
 
         label = RightAlignedLabel(_('Split Size:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 3, 4)
+        grid.attach(label, 0, 3)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 1, 2, 3, 4)
+        grid.attach(spin_button, 1, 3)
         self._task_options['min-split-size'] = _Option(spin_button, 'value',
                                                        _Option.mib_mapper)
 
         tooltip = _('Max connections per server.')
         label = RightAlignedLabel(_('Per Server Connections:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 2, 3, 3, 4)
+        grid.attach(label, 2, 3)
 
         adjustment = Gtk.Adjustment(lower=1, upper=10, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 3, 4, 3, 4)
+        grid.attach(spin_button, 3, 3)
         self._task_options['max-connection-per-server'] = _Option(
             spin_button, 'value', _Option.int_mapper)
 
         # Referer
         tooltip = _('The referrer page of the download.')
         label = RightAlignedLabel(_('Referer:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 4, 5)
+        grid.attach(label, 0, 4)
 
         entry = Gtk.Entry(activates_default=True, tooltip_text=tooltip)
-        table.attach_defaults(entry, 1, 4, 4, 5)
+        grid.attach(entry, 1, 4, 3, 1)
         self._task_options['referer'] = _Option(entry, 'text',
                                                 _Option.string_mapper)
 
         # Header
         label = RightAlignedLabel(_('HTTP Header:'))
-        table.attach_defaults(label, 0, 1, 5, 6)
+        grid.attach(label, 0, 5)
 
         entry = Gtk.Entry(activates_default=True)
-        table.attach_defaults(entry, 1, 4, 5, 6)
+        grid.attach(entry, 1, 5, 3, 1)
         self._task_options['header'] = _Option(entry, 'text',
                                                _Option.string_mapper)
 
@@ -572,26 +571,25 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(4, 4, False, row_spacing=5, column_spacing=5,
-                          halign=Gtk.Align.CENTER)
-        vbox.pack_start(table, expand=False)
+        grid = Grid()
+        vbox.pack_start(grid, expand=False)
 
         # Limit
         label = RightAlignedLabel(_('Max open files:'))
-        table.attach_defaults(label, 0, 1, 0, 1)
+        grid.attach(label, 0, 0)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
-        table.attach_defaults(spin_button, 1, 2, 0, 1)
+        grid.attach(spin_button, 1, 0)
         self._task_options['bt-max-open-files'] = _Option(spin_button, 'value',
                                                           _Option.int_mapper)
 
         label = RightAlignedLabel(_('Max peers:'))
-        table.attach_defaults(label, 2, 3, 0, 1)
+        grid.attach(label, 2, 0)
 
         adjustment = Gtk.Adjustment(lower=1, upper=1024, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
-        table.attach_defaults(spin_button, 3, 4, 0, 1)
+        grid.attach(spin_button, 3, 0)
         self._task_options['bt-max-peers'] = _Option(spin_button, 'value',
                                                      _Option.int_mapper)
 
@@ -599,21 +597,21 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         tooltip = _('Seed time, in minutes')
 
         label = RightAlignedLabel(_('Seed time:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 1, 2)
+        grid.attach(label, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=0, upper=7200, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 1, 2, 1, 2)
+        grid.attach(spin_button, 1, 1)
         self._task_options['seed-time'] = _Option(spin_button, 'value',
                                                   _Option.int_mapper)
 
         label = RightAlignedLabel(_('Seed ratio:'))
-        table.attach_defaults(label, 2, 3, 1, 2)
+        grid.attach(label, 2, 1)
 
         adjustment = Gtk.Adjustment(lower=0, upper=20, step_increment=.1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True, digits=1)
-        table.attach_defaults(spin_button, 3, 4, 1, 2)
+        grid.attach(spin_button, 3, 1)
         self._task_options['seed-ratio'] = _Option(spin_button, 'value',
                                                    _Option.float_mapper)
 
@@ -621,40 +619,40 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         tooltip = _('Download timeout, in seconds.')
 
         label = RightAlignedLabel(_('Timeout:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 2, 3)
+        grid.attach(label, 0, 2)
 
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 1, 2, 2, 3)
+        grid.attach(spin_button, 1, 2)
         self._task_options['bt-tracker-timeout'] = _Option(spin_button, 'value',
                                                            _Option.int_mapper)
 
         tooltip = _('Timeout to establish connection to trackers, in seconds.')
 
         label = RightAlignedLabel(_('Connect Timeout:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 2, 3, 2, 3)
+        grid.attach(label, 2, 2)
 
         adjustment = Gtk.Adjustment(lower=1, upper=300, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True,
                                      tooltip_text=tooltip)
-        table.attach_defaults(spin_button, 3, 4, 2, 3)
+        grid.attach(spin_button, 3, 2)
         self._task_options['bt-tracker-connect-timeout'] = _Option(
             spin_button, 'value', _Option.int_mapper)
 
         tooltip = _('Try to download first and last pieces first.')
         label = RightAlignedLabel(_('Preview Mode:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 3, 4)
+        grid.attach(label, 0, 3)
         switch = Gtk.Switch(tooltip_text=tooltip)
-        table.attach_defaults(switch, 1, 2, 3, 4)
+        grid.attach(switch, 1, 3)
         self._task_options['bt-prioritize-piece'] = _Option(
             switch, 'active', _Option.prioritize_mapper)
 
         tooltip = _('Convert downloaded torrent files to BitTorrent tasks.')
         label = RightAlignedLabel(_('Follow Torrent:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 2, 3, 3, 4)
+        grid.attach(label, 2, 3)
         switch = Gtk.Switch(tooltip_text=tooltip)
-        table.attach_defaults(switch, 3, 4, 3, 4)
+        grid.attach(switch, 3, 3)
         self._task_options['follow-torrent'] = _Option(switch, 'active',
                                                        _Option.bool_mapper)
 
@@ -666,14 +664,12 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
                     'added to form a URI for each file.')
         expander = AlignedExpander(_('Mirrors'), expanded=False, tooltip_text=tooltip)
         expander.connect_after('activate', self.update_size)
-        vbox.pack_start(expander, expand=False)
-
-        vbox = Box(VERTICAL)
-        expander.add(vbox)
+        grid.attach(expander, 0, 4, 4, 1)
+        #vbox.pack_start(expander, expand=False)
 
         uris_view = URIsView()
         uris_view.set_size_request(-1, 70)
-        vbox.pack_start(uris_view)
+        expander.add(uris_view)
         self._task_options['uris'] = _Option(uris_view, 'uris',
                                              _Option.default_mapper)
 
@@ -682,49 +678,48 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(3, 4, False, row_spacing=5, column_spacing=5,
-                          halign=Gtk.Align.CENTER)
-        vbox.pack_start(table, expand=False)
+        grid = Grid(halign=Gtk.Align.CENTER)
+        vbox.pack_start(grid, expand=False)
 
         label = RightAlignedLabel(_('Preferred locations:'))
-        table.attach_defaults(label, 0, 1, 0, 1)
+        grid.attach(label, 0, 0)
 
         entry = Gtk.Entry()
-        table.attach_defaults(entry, 1, 2, 0, 1)
+        grid.attach(entry, 1, 0)
         self._task_options['metalink-location'] = _Option(entry, 'text',
                                                           _Option.string_mapper)
 
         label = RightAlignedLabel(_('Language:'))
-        table.attach_defaults(label, 2, 3, 0, 1)
+        grid.attach(label, 0, 1)
 
         entry = Gtk.Entry()
-        table.attach_defaults(entry, 3, 4, 0, 1)
+        grid.attach(entry, 1, 1)
         self._task_options['metalink-language'] = _Option(entry, 'text',
                                                           _Option.string_mapper)
 
         label = RightAlignedLabel(_('Version:'))
-        table.attach_defaults(label, 0, 1, 1, 2)
+        grid.attach(label, 0, 2)
 
         entry = Gtk.Entry()
-        table.attach_defaults(entry, 1, 2, 1, 2)
+        grid.attach(entry, 1, 2)
         self._task_options['metalink-version'] = _Option(entry, 'text',
                                                          _Option.string_mapper)
 
         label = RightAlignedLabel(_('OS:'))
-        table.attach_defaults(label, 2, 3, 1, 2)
+        grid.attach(label, 0, 3)
 
         entry = Gtk.Entry()
-        table.attach_defaults(entry, 3, 4, 1, 2)
+        grid.attach(entry, 1, 3)
         self._task_options['metalink-os'] = _Option(entry, 'text',
                                                     _Option.string_mapper)
 
         tooltip = _('Convert downloaded metalink files to Metalink tasks.')
 
         label = RightAlignedLabel(_('Follow Metalink:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 2, 3)
+        grid.attach(label, 0, 4)
 
         switch = Gtk.Switch(tooltip_text=tooltip)
-        table.attach_defaults(switch, 1, 2, 2, 3)
+        grid.attach(switch, 1, 4)
         self._task_options['follow-metalink'] = _Option(switch, 'active',
                                                         _Option.bool_mapper)
 
@@ -733,80 +728,78 @@ class TaskNewDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5,
-                          halign=Gtk.Align.CENTER)
-        vbox.pack_start(table, expand=False)
+        grid = Grid()
+        vbox.pack_start(grid, expand=False)
 
         # Overwrite and Rename
         tooltip = _("Restart download from scratch if the corresponding"
                     " control file doesn't exist.")
 
         label = RightAlignedLabel(_('Allow Overwrite:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 0, 1)
+        grid.attach(label, 0, 0)
 
         switch = Gtk.Switch(tooltip_text=tooltip)
-        table.attach_defaults(switch, 1, 2, 0, 1)
+        grid.attach(switch, 1, 0)
         self._task_options['allow-overwrite'] = _Option(switch, 'active',
                                                         _Option.bool_mapper)
 
         tooltip = _('Rename file name if the same file already exists.')
 
         label = RightAlignedLabel(_('Auto Rename Files:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 2, 3, 0, 1)
+        grid.attach(label, 2, 0)
 
         switch = Gtk.Switch(tooltip_text=tooltip)
-        table.attach_defaults(switch, 3, 4, 0, 1)
+        grid.attach(switch, 3, 0)
         self._task_options['auto-file-renaming'] = _Option(switch, 'active',
                                                            _Option.bool_mapper)
 
         tooltip = _('Format: [http://][USER:PASSWORD@]HOST[:PORT]')
         label = RightAlignedLabel(_('Proxy:'), tooltip_text=tooltip)
-        table.attach_defaults(label, 0, 1, 1, 2)
+        grid.attach(label, 0, 1)
 
         entry = Gtk.Entry(activates_default=True, tooltip_text=tooltip)
         entry.set_placeholder_text(tooltip)
-        table.attach_defaults(entry, 1, 4, 1, 2)
+        grid.attach(entry, 1, 1, 3, 1)
         self._task_options['all-proxy'] = _Option(entry, 'text',
                                                   _Option.string_mapper)
 
         # Authorization
-        expander = AlignedExpander(_('Authorization'))
+        expander = AlignedExpander(_('Authorization'), expanded=False)
         expander.connect_after('activate', self.update_size)
-        table.attach_defaults(expander, 0, 4, 2, 3)
+        vbox.pack_start(expander, expand=False)
 
-        table = Gtk.Table(2, 4, False, row_spacing=5, column_spacing=5,
-                          halign=Gtk.Align.CENTER)
-        expander.add(table)
+        grid = Grid()
+        expander.add(grid)
 
         label = RightAlignedLabel(_('HTTP User:'))
-        table.attach_defaults(label, 0, 1, 0, 1)
+        grid.attach(label, 0, 0)
 
         entry = Gtk.Entry(activates_default=True)
-        table.attach_defaults(entry, 1, 2, 0, 1)
+        grid.attach(entry, 1, 0)
         self._task_options['http-user'] = _Option(entry, 'text',
                                                   _Option.string_mapper)
 
-        label = RightAlignedLabel(_('Password'))
-        table.attach_defaults(label, 2, 3, 0, 1)
+        label = RightAlignedLabel(_('Password:'))
+        grid.attach(label, 2, 0)
 
         entry = Gtk.Entry(activates_default=True)
-        table.attach_defaults(entry, 3, 4, 0, 1)
+        grid.attach(entry, 3, 0)
         self._task_options['http-passwd'] = _Option(entry, 'text',
                                                     _Option.string_mapper)
 
         label = RightAlignedLabel(_('FTP User:'))
-        table.attach_defaults(label, 0, 1, 1, 2)
+        grid.attach(label, 0, 1)
 
         entry = Gtk.Entry(activates_default=True)
-        table.attach_defaults(entry, 1, 2, 1, 2)
+        grid.attach(entry, 1, 1)
         self._task_options['ftp-user'] = _Option(entry, 'text',
                                                  _Option.string_mapper)
 
-        label = RightAlignedLabel(_('Password'))
-        table.attach_defaults(label, 2, 3, 1, 2)
+        label = RightAlignedLabel(_('Password:'))
+        grid.attach(label, 2, 1)
 
         entry = Gtk.Entry(activates_default=True)
-        table.attach_defaults(entry, 3, 4, 1, 2)
+        grid.attach(entry, 3, 1)
         self._task_options['ftp-passwd'] = _Option(entry, 'text',
                                                    _Option.string_mapper)
 
@@ -982,34 +975,33 @@ class PreferencesDialog(Gtk.Dialog, LoggingMixin):
         vbox = Box(VERTICAL, border_width=5)
         notebook.append_page(vbox, label)
 
-        table = Gtk.Table(3, 2, False, row_spacing=5, column_spacing=5,
-                          halign=Gtk.Align.CENTER)
-        vbox.pack_start(table, expand=False)
+        grid = Grid()
+        vbox.pack_start(grid, expand=False)
 
         label = RightAlignedLabel(_('Max Concurrent Tasks:'))
-        table.attach_defaults(label, 0, 1, 0, 1)
+        grid.attach(label, 0, 0)
 
         adjustment = Gtk.Adjustment(lower=1, upper=64, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
-        table.attach_defaults(spin_button, 1, 2, 0, 1)
+        grid.attach(spin_button, 1, 0)
         self._preferences['max-concurrent-downloads'] = _Option(
             spin_button, 'value', _Option.int_mapper)
 
         label = RightAlignedLabel(_('Global Upload Limit(KiB/s):'))
-        table.attach_defaults(label, 0, 1, 1, 2)
+        grid.attach(label, 0, 1)
 
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
-        table.attach_defaults(spin_button, 1, 2, 1, 2)
+        grid.attach(spin_button, 1, 1)
         self._preferences['max-overall-upload-limit'] = _Option(
             spin_button, 'value', _Option.kib_mapper)
 
         label = RightAlignedLabel(_('Global Download Limit(KiB/s):'))
-        table.attach_defaults(label, 0, 1, 2, 3)
+        grid.attach(label, 0, 2)
 
         adjustment = Gtk.Adjustment(lower=0, upper=4096, step_increment=1)
         spin_button = Gtk.SpinButton(adjustment=adjustment, numeric=True)
-        table.attach_defaults(spin_button, 1, 2, 2, 3)
+        grid.attach(spin_button, 1, 2)
         self._preferences['max-overall-download-limit'] = _Option(
             spin_button, 'value', _Option.kib_mapper)
 
