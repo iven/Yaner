@@ -60,13 +60,16 @@ class AlignedExpander(Gtk.Expander):
 
 class URIsView(Gtk.ScrolledWindow):
     """ScrolledWindow with a text view for getting/setting URIs."""
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         Gtk.ScrolledWindow.__init__(
             self, None, None, shadow_type=Gtk.ShadowType.IN,
             hscrollbar_policy=Gtk.PolicyType.NEVER,
             vscrollbar_policy=Gtk.PolicyType.AUTOMATIC)
 
-        text_view = Gtk.TextView(accepts_tab=False, wrap_mode=Gtk.WrapMode.CHAR)
+        text_view = Gtk.TextView(accepts_tab=False,
+                                 wrap_mode=Gtk.WrapMode.CHAR,
+                                 *args, **kwargs
+                                )
         self.add(text_view)
         self.text_view = text_view
 
