@@ -5,10 +5,11 @@
 
 #Put here CPPs
 SET(YANER_SRCS
-    main.cpp
+    main.cc
 )
 
 SET(YANER_HDRS
+    yaner.h
 )
 
 #Put here QRC files to be Rcc-ed

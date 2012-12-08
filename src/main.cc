@@ -20,20 +20,29 @@
 #include <QTranslator>
 #include <QLocale>
 #include <QLabel>
+#include <QtDebug>
+
+#include "yaner.h"
+
+using namespace yaner;
 
 const QString kTranslationPrefix("yaner_");
 
 int main(int argc, char *argv[])
 {
+  QDEBUG << "Initializing application.";
+
   QApplication app(argc, argv);
 
-  // Setup translator
+  // setup translator
   QTranslator translator;
   translator.load(kTranslationPrefix + QLocale::system().name(), ":/ts/");
   app.installTranslator(&translator);
 
   QLabel label(QLabel::tr("Hello world!"));
   label.show();
+
+  QDEBUG << "Application initialized.";
 
   return app.exec();
 }
