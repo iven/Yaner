@@ -23,6 +23,7 @@
 #include <QLocale>
 
 #include "config.h"
+#include "main_window.h"
 #include "yaner.h"
 
 using namespace yaner;
@@ -41,13 +42,13 @@ Application::Application(int &argc, char **argv): QApplication(argc, argv) {
   app_translator_.load(PROJECT_NAME "_" + QLocale::system().name(), ":/ts/");
   installTranslator(&app_translator_);
 
-  // setup UI
-  label_ = new QLabel(tr("Hello world!"));
-  label_->show();
+  main_window_ = new MainWindow();
+  main_window_->show();
 
   QDEBUG << "Application initialized.";
 }
 
 Application::~Application() {
+  delete main_window_;
 }
 

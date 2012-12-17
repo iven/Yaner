@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>Iven Hsu</author>
+ <class>main_window</class>
+ <widget class="QMainWindow" name="main_window">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>522</width>
+    <height>369</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="central_widget">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="opaqueResize">
+       <bool>true</bool>
+      </property>
+      <widget class="QTreeView" name="tree_view">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>180</width>
+         <height>300</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+      <widget class="QListView" name="list_view">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+         <horstretch>5</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="toolbar">
+   <property name="windowTitle">
+    <string>Toolbar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_task_new"/>
+   <addaction name="separator"/>
+   <addaction name="action_task_start"/>
+   <addaction name="action_pause"/>
+   <addaction name="action_delete"/>
+   <addaction name="separator"/>
+   <addaction name="action_properties"/>
+   <addaction name="action_about"/>
+   <addaction name="action_quit"/>
+  </widget>
+  <action name="action_task_new">
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new task</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="action_quit">
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="toolTip">
+    <string>Quit the application</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="action_about">
+   <property name="text">
+    <string>&amp;About</string>
+   </property>
+   <property name="toolTip">
+    <string>About Yaner</string>
+   </property>
+  </action>
+  <action name="action_task_start">
+   <property name="text">
+    <string>&amp;Start</string>
+   </property>
+   <property name="toolTip">
+    <string>Start task</string>
+   </property>
+  </action>
+  <action name="action_pause">
+   <property name="text">
+    <string>&amp;Pause</string>
+   </property>
+   <property name="toolTip">
+    <string>Pause task</string>
+   </property>
+  </action>
+  <action name="action_delete">
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete task</string>
+   </property>
+  </action>
+  <action name="action_properties">
+   <property name="text">
+    <string>&amp;Properties</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

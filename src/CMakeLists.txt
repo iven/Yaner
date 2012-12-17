@@ -7,10 +7,12 @@
 SET(YANER_SRCS
     application.cc
     main.cc
+    main_window.cc
 )
 
 SET(YANER_HDRS
     application.h
+    main_window.h
     yaner.h
 )
 
@@ -37,6 +39,7 @@ LIST( APPEND YANER_HDRS
 
 #Put here UI files
 SET(YANER_UIS
+    main_window.ui
 )
 
 QT4_WRAP_UI(YANER_UIS_H ${YANER_UIS})

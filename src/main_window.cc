@@ -16,35 +16,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef YANER_APPLICATION_H
-#define YANER_APPLICATION_H
+#include "main_window.h"
 
-#include <QApplication>
-#include <QTranslator>
+#include <QtGui>
 
-#include <yaner.h>
+using namespace yaner;
 
-namespace yaner {
+MainWindow::MainWindow() {
+  QDEBUG << "Constructing the main window.";
 
-class MainWindow;
+  ui_.setupUi(this);
 
-class Application: public QApplication {
-  Q_OBJECT
+  QDEBUG << "Main window constructed.";
+}
 
-  public:
-    Application(int &argc, char **argv);
-    virtual ~Application();
-
-  private:
-    QTranslator qt_translator_;
-    QTranslator app_translator_;
-
-    MainWindow *main_window_;
-
-    DISALLOW_COPY_AND_ASSIGN(Application);
-};
-
-} // namespace yaner
-
-#endif /* end of include guard */
+MainWindow::~MainWindow() {
+}
 
