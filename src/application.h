@@ -16,15 +16,35 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "application.h"
-#include "yaner.h"
+#ifndef YANER_APPLICATION_H
+#define YANER_APPLICATION_H
 
-using namespace yaner;
+#include <QApplication>
+#include <QTranslator>
 
-int main(int argc, char *argv[])
-{
-  Application app(argc, argv);
+#include <yaner.h>
 
-  return app.exec();
-}
+class QLabel;
+
+namespace yaner {
+
+class Application: public QApplication {
+  Q_OBJECT
+
+  public:
+    Application(int &argc, char **argv);
+    virtual ~Application();
+
+  private:
+    QTranslator qt_translator_;
+    QTranslator app_translator_;
+
+    QLabel *label_;
+
+    DISALLOW_COPY_AND_ASSIGN(Application);
+};
+
+} // namespace yaner
+
+#endif /* end of include guard */
 

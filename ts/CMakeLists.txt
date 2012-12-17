@@ -81,8 +81,9 @@ ENDIF(QT_LRELEASE_EXECUTABLE)
 IF(QT_LUPDATE_EXECUTABLE)
     ## Search for all translatable strings in the sources directory
     FILE(GLOB_RECURSE translate_SRCS ${CMAKE_SOURCE_DIR}/src/*.cpp
-                                 ${CMAKE_SOURCE_DIR}/src/*.hpp)
-    FILE(GLOB_RECURSE translate_HDRS ${CMAKE_SOURCE_DIR}/src/*.h)
+                                     ${CMAKE_SOURCE_DIR}/src/*.cc)
+    FILE(GLOB_RECURSE translate_HDRS ${CMAKE_SOURCE_DIR}/src/*.h
+                                     ${CMAKE_SOURCE_DIR}/src/*.hpp)
     FILE(GLOB_RECURSE translate_UIS ${CMAKE_SOURCE_DIR}/src/*.ui)
 
     SET(translate_SRCS ${translate_SRCS} ${translate_HDRS} ${translate_UIS})

@@ -16,8 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef YANER_H
-#define YANER_H
+#ifndef YANER_YANER_H
+#define YANER_YANER_H
+
+#include <QtDebug>
 
 namespace yaner {
 
@@ -35,5 +37,5 @@ namespace yaner {
 
 } // namespace yaner
 
-#endif
+#endif /* end of include guard */
 

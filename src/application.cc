@@ -17,14 +17,37 @@
  */
 
 #include "application.h"
+
+#include <QLabel>
+#include <QLibraryInfo>
+#include <QLocale>
+
+#include "config.h"
 #include "yaner.h"
 
 using namespace yaner;
 
-int main(int argc, char *argv[])
-{
-  Application app(argc, argv);
+Application::Application(int &argc, char **argv): QApplication(argc, argv) {
+  QDEBUG << "Initializing application.";
 
-  return app.exec();
+  setApplicationName(PROJECT_NAME);
+  setApplicationVersion(PROJECT_VERSION);
+
+  // install translators
+  qt_translator_.load("qt_" + QLocale::system().name(),
+                      QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+  installTranslator(&qt_translator_);
+
+  app_translator_.load(PROJECT_NAME "_" + QLocale::system().name(), ":/ts/");
+  installTranslator(&app_translator_);
+
+  // setup UI
+  label_ = new QLabel(tr("Hello world!"));
+  label_->show();
+
+  QDEBUG << "Application initialized.";
+}
+
+Application::~Application() {
 }
 

@@ -2,9 +2,9 @@
 <!DOCTYPE TS>
 <TS version="2.0" language="zh_CN" sourcelanguage="en">
 <context>
-    <name>QLabel</name>
+    <name>yaner::Application</name>
     <message>
-        <location filename="../src/main.cpp" line="35"/>
+        <location filename="../src/application.cc" line="45"/>
         <source>Hello world!</source>
         <translation>你好世界酱！</translation>
     </message>

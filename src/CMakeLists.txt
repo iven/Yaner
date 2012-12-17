@@ -5,10 +5,12 @@
 
 #Put here CPPs
 SET(YANER_SRCS
+    application.cc
     main.cc
 )
 
 SET(YANER_HDRS
+    application.h
     yaner.h
 )
 

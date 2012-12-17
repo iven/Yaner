@@ -7,6 +7,13 @@
 /* OS Name */
 #cmakedefine SYSNAME "@SYSNAME@"
 
+/* Project Name */
+#cmakedefine PROJECT_NAME "@PROJECT_NAME_SHORT@"
+#cmakedefine PROJECT_NAME_LONG "@PROJECT_NAME_LONG@"
+
+/* DESCRIPTION */
+#cmakedefine PROJECT_DESCRIPTION "@PROJECT_DESCRIPTION@"
+
 /* Version */
 #cmakedefine PROJECT_VERSION "@PROJECT_VERSION@"
 
