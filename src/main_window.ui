@@ -93,8 +93,8 @@
    <addaction name="action_task_new"/>
    <addaction name="separator"/>
    <addaction name="action_task_start"/>
-   <addaction name="action_pause"/>
-   <addaction name="action_delete"/>
+   <addaction name="action_task_pause"/>
+   <addaction name="action_task_delete"/>
    <addaction name="separator"/>
    <addaction name="action_properties"/>
    <addaction name="action_about"/>
@@ -138,7 +138,7 @@
     <string>Start task</string>
    </property>
   </action>
-  <action name="action_pause">
+  <action name="action_task_pause">
    <property name="text">
     <string>&amp;Pause</string>
    </property>
@@ -146,7 +146,7 @@
     <string>Pause task</string>
    </property>
   </action>
-  <action name="action_delete">
+  <action name="action_task_delete">
    <property name="text">
     <string>&amp;Delete</string>
    </property>

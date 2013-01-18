@@ -36,6 +36,8 @@ class MainWindow: public QMainWindow {
   private:
     Ui_main_window ui_;
 
+    QIcon getStockIcon(const QString &name, int fallback=-1);
+
     DISALLOW_COPY_AND_ASSIGN(MainWindow);
 };
 

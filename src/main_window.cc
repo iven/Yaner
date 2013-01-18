@@ -22,10 +22,29 @@
 
 using namespace yaner;
 
+QIcon MainWindow::getStockIcon(const QString &name, int fallback) {
+  QIcon icon = QIcon::fromTheme(name);
+  if (icon.isNull() && (fallback >= 0)) {
+    icon = style()->standardIcon(QStyle::StandardPixmap(fallback), 0, this);
+  }
+
+  return icon;
+}
+
 MainWindow::MainWindow() {
   QDEBUG << "Constructing the main window.";
 
   ui_.setupUi(this);
+
+  ui_.action_task_new->setIcon(getStockIcon("document-new", QStyle::SP_DesktopIcon));
+  ui_.action_task_start->setIcon(getStockIcon("media-playback-start", QStyle::SP_MediaPlay));
+  ui_.action_task_pause->setIcon(getStockIcon("media-playback-pause", QStyle::SP_MediaPause));
+  ui_.action_task_delete->setIcon(getStockIcon("edit-delete", QStyle::SP_TrashIcon));
+  ui_.action_properties->setIcon(getStockIcon("preferences-system"));
+  ui_.action_about->setIcon(getStockIcon("help-about"));
+  ui_.action_quit->setIcon(getStockIcon("application-exit"));
+
+  connect(ui_.action_quit, SIGNAL(triggered()), qApp, SLOT(quit()));
 
   QDEBUG << "Main window constructed.";
 }
