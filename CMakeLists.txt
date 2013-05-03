@@ -22,24 +22,16 @@ ELSE(NOT CMAKE_BUILD_TYPE)
     MESSAGE("Build type set to '${CMAKE_BUILD_TYPE}'")
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
-IF(WIN32)
-    # Building in release for WIN32
-    SET(CMAKE_BUILD_TYPE "Release")
-    SET_PROPERTY(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE QT_NO_DEBUG)
-    # Use mingw's sprintf instead of windows's
-    ADD_DEFINITIONS( -D__USE_MINGW_ANSI_STDIO=1 )
-ENDIF(WIN32)
-
 # For projects using Git, use git version patch
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     SET(PATCH_OUT "0")
 ELSE("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    # Find Git Version Patch   
+    # Find Git Version Patch
     FIND_PROGRAM(GIT git)
     IF(GIT)
         EXECUTE_PROCESS(
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-            COMMAND ${GIT} rev-parse --short HEAD 
+            COMMAND ${GIT} rev-parse --short HEAD
             OUTPUT_VARIABLE GIT_OUT OUTPUT_STRIP_TRAILING_WHITESPACE
         )
         SET(PATCH_OUT "0-git${GIT_OUT}")
@@ -95,42 +87,11 @@ ENDIF(UNIX)
 # Search and include Qt4 parameters
 # Set Qt min required version and add modules here
 
-IF(WIN32)
-    # FindQt4.cmake is so brain-dead when Xcompiling
-    SET(QT_LIBRARY_DIR ${CONTRIBS_PATH}/lib)
-    SET(QT_INCLUDE_DIR ${CONTRIBS_PATH}/include/qt4)
-    ADD_DEFINITIONS( -I${CONTRIBS_PATH}/include/qt4/QtCore)
-    ADD_DEFINITIONS( -I${CONTRIBS_PATH}/include/qt4/QtGui)
-    ADD_DEFINITIONS( -I${CONTRIBS_PATH}/include/qt4/QtXml)
-    ADD_DEFINITIONS( -I${CONTRIBS_PATH}/include/qt4/QtNetwork)
-    ADD_DEFINITIONS( -I${CONTRIBS_PATH}/include/qt4/)
-    FIND_PACKAGE(Qt4 4.6.0 COMPONENTS QtCore QtGui QtXml QtSvg QtNetwork REQUIRED )
-ELSE(WIN32)
-    FIND_PACKAGE(Qt4 4.6.0 COMPONENTS QtCore QtGui QtXml QtSvg QtNetwork REQUIRED )
-ENDIF(WIN32)
-
-IF (NOT WIN32)
-    #FindQt4.cmake is so brain-dead when Xcompiling
-    SET(YANER_LIBS ${QT_QTCORE_LIBRARY}
-                     ${QT_QTGUI_LIBRARY}
-                     ${QT_QTSVG_LIBRARY}
-                     ${QT_QTNETWORK_LIBRARY}
-                     ${QT_QTXML_LIBRARY}) # Add here any other QT module or other library
-    INCLUDE(${QT_USE_FILE})
-    ADD_DEFINITIONS(${QT_DEFINITIONS})
-ELSE (NOT WIN32)
-    SET (YANER_LIBS -L${CONTRIBS_PATH}/lib # Manually specify paths
-            ${CONTRIBS_PATH}/lib/libQtNetwork.a
-            ${CONTRIBS_PATH}/lib/libQtXml.a
-            ${CONTRIBS_PATH}/lib/libQtGui.a
-            ${CONTRIBS_PATH}/lib/libQtCore.a
-            ws2_32 winmm imm32 libeay32 ssleay32 crypt32 gdi32)
-ENDIF(NOT WIN32)
+FIND_PACKAGE(Qt4 4.8.0 COMPONENTS QtCore QtGui REQUIRED )
+INCLUDE(${QT_USE_FILE})
 
 # Copy the sh launcher
-IF(NOT WIN32)
-    CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/cmake/yaner.sh" "${CMAKE_CURRENT_BINARY_DIR}/yaner" COPYONLY)
-ENDIF(NOT WIN32)
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/cmake/yaner.sh" "${CMAKE_CURRENT_BINARY_DIR}/yaner" COPYONLY)
 
 # Layout of Yaner installation
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -170,7 +131,6 @@ ENDIF(UNIX)
 # Recursively add sub dirs
 SUBDIRS(ts)
 SUBDIRS(src)
-SUBDIRS(nsis)
 
 # Copy stuff to doc subdirectory
 INSTALL (FILES AUTHORS COPYING NEWS README.rst
@@ -208,19 +168,6 @@ SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Force Package Name
 SET(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME}-${CPACK_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
-
-# NSIS Windows installer
-IF(WIN32 AND NOT UNIX)
-    # There is a bug in NSI that does not handle full unix paths properly. Make
-    # sure there is at least one set of four (4) backslashes.
-    SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/share\\\\yaner.png")
-    SET(CPACK_NSIS_INSTALLED_ICON_NAME "\\\\yaner.exe")
-    SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} YANER")
-    SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.kissuki.com\\\\Yaner")
-    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.kissuki.com\\\\Yaner")
-    SET(CPACK_NSIS_CONTACT "ivenvd AT gmail.com")
-    SET(CPACK_NSIS_MODIFY_PATH ON)
-ENDIF(WIN32 AND NOT UNIX)
 
 # RPM packages
 INCLUDE(${CMAKE_MODULE_PATH}/RpmBuild.cmake)

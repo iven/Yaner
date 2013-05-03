@@ -22,6 +22,11 @@ SET(YANER_RCC
     ../ts/resources-ts.qrc
 )
 
+#Put here UI files
+SET(YANER_UIS
+    main_window.ui
+)
+
 #include paths for vlmc
 INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_BINARY_DIR}
@@ -31,33 +36,9 @@ INCLUDE_DIRECTORIES(
 
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
-LIST( APPEND YANER_SRCS
-    )
-
-LIST( APPEND YANER_HDRS
-    )
-
-#Put here UI files
-SET(YANER_UIS
-    main_window.ui
-)
-
 QT4_WRAP_UI(YANER_UIS_H ${YANER_UIS})
 QT4_ADD_RESOURCES(YANER_RCC_SRCS ${YANER_RCC})
 QT4_WRAP_CPP(YANER_MOC_SRCS ${YANER_HDRS})
-
-IF( MINGW )
-    # resource compilation for MinGW
-    ADD_CUSTOM_COMMAND( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/icon.o
-        COMMAND ${CMAKE_WINDRES} -I${CMAKE_SOURCE_DIR} -i${CMAKE_SOURCE_DIR}/cmake/icon.rc
-        -o ${CMAKE_CURRENT_BINARY_DIR}/icon.o )
-    SET(YANER_SRCS ${YANER_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/icon.o)
-    SET(LINK_FLAGS -Wl,-subsystem,windows)
-ENDIF( MINGW )
-
-IF(WIN32)
-    SET(GUI_TYPE WIN32)
-ENDIF(WIN32)
 
 IF(APPLE)
     SET(GUI_TYPE MACOSX_BUNDLE)
@@ -73,7 +54,7 @@ ADD_EXECUTABLE(yaner ${YANER_SRCS} ${YANER_MOC_SRCS} ${YANER_UIS_H} ${YANER_RCC_
 ADD_DEPENDENCIES(yaner translations)
 
 # Link the target against the Qt libraries
-TARGET_LINK_LIBRARIES(yaner ${YANER_LIBS})
+TARGET_LINK_LIBRARIES(yaner ${QT_LIBRARIES})
 
 # Now we are done.
 
@@ -89,7 +70,7 @@ ADD_CUSTOM_COMMAND(
 
 ADD_DEFINITIONS(-W -Wall)
 
-# Creates app bundle in /bin, uncomment #-dmg to create a dmg output 
+# Creates app bundle in /bin, uncomment #-dmg to create a dmg output
 IF( APPLE )
     ADD_CUSTOM_COMMAND(
         TARGET yaner
