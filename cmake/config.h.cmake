@@ -29,5 +29,9 @@
 /* Website */
 #cmakedefine ORG_WEBSITE "@ORG_WEBSITE@"
 
+/* Paths */
+#define DATA_DIR "@YANER_DATA_DIR@"
+#define PIXMAPS_DIR "@YANER_PIXMAPS_DIR@"
+#define PROJECT_ICON PIXMAPS_DIR "yaner.png"
 
 #endif //CONFIG_H

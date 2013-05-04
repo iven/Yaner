@@ -18,6 +18,7 @@
 
 #include "application.h"
 
+#include <QIcon>
 #include <QLabel>
 #include <QLibraryInfo>
 #include <QLocale>
@@ -33,6 +34,7 @@ Application::Application(int &argc, char **argv): QApplication(argc, argv) {
 
   setApplicationName(PROJECT_NAME);
   setApplicationVersion(PROJECT_VERSION);
+  setWindowIcon(QIcon(PROJECT_ICON));
 
   // install translators
   qt_translator_.load("qt_" + QLocale::system().name(),
