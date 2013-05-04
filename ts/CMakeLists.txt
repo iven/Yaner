@@ -6,18 +6,18 @@
 ## RCC file
 SET(TS_QRC ${CMAKE_SOURCE_DIR}/ts/resources-ts.qrc)
 
-IF(NOT QT_LUPDATE_EXECUTABLE)
+IF(NOT Qt5_LUPDATE_EXECUTABLE)
     MESSAGE(WARNING "Could not find lupdate. You won't be able to update translations.")
-ENDIF(NOT QT_LUPDATE_EXECUTABLE)
+ENDIF(NOT Qt5_LUPDATE_EXECUTABLE)
 
-IF(NOT QT_LRELEASE_EXECUTABLE)
+IF(NOT Qt5_LRELEASE_EXECUTABLE)
     MESSAGE(WARNING "Could not find lrelease. Your build won't contain translations.")
     ## Create an empty RCC file
     FILE(WRITE ${TS_QRC} "<RCC></RCC>")
-ENDIF(NOT QT_LRELEASE_EXECUTABLE)
+ENDIF(NOT Qt5_LRELEASE_EXECUTABLE)
 
 ## Wraps the supplied .ts files in lrelease commands
-MACRO(QT4_ADD_TRANSLATIONS outfiles)
+MACRO(QT5_ADD_TRANSLATIONS outfiles)
     FILE(WRITE ${TS_QRC} "<RCC><qresource prefix=\"ts\">\n")
     FOREACH (it ${ARGN})
         GET_FILENAME_COMPONENT(it ${it} ABSOLUTE)
@@ -29,7 +29,7 @@ MACRO(QT4_ADD_TRANSLATIONS outfiles)
 
         ADD_CUSTOM_COMMAND(
             OUTPUT ${outfile}
-            COMMAND ${QT_LRELEASE_EXECUTABLE}
+            COMMAND ${Qt5_LRELEASE_EXECUTABLE}
             ARGS -compress -silent -nounfinished ${it} -qm ${outfile}
             MAIN_DEPENDENCY ${it}
         )
@@ -37,7 +37,7 @@ MACRO(QT4_ADD_TRANSLATIONS outfiles)
         SET(${outfiles} ${${outfiles}} ${outfile})
     ENDFOREACH(it)
     FILE(APPEND ${TS_QRC} "</qresource></RCC>")
-ENDMACRO(QT4_ADD_TRANSLATIONS)
+ENDMACRO(QT5_ADD_TRANSLATIONS)
 
 ## Set availbale translations file ids here
 OPTION(LANGUAGES "Using translations")
@@ -69,16 +69,16 @@ FOREACH(LANGUAGE ${LANGUAGES})
     LIST(APPEND yaner_TS ${temp_TS})
 ENDFOREACH()
 
-IF(QT_LRELEASE_EXECUTABLE)
+IF(Qt5_LRELEASE_EXECUTABLE)
     ## Wraps the collected translations
-    QT4_ADD_TRANSLATIONS(yaner_QMS ${yaner_TS})
+    QT5_ADD_TRANSLATIONS(yaner_QMS ${yaner_TS})
 
     ## Create a target that runs lrelease for all the .ts files
     ## "ALL" means that it will be run by default.
     ADD_CUSTOM_TARGET(translations ALL DEPENDS ${yaner_QMS})
-ENDIF(QT_LRELEASE_EXECUTABLE)
+ENDIF(Qt5_LRELEASE_EXECUTABLE)
 
-IF(QT_LUPDATE_EXECUTABLE)
+IF(Qt5_LUPDATE_EXECUTABLE)
     ## Search for all translatable strings in the sources directory
     FILE(GLOB_RECURSE translate_SRCS ${CMAKE_SOURCE_DIR}/src/*.cpp
                                      ${CMAKE_SOURCE_DIR}/src/*.cc)
@@ -90,7 +90,7 @@ IF(QT_LUPDATE_EXECUTABLE)
 
     ## Create a target that runs lupdate for all the sources and UI files
     ADD_CUSTOM_TARGET(lupdate
-        COMMAND ${QT_LUPDATE_EXECUTABLE} -noobsolete ${translate_SRCS} -ts ${yaner_TS}
+        COMMAND ${Qt5_LUPDATE_EXECUTABLE} -noobsolete ${translate_SRCS} -ts ${yaner_TS}
     )
-ENDIF(QT_LUPDATE_EXECUTABLE)
+ENDIF(Qt5_LUPDATE_EXECUTABLE)
 

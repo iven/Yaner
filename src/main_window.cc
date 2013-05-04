@@ -18,7 +18,7 @@
 
 #include "main_window.h"
 
-#include <QtGui>
+#include <QtWidgets>
 
 using namespace yaner;
 

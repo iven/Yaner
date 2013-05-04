@@ -39,7 +39,7 @@ Application::Application(int &argc, char **argv): QApplication(argc, argv) {
                       QLibraryInfo::location(QLibraryInfo::TranslationsPath));
   installTranslator(&qt_translator_);
 
-  app_translator_.load(PROJECT_NAME "_" + QLocale::system().name(), ":/ts/");
+  app_translator_.load("yaner_" + QLocale::system().name(), ":/ts/");
   installTranslator(&app_translator_);
 
   main_window_ = new MainWindow();
