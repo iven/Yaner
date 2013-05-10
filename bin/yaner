@@ -29,56 +29,15 @@ window of the application.
 
 import os
 import sys
-import gettext
-import argparse
 
+# For development
 os.chdir(os.path.dirname(__file__))
 if os.path.isdir('../yaner'):
     sys.path.insert(0, '..')
 
-from yaner import __package__
-from yaner.Misc import VersionAction
-
-# Setup Translation
-gettext.install('yaner')
-
-# Parse command line arguments
-options = None
-if len(sys.argv) > 1:
-    parser = argparse.ArgumentParser(
-            description=_('{0} download mananger.').format(__package__))
-    parser.add_argument('-n', '--rename', metavar='FILENAME',
-            help=_('filename to save'))
-    parser.add_argument('-r', '--referer', nargs='?', const='',
-            default='', help=_('referer page of the link'))
-    parser.add_argument('-c', '--cookie', nargs='?', const='',
-            default='', help=_('cookies of the website'))
-    parser.add_argument('uris', nargs='*', metavar='URI | MAGNET',
-            help=_('the download addresses'))
-    parser.add_argument('-v', '--version', action=VersionAction, nargs=0,
-            help=_('output version information and exit'))
-    args = parser.parse_args()
-
-    options = {'referer': args.referer,
-               'header': 'Cookie: {}'.format(args.cookie),
-               'uris': '\n'.join(args.uris),
-              }
-    if args.rename is not None:
-        options['out'] = args.rename
-
-# Start the Application
-from gi.repository import GLib
-from gi.repository import Notify
 from yaner.Application import Application
 
-Notify.init('yaner')
-
-main_app = Application()
-
-if options is not None:
-    main_app.register(None)
-    # FIXME: GLib works strange when passing dictionaries, maybe a bug
-    main_app.activate_action('cmdline', GLib.Variant.new_string(str(options)))
-
-main_app.run(None)
+if __name__ == '__main__':
+    main_app = Application(sys.argv)
+    sys.exit(main_app.exec_())
 

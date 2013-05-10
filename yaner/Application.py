@@ -25,33 +25,30 @@ This module contains the main application class of L{yaner}.
 """
 
 import os
+import sys
 import logging
+import argparse
 import subprocess
 
-from gi.repository import Gtk, GLib, Gio
-from sqlalchemy import create_engine
+from PyQt4.QtGui import QApplication, QLabel
+from PyQt4.QtCore import QLocale, QTranslator, QLibraryInfo
+from gi.repository import Notify
 
-from yaner import __package__
-from yaner.XDG import save_data_file
-from yaner.Pool import Pool
-from yaner.Database import SQLSession, SQLBase
-from yaner.Presentable import Category
-from yaner.ui.Toplevel import Toplevel
+#from sqlalchemy import create_engine
+
+#from yaner.XDG import save_data_file
+from yaner.Misc import VersionAction
+#from yaner.Pool import Pool
+#from yaner.Database import SQLSession, SQLBase
+#from yaner.Presentable import Category
+#from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 
-class Application(Gtk.Application, LoggingMixin):
-    """Main application of L{yaner}."""
-
-    _NAME = __package__
+class Application(QApplication, LoggingMixin):
+    _NAME = "Yaner"
     """The name of the application, used by L{_LOG_FILE}, etc."""
 
-    _APPLICATION_ID = 'com.kissuki.yaner'
-    """
-    The unique bus name of the application, which identifies the application when
-    using L{Gtk.Application} to make the application unique.
-    """
-
-    _LOG_FILE = '{0}.log'.format(_NAME)
+    _LOG_FILE = '{}.log'.format(_NAME)
     """The logging file of the application."""
 
     _DATA_FILE = '{}.db'.format(_NAME)
@@ -60,35 +57,77 @@ class Application(Gtk.Application, LoggingMixin):
     _SYNC_INTERVAL = 60
     """Interval for database sync, in second(s)."""
 
-    def __init__(self):
-        """
-        The init methed of L{Application} class.
-
-        It handles command line options, creates L{toplevel window
-        <Toplevel>}, and initialize logging configuration.
-        """
-        Gtk.Application.__init__(self, application_id=self._APPLICATION_ID, flags=0)
+    def __init__(self, argv):
+        QApplication.__init__(self, argv)
         LoggingMixin.__init__(self)
 
-        self._toplevel = None
-        self._settings = None
+        self._translators = {}
         self._daemon = None
+        self._main_window = None
 
-        self._init_action_group()
+        self._init_i18n()
+        self._init_args(argv)
+        self._init_logging()
+        #self._init_database()
+        self._init_daemon()
+
+        Notify.init('yaner')
+
+        self.label = QLabel(self.tr('yaner'))
+        self.label.show()
+
+        self.aboutToQuit.connect(self.on_about_to_quit)
 
     @property
-    def toplevel(self):
+    def main_window(self):
         """Get the toplevel window of L{yaner}."""
-        if self._toplevel is None:
-            self._toplevel = Toplevel()
-        return self._toplevel
+        #if self._main_window is None:
+        #    self._main_window = MainWindow()
+        return self._main_window
 
-    @property
-    def settings(self):
-        """Get the GSettings object."""
-        if self._settings is None:
-            self._settings = Gio.Settings('com.kissuki.yaner')
-        return self._settings
+    def _init_args(self, argv):
+        """Parse command line arguments."""
+        options = None
+        if len(argv) > 1:
+            parser = argparse.ArgumentParser(
+                    description=self.tr('Yaner download mananger.'))
+            parser.add_argument('-n', '--rename', metavar='FILENAME',
+                    help=self.tr('filename to save'))
+            parser.add_argument('-r', '--referer', nargs='?', const='',
+                    default='', help=self.tr('referer page of the link'))
+            parser.add_argument('-c', '--cookie', nargs='?', const='',
+                    default='', help=self.tr('cookies of the website'))
+            parser.add_argument('uris', nargs='*', metavar='URI | MAGNET',
+                    help=self.tr('the download addresses'))
+            parser.add_argument('-v', '--version', action=VersionAction, nargs=0,
+                    help=self.tr('output version information and exit'))
+            args = parser.parse_args()
+
+            options = {'referer': args.referer,
+                       'header': 'Cookie: {}'.format(args.cookie),
+                       'uris': '\n'.join(args.uris),
+                      }
+            if args.rename is not None:
+                options['out'] = args.rename
+
+        if options is not None:
+            print(options)
+            sys.exit()
+
+    def _init_i18n(self):
+        """Set up Qt translater."""
+        locale = QLocale.system().name()
+        tr_path = QLibraryInfo.location(QLibraryInfo.TranslationsPath)
+
+        translator = QTranslator()
+        if translator.load('qt_' + locale, tr_path):
+            self.installTranslator(translator)
+        self._translators['qt'] = translator
+
+        translator = QTranslator()
+        if translator.load('yaner_' + locale, '.'):
+            self.installTranslator(translator)
+        self._translators['application'] = translator
 
     def _init_logging(self):
         """Set up basic config for logging."""
@@ -106,93 +145,53 @@ class Application(Gtk.Application, LoggingMixin):
             )
         self.logger.info('Logging system initialized, start logging...')
 
-    def _init_database(self):
-        """Connect to database and set up database if this is the first
-        start of the application."""
-        self.logger.info('Connecting to global database file...')
-
-        data_file = save_data_file(self._DATA_FILE)
-        engine = create_engine('sqlite:///' + data_file)
-        SQLSession.configure(bind=engine)
-
-        if not os.path.exists(data_file):
-            self.logger.info('Initializing database for first start...')
-
-            SQLBase.metadata.create_all(engine)
-
-            pool = Pool(name=_('My Computer'), host='localhost', is_local=True)
-
-            docs_dir = os.environ.get('XDG_DOCUMENTS_DIR', os.path.expanduser('~'))
-            Category(name=_('Documents'), directory=docs_dir, pool=pool)
-
-            videos_dir = os.environ.get('XDG_VIDEOS_DIR', os.path.expanduser('~'))
-            Category(name=_('Videos'), directory=videos_dir, pool=pool)
-
-            music_dir = os.environ.get('XDG_MUSIC_DIR', os.path.expanduser('~'))
-            Category(name=_('Music'), directory=music_dir, pool=pool)
-
-            self.logger.info('Database initialized.')
-
-        # Auto commit to database
-        GLib.timeout_add_seconds(self._SYNC_INTERVAL, SQLSession.commit)
-
-        self.logger.info('Global database file connected.')
-
-    def _init_action_group(self):
-        """Insert 'cmdline' action for opening new task dialog."""
-        action_group = Gio.SimpleActionGroup()
-        action = Gio.SimpleAction.new(name='cmdline',
-                                      parameter_type=GLib.VariantType.new('s'))
-        action.connect('activate', self.on_cmdline)
-        action_group.insert(action)
-        self.set_action_group(action_group)
+#    def _init_database(self):
+#        """Connect to database and set up database if this is the first
+#        start of the application."""
+#        self.logger.info('Connecting to global database file...')
+#
+#        data_file = save_data_file(self._DATA_FILE)
+#        engine = create_engine('sqlite:///' + data_file)
+#        SQLSession.configure(bind=engine)
+#
+#        if not os.path.exists(data_file):
+#            self.logger.info('Initializing database for first start...')
+#
+#            SQLBase.metadata.create_all(engine)
+#
+#            pool = Pool(name=self.tr('My Computer'), host='localhost', is_local=True)
+#
+#            docs_dir = os.environ.get('XDG_DOCUMENTS_DIR', os.path.expanduser('~'))
+#            Category(name=self.tr('Documents'), directory=docs_dir, pool=pool)
+#
+#            videos_dir = os.environ.get('XDG_VIDEOS_DIR', os.path.expanduser('~'))
+#            Category(name=self.tr('Videos'), directory=videos_dir, pool=pool)
+#
+#            music_dir = os.environ.get('XDG_MUSIC_DIR', os.path.expanduser('~'))
+#            Category(name=self.tr('Music'), directory=music_dir, pool=pool)
+#
+#            self.logger.info('Database initialized.')
+#
+#        # Auto commit to database XXX
+#        #GLib.timeout_add_seconds(self._SYNC_INTERVAL, SQLSession.commit)
+#
+#        self.logger.info('Global database file connected.')
 
     def _init_daemon(self):
         """Start aria2 daemon on start up."""
         self._daemon = subprocess.Popen(['aria2c', '--enable-rpc'],
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE,
-                        )
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE,
+                                       )
 
-    def on_cmdline(self, action, data):
-        """When application started with command line arguments, open new
-        task dialog.
-        """
-        options = eval(data.unpack())
-        self.logger.info('Received task options from command line arguments.')
-        self.logger.debug(str(options))
-
-        self.toplevel.task_new_dialog.run(options)
-
-    def do_activate(self):
-        """When Application activated, present the main window."""
-        self.logger.debug('Activating toplevel window...')
-        self.toplevel.present()
-
-        Gtk.Application.do_activate(self)
-
-    def do_startup(self):
-        """When start up, initialize logging and database systems, and
-        show the toplevel window.
-        """
-        self._init_logging()
-        self._init_database()
-        self._init_daemon()
-        self.toplevel.set_application(self)
-        self.toplevel.show_all()
-
-        Gtk.Application.do_startup(self)
-
-    def do_shutdown(self):
+    def on_about_to_quit(self):
         """When shutdown, finalize database and logging systems."""
         self.logger.info('Shutting down database...')
-        SQLSession.commit()
-        SQLSession.close()
+#        SQLSession.commit()
+#        SQLSession.close()
 
         self._daemon.terminate()
 
         self.logger.info('Application quit normally.')
         logging.shutdown()
-
-        Gtk.Application.do_shutdown(self)
 
