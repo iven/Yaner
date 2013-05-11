@@ -33,7 +33,7 @@ class LoggingMixin(object):
 
     def __init__(self):
         """Get the logger and set it as property. """
-        self._name = "{0}.{1}".format(self.__module__, self.__class__.__name__)
+        self._name = "{}.{}".format(self.__module__, self.__class__.__name__)
         self._logger = None
 
     @property
