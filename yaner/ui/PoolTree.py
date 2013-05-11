@@ -106,7 +106,7 @@ class PoolModel(Gtk.TreeStore, LoggingMixin):
         if not parent is None:
             parent_iter = self.get_iter_for_presentable(parent)
             if parent_iter is None:
-                self.logger.warning('No parent presentable for {0}.'.format(
+                self.logger.warning('No parent presentable for {}.'.format(
                     presentable.name))
                 self.add_presentable(parent)
                 parent_iter = self.get_iter_for_presentable(parent)

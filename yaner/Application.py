@@ -51,7 +51,7 @@ class Application(Gtk.Application, LoggingMixin):
     using L{Gtk.Application} to make the application unique.
     """
 
-    _LOG_FILE = '{0}.log'.format(_NAME)
+    _LOG_FILE = '{}.log'.format(_NAME)
     """The logging file of the application."""
 
     _DATA_FILE = '{}.db'.format(_NAME)

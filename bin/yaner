@@ -46,7 +46,7 @@ gettext.install('yaner')
 options = None
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser(
-            description=_('{0} download mananger.').format(__package__))
+            description=_('{} download mananger.').format(__package__))
     parser.add_argument('-n', '--rename', metavar='FILENAME',
             help=_('filename to save'))
     parser.add_argument('-r', '--referer', nargs='?', const='',

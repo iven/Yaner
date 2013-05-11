@@ -31,7 +31,7 @@ from gi.repository import Gtk
 
 from yaner.ui import __package__
 
-_module = '{0}.Misc'.format(__package__)
+_module = '{}.Misc'.format(__package__)
 _logger = logging.getLogger(_module)
 
 def load_ui_file(filename):
@@ -62,7 +62,7 @@ def get_mix_color(widget, state):
         background = getattr(style.get_background_color(state), component) * 255
         color[component] = int(foreground * .7 + background * .3)
     color = '#{red:02X}{green:02X}{blue:02X}'.format(**color)
-    #_logger.debug(_("Got mix color: {0}.").format(color))
+    #_logger.debug(_("Got mix color: {}.").format(color))
 
     return color
 

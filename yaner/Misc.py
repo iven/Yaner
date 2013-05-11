@@ -35,7 +35,7 @@ class VersionAction(argparse.Action):
     """Show version information of the application."""
 
     def __call__(self, parser, namespace, values, option_string=None):
-        print('{0} {1}'.format(__package__, __version__))
+        print('{} {}'.format(__package__, __version__))
         print('Copyright (C) 2010-2011 Iven Hsu (Xu Lijian)')
         print(_('License GPLv3+: GNU GPL version 3 or later'))
         print('<http://gnu.org/licenses/gpl.html>.')
