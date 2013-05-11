@@ -24,14 +24,13 @@
 This module contains the L{Pool} class of L{yaner}.
 """
 
-import os
-
 from gi.repository import GLib
 from gi.repository import GObject
 from sqlalchemy import Column, Unicode, Boolean
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from yaner.XDG import xdg_download_dir
 from yaner.Xmlrpc import ServerProxy
 from yaner.Database import SQLSession, SQLBase
 from yaner.Presentable import Presentable, Queuing, Category, Dustbin
@@ -97,9 +96,8 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
 
         if self.default_category is None:
             self.logger.info('Creating default category for {}.'.format(self))
-            down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
             self.default_category = Category(name=_('My Downloads'),
-                                             directory= down_dir,
+                                             directory=xdg_download_dir,
                                              pool=self)
             SQLSession.commit()
 

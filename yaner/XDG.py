@@ -43,6 +43,8 @@ save_config_path = partial(save_config_path, directory)
 save_data_file = lambda filename: os.path.join(save_data_path(), filename)
 save_config_file = lambda filename: os.path.join(save_config_path(), filename)
 
+xdg_download_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
+
 def xdg_open(args):
     args.insert(0, 'xdg-open')
     return subprocess.call(args)
