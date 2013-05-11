@@ -141,12 +141,26 @@ class Pool(SQLBase, QObject, LoggingMixin):
 
     @connected.setter
     def connected(self, new_status):
+        """When pool connected, try to resume last session.
+
+        When disconnected, mark all queuing tasks as inactive.
+
+        This will make a difference when start a task: paused tasks will
+        call C{aria2.unpause} method, while inactive tasks will call
+        C{aria2.addUri}, or other method to add them as new tasks.
+        """
         if new_status != self.connected:
             self._connected = new_status
             if self._connected:
+                self.logger.info('{}: connected.'.format(self))
+                self._resume_session()
                 self.emit('connected')
             else:
+                self.logger.info('{}: disconnected.'.format(self))
+                for task in self.queuing.tasks:
+                    task.state = 'inactive'
                 self.emit('disconnected')
+
             self.queuing.emit('changed')
 
     @property
@@ -158,22 +172,6 @@ class Pool(SQLBase, QObject, LoggingMixin):
             timer.timeout.connect(self._keep_connection)
             self._connection_keep_timer = timer
         return self._connection_keep_timer
-
-    def do_connected(self):
-        """When pool connected, try to resume last session."""
-        self.logger.info('{}: connected.'.format(self))
-        self._resume_session()
-
-    def do_disconnected(self):
-        """When status changed, mark all queuing tasks as inactive.
-
-        This will make a difference when start a task: paused tasks will
-        call C{aria2.unpause} method, while inactive tasks will call
-        C{aria2.addUri}, or other method to add them as new tasks.
-        """
-        self.logger.info('{}: disconnected.'.format(self))
-        for task in self.queuing.tasks:
-            task.state = 'inactive'
 
     def _keep_connection(self):
         """Keep calling C{aria2.getVersion} and mark pool as connected."""
