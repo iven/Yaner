@@ -29,7 +29,7 @@ import os
 from sqlalchemy import Column, Integer, PickleType, Unicode, ForeignKey
 from sqlalchemy.orm import reconstructor, deferred
 from sqlalchemy.ext.hybrid import hybrid_property
-from PyQt4.QtCore import pyqtSignal, QObject
+from PyQt4.QtCore import pyqtSignal, QObject, QTimer
 
 from yaner.Misc import unquote
 from yaner.Database import SQLBase, SQLSession
@@ -45,8 +45,8 @@ class Task(SQLBase, QObject, LoggingMixin):
     changed = pyqtSignal()
     """Signals of this class."""
 
-    _UPDATE_INTERVAL = 1
-    """Interval for status updating, in second(s)."""
+    _UPDATE_INTERVAL = 1000
+    """Interval for status updating, in millisecond(s)."""
 
     _DEFAULT_STATUS = {
         'completedLength': '0',
@@ -96,13 +96,20 @@ class Task(SQLBase, QObject, LoggingMixin):
         LoggingMixin.__init__(self)
         QObject.__init__(self)
 
-        self._status_update_handle = None
-        self._database_sync_handle = None
-
+        self._status_update_timer = None
         self._name_fixed = False
 
     def __repr__(self):
         return self.tr("<Task {}>").format(self.name)
+
+    @property
+    def status_update_timer(self):
+        if self._status_update_timer is None:
+            timer = QTimer()
+            timer.setInterval(self._UPDATE_INTERVAL)
+            timer.timeout.connect(self._call_tell_status)
+            self._status_update_timer = timer
+        return self._status_update_timer
 
     @hybrid_property
     def pool(self):
@@ -274,18 +281,15 @@ class Task(SQLBase, QObject, LoggingMixin):
         """Begin to update status every second. Task must be marked
         waiting before calling this.
         """
-        if self._status_update_handle is None:
+        if not self._status_update_timer.isActive():
             self.logger.info('{}: begin updating status.'.format(self))
-            # TODO
-            #self._status_update_handle = GLib.timeout_add_seconds(self._UPDATE_INTERVAL, self._call_tell_status)
+            self._status_update_timer.start()
 
     def end_update_status(self):
         """Stop updating status every second."""
-        if self._status_update_handle:
+        if self.status_update_timer.isActive():
             self.logger.info('{}: end updating status.'.format(self))
-            # TODO
-            #GLib.source_remove(self._status_update_handle)
-            self._status_update_handle = None
+            self.status_update_timer.stop()
 
     def _update_session_id(self):
         """Get session id of the pool and store it in task."""

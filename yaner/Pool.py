@@ -27,7 +27,7 @@ This module contains the L{Pool} class of L{yaner}.
 from sqlalchemy import Column, Unicode, Boolean
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
-from PyQt4.QtCore import pyqtSignal, QObject
+from PyQt4.QtCore import pyqtSignal, QObject, QTimer
 
 from yaner.XDG import xdg_download_dir
 from yaner.Xmlrpc import ServerProxy
@@ -49,8 +49,8 @@ class Pool(SQLBase, QObject, LoggingMixin):
     presentable_removed = pyqtSignal(Presentable)
     """Signals of this class."""
 
-    _CONNECTION_INTERVAL = 5
-    """Interval for keeping connection, in second(s)."""
+    _CONNECTION_INTERVAL = 5000
+    """Interval for keeping connection, in millisecond(s)."""
 
     name = Column(Unicode)
     user = Column(Unicode)
@@ -87,6 +87,8 @@ class Pool(SQLBase, QObject, LoggingMixin):
         self._connected = False
         self._proxy = None
 
+        self._connection_keep_timer = None
+
         if self.default_category is None:
             self.logger.info('Creating default category for {}.'.format(self))
             self.default_category = Category(name=self.tr('My Downloads'),
@@ -94,8 +96,7 @@ class Pool(SQLBase, QObject, LoggingMixin):
                                              pool=self)
             SQLSession.commit()
 
-        self.do_disconnected()
-        self._keep_connection()
+        self.connection_keep_timer.start()
 
     def __repr__(self):
         return self.tr("<Pool {}>").format(self.name)
@@ -148,6 +149,16 @@ class Pool(SQLBase, QObject, LoggingMixin):
                 self.emit('disconnected')
             self.queuing.emit('changed')
 
+    @property
+    def connection_keep_timer(self):
+        if self._connection_keep_timer is None:
+            self.do_disconnected()
+            timer = QTimer()
+            timer.setInterval(self._CONNECTION_INTERVAL)
+            timer.timeout.connect(self._keep_connection)
+            self._connection_keep_timer = timer
+        return self._connection_keep_timer
+
     def do_connected(self):
         """When pool connected, try to resume last session."""
         self.logger.info('{}: connected.'.format(self))
@@ -175,10 +186,6 @@ class Pool(SQLBase, QObject, LoggingMixin):
         deferred.add_callback(on_got_version)
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
-
-        # TODO
-        #GLib.timeout_add_seconds(self._CONNECTION_INTERVAL, self._keep_connection)
-        return False
 
     def _resume_session(self):
         """Get session id from pool."""

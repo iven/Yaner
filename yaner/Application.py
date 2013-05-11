@@ -31,7 +31,7 @@ import argparse
 import subprocess
 
 from PyQt4.QtGui import QApplication, QLabel
-from PyQt4.QtCore import QLocale, QTranslator, QLibraryInfo
+from PyQt4.QtCore import QLocale, QTranslator, QLibraryInfo, QTimer
 from gi.repository import Notify
 
 from sqlalchemy import create_engine
@@ -54,8 +54,8 @@ class Application(QApplication, LoggingMixin):
     _DATA_FILE = '{}.db'.format(_NAME)
     """The global database file of the application."""
 
-    _SYNC_INTERVAL = 60
-    """Interval for database sync, in second(s)."""
+    _SYNC_INTERVAL = 60000
+    """Interval for database sync, in millisecond(s)."""
 
     def __init__(self, argv):
         QApplication.__init__(self, argv)
@@ -64,6 +64,7 @@ class Application(QApplication, LoggingMixin):
         self._translators = {}
         self._daemon = None
         self._main_window = None
+        self._database_sync_timer = None
 
         self._init_i18n()
         self._init_args(argv)
@@ -77,6 +78,15 @@ class Application(QApplication, LoggingMixin):
         self.label.show()
 
         self.aboutToQuit.connect(self.on_about_to_quit)
+
+    @property
+    def database_sync_timer(self):
+        if self._database_sync_timer is None:
+            timer = QTimer()
+            timer.setInterval(self._SYNC_INTERVAL)
+            timer.timeout.connect(SQLSession.commit)
+            self._database_sync_timer = timer
+        return self._database_sync_timer
 
     @property
     def main_window(self):
@@ -173,8 +183,8 @@ class Application(QApplication, LoggingMixin):
 
             self.logger.info('Database initialized.')
 
-        # Auto commit to database TODO
-        #GLib.timeout_add_seconds(self._SYNC_INTERVAL, SQLSession.commit)
+        # Auto commit to database
+        self.database_sync_timer.start()
 
         self.logger.info('Global database file connected.')
 
