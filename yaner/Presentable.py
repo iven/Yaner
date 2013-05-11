@@ -24,36 +24,32 @@
 This module contains the L{Presentable} class of L{yaner}.
 """
 
-from gi.repository import GObject
 from sqlalchemy import Column, Integer, Unicode, ForeignKey
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
+from PyQt4.QtCore import pyqtSignal, QObject
 
 from yaner.Task import Task
 from yaner.Database import SQLSession, SQLBase
 from yaner.utils.Enum import Enum
 from yaner.utils.Logging import LoggingMixin
 
-class Presentable(LoggingMixin, GObject.GObject):
+class Presentable(QObject, LoggingMixin):
     """
     The Presentable class of L{yaner}, which provides data for L{PoolModel}.
     """
 
-    __gsignals__ = {
-            'changed': (GObject.SignalFlags.RUN_LAST, None, ()),
-            'task-added': (GObject.SignalFlags.RUN_LAST, None, (Task,)),
-            'task-removed': (GObject.SignalFlags.RUN_LAST, None, (Task,)),
-            }
-    """
-    GObject signals of this class.
-    """
+    changed = pyqtSignal()
+    task_added = pyqtSignal(Task)
+    task_removed = pyqtSignal(Task)
+    """Signals of this class."""
 
     TYPES = Enum('QUEUING', 'CATEGORY', 'DUSTBIN')
     """Presentable types."""
 
     def __init__(self):
         LoggingMixin.__init__(self)
-        GObject.GObject.__init__(self)
+        QObject.__init__(self)
 
     def __repr__(self):
         return '<{}>'.format(self.name)
@@ -133,7 +129,7 @@ class Category(SQLBase, Presentable):
         self.parent = self.pool.queuing
 
     def __repr__(self):
-        return _("<Category {}>").format(self.name)
+        return self.tr("<Category {}>").format(self.name)
 
     @hybrid_property
     def name(self):
@@ -169,7 +165,7 @@ class Dustbin(Presentable):
     @property
     def name(self):
         """Get the name of the presentable."""
-        return _('Dustbin')
+        return self.tr('Dustbin')
 
     @property
     def pool(self):

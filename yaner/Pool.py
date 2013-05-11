@@ -26,18 +26,17 @@ This module contains the L{Pool} class of L{yaner}.
 
 import os
 
-from gi.repository import GLib
-from gi.repository import GObject
 from sqlalchemy import Column, Unicode, Boolean
 from sqlalchemy.orm import reconstructor, relationship
 from sqlalchemy.ext.hybrid import hybrid_property
+from PyQt4.QtCore import pyqtSignal, QObject
 
 from yaner.Xmlrpc import ServerProxy
 from yaner.Database import SQLSession, SQLBase
 from yaner.Presentable import Presentable, Queuing, Category, Dustbin
 from yaner.utils.Logging import LoggingMixin
 
-class Pool(SQLBase, GObject.GObject, LoggingMixin):
+class Pool(SQLBase, QObject, LoggingMixin):
     """
     The Pool class of L{yaner}, which provides data for L{PoolModel}.
 
@@ -45,17 +44,11 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
     with download server.
     """
 
-    __gsignals__ = {
-            'connected': (GObject.SignalFlags.RUN_LAST, None, ()),
-            'disconnected': (GObject.SignalFlags.RUN_LAST, None, ()),
-            'presentable-added': (GObject.SignalFlags.RUN_LAST,
-                None, (Presentable,)),
-            'presentable-removed': (GObject.SignalFlags.RUN_LAST,
-                None, (Presentable,)),
-            }
-    """
-    GObject signals of this class.
-    """
+    connected = pyqtSignal()
+    disconnected = pyqtSignal()
+    presentable_added = pyqtSignal(Presentable)
+    presentable_removed = pyqtSignal(Presentable)
+    """Signals of this class."""
 
     _CONNECTION_INTERVAL = 5
     """Interval for keeping connection, in second(s)."""
@@ -85,7 +78,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
 
     @reconstructor
     def _init(self):
-        GObject.GObject.__init__(self)
+        QObject.__init__(self)
         LoggingMixin.__init__(self)
 
         self._queuing = None
@@ -98,7 +91,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         if self.default_category is None:
             self.logger.info('Creating default category for {}.'.format(self))
             down_dir = os.environ.get('XDG_DOWNLOAD_DIR', os.path.expanduser('~'))
-            self.default_category = Category(name=_('My Downloads'),
+            self.default_category = Category(name=self.tr('My Downloads'),
                                              directory= down_dir,
                                              pool=self)
             SQLSession.commit()
@@ -107,7 +100,7 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         self._keep_connection()
 
     def __repr__(self):
-        return _("<Pool {}>").format(self.name)
+        return self.tr("<Pool {}>").format(self.name)
 
     @property
     def proxy(self):
@@ -185,8 +178,8 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
         deferred.add_errback(self._on_xmlrpc_error)
         deferred.start()
 
-        GLib.timeout_add_seconds(self._CONNECTION_INTERVAL,
-                self._keep_connection)
+        # TODO
+        #GLib.timeout_add_seconds(self._CONNECTION_INTERVAL, self._keep_connection)
         return False
 
     def _resume_session(self):
@@ -213,6 +206,4 @@ class Pool(SQLBase, GObject.GObject, LoggingMixin):
 
         """
         self.connected = False
-
-GObject.type_register(Pool)
 

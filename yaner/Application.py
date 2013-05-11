@@ -34,13 +34,13 @@ from PyQt4.QtGui import QApplication, QLabel
 from PyQt4.QtCore import QLocale, QTranslator, QLibraryInfo
 from gi.repository import Notify
 
-#from sqlalchemy import create_engine
+from sqlalchemy import create_engine
 
-#from yaner.XDG import save_data_file
+from yaner.XDG import save_data_file
 from yaner.Misc import VersionAction
-#from yaner.Pool import Pool
-#from yaner.Database import SQLSession, SQLBase
-#from yaner.Presentable import Category
+from yaner.Pool import Pool
+from yaner.Database import SQLSession, SQLBase
+from yaner.Presentable import Category
 #from yaner.ui.Toplevel import Toplevel
 from yaner.utils.Logging import LoggingMixin
 
@@ -68,7 +68,7 @@ class Application(QApplication, LoggingMixin):
         self._init_i18n()
         self._init_args(argv)
         self._init_logging()
-        #self._init_database()
+        self._init_database()
         self._init_daemon()
 
         Notify.init('yaner')
@@ -81,6 +81,7 @@ class Application(QApplication, LoggingMixin):
     @property
     def main_window(self):
         """Get the toplevel window of L{yaner}."""
+        # TODO
         #if self._main_window is None:
         #    self._main_window = MainWindow()
         return self._main_window
@@ -145,37 +146,37 @@ class Application(QApplication, LoggingMixin):
             )
         self.logger.info('Logging system initialized, start logging...')
 
-#    def _init_database(self):
-#        """Connect to database and set up database if this is the first
-#        start of the application."""
-#        self.logger.info('Connecting to global database file...')
-#
-#        data_file = save_data_file(self._DATA_FILE)
-#        engine = create_engine('sqlite:///' + data_file)
-#        SQLSession.configure(bind=engine)
-#
-#        if not os.path.exists(data_file):
-#            self.logger.info('Initializing database for first start...')
-#
-#            SQLBase.metadata.create_all(engine)
-#
-#            pool = Pool(name=self.tr('My Computer'), host='localhost', is_local=True)
-#
-#            docs_dir = os.environ.get('XDG_DOCUMENTS_DIR', os.path.expanduser('~'))
-#            Category(name=self.tr('Documents'), directory=docs_dir, pool=pool)
-#
-#            videos_dir = os.environ.get('XDG_VIDEOS_DIR', os.path.expanduser('~'))
-#            Category(name=self.tr('Videos'), directory=videos_dir, pool=pool)
-#
-#            music_dir = os.environ.get('XDG_MUSIC_DIR', os.path.expanduser('~'))
-#            Category(name=self.tr('Music'), directory=music_dir, pool=pool)
-#
-#            self.logger.info('Database initialized.')
-#
-#        # Auto commit to database XXX
-#        #GLib.timeout_add_seconds(self._SYNC_INTERVAL, SQLSession.commit)
-#
-#        self.logger.info('Global database file connected.')
+    def _init_database(self):
+        """Connect to database and set up database if this is the first
+        start of the application."""
+        self.logger.info('Connecting to global database file...')
+
+        data_file = save_data_file(self._DATA_FILE)
+        engine = create_engine('sqlite:///' + data_file)
+        SQLSession.configure(bind=engine)
+
+        if not os.path.exists(data_file):
+            self.logger.info('Initializing database for first start...')
+
+            SQLBase.metadata.create_all(engine)
+
+            pool = Pool(name=self.tr('My Computer'), host='localhost', is_local=True)
+
+            docs_dir = os.environ.get('XDG_DOCUMENTS_DIR', os.path.expanduser('~'))
+            Category(name=self.tr('Documents'), directory=docs_dir, pool=pool)
+
+            videos_dir = os.environ.get('XDG_VIDEOS_DIR', os.path.expanduser('~'))
+            Category(name=self.tr('Videos'), directory=videos_dir, pool=pool)
+
+            music_dir = os.environ.get('XDG_MUSIC_DIR', os.path.expanduser('~'))
+            Category(name=self.tr('Music'), directory=music_dir, pool=pool)
+
+            self.logger.info('Database initialized.')
+
+        # Auto commit to database TODO
+        #GLib.timeout_add_seconds(self._SYNC_INTERVAL, SQLSession.commit)
+
+        self.logger.info('Global database file connected.')
 
     def _init_daemon(self):
         """Start aria2 daemon on start up."""
@@ -187,8 +188,8 @@ class Application(QApplication, LoggingMixin):
     def on_about_to_quit(self):
         """When shutdown, finalize database and logging systems."""
         self.logger.info('Shutting down database...')
-#        SQLSession.commit()
-#        SQLSession.close()
+        SQLSession.commit()
+        SQLSession.close()
 
         self._daemon.terminate()
 

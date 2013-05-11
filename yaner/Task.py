@@ -26,11 +26,10 @@ This module contains the L{Task} class of L{yaner}.
 
 import os
 
-from gi.repository import GLib
-from gi.repository import GObject
 from sqlalchemy import Column, Integer, PickleType, Unicode, ForeignKey
 from sqlalchemy.orm import reconstructor, deferred
 from sqlalchemy.ext.hybrid import hybrid_property
+from PyQt4.QtCore import pyqtSignal, QObject
 
 from yaner.Misc import unquote
 from yaner.Database import SQLBase, SQLSession
@@ -38,15 +37,13 @@ from yaner.utils.Logging import LoggingMixin
 from yaner.utils.MutationDict import MutationDict
 from yaner.utils.Notification import Notification
 
-class Task(SQLBase, GObject.GObject, LoggingMixin):
+class Task(SQLBase, QObject, LoggingMixin):
     """
     Task class is just downloading tasks, which provides data to L{TaskListModel}.
     """
 
-    __gsignals__ = {
-            'changed': (GObject.SignalFlags.RUN_LAST, None, ()),
-            }
-    """GObject signals of this class."""
+    changed = pyqtSignal()
+    """Signals of this class."""
 
     _UPDATE_INTERVAL = 1
     """Interval for status updating, in second(s)."""
@@ -97,7 +94,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
     @reconstructor
     def _init(self):
         LoggingMixin.__init__(self)
-        GObject.GObject.__init__(self)
+        QObject.__init__(self)
 
         self._status_update_handle = None
         self._database_sync_handle = None
@@ -105,7 +102,7 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         self._name_fixed = False
 
     def __repr__(self):
-        return _("<Task {}>").format(self.name)
+        return self.tr("<Task {}>").format(self.name)
 
     @hybrid_property
     def pool(self):
@@ -279,14 +276,15 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         """
         if self._status_update_handle is None:
             self.logger.info('{}: begin updating status.'.format(self))
-            self._status_update_handle = GLib.timeout_add_seconds(
-                    self._UPDATE_INTERVAL, self._call_tell_status)
+            # TODO
+            #self._status_update_handle = GLib.timeout_add_seconds(self._UPDATE_INTERVAL, self._call_tell_status)
 
     def end_update_status(self):
         """Stop updating status every second."""
         if self._status_update_handle:
             self.logger.info('{}: end updating status.'.format(self))
-            GLib.source_remove(self._status_update_handle)
+            # TODO
+            #GLib.source_remove(self._status_update_handle)
             self._status_update_handle = None
 
     def _update_session_id(self):
@@ -396,7 +394,5 @@ class Task(SQLBase, GObject.GObject, LoggingMixin):
         """Handle errors occured when calling some function via xmlrpc."""
         self.state = 'error'
         message = getattr(deferred.error, 'message', str(deferred.error))
-        Notification(_('Network Error'), message).show()
-
-GObject.type_register(Task)
+        Notification(self.tr('Network Error'), message).show()
 

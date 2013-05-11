@@ -24,15 +24,14 @@
 This module contains classes and constants related to database.
 """
 
-from gi.repository.GObject import GObjectMeta
-
+from PyQt4.QtCore import pyqtWrapperType
 from sqlalchemy import Column, Integer
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.declarative import DeclarativeMeta, declared_attr
 
-class DeclarativeGObjectMeta(DeclarativeMeta, GObjectMeta):
-    """Metaclass for Declarative and GObject subclasses."""
+class DeclarativeGObjectMeta(pyqtWrapperType, DeclarativeMeta):
+    """Metaclass for Declarative and QObject subclasses."""
     pass
 
 class _SQLBase(object):
