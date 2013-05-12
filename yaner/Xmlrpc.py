@@ -27,21 +27,16 @@ import http.client
 import xmlrpc.client
 import threading
 
-from functools import partial
-from gi.repository import GLib
-from gi.repository import GObject
+from PyQt4.QtCore import pyqtSignal, QObject
 
-class _Deferred(threading.Thread, GObject.GObject):
-
-    __gsignals__ = {
-            'success': (GObject.SignalFlags.RUN_LAST, None, ()),
-            'fault': (GObject.SignalFlags.RUN_LAST, None, ()),
-            'error': (GObject.SignalFlags.RUN_LAST, None, ()),
-            }
+class _Deferred(threading.Thread, QObject):
+    success = pyqtSignal()
+    fault = pyqtSignal()
+    error = pyqtSignal()
 
     def __init__(self, target, args=(), kwargs=None):
         threading.Thread.__init__(self)
-        GObject.GObject.__init__(self)
+        QObject.__init__(self)
 
         self.target = target
         self.args = args
@@ -53,17 +48,17 @@ class _Deferred(threading.Thread, GObject.GObject):
 
     def add_callback(self, func):
         """Connect signal "success" to func."""
-        self.connect("success", partial(GLib.idle_add, func))
+        self.success.connect(func)
         return self
 
     def add_errback(self, func):
         """Connect signal "error" to func."""
-        self.connect("error", partial(GLib.idle_add, func))
+        self.error.connect(func)
         return self
 
     def add_faultback(self, func):
         """Connect signal "fault" to func."""
-        self.connect("fault", partial(GLib.idle_add, func))
+        self.fault.connect(func)
         return self
 
     def run(self):
